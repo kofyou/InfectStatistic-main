@@ -51,6 +51,32 @@ class InfectStatistic {
                 break;
             }
         }
+        if (command.getPrintProvinces().isEmpty()) {
+            command.getPrintProvinces().add("全国");
+            command.getPrintProvinces().addAll(new ArrayList<>(statisticsMap.keySet()));
+        } else {
+            command.getPrintProvinces().forEach(s -> {
+                if (!statisticsMap.containsKey(s)) {
+                    statisticsMap.put(s, new Statistics());
+                }
+            });
+        }
+        if (command.getPrintProvinces().contains("全国")) {
+            Statistics countryStatistics = new Statistics();
+            statisticsMap.forEach((s, statistics) -> {
+                statistics.getInfos().forEach(countryStatistics::setInfo);
+            });
+            statisticsMap.put("全国", countryStatistics);
+        }
+        command.getPrintProvinces().forEach(s -> {
+            System.out.print(s);
+            Map<String, Integer> infos = statisticsMap.get(s).getInfos();
+            command.getPrintTypes().forEach(s1 -> {
+                System.out.print(" " + s1 + infos.get(s1) + "人");
+            });
+            System.out.println();
+        });
+        System.out.println("// 该文档并非真实数据，仅供测试使用");
     }
 
     public static Command readArgs(String[] args) {

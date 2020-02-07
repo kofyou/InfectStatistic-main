@@ -1,17 +1,13 @@
 import java.io.*;
 import java.text.Collator;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * InfectStatistic
- * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author Xily9
+ * @version 1.0
+ * @since 1.0
  */
 class InfectStatistic {
     public static final List<String> typeList = new ArrayList<>() {{
@@ -28,7 +24,7 @@ class InfectStatistic {
     }};
 
     public static void main(String[] args) {
-        Command command = readArgs("list -log ./221701423/log -out D:\\ListOut7.txt -date 2020-01-30 -type cure dead ip -province 全国 浙江 福建".split(" "));
+        Command command = readArgs(args);
         Map<String, Statistics> statisticsMap = new HashMap<>();
         List<String> files = Lib.getFiles(command.getLogDir());
         if (files.get(files.size() - 1).compareTo(command.getDate() + ".log.txt") < 0) {

@@ -5,11 +5,10 @@ import java.util.stream.Stream;
 
 /**
  * Lib
- * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author Xily9
+ * @version 1.0
+ * @since 1.0
  */
 public class Lib {
     public static List<String> getFiles(String dir) {

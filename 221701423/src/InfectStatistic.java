@@ -1,9 +1,12 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.PrintStream;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * InfectStatistic
@@ -14,6 +17,12 @@ import java.util.*;
  * @since xxx
  */
 class InfectStatistic {
+    public static final List<String> typeList = new ArrayList<>() {{
+        add("感染患者");
+        add("疑似患者");
+        add("治愈");
+        add("死亡");
+    }};
     public static final Map<String, String> typeMap = new HashMap<>() {{
         put("ip", "感染患者");
         put("sp", "疑似患者");
@@ -23,6 +32,25 @@ class InfectStatistic {
 
     public static void main(String[] args) {
         Command command = readArgs(args);
+        Map<String, Statistics> statisticsMap = new HashMap<>();
+        List<String> files = Lib.getFiles(command.getLogDir());
+        if (files.get(files.size() - 1).compareTo(command.getDate() + ".log.txt") < 0) {
+            System.out.println("日期超出范围");
+            System.exit(1);
+        }
+        for (String file : files) {
+            List<Log> logList = readLog(new File(command.getLogDir(), file));
+            logList.forEach(log -> {
+                System.out.println(log.toString());
+                if (!statisticsMap.containsKey(log.getProvince())) {
+                    statisticsMap.put(log.getProvince(), new Statistics());
+                }
+                statisticsMap.get(log.getProvince()).setInfo(log.getType(), log.getCount());
+            });
+            if (file.compareTo(command.getDate()) >= 0) {
+                break;
+            }
+        }
     }
 
     public static Command readArgs(String[] args) {
@@ -88,6 +116,7 @@ class InfectStatistic {
                             logSub.setType("疑似患者");
                             logSub.setCount(-count);
                             logList.add(logSub);
+                            log.setProvince(arr[0]);
                             log.setType("感染患者");
                             log.setCount(count);
                             break;
@@ -100,8 +129,13 @@ class InfectStatistic {
                     }
                     logList.add(log);
                 } else {//死亡 治愈
-                    Log log = new Log();
                     int count = Integer.parseInt(arr[2].substring(0, arr[2].length() - 1));
+                    Log logSub = new Log();
+                    logSub.setProvince(arr[0]);
+                    logSub.setType("感染患者");
+                    logSub.setCount(-count);
+                    logList.add(logSub);
+                    Log log = new Log();
                     log.setProvince(arr[0]);
                     log.setType(arr[1]);
                     log.setCount(count);
@@ -202,6 +236,7 @@ class InfectStatistic {
             }
 
             public Command build() {
+                if (printTypes.isEmpty()) printTypes.addAll(typeList);
                 return new Command(logDir, outFile, date, printTypes, printProvinces);
             }
         }
@@ -235,13 +270,22 @@ class InfectStatistic {
         public void setCount(int count) {
             this.count = count;
         }
+
+        @Override
+        public String toString() {
+            return "Log{" +
+                    "province='" + province + '\'' +
+                    ", type='" + type + '\'' +
+                    ", count=" + count +
+                    '}';
+        }
     }
 
     public static class Statistics {
         private Map<String, Integer> infos = new HashMap<>();
 
         public Statistics() {
-            typeMap.values().forEach(s -> {
+            typeList.forEach(s -> {
                 infos.put(s, 0);
             });
         }

@@ -31,7 +31,7 @@ class InfectStatistic {
     }};
 
     public static void main(String[] args) {
-        Command command = readArgs(args);
+        Command command = readArgs("list -log ./221701423/log -out D:\\ListOut7.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建".split(" "));
         Map<String, Statistics> statisticsMap = new HashMap<>();
         List<String> files = Lib.getFiles(command.getLogDir());
         if (files.get(files.size() - 1).compareTo(command.getDate() + ".log.txt") < 0) {
@@ -61,6 +61,12 @@ class InfectStatistic {
                 }
             });
         }
+        Collator collator = Collator.getInstance(Locale.CHINA);
+        command.getPrintProvinces().sort((o1, o2) -> {
+            if (o1.equals("全国")) return -1;
+            else if (o2.equals("全国")) return 1;
+            else return collator.compare(o1, o2);
+        });
         if (command.getPrintProvinces().contains("全国")) {
             Statistics countryStatistics = new Statistics();
             statisticsMap.forEach((s, statistics) -> {

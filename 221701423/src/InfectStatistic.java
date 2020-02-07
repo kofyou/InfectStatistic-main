@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -31,7 +28,7 @@ class InfectStatistic {
     }};
 
     public static void main(String[] args) {
-        Command command = readArgs("list -log ./221701423/log -out D:\\ListOut7.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建".split(" "));
+        Command command = readArgs("list -log ./221701423/log -out D:\\ListOut7.txt -date 2020-01-30 -type cure dead ip -province 全国 浙江 福建".split(" "));
         Map<String, Statistics> statisticsMap = new HashMap<>();
         List<String> files = Lib.getFiles(command.getLogDir());
         if (files.get(files.size() - 1).compareTo(command.getDate() + ".log.txt") < 0) {
@@ -41,7 +38,6 @@ class InfectStatistic {
         for (String file : files) {
             List<Log> logList = readLog(new File(command.getLogDir(), file));
             logList.forEach(log -> {
-                System.out.println(log.toString());
                 if (!statisticsMap.containsKey(log.getProvince())) {
                     statisticsMap.put(log.getProvince(), new Statistics());
                 }
@@ -74,15 +70,27 @@ class InfectStatistic {
             });
             statisticsMap.put("全国", countryStatistics);
         }
-        command.getPrintProvinces().forEach(s -> {
-            System.out.print(s);
-            Map<String, Integer> infos = statisticsMap.get(s).getInfos();
-            command.getPrintTypes().forEach(s1 -> {
-                System.out.print(" " + s1 + infos.get(s1) + "人");
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(command.getOutFile()))) {
+            command.getPrintProvinces().forEach(s -> {
+                try {
+                    bufferedWriter.write(s);
+                    Map<String, Integer> infos = statisticsMap.get(s).getInfos();
+                    command.getPrintTypes().forEach(s1 -> {
+                        try {
+                            bufferedWriter.write(" " + s1 + infos.get(s1) + "人");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    bufferedWriter.newLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             });
-            System.out.println();
-        });
-        System.out.println("// 该文档并非真实数据，仅供测试使用");
+            bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static Command readArgs(String[] args) {

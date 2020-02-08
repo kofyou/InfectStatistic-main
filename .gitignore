@@ -1,11 +1,34 @@
-# Created by .ignore support plugin (hsz.mobi)
-### Example user template template
-### Example user template
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
 
-# IntelliJ project files
+# Folder config file
+Desktop.ini
+
+# java class file
+*.class
+
+# Package Files #
+*.war
+*.ear
+/target
+/.settings
+/.classpath
+/.project
+/.idea
+
+# ignore Maven generated target folders
+target
+out
+
+# ignore eclipse files
+.project
+.classpath
+.settings
+.factorypath
+.metadata
 .idea
 *.iml
-out
-gen
-.idea/
-InfectStatistic-example.iml
+
+# ignore log files
+*.log

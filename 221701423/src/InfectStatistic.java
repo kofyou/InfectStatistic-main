@@ -29,9 +29,11 @@ class InfectStatistic {
         Command command = readArgs(args);
         Map<String, Statistics> statisticsMap = new HashMap<>();
         List<String> files = Lib.getFiles(command.getLogDir());
-        if (files.get(files.size() - 1).compareTo(command.getDate() + ".log.txt") < 0) {
-            System.out.println("日期超出范围");
-            return;
+        if (command.getDate() != null) {
+            if (files.get(files.size() - 1).compareTo(command.getDate() + ".log.txt") < 0) {
+                System.out.println("日期超出范围");
+                return;
+            }
         }
         for (String file : files) {
             List<Log> logList = readLog(new File(command.getLogDir(), file));
@@ -41,7 +43,7 @@ class InfectStatistic {
                 }
                 statisticsMap.get(log.getProvince()).setInfo(log.getType(), log.getCount());
             });
-            if (file.compareTo(command.getDate()) >= 0) {
+            if (command.getDate() != null && file.compareTo(command.getDate()) >= 0) {
                 break;
             }
         }

@@ -1,5 +1,4 @@
 import java.io.*;
-import java.text.Collator;
 import java.util.*;
 
 /**
@@ -22,6 +21,7 @@ class InfectStatistic {
         put("cure", "治愈");
         put("dead", "死亡");
     }};
+    private static final String[] provinces = {"全国", "安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
 
     public static void main(String[] args) {
         Command command = readArgs(args);
@@ -29,7 +29,7 @@ class InfectStatistic {
         List<String> files = Lib.getFiles(command.getLogDir());
         if (files.get(files.size() - 1).compareTo(command.getDate() + ".log.txt") < 0) {
             System.out.println("日期超出范围");
-            System.exit(1);
+            return;
         }
         for (String file : files) {
             List<Log> logList = readLog(new File(command.getLogDir(), file));
@@ -53,12 +53,6 @@ class InfectStatistic {
                 }
             });
         }
-        Collator collator = Collator.getInstance(Locale.CHINA);
-        command.getPrintProvinces().sort((o1, o2) -> {
-            if (o1.equals("全国")) return -1;
-            else if (o2.equals("全国")) return 1;
-            else return collator.compare(o1, o2);
-        });
         if (command.getPrintProvinces().contains("全国")) {
             Statistics countryStatistics = new Statistics();
             statisticsMap.forEach((s, statistics) -> {
@@ -67,23 +61,27 @@ class InfectStatistic {
             statisticsMap.put("全国", countryStatistics);
         }
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(command.getOutFile()))) {
-            command.getPrintProvinces().forEach(s -> {
-                try {
-                    bufferedWriter.write(s);
-                    Map<String, Integer> infos = statisticsMap.get(s).getInfos();
-                    command.getPrintTypes().forEach(s1 -> {
-                        try {
-                            bufferedWriter.write(" " + s1 + infos.get(s1) + "人");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-                    bufferedWriter.newLine();
-                } catch (IOException e) {
-                    e.printStackTrace();
+            for (String province : provinces) {
+                if (command.getPrintProvinces().contains(province)) {
+                    try {
+                        bufferedWriter.write(province);
+                        Map<String, Integer> infos = statisticsMap.get(province).getInfos();
+                        command.getPrintTypes().forEach(s1 -> {
+                            try {
+                                bufferedWriter.write(" " + s1 + infos.get(s1) + "人");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        bufferedWriter.newLine();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            });
+            }
             bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
+            bufferedWriter.newLine();
+            bufferedWriter.write("// 命令 java InfectStatistic " + String.join(" ", args));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -332,6 +330,13 @@ class InfectStatistic {
 
         public void setInfo(String type, int count) {
             infos.put(type, infos.get(type) + count);
+        }
+
+        @Override
+        public String toString() {
+            return "Statistics{" +
+                    "infos=" + infos +
+                    '}';
         }
     }
 

@@ -22,7 +22,50 @@ import javax.annotation.PostConstruct;
  */
 class InfectStatistic {
 	 
+	private static void solveArgs(String[] args, Vector<Order> orders) {
+		int i = 0;
+		int pos = 1;
+		while(pos < args.length) {
+			String arg = args[pos];
+		//	System.out.println(pos + "-" + arg);
+			if(arg.indexOf('-') == 0) {//这是命令
+				
+	    		Order oneOrder = new Order();
+	    		oneOrder.orderName = arg;
+	    		for(i = pos + 1; i < args.length; i++) {
+	    			//System.out.println("I:" + i);
+	    			String newArg = args[i];
+	    			if(newArg.indexOf('-') != 0) {//这是参数
+	    				oneOrder.orderParams.add(newArg);
+	    			}
+	    			else {
+	    				pos = i;
+	    				break;
+	    			}
+	    		}
+	    		orders.add(oneOrder);
+	    		if(i == args.length) {
+	    			break;
+	    		}
+	    	}
+			try {
+				Thread.sleep(2000);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+		
+	}
 	
+	private static void printOrders(Vector<Order> orders) {
+		for(Order order : orders) {
+			System.out.println("命令名为" + order.orderName);
+			System.out.println("命令参数为");
+			for(String param : order.orderParams) {
+				System.out.println(param + " ");
+			}
+		}
+	}
     public static void main(String[] args) {
     	Vector<Order> orders = new Vector<Order>();
 //    	try {

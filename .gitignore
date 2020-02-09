@@ -9,3 +9,7 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+*.exe
+221701210/src/InfectStatistic.java
+221701210/src/Lib.java
+*.json

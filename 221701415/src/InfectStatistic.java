@@ -70,13 +70,13 @@ public class InfectStatistic {
 			String input = null, output = null, date = null;
 			List<String> typeList = new LinkedList<>(), provinceList = new LinkedList<>();
 			while (optNumber < args.length) {
-				if (args[optNumber].equals("-l") || args[optNumber].equals("--log")) {
+				if (args[optNumber].equals("-log")) {
 					input = args[++optNumber];
-				} else if (args[optNumber].equals("-o") || args[optNumber].equals("--out")) {
+				} else if (args[optNumber].equals("-out")) {
 					output = args[++optNumber];
-				} else if (args[optNumber].equals("-d") || args[optNumber].equals("--date")) {
+				} else if (args[optNumber].equals("-date")) {
 					date = args[++optNumber];
-				} else if (args[optNumber].equals("-t") || args[optNumber].equals("--type")) {
+				} else if (args[optNumber].equals("-type")) {
 					String type = args[++optNumber];
 					while (!type.contains("-")) {
 						typeList.add(type);
@@ -85,7 +85,7 @@ public class InfectStatistic {
 						type = args[++optNumber];
 
 					}
-				} else if (args[optNumber].equals("-p") || args[optNumber].equals("--province")) {
+				} else if (args[optNumber].equals("-province")) {
 					String province = args[++optNumber];
 					while (!province.contains("-")) {
 						provinceList.add(province);

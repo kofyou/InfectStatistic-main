@@ -29,6 +29,10 @@ class InfectStatistic
 	private HashMap<String,Province> map;
 	//存放全国的具体情况
 	private Province country;
+	//是否输出所有参数
+	private boolean isOutput;
+	//输出参数的顺序
+	private String[] output;
 		
 	//构造函数
 	public InfectStatistic(String[] args)
@@ -39,6 +43,12 @@ class InfectStatistic
 		name = new ArrayList<>();
 		map = new HashMap<String,Province>();
 		country = new Province("全国");
+		isOutput = true;
+		output = new String[4];		
+		for(int i=0;i<4;i++)
+		{
+			output[i] = "";
+		}
 		this.init();
 	}
 		
@@ -153,15 +163,41 @@ class InfectStatistic
 			country.allAdd(map.get(name.get(i)));
 		}
 	}
+	
+	//处理-type参数
+	public void dealType(int index)
+	{		
+		for(int i=0;index<arg.length && i<4;i++)
+		{
+			switch(arg[index])
+			{
+			    case "ip":
+			    	output[i] = arg[index];
+			    	break;
+			    case "sp":
+			    	output[i] = arg[index];
+			    	break;
+			    case "cure":
+			    	output[i] = arg[index];
+			    	break;
+			    case "dead":
+			    	output[i] = arg[index];
+			    	break;
+			    default:
+			    	break;
+			}
+			index++;
+		}
+	}
 
 	//生成output.txt文件
 	public void output()
 	{
-		country.output();
+		country.output(isOutput,output);
 		for(int i=0;i<name.size();i++)
 		{			
 			//System.out.println(i+":"+name.get(i));
-			map.get(name.get(i)).output();
+			map.get(name.get(i)).output(isOutput,output);
 		}
 	}
 		
@@ -182,6 +218,10 @@ class InfectStatistic
 			    case "-out":
 				    outputPath = new String(arg[i+1]);
 				    break;
+			    case "-type":
+			    	isOutput = false;
+			    	dealType(i+1);
+			    	break;
 				default:	
 					break;
 			}			
@@ -267,12 +307,42 @@ class Province
 		this.dead += p.dead;
 	}
 	//输出本省情况
-	public void output()
+	public void output(boolean isOutput,String[] output)
 	{
-		System.out.println(name + " 感染患者" + infectionPatients + "人 " +
-	                              "疑似患者" + suspectedPatients + "人 " +
-				                  "治愈" + cure + "人 " +
-	                              "死亡" + dead + "人");
+		//默认输出
+		if(isOutput)
+		{
+			System.out.println(name + " 感染患者 " + infectionPatients + "人 " +
+                    "疑似患者 " + suspectedPatients + "人 " +
+	                  "治愈 " + cure + "人 " +
+                    "死亡 " + dead + "人");
+		}
+		//有-type参数情况下的输出
+		else
+		{
+			System.out.print(name);
+			for(int i=0;i<4;i++)
+			{
+				switch(output[i])
+				{
+				    case "ip":			    	
+				    	System.out.print(" 感染患者 " + infectionPatients + "人");	    	
+				    	break;
+			        case "sp":			    	
+			        	System.out.print(" 疑似患者 " + suspectedPatients + "人");		    	
+			        	break;
+			        case "cure":			    	
+			        	System.out.print(" 治愈 " + cure + "人");			    	
+			        	break;
+			        case "dead":			     	
+			        	System.out.print(" 死亡 " + dead + "人");	    	
+			        	break;
+			        default:		    	
+			        	break;
+				}
+			}
+			System.out.print("\n");
+		}		
 	}
 }
 

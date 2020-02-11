@@ -1,4 +1,4 @@
-# InfectStatistic
+﻿# InfectStatistic
 疫情统计-作业完成流程：
 
 
@@ -24,3 +24,5 @@
 7. 除了示例仓库的给出的文件，其它自己产生的文件都应该在`.gitignore`忽略，如编译器生成的项目文件、输出文件、class、jar包、exe等
 
 8. 代码每有更新就可以进行commit签入，然后push到github，至少进行10次以上的commit签入，并将最终程序以pr的方式提交到该仓库
+
+test

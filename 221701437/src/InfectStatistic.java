@@ -1,4 +1,3 @@
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -21,40 +20,33 @@ class InfectStatistic {
         AbstractDataHandle addCure = new AddCurePeople(AbstractDataHandle.s4);
         AbstractDataHandle subDoubt = new SubDoubtPeople(AbstractDataHandle.s5);
         AbstractDataHandle sureDoubt = new SureInfectPeople(AbstractDataHandle.s6);
-        AbstractDataHandle infectinflow = new InfectInflow(AbstractDataHandle.s7);
-        AbstractDataHandle doubtinflow = new DoubtInflow(AbstractDataHandle.s8);
+        AbstractDataHandle infectInflow = new InfectInflow(AbstractDataHandle.s7);
+        AbstractDataHandle doubtInflow = new DoubtInflow(AbstractDataHandle.s8);
 
         addInfect.setNextDataHandle(addDoubt);
         addDoubt.setNextDataHandle(addDead);
         addDead.setNextDataHandle(addCure);
         addCure.setNextDataHandle(subDoubt);
         subDoubt.setNextDataHandle(sureDoubt);
-        sureDoubt.setNextDataHandle(doubtinflow);
-        doubtinflow.setNextDataHandle(infectinflow);
+        sureDoubt.setNextDataHandle(doubtInflow);
+        doubtInflow.setNextDataHandle(infectInflow);
 
         return addInfect;
     }
 
-    private static String fileName = "C:\\Users\\Administrator\\Desktop\\blog\\2\\InfectStatistic-main\\221701437\\log\\2020-01-22.log.txt";
-
     public static void main(String[] args) throws IOException {
         ProvinceData pd = ProvinceData.getInstance();
-        pd.AllPrint();
+        //pd.AllPrint();
         AbstractDataHandle dataHandle = getChainOfDataHandle();
-        ArrayList<String> arrayList = new ArrayList<>();
-        File file = new File(fileName);
-        InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file));
-        BufferedReader bf = new BufferedReader(inputReader);
-        String str;
-        while ((str = bf.readLine()) != null) {
-            arrayList.add(str);
+        FileProcess fileProcess = FileProcess.getInstance();
+        ArrayList<File> fileList = fileProcess.InputFileData();
+        for(int i = 0; i < fileList.size(); i++){
+            ArrayList<String> data = fileProcess.getFileData(fileList.get(i));
+            for(int j = 0; j < data.size(); j++)
+                dataHandle.dataProcessing(data.get(j));
         }
-        bf.close();
-        inputReader.close();
-        for(int i = 0; i < arrayList.size(); i++){
-            dataHandle.dataprocessing(arrayList.get(i));
-        }
-        pd.AllPrint();
+        pd.LogData("./221701437/result/output.txt");
+        //pd.AllPrint();
     }
 }
 class ProvinceData{
@@ -125,6 +117,22 @@ class ProvinceData{
             System.out.println();
         }
     }
+
+    public void LogData(String path) throws IOException {
+        File outFile = new File(path);
+        if(!outFile.exists()){
+            outFile.createNewFile();
+        }
+        PrintStream stream=null;
+        stream=new PrintStream(path);
+        String data = new String();
+        for(int i = 0; i < initStr.length; i++){
+            int[] datavalue = AllData.get(initStr[i]);
+            data = data + initStr[i] + " 感染患者" + datavalue[0] + "人 疑似患者" + datavalue[1] + "人 治愈" + datavalue[2] + "人 死亡" + datavalue[3] + "人\n";
+        }
+        System.out.println(data);
+        stream.print(data);
+    }
 }
 
 abstract class AbstractDataHandle{
@@ -147,14 +155,14 @@ abstract class AbstractDataHandle{
         this.nextDataHandle = nextDataHandle;
     }
 
-    public void dataprocessing(String str){
+    public void dataProcessing(String str){
         Pattern pattern = Pattern.compile(model);
         Matcher matcher = pattern.matcher(str);
         boolean result = matcher.matches();
         if(result){
             processing(str);
         }else if(nextDataHandle != null){
-            nextDataHandle.dataprocessing(str);
+            nextDataHandle.dataProcessing(str);
         }
     }
 
@@ -307,5 +315,48 @@ class SureInfectPeople extends AbstractDataHandle{
 
         provinceData.AddInfectPeople(province[0],num);
         provinceData.SubDoubtPeople(province[0],num);
+    }
+}
+
+class FileProcess{
+    private final static String INPUTFILEPATH = "./221701437/log";
+    private final static String OUTPUTFILEPATH = "./221701437/result";
+    private final static String GETFLENAME = "(\\d{4})-(\\d{2})-(\\d{2})\\.log\\.txt";
+    private static FileProcess fileProcess = new FileProcess();
+    private File file = new File(INPUTFILEPATH);
+
+    private FileProcess(){};
+
+    public static FileProcess getInstance(){
+        return fileProcess;
+    }
+
+    public ArrayList<File> InputFileData(){
+        File[] tempList = file.listFiles();
+        ArrayList<File> fileArrayList = new ArrayList<File>();
+        for(int i = 0; i < tempList.length; i++){
+            if(tempList[i].isFile()){
+                Pattern pattern = Pattern.compile(GETFLENAME);
+                Matcher matcher = pattern.matcher(tempList[i].getName());
+                boolean result = matcher.matches();
+                if(result){
+                    fileArrayList.add(tempList[i]);
+                }
+            }
+        }
+        return fileArrayList;
+    }
+
+    public ArrayList<String> getFileData(File file) throws IOException {
+        ArrayList<String> arrayList = new ArrayList<>();
+        InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file));
+        BufferedReader bf = new BufferedReader(inputReader);
+        String str;
+        while ((str = bf.readLine()) != null) {
+            arrayList.add(str);
+        }
+        bf.close();
+        inputReader.close();
+        return arrayList;
     }
 }

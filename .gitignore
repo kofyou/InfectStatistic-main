@@ -10,4 +10,4 @@ gen
 .idea/
 InfectStatistic-example.iml
 *.class
-*..DS_Store
+*.DS_Store

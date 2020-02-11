@@ -9,3 +9,5 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+*.class
+*..DS_Store

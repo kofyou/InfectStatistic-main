@@ -2,14 +2,18 @@
 FileName:InfectStatistic.cpp
 Author:Cazenove
 Version:v1.1
-Date:2020.02.10
+Date:2020.02.11
 Description:
-    ¸Ã³ÌĞòÎªÒßÇéÍ³¼Æ³ÌĞò£¬´ÓlogÄ¿Â¼ÖĞ¶ÁÈ¡.log.txtÎÄ¼ş£¬Í³¼Æ²¢Éú³Éµ±ÈÕÒßÇéĞÅÏ¢µÄÈÕÖ¾ÎÄ¼ş¡£
-Version Description:Basic funtion
+    è¯¥ç¨‹åºä¸ºç–«æƒ…ç»Ÿè®¡ç¨‹åºï¼Œä»ç»™å®šçš„ç›®å½•ä¸­è¯»å–.log.txtæ–‡ä»¶å¹¶è¿›è¡Œç»Ÿè®¡ï¼Œç„¶åè¾“å‡ºåœ¨æŒ‡å®šè·¯å¾„
+Version Description:å®ŒæˆåŸºæœ¬å‘½ä»¤æ“ä½œ
 Function List:
     void init();
-    void ReadAllLog(string path);
+    int datecmp(string date1, string date2);
+    void ReadAllLog(string path, string date);
     void ReadLog(string filePath);
+    void ProcessOption(int argc,char *argv[]);
+    void list(string logPath, string outPath, string date, vector<string> type, vector<string> province);
+    void OutLog(string filePath, vector<string> type, vector<string> province);
     void ShowProvince(string strProvince);
     void ShowAllProvince();
     void AddIP(string strProvince,int num);
@@ -35,120 +39,122 @@ History:
 #include <sstream>
 #include <strstream>
 #include <getopt.h>
-#pragma execution_character_set("gbk")//Éè¶¨×Ö·û¼¯£¬·ÀÖ¹³öÏÖÖĞÎÄÂÒÂë
 using namespace std;
 
 
 /***********************
-Description:Ê¡·İĞÅÏ¢½á¹¹Ìå£¬ÓÃÓÚ´æ´¢µ¥¸öÊ¡·İµÄÈ·Õï¡¢ÒÉËÆ¡¢ÖÎÓú¡¢ËÀÍöÊıÁ¿
+Description:çœä»½ä¿¡æ¯ç»“æ„ä½“ï¼Œç”¨äºå­˜å‚¨å•ä¸ªçœä»½çš„ç¡®è¯Šã€ç–‘ä¼¼ã€æ²»æ„ˆã€æ­»äº¡æ•°é‡
 ***********************/
 struct SProvinceInformation
 {
-    unsigned int ip;//È·Õï»¼ÕßÊıÁ¿
-    unsigned int sp;//ÒÉËÆ»¼ÕßÊıÁ¿
-    unsigned int cure;//ÖÎÓú»¼ÕßÊıÁ¿
-    unsigned int dead;//ËÀÍö»¼ÕßÊıÁ¿
-};
-
-string PROVINCE[35] = 
-{
-    "È«¹ú","°²»Õ","°ÄÃÅ","±±¾©","ÖØÇì","¸£½¨","¸ÊËà",
-    "¹ã¶«","¹ãÎ÷","¹óÖİ","º£ÄÏ","ºÓ±±","ºÓÄÏ","ºÚÁú½­",
-    "ºş±±","ºşÄÏ","¼ªÁÖ","½­ËÕ","½­Î÷","ÁÉÄş","ÄÚÃÉ¹Å",
-    "ÄşÏÄ","Çàº£","É½¶«","É½Î÷","ÉÂÎ÷","ÉÏº£","ËÄ´¨",
-    "Ì¨Íå","Ìì½ò","Î÷²Ø","Ïã¸Û","ĞÂ½®","ÔÆÄÏ","Õã½­"
+    unsigned int ip;//ç¡®è¯Šæ‚£è€…æ•°é‡
+    unsigned int sp;//ç–‘ä¼¼æ‚£è€…æ•°é‡
+    unsigned int cure;//æ²»æ„ˆæ‚£è€…æ•°é‡
+    unsigned int dead;//æ­»äº¡æ‚£è€…æ•°é‡
 };
 
 /***********************
-Description:Ê¹ÓÃSTLµÄmapÀ´½¨Á¢Ê¡·İÃû³ÆºÍÊ¡·İĞÅÏ¢½á¹¹ÌåÖ®¼äµÄÓ³Éä¹ØÏµ
+Description:å­˜æ”¾å„çœä»½åç§°
+***********************/
+string PROVINCE[35] = 
+{
+    "å…¨å›½","å®‰å¾½","æ¾³é—¨","åŒ—äº¬","é‡åº†","ç¦å»º","ç”˜è‚ƒ",
+    "å¹¿ä¸œ","å¹¿è¥¿","è´µå·","æµ·å—","æ²³åŒ—","æ²³å—","é»‘é¾™æ±Ÿ",
+    "æ¹–åŒ—","æ¹–å—","å‰æ—","æ±Ÿè‹","æ±Ÿè¥¿","è¾½å®","å†…è’™å¤",
+    "å®å¤","é’æµ·","å±±ä¸œ","å±±è¥¿","é™•è¥¿","ä¸Šæµ·","å››å·",
+    "å°æ¹¾","å¤©æ´¥","è¥¿è—","é¦™æ¸¯","æ–°ç–†","äº‘å—","æµ™æ±Ÿ"
+};
+
+/***********************
+Description:ä½¿ç”¨STLçš„mapæ¥å»ºç«‹çœä»½åç§°å’Œçœä»½ä¿¡æ¯ç»“æ„ä½“ä¹‹é—´çš„æ˜ å°„å…³ç³»
 ***********************/
 map<string,SProvinceInformation> mapProvince;
 
 
 /***********************
-Description:³ÌĞò³õÊ¼»¯
+Description:ç¨‹åºåˆå§‹åŒ–
 Input:none
 Output:none
 Return:none
 Others:
-    ¶ÁÈ¡Ê¡·İÅäÖÃÎÄ¼ş²¢Çå¿ÕmapProvince
+    è¯»å–çœä»½é…ç½®æ–‡ä»¶å¹¶æ¸…ç©ºmapProvince
 ***********************/
 void init();
 
 
 /***********************
-Description:±È½ÏÁ½¸öyyyy-mm-dd¸ñÊ½µÄ×Ö·û´®ÈÕÆÚµÄ´óĞ¡
+Description:æ¯”è¾ƒä¸¤ä¸ªyyyy-mm-ddæ ¼å¼çš„å­—ç¬¦ä¸²æ—¥æœŸçš„å¤§å°
 Input:
-    string date1:µÚÒ»¸öÈÕÆÚ
-    string date2:µÚ¶ş¸öÈÕÆÚ
+    string date1:ç¬¬ä¸€ä¸ªæ—¥æœŸ
+    string date2:ç¬¬äºŒä¸ªæ—¥æœŸ
 Output:none
 Return:
-    intÀàĞÍ£¬Îª·½±ãÊ¹ÓÃ£¬²ÎÔìstrcmpº¯ÊıµÄ·µ»ØÖµ¡£
-    date1>date2 ·µ»ØÖµ´óÓÚ0
-    date1<date2 ·µ»ØÖµĞ¡ÓÚ0
-    date1=date2 ·µ»ØÖµÎª0
+    intç±»å‹ï¼Œä¸ºæ–¹ä¾¿ä½¿ç”¨ï¼Œå‚é€ strcmpå‡½æ•°çš„è¿”å›å€¼ã€‚
+    date1>date2 è¿”å›å€¼å¤§äº0
+    date1<date2 è¿”å›å€¼å°äº0
+    date1=date2 è¿”å›å€¼ä¸º0
 Others:none
 ***********************/
 int datecmp(string date1, string date2);
 
 
 /***********************
-Description:¶ÁÈ¡¸ø¶¨ÎÄ¼ş¼ĞÖĞ£¬ËùÓĞ¸ø¶¨ÈÕÆÚÖ®Ç°µÄÈÕÖ¾ÎÄ¼ş
+Description:è¯»å–ç»™å®šæ–‡ä»¶å¤¹ä¸­ï¼Œæ‰€æœ‰ç»™å®šæ—¥æœŸä¹‹å‰çš„æ—¥å¿—æ–‡ä»¶
 Input:
-    string path:¸ø¶¨µÄÎÄ¼ş¼ĞÂ·¾¶
-    string date:yyyy-mm-dd¸ñÊ½µÄÈÕÆÚ
+    string path:ç»™å®šçš„æ–‡ä»¶å¤¹è·¯å¾„
+    string date:yyyy-mm-ddæ ¼å¼çš„æ—¥æœŸ
 Output:none
 Return:none
 Others:
-    »á½«¶ÁÈ¡µ½µÄ×ÓÎÄ¼ş½»ÓÉReadLogº¯Êı´¦Àí
+    ä¼šå°†è¯»å–åˆ°çš„å­æ–‡ä»¶äº¤ç”±ReadLogå‡½æ•°å¤„ç†
 ***********************/
 void ReadAllLog(string path, string date);
 
 
 /***********************
-Description:´¦Àí´«ÈëµÄÈÕÖ¾ÎÄ¼ş
+Description:å¤„ç†ä¼ å…¥çš„æ—¥å¿—æ–‡ä»¶
 Input:
-    string filePath:Â·¾¶+ÎÄ¼şÃû
+    string filePath:è·¯å¾„+æ–‡ä»¶å
 Output:none
 Return:none
 Others:
-    ½«¶ÁÈ¡µ½µÄÊı¾İ´æÈëmapProvince
+    å°†è¯»å–åˆ°çš„æ•°æ®å­˜å…¥mapProvince
 ***********************/
 void ReadLog(string filePath);
 
 /***********************
-Description:´¦ÀíÃüÁîĞĞ²ÎÊı£¬²¢½»ÓÉlist()´¦Àí
+Description:å¤„ç†å‘½ä»¤è¡Œå‚æ•°ï¼Œå¹¶äº¤ç”±list()å¤„ç†
 Input:
-    int argc:´Ómainº¯Êı¶ÁÈ¡µÄargc
-    char *argv[]:´Ómainº¯Êı¶ÁÈ¡µÄargv
+    int argc:ä»mainå‡½æ•°è¯»å–çš„argc
+    char *argv[]:ä»mainå‡½æ•°è¯»å–çš„argv
 Output:none
 Return:none
 Others:
-    ²ÎÊı½âÎöºóµ÷ÓÃlistº¯Êı´¦Àí
+    å‚æ•°è§£æåè°ƒç”¨listå‡½æ•°å¤„ç†
 ***********************/
 void ProcessOption(int argc,char *argv[]);
 
 
 /***********************
-Description:´¦ÀílistÃüÁî
+Description:å¤„ç†listå‘½ä»¤
 Input:
-    string logPath:¶ÁÈ¡µÄÈÕÖ¾ÎÄ¼şÄ¿Â¼
-    string outPath:Êä³öÎÄ¼şµÄ´æ·ÅÄ¿Â¼
-    string date:yyyy-mm-dd¸ñÊ½µÄÈÕÆÚ
-    vector<string> type:Êä³öµÄ¸ñÊ½
-    vector<string> province:Êä³öµÄÊ¡·İ
+    string logPath:è¯»å–çš„æ—¥å¿—æ–‡ä»¶ç›®å½•
+    string outPath:è¾“å‡ºæ–‡ä»¶çš„å­˜æ”¾ç›®å½•
+    string date:yyyy-mm-ddæ ¼å¼çš„æ—¥æœŸ
+    vector<string> type:è¾“å‡ºçš„æ ¼å¼
+    vector<string> province:è¾“å‡ºçš„çœä»½
 Output:none
 Return:none
 Others:
-    Ê¹ÓÃinit½øĞĞ³õÊ¼»¯
-    µ÷ÓÃReadAllLog¶ÁÈ¡ÈÕÖ¾ÎÄ¼ş
-    ÔÙÊ¹ÓÃOutLogÊä³öÈÕÖ¾ÎÄ¼ş
+    ä½¿ç”¨initè¿›è¡Œåˆå§‹åŒ–
+    è°ƒç”¨ReadAllLogè¯»å–æ—¥å¿—æ–‡ä»¶
+    å†ä½¿ç”¨OutLogè¾“å‡ºæ—¥å¿—æ–‡ä»¶
 ***********************/
 void list(string logPath, string outPath, string date, vector<string> type, vector<string> province);
 
 
 /***********************
-Description:Éú³ÉÈÕÖ¾ÎÄ¼ş
+Description:ç”Ÿæˆæ—¥å¿—æ–‡ä»¶
 Input:
 Output:
 Return:
@@ -158,9 +164,9 @@ void OutLog(string filePath, vector<string> type, vector<string> province);
 
 
 /***********************
-Description:Êä³öÖ¸¶¨Ê¡·İµÄÈËÔ±ĞÅÏ¢
-Input:strProvince:Ê¡·İÃû³Æ
-Output:Ê¡·İ ¸ĞÈ¾»¼ÕßaÈË ÒÉËÆ»¼ÕßbÈË ÖÎÓúcÈË ËÀÍödÈË
+Description:è¾“å‡ºæŒ‡å®šçœä»½çš„äººå‘˜ä¿¡æ¯
+Input:strProvince:çœä»½åç§°
+Output:çœä»½ æ„ŸæŸ“æ‚£è€…aäºº ç–‘ä¼¼æ‚£è€…bäºº æ²»æ„ˆcäºº æ­»äº¡däºº
 Return:none
 Others:
 ***********************/
@@ -168,9 +174,9 @@ void ShowProvince(string strProvince);
 
 
 /***********************
-Description:Êä³öËùÓĞÊ¡·İµÄÈËÔ±ĞÅÏ¢
+Description:è¾“å‡ºæ‰€æœ‰çœä»½çš„äººå‘˜ä¿¡æ¯
 Input:
-Output:Ê¡·İ ¸ĞÈ¾»¼ÕßaÈË ÒÉËÆ»¼ÕßbÈË ÖÎÓúcÈË ËÀÍödÈË
+Output:çœä»½ æ„ŸæŸ“æ‚£è€…aäºº ç–‘ä¼¼æ‚£è€…bäºº æ²»æ„ˆcäºº æ­»äº¡däºº
 Return:none
 Others:
 ***********************/
@@ -178,9 +184,9 @@ void ShowAllProvince();
 
 
 /***********************
-Description:<Ê¡> ĞÂÔö ¸ĞÈ¾»¼Õß nÈË
+Description:<çœ> æ–°å¢ æ„ŸæŸ“æ‚£è€… näºº
 Input:
-    strProvince:Ê¡Ãû³Æ
+    strProvince:çœåç§°
 Output:none
 Return:none
 Others:
@@ -189,9 +195,9 @@ void AddIP(string strProvince,int num);
 
 
 /***********************
-Description:<Ê¡> ĞÂÔö ÒÉËÆ»¼Õß nÈË
+Description:<çœ> æ–°å¢ ç–‘ä¼¼æ‚£è€… näºº
 Input:
-    strProvince:Ê¡·İÃû³Æ
+    strProvince:çœä»½åç§°
 Output:none
 Return:none
 Others:
@@ -200,9 +206,9 @@ void AddSP(string strProvince,int num);
 
 
 /***********************
-Description:<Ê¡1> ¸ĞÈ¾»¼Õß Á÷Èë <Ê¡2> nÈË
+Description:<çœ1> æ„ŸæŸ“æ‚£è€… æµå…¥ <çœ2> näºº
 Input:
-    strProvince:Ê¡·İÃû³Æ
+    strProvince:çœä»½åç§°
 Output:none
 Return:none
 Others:
@@ -211,8 +217,8 @@ void MoveIP(string strProvinceA,string strProvinceB,int num);
 
 
 /***********************
-Description:<Ê¡1> ÒÉËÆ»¼Õß Á÷Èë <Ê¡2> nÈË
-Input:strProvince:Ê¡·İÃû³Æ
+Description:<çœ1> ç–‘ä¼¼æ‚£è€… æµå…¥ <çœ2> näºº
+Input:strProvince:çœä»½åç§°
 Output:none
 Return:none
 Others:
@@ -221,7 +227,7 @@ void MoveSP(string strProvinceA,string strProvinceB,int num);
 
 
 /***********************
-Description:<Ê¡> ËÀÍö nÈË
+Description:<çœ> æ­»äº¡ näºº
 Input:
 Output:
 Return:none
@@ -231,7 +237,7 @@ void IPtoDead(string strProvince,int num);
 
 
 /***********************
-Description:<Ê¡> ÖÎÓú nÈË
+Description:<çœ> æ²»æ„ˆ näºº
 Input:
 Output:
 Return:none
@@ -241,7 +247,7 @@ void IPtoCure(string strProvince,int num);
 
 
 /***********************
-Description:<Ê¡> ÒÉËÆ»¼Õß È·Õï¸ĞÈ¾ nÈË
+Description:<çœ> ç–‘ä¼¼æ‚£è€… ç¡®è¯Šæ„ŸæŸ“ näºº
 Input:
 Output:
 Return:none
@@ -251,7 +257,7 @@ void SPtoIP(string strProvince,int num);
 
 
 /***********************
-Description:<Ê¡> ÅÅ³ı ÒÉËÆ»¼Õß nÈË
+Description:<çœ> æ’é™¤ ç–‘ä¼¼æ‚£è€… näºº
 Input:
 Output:
 Return:none
@@ -260,32 +266,24 @@ Others:
 void SubSP(string strProvince,int num);
 
 
-/*Ö÷º¯Êı*/
+/*ä¸»å‡½æ•°*/
 int main(int argc,char *argv[])
 {
-    ProcessOption(argc,argv);//´¦ÀíÃüÁîĞĞ²ÎÊı
+    ProcessOption(argc,argv);//å¤„ç†å‘½ä»¤è¡Œå‚æ•°
     system("pause");
     return 0;
 }
 
 
-void init()//³õÊ¼»¯
+void init()//åˆå§‹åŒ–
 {
-    //ifstream ifProvince("..\\221701210\\log\\provincelist.txt");//´ò¿ªÊ¡·İÅäÖÃÎÄ¼ş
-    /*ifstream ifProvince("D:\\Users\\qaz70\\Documents\\GitHub\\InfectStatistic-main\\221701210\\log\\provincelist.txt");//´ò¿ªÊ¡·İÅäÖÃÎÄ¼ş
-    if(!ifProvince)
-    {
-        cout<<"Ê¡·İÅäÖÃÎÄ¼ş´ò¿ªÊ§°Ü£¡\n";
-        exit(0);
-    }*/
-    
-    mapProvince.clear();//Çå¿Õmap
+    mapProvince.clear();//æ¸…ç©ºmap
     string strProvince;
     for(int i=0; i<35; i++)
     {
-        //ifProvince>>strProvince;//´ÓÎÄ¼şÖĞ¶ÁÈ¡Ê¡·İÃû³Æ
+        //ifProvince>>strProvince;//ä»æ–‡ä»¶ä¸­è¯»å–çœä»½åç§°
         SProvinceInformation spiProvince = {0};
-        mapProvince[PROVINCE[i]] = spiProvince;//½¨Á¢Ê¡·İÃû³ÆÓëĞÅÏ¢´æ´¢½á¹¹µÄÓ³Éä¹ØÏµ
+        mapProvince[PROVINCE[i]] = spiProvince;//å»ºç«‹çœä»½åç§°ä¸ä¿¡æ¯å­˜å‚¨ç»“æ„çš„æ˜ å°„å…³ç³»
     }
 
 
@@ -293,7 +291,7 @@ void init()//³õÊ¼»¯
 
 int datecmp(string date1, string date2)
 {
-    /*°Ñyyyy-mm-dd¸ñÊ½µÄ×Ö·û´®·ÖÀë¿ª*/
+    /*æŠŠyyyy-mm-ddæ ¼å¼çš„å­—ç¬¦ä¸²åˆ†ç¦»å¼€*/
     int year1,month1,day1;
     int year2,month2,day2;
 
@@ -342,11 +340,11 @@ int datecmp(string date1, string date2)
     }
 }
 
-void ReadAllLog(string path, string date)//¶ÁÈ¡µ½dateÖ®Ç°µÄ¸ø¶¨Â·¾¶ÖĞËùÓĞÈÕÖ¾ÎÄ¼ş
+void ReadAllLog(string path, string date)//è¯»å–åˆ°dateä¹‹å‰çš„ç»™å®šè·¯å¾„ä¸­æ‰€æœ‰æ—¥å¿—æ–‡ä»¶
 {
-    long hFile = 0;//ÎÄ¼ş¾ä±ú
+    long hFile = 0;//æ–‡ä»¶å¥æŸ„
 
-    struct _finddata_t fileinfo;//ÎÄ¼şĞÅÏ¢
+    struct _finddata_t fileinfo;//æ–‡ä»¶ä¿¡æ¯
 
     string p;
     if((hFile = _findfirst(p.assign(path).append("\\*.log.txt").c_str(),&fileinfo)) != -1)
@@ -355,8 +353,8 @@ void ReadAllLog(string path, string date)//¶ÁÈ¡µ½dateÖ®Ç°µÄ¸ø¶¨Â·¾¶ÖĞËùÓĞÈÕÖ¾ÎÄ¼
         {
             string fileName = fileinfo.name;
             string filePath = "\\";
-            filePath = path + filePath + fileName;//¹¹ÔìÍêÕûµÄÎÄ¼şÂ·¾¶¼°Ãû³Æ
-            ReadLog(filePath);//Í¨¹ıÎÄ¼şÃû£¬¶ÔÎÄ¼ş½øĞĞ¶ÔÓ¦´¦Àí
+            filePath = path + filePath + fileName;//æ„é€ å®Œæ•´çš„æ–‡ä»¶è·¯å¾„åŠåç§°
+            ReadLog(filePath);//é€šè¿‡æ–‡ä»¶åï¼Œå¯¹æ–‡ä»¶è¿›è¡Œå¯¹åº”å¤„ç†
         } while (_findnext(hFile,&fileinfo) == 0);
         _findclose(hFile);
     }
@@ -364,65 +362,65 @@ void ReadAllLog(string path, string date)//¶ÁÈ¡µ½dateÖ®Ç°µÄ¸ø¶¨Â·¾¶ÖĞËùÓĞÈÕÖ¾ÎÄ¼
 
 void ReadLog(string filePath)
 {
-    ifstream ifLog(filePath.c_str());//´ò¿ªÈÕÖ¾ÎÄ¼ş
+    ifstream ifLog(filePath.c_str());//æ‰“å¼€æ—¥å¿—æ–‡ä»¶
     if(!ifLog)
     {
-        cout<<filePath<<"ÎÄ¼ş´ò¿ªÊ§°Ü\n";
+        cout<<filePath<<"æ–‡ä»¶æ‰“å¼€å¤±è´¥\n";
         return ;
     }
 
-    string buffer;//¶ÁÈ¡ĞĞ»º³åÇø
-    while(getline(ifLog,buffer))//ÖğĞĞ¶ÁÈ¡ÎÄ¼ş
+    string buffer;//è¯»å–è¡Œç¼“å†²åŒº
+    while(getline(ifLog,buffer))//é€è¡Œè¯»å–æ–‡ä»¶
     {
         char cBuffer[10][20];
         int i=0;
-        if(buffer.size() == 0)//Ìø¹ı¿ÕĞĞ
+        if(buffer.size() == 0)//è·³è¿‡ç©ºè¡Œ
         {
             break;
         }
         istringstream ist(buffer);
-        while(ist>>cBuffer[i++])//´Ó»º³åÇøÖğ¸ö¶ÁÈë´ÊÓï
+        while(ist>>cBuffer[i++])//ä»ç¼“å†²åŒºé€ä¸ªè¯»å…¥è¯è¯­
         {
             
         }
 
-        if(cBuffer[0][0]!='/')//Ìø¹ı×¢ÊÍ
+        if(cBuffer[0][0]!='/')//è·³è¿‡æ³¨é‡Š
         {
-            if(strcmp(cBuffer[1],"ĞÂÔö") == 0)
+            if(strcmp(cBuffer[1],"æ–°å¢") == 0)
             {
-                if(strcmp(cBuffer[2],"¸ĞÈ¾»¼Õß") == 0)//ĞÂÔö¸ĞÈ¾»¼Õß
+                if(strcmp(cBuffer[2],"æ„ŸæŸ“æ‚£è€…") == 0)//æ–°å¢æ„ŸæŸ“æ‚£è€…
                 {
                     AddIP(cBuffer[0],atoi(cBuffer[3]));
                 }
-                else//ĞÂÔöÒÉËÆ»¼Õß
+                else//æ–°å¢ç–‘ä¼¼æ‚£è€…
                 {
                     AddSP(cBuffer[0],atoi(cBuffer[3]));
                 }
             }
-            else if(strcmp(cBuffer[1],"¸ĞÈ¾»¼Õß") == 0)//Ê¡1¸ĞÈ¾»¼ÕßÁ÷ÈëÊ¡2
+            else if(strcmp(cBuffer[1],"æ„ŸæŸ“æ‚£è€…") == 0)//çœ1æ„ŸæŸ“æ‚£è€…æµå…¥çœ2
             {
                 MoveIP(cBuffer[0],cBuffer[3],atoi(cBuffer[4]));
             }
-            else if(strcmp(cBuffer[1],"ÒÉËÆ»¼Õß") == 0)
+            else if(strcmp(cBuffer[1],"ç–‘ä¼¼æ‚£è€…") == 0)
             {
-                if(strcmp(cBuffer[2],"Á÷Èë") == 0)//Ê¡1ÒÉËÆ»¼ÕßÁ÷ÈëÊ¡2
+                if(strcmp(cBuffer[2],"æµå…¥") == 0)//çœ1ç–‘ä¼¼æ‚£è€…æµå…¥çœ2
                 {
                     MoveSP(cBuffer[0],cBuffer[3],atoi(cBuffer[4]));
                 }
-                else//ÒÉËÆ»¼ÕßÈ·ÈÏ¸ĞÈ¾
+                else//ç–‘ä¼¼æ‚£è€…ç¡®è®¤æ„ŸæŸ“
                 {
                     SPtoIP(cBuffer[0],atoi(cBuffer[3]));
                 }
             }
-            else if(strcmp(cBuffer[1],"ËÀÍö") == 0)//¸ĞÈ¾»¼ÕßËÀÍö
+            else if(strcmp(cBuffer[1],"æ­»äº¡") == 0)//æ„ŸæŸ“æ‚£è€…æ­»äº¡
             {
                 IPtoDead(cBuffer[0],atoi(cBuffer[2]));
             }
-            else if(strcmp(cBuffer[1],"ÖÎÓú") == 0)//¸ĞÈ¾»¼ÕßÖÎÓú
+            else if(strcmp(cBuffer[1],"æ²»æ„ˆ") == 0)//æ„ŸæŸ“æ‚£è€…æ²»æ„ˆ
             {
                 IPtoCure(cBuffer[0],atoi(cBuffer[2]));
             }
-            else if(strcmp(cBuffer[1],"ÅÅ³ı") == 0)//ÅÅ³ıÒÉËÆ»¼Õß»¼Õß
+            else if(strcmp(cBuffer[1],"æ’é™¤") == 0)//æ’é™¤ç–‘ä¼¼æ‚£è€…æ‚£è€…
             {
                 SubSP(cBuffer[0],atoi(cBuffer[3]));
             }
@@ -431,9 +429,9 @@ void ReadLog(string filePath)
     ifLog.close();
 }
 
-void ProcessOption(int argc,char *argv[])//´¦Àí²ÎÊı
+void ProcessOption(int argc,char *argv[])//å¤„ç†å‚æ•°
 {
-    if(argc > 1)//ÓĞ²ÎÊı
+    if(argc > 1)//æœ‰å‚æ•°
     {
         if(strcmp(argv[1], "list") == 0)
         {
@@ -464,7 +462,7 @@ void ProcessOption(int argc,char *argv[])//´¦Àí²ÎÊı
                 }
                 else if(strcmp(argv[index], "-date") == 0)
                 {
-                    if(argv[index+1][0] != '-')//Èç¹ûÏÂÒ»Î»²»ÊÇÆäËû²Ù×÷·û£¬ÄÇÃ´ÔòÊÇdateµÄ²ÎÊıÖµ
+                    if(argv[index+1][0] != '-')//å¦‚æœä¸‹ä¸€ä½ä¸æ˜¯å…¶ä»–æ“ä½œç¬¦ï¼Œé‚£ä¹ˆåˆ™æ˜¯dateçš„å‚æ•°å€¼
                     {
                         date = argv[index+1];
                         index++;
@@ -472,13 +470,13 @@ void ProcessOption(int argc,char *argv[])//´¦Àí²ÎÊı
                 }
                 else if(strcmp(argv[index], "-type") == 0)
                 {
-                    while((argv[index+1]) && (argv[index+1][0] != '-'))//-typeºóÃæ¿ÉÄÜÓĞ0µ½¶à¸ö²ÎÊıÖµ
+                    while((argv[index+1]) && (argv[index+1][0] != '-'))//-typeåé¢å¯èƒ½æœ‰0åˆ°å¤šä¸ªå‚æ•°å€¼
                     {
                         type.push_back(argv[index+1]);
                         index++;
                     }
                 }
-                else if(strcmp(argv[index], "-province") == 0)//-provinceºóÃæ¿ÉÄÜÓĞ0µ½¶à¸ö²ÎÊı
+                else if(strcmp(argv[index], "-province") == 0)//-provinceåé¢å¯èƒ½æœ‰0åˆ°å¤šä¸ªå‚æ•°
                 {
                     while((argv[index+1]) && (argv[index+1][0] != '-'))
                     {
@@ -490,7 +488,7 @@ void ProcessOption(int argc,char *argv[])//´¦Àí²ÎÊı
                 {
                     if(argv[index][0] == '-')
                     {
-                        cout<<"Î´ÖªµÄ²Ù×÷·û"<<argv[index]<<endl;
+                        cout<<"æœªçŸ¥çš„æ“ä½œç¬¦"<<argv[index]<<endl;
                     }
                 }
                 index++;
@@ -498,75 +496,73 @@ void ProcessOption(int argc,char *argv[])//´¦Àí²ÎÊı
 
             if(logPath == "" || outPath == "")
             {
-                cout<<"-logºÍ-outÖ¸Áî²ÎÊı²»ÄÜÎª¿Õ£¡\n";
+                cout<<"-logå’Œ-outæŒ‡ä»¤å‚æ•°ä¸èƒ½ä¸ºç©ºï¼\n";
                 exit(0);
             }
-            list(logPath, outPath, date, type, province);//½»ÓÉlistº¯Êı´¦Àí
+            list(logPath, outPath, date, type, province);//äº¤ç”±listå‡½æ•°å¤„ç†
         }
     }
 }
 
-void list(string logPath, string outPath, string date, vector<string> type, vector<string> province)//listÃüÁî
+void list(string logPath, string outPath, string date, vector<string> type, vector<string> province)//listå‘½ä»¤
 {
-    cout<<logPath<<endl<<outPath<<endl<<date<<endl;
-    init();//³õÊ¼»¯
-    ReadAllLog(logPath, date);//¶ÁÈ¡dateÖ®Ç°ËùÓĞµÄÈÕÖ¾ÎÄ¼ş
-    OutLog(outPath, type, province);//°´ÕÕÖ¸¶¨¸ñÊ½Êä³ö
-    ShowAllProvince();
+    init();//åˆå§‹åŒ–
+    ReadAllLog(logPath, date);//è¯»å–dateä¹‹å‰æ‰€æœ‰çš„æ—¥å¿—æ–‡ä»¶
+    OutLog(outPath, type, province);//æŒ‰ç…§æŒ‡å®šæ ¼å¼è¾“å‡º
 }
 
 void OutLog(string filePath, vector<string> type, vector<string> province)
 {   
-    ofstream ofLog(filePath.c_str(),ios::out);//´´½¨²¢Ğ´ÈëĞÂµÄÈÕÖ¾ÎÄ¼ş
+    ofstream ofLog(filePath.c_str(),ios::out);//åˆ›å»ºå¹¶å†™å…¥æ–°çš„æ—¥å¿—æ–‡ä»¶
     if(!ofLog)
     {
-        cout<<"Êä³öÄ¿Â¼´ò¿ªÊ§°Ü£¡";
+        cout<<"è¾“å‡ºç›®å½•æ‰“å¼€å¤±è´¥ï¼";
         exit(0);
     }
 
-    for(int i=0;i<35;i++)//°´ÕÕÊ¡·İÁĞ±íµÄË³ĞòÊä³öÃ¿¸öÊ¡·İµÄÊı¾İĞÅÏ¢
+    for(int i=0;i<35;i++)//æŒ‰ç…§çœä»½åˆ—è¡¨çš„é¡ºåºè¾“å‡ºæ¯ä¸ªçœä»½çš„æ•°æ®ä¿¡æ¯
     {
-        ofLog<<PROVINCE[i]<<" ¸ĞÈ¾»¼Õß"<<mapProvince[PROVINCE[i]].ip<<"ÈË ";
-        ofLog<<"ÒÉËÆ»¼Õß"<<mapProvince[PROVINCE[i]].sp<<"ÈË ";
-        ofLog<<"ÖÎÓú"<<mapProvince[PROVINCE[i]].cure<<"ÈË ";
-        ofLog<<"ËÀÍö"<<mapProvince[PROVINCE[i]].dead<<"ÈË\n";
+        ofLog<<PROVINCE[i]<<" æ„ŸæŸ“æ‚£è€…"<<mapProvince[PROVINCE[i]].ip<<"äºº ";
+        ofLog<<"ç–‘ä¼¼æ‚£è€…"<<mapProvince[PROVINCE[i]].sp<<"äºº ";
+        ofLog<<"æ²»æ„ˆ"<<mapProvince[PROVINCE[i]].cure<<"äºº ";
+        ofLog<<"æ­»äº¡"<<mapProvince[PROVINCE[i]].dead<<"äºº\n";
     }
-    ofLog<<"// ¸ÃÎÄµµ²¢·ÇÕæÊµÊı¾İ£¬½ö¹©²âÊÔÊ¹ÓÃ";
+    ofLog<<"// è¯¥æ–‡æ¡£å¹¶éçœŸå®æ•°æ®ï¼Œä»…ä¾›æµ‹è¯•ä½¿ç”¨";
 
     ofLog.close();
 }
 
-void ShowProvince(string strProvince)//°´Ê¡·İÃû³ÆÊä³öÊı¾İ
+void ShowProvince(string strProvince)//æŒ‰çœä»½åç§°è¾“å‡ºæ•°æ®
 {
     SProvinceInformation *pProvince=&mapProvince[strProvince];
     cout<<strProvince;
-    printf(" ¸ĞÈ¾»¼Õß%dÈË ",pProvince->ip);
-    printf("ÒÉËÆ»¼Õß%dÈË ",pProvince->sp);
-    printf("ÖÎÓú%dÈË ",pProvince->cure);
-    printf("ËÀÍö%dÈË\n",pProvince->dead);
+    printf(" æ„ŸæŸ“æ‚£è€…%däºº ",pProvince->ip);
+    printf("ç–‘ä¼¼æ‚£è€…%däºº ",pProvince->sp);
+    printf("æ²»æ„ˆ%däºº ",pProvince->cure);
+    printf("æ­»äº¡%däºº\n",pProvince->dead);
     delete(pProvince);
 }
 
-void ShowAllProvince()//Êä³öËùÓĞÊ¡·İµÄÊı¾İĞÅÏ¢
+void ShowAllProvince()//è¾“å‡ºæ‰€æœ‰çœä»½çš„æ•°æ®ä¿¡æ¯
 {
-    for(int i=0;i<35;i++)//°´ÕÕÊ¡·İÁĞ±íµÄË³ĞòÊä³öÃ¿¸öÊ¡·İµÄÊı¾İĞÅÏ¢
+    for(int i=0;i<35;i++)//æŒ‰ç…§çœä»½åˆ—è¡¨çš„é¡ºåºè¾“å‡ºæ¯ä¸ªçœä»½çš„æ•°æ®ä¿¡æ¯
     {
-        cout<<PROVINCE[i]<<" ¸ĞÈ¾»¼Õß"<<mapProvince[PROVINCE[i]].ip<<"ÈË ";
-        cout<<"ÒÉËÆ»¼Õß"<<mapProvince[PROVINCE[i]].sp<<"ÈË ";
-        cout<<"ÖÎÓú"<<mapProvince[PROVINCE[i]].cure<<"ÈË ";
-        cout<<"ËÀÍö"<<mapProvince[PROVINCE[i]].dead<<"ÈË\n";
+        cout<<PROVINCE[i]<<" æ„ŸæŸ“æ‚£è€…"<<mapProvince[PROVINCE[i]].ip<<"äºº ";
+        cout<<"ç–‘ä¼¼æ‚£è€…"<<mapProvince[PROVINCE[i]].sp<<"äºº ";
+        cout<<"æ²»æ„ˆ"<<mapProvince[PROVINCE[i]].cure<<"äºº ";
+        cout<<"æ­»äº¡"<<mapProvince[PROVINCE[i]].dead<<"äºº\n";
     }
 }
 
 void AddIP(string strProvince,int num)
 {
     mapProvince[strProvince].ip += num;
-    mapProvince["È«¹ú"].ip += num;
+    mapProvince["å…¨å›½"].ip += num;
 }
 void AddSP(string strProvince,int num)
 {
     mapProvince[strProvince].sp += num;
-    mapProvince["È«¹ú"].sp += num;
+    mapProvince["å…¨å›½"].sp += num;
 }
 void MoveIP(string strProvinceA,string strProvinceB,int num)
 {
@@ -582,25 +578,25 @@ void IPtoDead(string strProvince,int num)
 {
     mapProvince[strProvince].ip -= num;
     mapProvince[strProvince].dead += num;
-    mapProvince["È«¹ú"].ip -= num;
-    mapProvince["È«¹ú"].dead += num;
+    mapProvince["å…¨å›½"].ip -= num;
+    mapProvince["å…¨å›½"].dead += num;
 }
 void IPtoCure(string strProvince,int num)
 {
     mapProvince[strProvince].ip -= num;
     mapProvince[strProvince].cure += num;
-    mapProvince["È«¹ú"].ip -= num;
-    mapProvince["È«¹ú"].cure += num;
+    mapProvince["å…¨å›½"].ip -= num;
+    mapProvince["å…¨å›½"].cure += num;
 }
 void SPtoIP(string strProvince,int num)
 {
     mapProvince[strProvince].sp -= num;
     mapProvince[strProvince].ip += num;
-    mapProvince["È«¹ú"].sp -= num;
-    mapProvince["È«¹ú"].ip += num;
+    mapProvince["å…¨å›½"].sp -= num;
+    mapProvince["å…¨å›½"].ip += num;
 }
 void SubSP(string strProvince,int num)
 {
     mapProvince[strProvince].sp -= num;
-    mapProvince["È«¹ú"].sp -= num;
+    mapProvince["å…¨å›½"].sp -= num;
 }

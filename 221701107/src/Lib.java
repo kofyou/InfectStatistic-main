@@ -7,8 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.NotDirectoryException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
-import javax.print.attribute.standard.MediaSize.NA;
 
 /**
  * Lib
@@ -98,8 +95,6 @@ public class Lib {
     }
 
 
-
-
     public void outputResult() {
         List<String> province2stat;
         if (commandArgs.containsOption("province")) {
@@ -134,7 +129,7 @@ public class Lib {
                     for (String type : patientTypes) {
                         switch (type) {
                             case "ip":
-                                bufferedWriter.write(" 感染患者" + provinceStat.getNumIP() +"人");
+                                bufferedWriter.write(" 感染患者" + provinceStat.getNumIP() + "人");
                                 break;
                             case "sp":
                                 bufferedWriter.write(" 疑似患者" + provinceStat.getNumSP() + "人");
@@ -261,8 +256,7 @@ class CommandArgs {
 
 class LogParser {
 
-    private Map<String, ProvinceStat> provinceStatMap;
-
+    final static public String NATION_NAME = "全国";
     final static private String regex1 = "(^\\W+) 新增 感染患者 (\\d+)人";
     final static private String regex2 = "(^\\W+) 新增 疑似患者 (\\d+)人";
     final static private String regex3 = "(^\\W+) 感染患者 流入 (\\W+) (\\d+)人";
@@ -271,8 +265,7 @@ class LogParser {
     final static private String regex6 = "(^\\W+) 治愈 (\\d+)人";
     final static private String regex7 = "(^\\W+) 疑似患者 确诊感染 (\\d+)人";
     final static private String regex8 = "(^\\W+) 排除 疑似患者 (\\d+)人";
-
-    final static public String NATION_NAME = "全国";
+    private Map<String, ProvinceStat> provinceStatMap;
 
     public static List<String> regexGroup2(String soap, String regex) {
         final Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
@@ -335,7 +328,6 @@ class LogParser {
         if (logFiles == null || logFiles.length == 0) {
             return provinceStatMap;
         }
-
 
         for (String logFile : logFiles) {
 

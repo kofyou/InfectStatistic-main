@@ -7,6 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.NotDirectoryException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +17,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
+import javax.print.attribute.standard.MediaSize.NA;
 
 /**
  * Lib
@@ -24,6 +28,7 @@ import java.util.zip.DataFormatException;
  */
 public class Lib {
 
+    private static final String NATION_NAME = "全国";
     private CommandArgs commandArgs;
 
     private Map<String, ProvinceStat> provinceStatMap;
@@ -77,16 +82,84 @@ public class Lib {
         outputResult();
     }
 
+    private void statAll() {
+        ProvinceStat nationStat = new ProvinceStat();
+
+        Set<String> provinces = provinceStatMap.keySet();
+        for (String province : provinces) {
+            ProvinceStat provinceStat = provinceStatMap.get(province);
+            nationStat.incrNumIP(provinceStat.getNumIP());
+            nationStat.incrNumSP(provinceStat.getNumSP());
+            nationStat.incrNumCure(provinceStat.getNumCure());
+            nationStat.incrNumDead(provinceStat.getNumDead());
+        }
+
+        provinceStatMap.put(NATION_NAME, nationStat);
+    }
+
+
+
+
     public void outputResult() {
+        List<String> province2stat;
+        if (commandArgs.containsOption("province")) {
+            province2stat = commandArgs.getOptionValues("province");
+        } else {
+            province2stat = new ArrayList<>(provinceStatMap.keySet());
+            province2stat.add(0, NATION_NAME);
+        }
+
+        province2stat.sort(Comparator.reverseOrder());
+        if (province2stat.contains(NATION_NAME)) {
+            province2stat.remove(NATION_NAME);
+            province2stat.add(0, NATION_NAME);
+            statAll();
+        }
+
         String outFilename = commandArgs.getOptionValues("out").get(0);
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outFilename))) {
 
-            Set<String> provinces = provinceStatMap.keySet();
-            for (String province : provinces) {
+//            Set<String> provinces = provinceStatMap.keySet();
+
+            if (commandArgs.containsOption("type")) {
+//                List<String> patientTypes = Arrays.asList("ip", "sp", "cure", "dead");
+                List<String> patientTypes = commandArgs.getOptionValues("type");
+                for (String province : province2stat) {
+                    if (!provinceStatMap.containsKey(province)) {
+                        provinceStatMap.put(province, new ProvinceStat());
+                    }
+                    ProvinceStat provinceStat = provinceStatMap.get(province);
+                    bufferedWriter.write(province);
+                    for (String type : patientTypes) {
+                        switch (type) {
+                            case "ip":
+                                bufferedWriter.write(" 感染患者" + provinceStat.getNumIP() +"人");
+                                break;
+                            case "sp":
+                                bufferedWriter.write(" 疑似患者" + provinceStat.getNumSP() + "人");
+                                break;
+                            case "cure":
+                                bufferedWriter.write(" 治愈" + provinceStat.getNumCure() + "人");
+                                break;
+                            case "dead":
+                                bufferedWriter.write(" 死亡" + provinceStat.getNumDead() + "人");
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    bufferedWriter.newLine();
+                }
+            } else {
+                for (String province : province2stat) {
+                    if (!provinceStatMap.containsKey(province)) {
+                        provinceStatMap.put(province, new ProvinceStat());
+                    }
 //                System.out.println(province + " " + provinceStatMap.get(province));
-                bufferedWriter.write(province + " " + provinceStatMap.get(province));
-                bufferedWriter.newLine();
+                    bufferedWriter.write(province + " " + provinceStatMap.get(province));
+                    bufferedWriter.newLine();
+                }
             }
             bufferedWriter.write("// 该文档并非真实数据，仅供测试使用\n");
             bufferedWriter.write("// 命令：" + String.join(" ", this.args) + "\n");
@@ -190,14 +263,16 @@ class LogParser {
 
     private Map<String, ProvinceStat> provinceStatMap;
 
-    final static String regex1 = "(^\\W+) 新增 感染患者 (\\d+)人";
-    final static String regex2 = "(^\\W+) 新增 疑似患者 (\\d+)人";
-    final static String regex3 = "(^\\W+) 感染患者 流入 (\\W+) (\\d+)人";
-    final static String regex4 = "(^\\W+) 疑似患者 流入 (\\W+) (\\d+)人";
-    final static String regex5 = "(^\\W+) 死亡 (\\d+)人";
-    final static String regex6 = "(^\\W+) 治愈 (\\d+)人";
-    final static String regex7 = "(^\\W+) 疑似患者 确诊感染 (\\d+)人";
-    final static String regex8 = "(^\\W+) 排除 疑似患者 (\\d+)人";
+    final static private String regex1 = "(^\\W+) 新增 感染患者 (\\d+)人";
+    final static private String regex2 = "(^\\W+) 新增 疑似患者 (\\d+)人";
+    final static private String regex3 = "(^\\W+) 感染患者 流入 (\\W+) (\\d+)人";
+    final static private String regex4 = "(^\\W+) 疑似患者 流入 (\\W+) (\\d+)人";
+    final static private String regex5 = "(^\\W+) 死亡 (\\d+)人";
+    final static private String regex6 = "(^\\W+) 治愈 (\\d+)人";
+    final static private String regex7 = "(^\\W+) 疑似患者 确诊感染 (\\d+)人";
+    final static private String regex8 = "(^\\W+) 排除 疑似患者 (\\d+)人";
+
+    final static public String NATION_NAME = "全国";
 
     public static List<String> regexGroup2(String soap, String regex) {
         final Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);

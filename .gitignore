@@ -2,6 +2,11 @@
 ### Example user template template
 ### Example user template
 
+# Mac files
+.DS_Store
+.DS_Store/
+
+
 # IntelliJ project files
 .idea
 *.iml

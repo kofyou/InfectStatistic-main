@@ -51,11 +51,12 @@ public class InfectStatistic {
 				//疑似患者人数减少
 				count = infectMap.get(province).get("疑似患者") - Integer.valueOf(params[3].replaceAll("人", ""));
 				infectMap.get(province).replace("疑似患者", count);
-			} else {
+			} else { //治愈 死亡
 				//感染者人数减少
 				count = infectMap.get(province).get("感染患者") - Integer.valueOf(params[2].replaceAll("人", ""));
 				infectMap.get(province).replace("感染患者", count);
-				infectMap.get(province).replace(params[1], Integer.valueOf(params[2].replaceAll("人", "")));
+				count = infectMap.get(province).get(params[1]) + Integer.valueOf(params[2].replaceAll("人", ""));
+				infectMap.get(province).replace(params[1], count);
 			}
 
 		}
@@ -63,8 +64,26 @@ public class InfectStatistic {
 		bufferedReader.close();
 	}
 
+	public void parseDirectory(String path, String date) throws IOException {
+		File file = new File(path);
+		File[] fileList = file.listFiles();
+		if (date != null) {
+			for (File f:fileList) {
+				if (f.getName().substring(0,f.getName().indexOf('.')).compareTo(date) <= 0) {
+//					System.out.println(f.getName());
+					readFile(f);
+				}
+			}
+		} else {
+			for (File f: fileList) {
+//				System.out.println(f.getName());
+				readFile(f);
+			}
+		}
 
-	public static void main(String[] args) {
+	}
+
+	public void parseArgs(String[] args) {
 		int optNumber = 0;
 		if (args[0].equals("list")) {
 			String input = null, output = null, date = null;
@@ -97,14 +116,11 @@ public class InfectStatistic {
 					optNumber++;
 				}
 			}
-			System.out.println(input+output+date);
-			for (int i = 0; i < typeList.size(); i++) {
-				System.out.println(typeList.get(i));
-			}
-			for (int i = 0; i < provinceList.size(); i++) {
-				System.out.println(provinceList.get(i));
-			}
 		}
+	}
+
+	public static void main(String[] args) {
+
 	}
 
 	public HashMap<String, Map<String, Integer>> getInfectMap() {

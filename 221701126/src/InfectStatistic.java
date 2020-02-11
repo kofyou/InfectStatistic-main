@@ -9,6 +9,8 @@ import java.util.Vector;
 import javax.annotation.PostConstruct;
 import javax.print.attribute.standard.OutputDeviceAssigned;
 
+import sun.nio.cs.ext.IBM037;
+
 
 
 
@@ -24,6 +26,7 @@ import javax.print.attribute.standard.OutputDeviceAssigned;
 class InfectStatistic {
 	private static String inputPath = "C://";
 	private static String outputPath = "C://";
+	private static String targetDate = "";
 	 
 	//将命令行参数转换成对象存储起来
 	private static void solveArgs(String[] args, Vector<Order> orders) {
@@ -41,6 +44,9 @@ class InfectStatistic {
 	    		}
 	    		else if(arg.equals("-out")) {//处理输出路径
 	    			outputPath = args[pos + 1];
+	    		}
+	    		else if(arg.equals("-date")) {//处理日期
+	    			targetDate = args[pos + 1];
 	    		}
 	    		for(i = pos + 1; i < args.length; i++) {
 	    			//System.out.println("I:" + i);
@@ -77,7 +83,41 @@ class InfectStatistic {
 			}
 		}
 	}
-    
+	
+	//处理date命令
+	private static void solveDateOrder(String targetDate) {
+		//获取输入路径下的所有文件
+		File file = new File(inputPath);
+		if(file.isDirectory()) {
+			Vector<String> toHandleDate = new Vector<String>();//获取符合要求待处理的日期文件
+			String[] fileNames = file.list(); // 获得目录下的所有文件的文件名
+			boolean flag = false;
+			for(String fileName : fileNames) {//截断后缀名
+				fileName = fileName.substring(0, fileName.indexOf('.'));
+				//日期比较
+				if(fileName.compareTo(targetDate) <= 0) {
+					toHandleDate.add(fileName);
+				}
+				else {
+					flag = true;
+					break;
+				}
+				//System.out.println(fileName);
+			}
+			if(flag == false) {
+				System.out.println("日期超出范围");
+				toHandleDate.clear();
+			}
+			else {
+				flag = false;
+			}
+			for(String aString : toHandleDate) {
+				System.out.println(aString);
+			}
+		}
+		
+	}
+	
 	public static void main(String[] args) {
 	
     	Vector<Order> orders = new Vector<Order>();
@@ -112,7 +152,7 @@ class InfectStatistic {
     	printOrders(orders);
     	System.out.println(inputPath);
     	System.out.println(outputPath);
-    	
+    	solveDateOrder(targetDate);
     	//setVariable(orders);
     }
 }

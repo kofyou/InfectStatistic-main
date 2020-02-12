@@ -2,11 +2,14 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * InfectStatistic
  * @author HHQ
- * @version 1.3
+ * @version 1.4
  */
 class InfectStatistic {
 
@@ -96,7 +99,7 @@ class InfectStatistic {
         /**
          * description：将一个字符串以空格" "分割
          * @param string 传入的字符串
-         * @return 返回值为分割后的数组
+         * @return 返回值为分割后的数组数量
          */
         public static int numAfterSplit(String string) {
             String[] afterSplitStrings = string.split(" ");
@@ -297,6 +300,76 @@ class InfectStatistic {
 //                    fileName.addAll(Arrays.asList(nameStrings));
                 }
             }
+        }
+
+        /**
+         * description：统计省份数据
+         * @param lineString 一行字符串
+         * @param hashtable 保存参与统计的省份
+         */
+        public static void calcProvince(String lineString, Hashtable<String, Province> hashtable) {
+            InfectStatistic infectStatistic = new InfectStatistic();
+            String[] afterSplitStrings = lineString.split(" ");
+            int numAfterSplit = afterSplitStrings.length; // 切割后数量
+            int number = ToolMethods.getNumber(afterSplitStrings[numAfterSplit - 1]); // 一行信息中涉及的人数
+            String[] provinceNameStrings = ToolMethods.getNeedModifyProvinceNames(afterSplitStrings);
+            int operateType = ToolMethods.getOperateType(afterSplitStrings);
+
+            if (provinceNameStrings[1].equals("")) { // 只有一个省
+                if (!hashtable.containsKey(provinceNameStrings[0])) { // 哈希表中没有该省
+                    Province province = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
+                    ToolMethods.executeOperate(province, province, operateType, number);
+                    hashtable.put(province.getProvinceName(), province);
+                } else {
+                    Province province = hashtable.get(provinceNameStrings[0]);
+                    ToolMethods.executeOperate(province, province, operateType, number);
+                }
+            } else if (!provinceNameStrings[1].equals("")) { // 有两个省
+                Province province1 = null;
+                Province province2 = null;
+                if (hashtable.containsKey(provinceNameStrings[0]) && hashtable.containsKey(provinceNameStrings[1])) {
+                    province1 = hashtable.get(provinceNameStrings[0]);
+                    province2 = hashtable.get(provinceNameStrings[1]);
+                } else if (hashtable.containsKey(provinceNameStrings[0])
+                        && !hashtable.containsKey(provinceNameStrings[1])) {
+                    province1 = hashtable.get(provinceNameStrings[0]);
+                    province2 = infectStatistic.new Province(provinceNameStrings[1], 0, 0, 0, 0);
+                    hashtable.put(provinceNameStrings[1], province2);
+                } else if (!hashtable.containsKey(provinceNameStrings[0])
+                        && hashtable.containsKey(provinceNameStrings[1])) {
+                    province1 = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
+                    hashtable.put(provinceNameStrings[0], province1);
+                    province2 = hashtable.get(provinceNameStrings[1]);
+                } else if (!hashtable.containsKey(provinceNameStrings[0])
+                        && !hashtable.containsKey(provinceNameStrings[1])) {
+                    province1 = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
+                    province2 = infectStatistic.new Province(provinceNameStrings[1], 0, 0, 0, 0);
+                    hashtable.put(provinceNameStrings[0], province1);
+                    hashtable.put(provinceNameStrings[1], province2);
+
+                }
+                ToolMethods.executeOperate(province1, province2, operateType, number);
+            }
+
+        }
+
+        /**
+         * description：统计全国的数据
+         * @param hashtable 保存着所有参与统计的省份
+         */
+        public static void calcWholeNation(Hashtable<String, Province> hashtable) {
+            InfectStatistic infectStatistic = new InfectStatistic();
+            Province wholeNation = infectStatistic.new Province("全国", 0, 0, 0, 0);
+            Set set = hashtable.keySet();
+            Iterator iterator = set.iterator();
+            while(iterator.hasNext()) {
+                Object keyObject = iterator.next();
+                wholeNation.ip += hashtable.get(keyObject).getIp();
+                wholeNation.sp += hashtable.get(keyObject).getSp();
+                wholeNation.cure += hashtable.get(keyObject).getCure();
+                wholeNation.dead += hashtable.get(keyObject).getDead();
+            }
+            hashtable.put("全国", wholeNation);
         }
 
     

@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * InfectStatistic
  * @author HHQ
- * @version 1.7
+ * @version 1.8
  */
 class InfectStatistic {
 
@@ -570,16 +570,26 @@ class InfectStatistic {
             return res;
         }
 
+        /**
+         * description：初始化参数名哈希表
+         * @return 返回一个包含所有参数名的哈希表
+         */
+        public static HashMap<Integer, String> initParamentHashMap() {
+            HashMap<Integer, String> paramenterHashMap = new HashMap<Integer, String>(5);
+            paramenterHashMap.put(1, "-log");
+            paramenterHashMap.put(2, "-out");
+            paramenterHashMap.put(3, "-date");
+            paramenterHashMap.put(4, "-type");
+            paramenterHashMap.put(5, "-province");
+            
+            return paramenterHashMap;
+        }
+
     
     }
 
     public static void main(String[] args) {
-        HashMap<Integer, String> paramenterHashMap = new HashMap<Integer, String>(5);
-        paramenterHashMap.put(1, "-log");
-        paramenterHashMap.put(2, "-out");
-        paramenterHashMap.put(3, "-date");
-        paramenterHashMap.put(4, "-type");
-        paramenterHashMap.put(5, "-province");
+        HashMap<Integer, String> paramenterHashMap = ToolMethods.initParamentHashMap(); //一个包含所有参数名的哈希表
 
         String[] paramenterStrings = new String[args.length - 1];   //存储传入的参数名、参数值
         for(int i=1; i<args.length; i++) {
@@ -592,6 +602,45 @@ class InfectStatistic {
             int key = ToolMethods.getKey(paramenterHashMap, paramenterStrings[i]);
             if( key != -1) {   //是参数名
                 indexOfParamenterStrings[key] = i;   //key对应的参数名在patamenterStrings的i下标位置,值为-1则代表无此参数名
+            }
+        }
+
+        String directoryString = "./log";
+        String outputFileNameString = "./result/testOutput.txt";    //输出路径/文件名
+        String toDateString = ToolMethods.getToday(); //统计到哪一天
+        String[] paramentersOfType = new String[10];;  //type的参数值
+        String[] paramentersOfProvince = new String[25];  //province的参数值
+        paramentersOfType[0] = "null";
+        paramentersOfProvince[0] = "null";
+
+        //接着处理每个参数名对应的参数值
+        for(int i=1; i<=5; i++) {
+            if(indexOfParamenterStrings[i] != -1) { //传入了该参数名
+                if(i == 1) {    // -log
+                    directoryString = "./" + paramenterStrings[indexOfParamenterStrings[i] + 1];    //配置log路径
+                }else if(i == 2) {  //-out
+                    outputFileNameString = paramenterStrings[indexOfParamenterStrings[i] + 1];      //配置输出文件路径
+                }else if(i == 3) {  //-date
+                    toDateString = paramenterStrings[indexOfParamenterStrings[i] + 1];  //统计到哪一天
+                }else if(i == 4) {  //-type 可能会有多个参数
+                    String[] paramenterValues = new String[20]; //记录所有参数值
+                    int cnt = 0;
+                    //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
+                     for(int j=indexOfParamenterStrings[i]+1; 
+                        j<paramenterStrings.length && ToolMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
+                        paramenterValues[cnt++] = paramenterStrings[j];
+                        paramentersOfType = paramenterValues;
+                    }
+                }else if(i == 5) {  //-province
+                    String[] paramenterValues = new String[20];
+                    int cnt = 0;
+                    //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
+                     for(int j=indexOfParamenterStrings[i]+1; 
+                        j<paramenterStrings.length && ToolMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
+                        paramenterValues[cnt++] = paramenterStrings[j];
+                        paramentersOfProvince = paramenterValues;
+                    }
+                }
             }
         }
     }

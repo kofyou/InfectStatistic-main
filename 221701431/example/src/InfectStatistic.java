@@ -73,16 +73,20 @@ class Execute{
           "[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|" +
           "((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|" +
           "((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29))\\.log\\.txt";
+  static String type = "ip|sp|cure|dead";
 
   public void log(String[] args){
+      int judgeNum = judge(args);
+      if (judgeNum == 1){
 
+      }
   }
 
 
 
   public int judge(String[] args){
 //      返回值0为语法错误，1为list语句，2为help,3为present
-      java.util.List<Integer> integers = new LinkedList<Integer>();
+      java.util.List<Integer> integers = new LinkedList<Integer>();//存储参数的下标
       if (!args[0].equals("list") && !args[0].equals("help") && !args[0].equals("present")){
           System.out.println("Command " + args[0] + " not found");
           return 0;
@@ -165,6 +169,9 @@ class Execute{
                   if (args[integers.get(i)].equals("-log")){
                       String logInputPath;
                       if ((i+1) == integers.size()){
+                          if (args.length-2 != integers.get(i)){
+                              System.out.println("Error Command6");
+                          }
                           File file = new File(args[integers.get(i)+1]);
                           if (!file.isDirectory()){
                               System.out.println("It should be a directory");
@@ -191,6 +198,7 @@ class Execute{
                           File f = new File(args[integers.get(i)+1]);
                           if (!f.isDirectory()){
                               System.out.println("It should be a directory");
+                              return 0;
                           }
                           else {
                               File[] files = f.listFiles();
@@ -210,19 +218,117 @@ class Execute{
 
 
                   if (args[integers.get(i)].equals("-out")){
-
-                  }
-
-                  if (args[integers.get(i)].equals("-type")){
-
+                      if ((i+1) == integers.size()){
+                          if (args.length-2 != integers.get(i)){
+                              System.out.println("Error Command7");
+                          }
+                          File f = new File(args[integers.get(i) + 1]);
+                          if (f.isDirectory()){
+                              System.out.println("It should be a file");
+                              return 0;
+                          }
+                      }
+                      else {
+                          File f = new File(args[integers.get(i) + 1]);
+                          if (f.isDirectory()){
+                              System.out.println("It should be a file");
+                              return 0;
+                          }
+                          if ((integers.get(i+1) - integers.get(i)) != 2){
+                              System.out.println("Error Commad8");
+                              return 0;
+                          }
+                      }
                   }
 
                   if (args[integers.get(i)].equals("-date")){
+                      if ((i+1) == integers.size()){
+                          if (args.length-2 != integers.get(i)){
+                              System.out.println("Error Command9");
+                              return 0;
+                          }
+                          if (!Pattern.matches(date , args[integers.get(i)+1])){
+                              System.out.println("Please input correct date");
+                              return 0;
+                          }
+                      }
+                      else {
+                          if ((integers.get(i+1) - integers.get(i)) != 2){
+                              System.out.println("Error Command10");
+                              return 0;
+                          }
+                          if (!Pattern.matches(date , args[integers.get(i)+1])){
+                              System.out.println("Please input correct date");
+                              return 0;
+                          }
+                      }
+                  }
 
+
+                  if (args[integers.get(i)].equals("-type")){
+                      if ((i+1) == integers.size()){
+                          String[] types = new String[args.length - integers.get(i) - 1];
+                          for (int j = integers.get(i)+1 ; j < args.length ; j++){
+                              types[j - (integers.get(i) + 1)] = args[j];
+                          }
+                          for (int j = 0 ; j < types.length ; j++){
+//                              System.out.println(types[j]);
+                              if (!Pattern.matches(type , types[j])){
+                                  System.out.println("Please input correct type");
+                                  return 0;
+                              }
+                          }
+                      }
+                      else {
+                          if ((integers.get(i+1) - integers.get(i)) < 2){
+                              System.out.println("Error Type");
+                              return 0;
+                          }
+                          String[] types = new String[integers.get(i+1) - integers.get(i) - 1];
+                          for (int j = integers.get(i) + 1 ; j < integers.get(i + 1) ; j++){
+                              types[j - integers.get(i) - 1] = args[j];
+                          }
+                          for (int j = 0 ; j < types.length ; j++){
+//                              System.out.println(types[j]);
+                              if (!Pattern.matches(type , types[j])){
+                                  System.out.println("Please input correct type");
+                                  return 0;
+                              }
+                          }
+                      }
                   }
 
                   if (args[integers.get(i)].equals("-province")){
-
+                      if ((i+1) == integers.size()){
+                          String[] provinces = new String[args.length - integers.get(i) - 1];
+                          for (int j = integers.get(i)+1 ; j < args.length ; j++){
+                              provinces[j - (integers.get(i) + 1)] = args[j];
+                          }
+                          for (int j = 0 ; j < provinces.length ; j++){
+//                              System.out.println(types[j]);
+                              if (!Pattern.matches(province , provinces[j])){
+                                  System.out.println("Please input correct province");
+                                  return 0;
+                              }
+                          }
+                      }
+                      else {
+                          if ((integers.get(i+1) - integers.get(i)) < 2){
+                              System.out.println("Error Type");
+                              return 0;
+                          }
+                          String[] provinces = new String[integers.get(i+1) - integers.get(i) - 1];
+                          for (int j = integers.get(i) + 1 ; j < integers.get(i + 1) ; j++){
+                              provinces[j - integers.get(i) - 1] = args[j];
+                          }
+                          for (int j = 0 ; j < provinces.length ; j++){
+//                              System.out.println(provinces[j]);
+                              if (!Pattern.matches(province , provinces[j])){
+                                  System.out.println("Please input correct province");
+                                  return 0;
+                              }
+                          }
+                      }
                   }
 
 
@@ -263,6 +369,29 @@ class Execute{
 *
 * */
 class List{
+    public void Command(String[] args){
+        
+    }
+
+    public void logPath(){
+
+    }
+
+    public void outFile(){
+
+    }
+
+    public void chooseDate(){
+
+    }
+
+    public void chooseType(){
+
+    }
+
+    public void chooseProvince(){
+
+    }
 }
 
 /*

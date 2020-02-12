@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * TODO
  *
  * @author 221701238_周宇靖
- * @version 1.3
+ * @version 1.5
  * @since 2020-02-08
  */
 public class InfectStatistic {
@@ -318,11 +318,10 @@ public class InfectStatistic {
     }
 
     /**
-     * 读取指定文件夹下的所有文件
+     * 读取指定文件夹下的所有文件的方法
      * @param filepath    //文件路径
      */
     public void readDirectory(String filepath) {
-        //读取指定文件夹下的所有文件
         File file = new File(filepath);
         if (file == null){
             System.out.println("找不到该文件夹");
@@ -338,6 +337,63 @@ public class InfectStatistic {
         if (fileList.size() == 0){
             System.out.println("该文件夹下无相关文件");
             System.exit(0);
+        }
+    }
+
+    /**
+     * 将统计好的日志信息写入文件的方法
+     * @param filepath    指定文件路径
+     */
+    public void writeFile(String filepath){
+        File file = new File(filepath);
+        BufferedWriter writer = null;
+        if(!file.exists())
+        {
+            try{
+                file.createNewFile();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        try{
+            writer = new BufferedWriter(new FileWriter(filepath));
+            StatisticsInformation nation = new StatisticsInformation("全国",
+                    0, 0, 0 ,0);
+            //统计目前全国的感染情况
+            for (int i = 0; i < statisticsInformationArrayList.size(); i++){
+                nation.infection += statisticsInformationArrayList.get(i).infection;
+                nation.suspect += statisticsInformationArrayList.get(i).suspect;
+                nation.dead += statisticsInformationArrayList.get(i).dead;
+                nation.cure += statisticsInformationArrayList.get(i).cure;
+            }
+            writer.write(nation.name + " 感染患者" + nation.infection + "人 疑似患者" + nation.suspect + "人 治愈"
+                    + nation.cure + "人 死亡" + nation.dead + "人");
+            writer.newLine();
+            for (int i = 0; i < statisticsInformationArrayList.size(); i++){
+                if (statisticsInformationArrayList.get(i).infection == 0
+                        && statisticsInformationArrayList.get(i).suspect == 0
+                        && statisticsInformationArrayList.get(i).dead == 0
+                        && statisticsInformationArrayList.get(i).cure == 0 ){
+
+                }else{
+                    writer.write(statisticsInformationArrayList.get(i).name + " 感染患者"
+                            + statisticsInformationArrayList.get(i).infection + "人 疑似患者"
+                            + statisticsInformationArrayList.get(i).suspect + "人 治愈"
+                            + statisticsInformationArrayList.get(i).cure + "人 死亡"
+                            + statisticsInformationArrayList.get(i).dead + "人");
+                    writer.newLine();
+                }
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }finally{
+            if (writer != null){
+                try{
+                    writer.close();
+                }catch (IOException e1){
+                    e1.printStackTrace();
+                }
+            }
         }
     }
 

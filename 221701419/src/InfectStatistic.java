@@ -1,9 +1,8 @@
-import java.util.ArrayList;
 
- /**
+/**
  * InfectStatistic
  * @author HHQ
- * @version 1.1
+ * @version 1.2
  */
 class InfectStatistic {
 
@@ -30,6 +29,56 @@ class InfectStatistic {
             this.sp = sp;
             this.cure = cure;
             this.dead = dead;
+        }
+        
+        /** 感染人数增加 */
+        public void increaseIp(int newIpNum) {
+            ip += newIpNum;
+        }
+
+        /** 感染人数减少 */
+        public void decreaseIp(int ipNum) {
+            ip -= ipNum;
+        }
+
+        /** 疑似患者增加 */
+        public void increaseSp(int newSpNum) {
+            sp += newSpNum;
+        }
+        
+        /** 疑似患者减少 */
+        public void decreaseSp(int spNum) {
+            sp -= spNum;
+        }
+
+        /** 治愈增加 */
+        public void increaseCure(int newCureNum) {
+            cure += newCureNum;
+        }
+
+        /** 死亡增加 */
+        public void increaseDead(int newDeadNum) {
+            dead += newDeadNum;
+        }
+        
+        public String getProvinceName() {
+            return provinceName;
+        }
+
+        public int getIp() {
+            return ip;
+        }
+
+        public int getSp() {
+            return sp;
+        }
+
+        public int getCure() {
+            return cure;
+        }
+
+        public int getDead() {
+            return dead;
         }
 
     }
@@ -120,6 +169,49 @@ class InfectStatistic {
                 }
             }
             return res;
+        }
+        
+        /**
+         * description：根据省份和操作类型ID执行相应的操作
+         * @param province1 省份1
+         * @param province2 省份2，有可能为空
+         * @param operateType 操作类型ID（1~8）
+         * @param number 执行相应修改的 人数
+         */
+        public static void executeOperate(Province province1, Province province2, int operateType, int number) {
+            switch (operateType) {
+            case 1:
+                province1.increaseDead(number);
+                province1.decreaseIp(number);
+                break;
+            case 2:
+                province1.increaseCure(number);
+                province1.decreaseIp(number);
+                break;
+            case 3:
+                province1.increaseIp(number);
+                break;
+            case 4:
+                province1.increaseSp(number);
+                break;
+            case 5:
+                province1.decreaseSp(number);
+                break;
+            case 6:
+                province1.decreaseSp(number);
+                province1.increaseIp(number);
+                break;
+            case 7:
+                province1.decreaseIp(number);
+                province2.increaseIp(number);
+                break;
+            case 8:
+                province1.decreaseSp(number);
+                province2.increaseSp(number);
+                break;
+            default:
+                break;
+            }
         }
     
     }

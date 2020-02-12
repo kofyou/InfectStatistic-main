@@ -1,4 +1,5 @@
 import java.io.*;
+import java.text.Collator;
 import java.util.*;
 
 public class InfectStatistic {
@@ -7,6 +8,12 @@ public class InfectStatistic {
 
 	public InfectStatistic() {
 		infectMap = new HashMap<>();
+		HashMap<String, Integer> map = new HashMap<>();
+		map.put("感染患者", 0);
+		map.put("疑似患者", 0);
+		map.put("治愈", 0);
+		map.put("死亡", 0);
+		infectMap.put("全国", map);
 	}
 
 	public void readFile(File file) throws IOException {
@@ -25,7 +32,7 @@ public class InfectStatistic {
 				map.put("死亡", 0);
 				infectMap.put(province, map);
 			}
-			int count;
+			int count, country;
 			//解析当前行
 			if (textLine.contains("新增")) {
 				//新增人数
@@ -58,8 +65,25 @@ public class InfectStatistic {
 				count = infectMap.get(province).get(params[1]) + Integer.valueOf(params[2].replaceAll("人", ""));
 				infectMap.get(province).replace(params[1], count);
 			}
-
 		}
+		//修正全国人数变化
+		int ip = 0, sp = 0, cure = 0, dead = 0;
+		for (Map.Entry<String, Map<String, Integer>> e : infectMap.entrySet()) {
+			if (!e.getKey().equals("全国")) {
+				for (Map.Entry<String, Integer> entry: e.getValue().entrySet()) {
+					switch (entry.getKey()) {
+						case "感染患者": ip += entry.getValue(); break;
+						case "疑似患者": sp += entry.getValue(); break;
+						case "治愈": cure += entry.getValue(); break;
+						case "死亡": dead += entry.getValue(); break;
+					}
+				}
+			}
+		}
+		infectMap.get("全国").replace("感染患者", ip);
+		infectMap.get("全国").replace("疑似患者", sp);
+		infectMap.get("全国").replace("治愈", cure);
+		infectMap.get("全国").replace("死亡", dead);
 
 		bufferedReader.close();
 	}
@@ -81,6 +105,70 @@ public class InfectStatistic {
 			}
 		}
 
+	}
+
+	public void output(String path, List<String> typeList, List<String> provinceList) throws IOException {
+		File file = new File(path);
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+		List<String> result = parseType(typeList, provinceList);
+		for (int i = 0; i < result.size(); i++) {
+			if (result.get(i).contains("全国")) {
+				System.out.println(result.get(i));
+				result.remove(i);
+				break;
+			}
+		}
+		//排序
+		Collator cmp = Collator.getInstance(Locale.CHINA);
+		result.sort(cmp);
+		for (String s: result
+		     ) {
+			System.out.println(s);
+		}
+	}
+
+
+	public List<String> parseType(List<String> typeList, List<String> provinceList) {
+		List<String> typeName = new LinkedList<>();
+		List<String> result = new LinkedList<>();
+		if (typeList != null) {
+			for (String s:typeList) {
+				switch (s) {
+					case "ip": typeName.add("感染患者"); break;
+					case "sp": typeName.add("疑似患者"); break;
+					case "cure": typeName.add("治愈"); break;
+					case "dead": typeName.add("死亡"); break;
+				}
+			}
+		} else {
+			typeName.add("感染患者");
+			typeName.add("疑似患者");
+			typeName.add("治愈");
+			typeName.add("死亡");
+		}
+		if (provinceList != null) {
+			provinceList.add("全国");
+			for (String province : provinceList) {
+				StringBuilder sb = new StringBuilder();
+				sb.append(province+ " ");
+				for (String type : typeName) {
+					sb.append(type+infectMap.get(province).get(type)+"人 ");
+				}
+				result.add(sb.toString());
+			}
+		} else {
+			for (Map.Entry<String, Map<String, Integer>> e : infectMap.entrySet()) {
+				StringBuilder sb = new StringBuilder();
+				sb.append(e.getKey()+" ");
+				for (String type : typeName) {
+					sb.append(type+e.getValue().get(type)+"人 ");
+				}
+				result.add(sb.toString());
+			}
+		}
+		return result;
 	}
 
 	public void parseArgs(String[] args) {
@@ -116,11 +204,20 @@ public class InfectStatistic {
 					optNumber++;
 				}
 			}
+			System.out.println(input + " " + output + " " + date);
+			for (String type: typeList
+			     ) {
+				System.out.println(type);
+			}
+
+			for (String p:provinceList)
+				System.out.println(p);
 		}
 	}
 
 	public static void main(String[] args) {
-
+//		InfectStatistic infectStatistic = new InfectStatistic();
+//		infectStatistic.parseArgs(args);
 	}
 
 	public HashMap<String, Map<String, Integer>> getInfectMap() {

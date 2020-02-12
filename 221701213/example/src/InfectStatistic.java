@@ -41,10 +41,24 @@ class province {
 
     }
 
+    public int get_infected ()
+    {
+
+        return this.infected;
+
+    }
+
     public void set_suspected (int sum)
     {
 
         this.suspected = sum;
+
+    }
+
+    public int get_suspected ()
+    {
+
+        return this.suspected;
 
     }
 
@@ -55,6 +69,13 @@ class province {
 
     }
 
+    public int get_cure ()
+    {
+
+        return this.cure;
+
+    }
+
     public void set_death (int sum)
     {
 
@@ -62,10 +83,24 @@ class province {
 
     }
 
+    public int get_death ()
+    {
+
+        return this.death;
+
+    }
+
     public void set_pro_name (String str)
     {
 
         this.pro_name = str;
+
+    }
+
+    public String get_pro_name ()
+    {
+
+        return this.pro_name;
 
     }
 
@@ -124,7 +159,120 @@ public class InfectStatistic {
 
     }
 
-    public void process_log(String log_name) throws IOException // 读取日志内容
+    public int get_num(String str)  //提取字符串中的数字
+    {
+
+        str=str.trim();
+
+        String str2 = new String();
+
+        for(int i = 0 ;i < str.length() ;i++)
+        {
+
+            if(str.charAt(i) > '0' && str.charAt(i) <= '9')
+            {
+
+                str2 += str.charAt(i);
+
+            }
+        
+        }
+        
+        return Integer.parseInt(str2);
+
+    }
+
+    public void process_string(String strLine , province[] pro)  //处理字符串
+    {
+
+        String [] spString = strLine.split("\\s+");
+
+        if(spString[0].equals("//"))    //如果以“//”开头表示是注释，则忽略
+        {
+
+            return; 
+
+        }
+
+        for(int i = 0 ;i < pro.length ;i++)
+        {
+
+            if(spString[0].equals(pro[i].get_pro_name()))
+            {
+
+                if(spString[1].equals("新增"))
+                {
+
+                    if(spString[2].equals("感染患者"))
+                    {
+
+                        pro[i].set_infected(this.get_num(spString[3]));
+
+                    }
+
+                    else if(spString[2].equals("疑似患者"))
+                    {
+
+                        pro[i].set_suspected(this.get_num(spString[3]));
+
+                    }
+
+                }
+
+                if(spString[1].equals("死亡"))
+                {
+
+                    pro[i].set_death(this.get_num(spString[2]));
+
+                }
+
+                if(spString[1].equals("治愈"))
+                {
+
+                    pro[i].set_cure(this.get_num(spString[2]));
+
+                }
+
+                if(spString[1].equals("疑似患者"))
+                {
+
+                    if(spString[2].equals("感染确诊"))
+                    {
+
+                        int add = this.get_num(spString[3]);
+
+                        int new_infected = pro[i].get_infected() + add;
+
+                        int new_suspected = pro[i].get_suspected() - add;
+
+                        pro[i].set_infected(new_infected);
+
+                        pro[i].set_suspected(new_suspected);
+
+                    }
+
+                }
+
+                if(spString[1].equals("排除"))
+                {
+
+                    if(spString[2].equals("疑似患者"))
+                    {
+
+                        int add = this.get_num(spString[3]);
+
+                        int new_suspected = pro[i].get_suspected() - add;
+
+                        pro[i].set_suspected(new_suspected);
+
+                    }
+                }
+            }
+
+        }
+    }
+
+    public void process_log(String log_name , province[] pro) throws IOException // 读取并处理日志内容
     {
 
         String result = new String ("D:\\221701213\\example\\log\\"+log_name);
@@ -138,12 +286,34 @@ public class InfectStatistic {
         while((strLine = br.readLine()) != null)
         {
 
-            //System.out.println(strLine);
+            this.process_string(strLine , pro);
 
         }
 
         br.close();
 
+    }
+
+    public void print(province[] pro)   // 打印各省疫情情况（用于调试）
+    {
+
+        for(int i = 0 ;i < pro.length ;i++)
+        {
+
+            if(pro[i].get_cure() != 0 ||pro[i].get_death() != 0 ||pro[i].get_infected() != 0 ||pro[i].get_suspected() != 0)
+            {
+
+                System.out.print(pro[i].get_pro_name());
+                System.out.print(" 感染患者");
+                System.out.print(pro[i].get_infected());
+                System.out.print(" 疑似患者");
+                System.out.print(pro[i].get_suspected());
+                System.out.print(" 治愈");
+                System.out.print(pro[i].get_cure());
+                System.out.print(" 死亡");
+                System.out.println(pro[i].get_death());
+            }
+        }
     }
 
     public static void main(String[] args) throws IOException {
@@ -167,9 +337,11 @@ public class InfectStatistic {
         if(find == true)
         {
 
-            in.process_log(log_name);
+            in.process_log(log_name , pro);
 
         }
+
+        in.print(pro);
         
     }
 }

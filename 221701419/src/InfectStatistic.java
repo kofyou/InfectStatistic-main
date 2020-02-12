@@ -6,17 +6,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  * InfectStatistic
  * @author HHQ
- * @version 1.6
+ * @version 1.7
  */
 class InfectStatistic {
 
@@ -554,10 +554,45 @@ class InfectStatistic {
             }
         }
 
+        /**
+         * description：HashMap根据value获取key
+         * @param map 要反转的HashMap
+         * @param value map的值
+         * @return 返回获得的key值，如果没找到返回-1
+         */
+        public static int getKey(HashMap<Integer, String> map, String value) {
+            int res = -1;
+            for(int getKey:map.keySet()) {
+                if(map.get(getKey).equals(value)) {
+                    res = getKey;
+                }
+            }
+            return res;
+        }
+
     
     }
 
     public static void main(String[] args) {
+        HashMap<Integer, String> paramenterHashMap = new HashMap<Integer, String>(5);
+        paramenterHashMap.put(1, "-log");
+        paramenterHashMap.put(2, "-out");
+        paramenterHashMap.put(3, "-date");
+        paramenterHashMap.put(4, "-type");
+        paramenterHashMap.put(5, "-province");
+
+        String[] paramenterStrings = new String[args.length - 1];   //存储传入的参数名、参数值
+        for(int i=1; i<args.length; i++) {
+            paramenterStrings[i-1] = args[i];
+        }
         
+        int[] indexOfParamenterStrings = {-1, -1, -1, -1, -1, -1};
+        //找到参数名，并记录位置
+        for(int i=0; i<paramenterStrings.length; i++) {
+            int key = ToolMethods.getKey(paramenterHashMap, paramenterStrings[i]);
+            if( key != -1) {   //是参数名
+                indexOfParamenterStrings[key] = i;   //key对应的参数名在patamenterStrings的i下标位置,值为-1则代表无此参数名
+            }
+        }
     }
 }

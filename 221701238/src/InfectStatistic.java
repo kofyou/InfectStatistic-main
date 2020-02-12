@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +19,8 @@ public class InfectStatistic {
             "山东", "山西", "陕西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
     //全局变量statisticsInformationArrayList，存储所有省份的疾病信息
     public static ArrayList<StatisticsInformation> statisticsInformationArrayList = initStatisticsInformation();
+    //存储指定文件夹下所有日志文件的文件名
+    public static ArrayList<String> fileList = new ArrayList<String>();
 
     /**
      * 初始化各省份信息数组的方法
@@ -300,9 +303,9 @@ public class InfectStatistic {
 
     /**
      * 匹配并提取相应的字符串的方法
-     * @param p      Pattern类
-     * @param str    原字符串
-     * @return       新字符串
+     * @param p                 Pattern类
+     * @param str               原字符串
+     * @return sb.toString()    新字符串
      */
     public static String matchResult(Pattern p, String str) {
         StringBuilder sb = new StringBuilder();
@@ -312,6 +315,30 @@ public class InfectStatistic {
                 sb.append(m.group());
             }
         return sb.toString();
+    }
+
+    /**
+     * 读取指定文件夹下的所有文件
+     * @param filepath    //文件路径
+     */
+    public void readDirectory(String filepath) {
+        //读取指定文件夹下的所有文件
+        File file = new File(filepath);
+        if (file == null){
+            System.out.println("找不到该文件夹");
+            System.exit(0);
+        }
+        File[] tempLists = file.listFiles();
+        for (int i = 0; i < tempLists.length; i++) {
+            if (tempLists[i].isFile() && tempLists[i].getName().endsWith(".log.txt")) {
+                fileList.add(tempLists[i].getName());
+            }
+        }
+        Collections.sort(fileList);
+        if (fileList.size() == 0){
+            System.out.println("该文件夹下无相关文件");
+            System.exit(0);
+        }
     }
 
     /**

@@ -17,9 +17,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * InfectStatistic
+ * InfectStatistic TODO
+ *
  * @author HHQ
- * @version 1.9
+ * @version 2.0
  */
 class InfectStatistic {
 
@@ -47,7 +48,7 @@ class InfectStatistic {
             this.cure = cure;
             this.dead = dead;
         }
-        
+
         /** 感染人数增加 */
         public void increaseIp(int newIpNum) {
             ip += newIpNum;
@@ -107,7 +108,7 @@ class InfectStatistic {
                     + "人" + " " + "死亡" + dead + "人";
             return resString;
         }
-
+        
         /**
          * description：按指定参数值要求给出结果
          * @param paramenterOf 一个保存着-type的参数值的数组
@@ -136,7 +137,6 @@ class InfectStatistic {
             
             return resString;
         }
-
     }
 
     /**
@@ -144,17 +144,17 @@ class InfectStatistic {
      * @author HHQ
      */
     static class ToolMethods {
-        
+
         /**
          * description：将一个字符串以空格" "分割
          * @param string 传入的字符串
-         * @return 返回值为分割后的数组
+         * @return 返回值为分割后的数组长度
          */
         public static int numAfterSplit(String string) {
             String[] afterSplitStrings = string.split(" ");
             return afterSplitStrings.length;
         }
-        
+
         /**
          * description：获取一个字符串前的数字
          * @param string 传入的字符串
@@ -172,7 +172,7 @@ class InfectStatistic {
 
             return Integer.parseInt(string);
         }
-        
+
         /**
          * description：得到要修改数据的省份名称modifyProvinceName
          * @param strings 分割后的字符串数组
@@ -190,7 +190,7 @@ class InfectStatistic {
             }
             return resStrings;
         }
-        
+
         /**
          * description：判断操作类型
          * @param strings 分割后的字符串数组
@@ -225,49 +225,6 @@ class InfectStatistic {
                 }
             }
             return res;
-        }
-        
-        /**
-         * description：根据省份和操作类型ID执行相应的操作
-         * @param province1 省份1
-         * @param province2 省份2，有可能为空
-         * @param operateType 操作类型ID（1~8）
-         * @param number 执行相应修改的 人数
-         */
-        public static void executeOperate(Province province1, Province province2, int operateType, int number) {
-            switch (operateType) {
-            case 1:
-                province1.increaseDead(number);
-                province1.decreaseIp(number);
-                break;
-            case 2:
-                province1.increaseCure(number);
-                province1.decreaseIp(number);
-                break;
-            case 3:
-                province1.increaseIp(number);
-                break;
-            case 4:
-                province1.increaseSp(number);
-                break;
-            case 5:
-                province1.decreaseSp(number);
-                break;
-            case 6:
-                province1.decreaseSp(number);
-                province1.increaseIp(number);
-                break;
-            case 7:
-                province1.decreaseIp(number);
-                province2.increaseIp(number);
-                break;
-            case 8:
-                province1.decreaseSp(number);
-                province2.increaseSp(number);
-                break;
-            default:
-                break;
-            }
         }
 
         /**
@@ -314,7 +271,7 @@ class InfectStatistic {
             String todayString = sdfDateFormat.format(todayDate);
             return todayString;
         }
-
+        
         /**
          * description：获取文件夹下指定日期前的所有文件文件名
          * @param path 文件夹路径
@@ -345,9 +302,124 @@ class InfectStatistic {
                         // TODO: handle exception
                         e.printStackTrace();
                     }
-
-//                    fileName.addAll(Arrays.asList(nameStrings));
                 }
+            }
+        }
+
+        /**
+         * description：根据省份和操作类型ID执行相应的操作
+         * @param province1 省份1
+         * @param province2 省份2，有可能为空
+         * @param operateType 操作类型ID（1~8）
+         * @param number 执行相应修改的 人数
+         */
+        public static void executeOperate(Province province1, Province province2, int operateType, int number) {
+            switch (operateType) {
+            case 1:
+                province1.increaseDead(number);
+                province1.decreaseIp(number);
+                break;
+            case 2:
+                province1.increaseCure(number);
+                province1.decreaseIp(number);
+                break;
+            case 3:
+                province1.increaseIp(number);
+                break;
+            case 4:
+                province1.increaseSp(number);
+                break;
+            case 5:
+                province1.decreaseSp(number);
+                break;
+            case 6:
+                province1.decreaseSp(number);
+                province1.increaseIp(number);
+                break;
+            case 7:
+                province1.decreaseIp(number);
+                province2.increaseIp(number);
+                break;
+            case 8:
+                province1.decreaseSp(number);
+                province2.increaseSp(number);
+                break;
+            default:
+                break;
+            }
+        }
+
+        /**
+         * description：写入文件
+         * @param hashtable 保存着所有参与统计的省份
+         * @param fileOutputStream 输出文件流
+         * @param paramenterOfType -type的参数值
+         * @param paramenterOfProvice -province的参数值
+         * @param commandLineStrings 命令行数组 argv
+         */
+        public static void writeFile(Hashtable<String, Province> hashtable, FileOutputStream fileOutputStream, 
+            String[] paramentersOfType, String[] paramentersOfProvince,String[] commandLineStrings) {
+            String endLineString = "// 该文档并非真实数据，仅供测试使用";
+            String commandLineString = "// 命令：";
+            for(int i=0; i<commandLineStrings.length; i++) {
+                commandLineString = commandLineString + commandLineStrings[i] + " ";
+            }
+            InfectStatistic infectStatistic = new InfectStatistic();
+            Province wholeNation = hashtable.get("全国");
+            try {
+               
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,"UTF8");
+                
+                if(paramentersOfProvince[0].equals("null")) {   //没有指定省份
+                    Set set = hashtable.keySet();
+                    Iterator iterator = set.iterator();
+                    List<Map.Entry<String,Province>> list = sortByHeadAlphabet(hashtable);       //排序
+                    for (Map.Entry entry : list){
+                        Province province = (Province) entry.getValue();
+                        
+                        if(paramentersOfType[0].equals("null")) {   //没有指定输出类型
+                            outputStreamWriter.write(province.getAllResult() + "\r\n");
+                            outputStreamWriter.flush();
+                        }else {
+                            outputStreamWriter.write(province.getResultByRequest(paramentersOfType) + "\r\n");
+                            outputStreamWriter.flush();
+                        }
+                    }
+                    outputStreamWriter.write(endLineString + "\r\n" + commandLineString);
+                    outputStreamWriter.flush();
+                }else { //指定省份
+                    Hashtable<String, Province> requestProvinceHashtable = new Hashtable<String, InfectStatistic.Province>();
+//                    for(int i=0; i<paramentersOfProvince.length; i++) {   // 别用.length，指定的省的个数不一定等于数组的大小
+                    for(int i=0; paramentersOfProvince[i] != null; i++) {
+                        if(!hashtable.containsKey(paramentersOfProvince[i])) {  //哈希表中不存在
+                            Province province = infectStatistic.new Province(paramentersOfProvince[i], 0, 0, 0, 0);
+                            requestProvinceHashtable.put(paramentersOfProvince[i], province);
+                        }else { //哈希表中存在
+                            Province province = hashtable.get(paramentersOfProvince[i]);
+                            requestProvinceHashtable.put(paramentersOfProvince[i], province);
+                        }
+                    }
+                   
+                    List<Map.Entry<String,Province>> list = sortByHeadAlphabet(requestProvinceHashtable);       //排序
+
+                    for (Map.Entry entry : list){
+                        Province province = (Province) entry.getValue();
+                        
+                        if(paramentersOfType[0].equals("null")) {   //没有指定输出类型
+                            outputStreamWriter.write(province.getAllResult() + "\r\n");
+                            outputStreamWriter.flush();
+                        }else {
+                            outputStreamWriter.write(province.getResultByRequest(paramentersOfType) + "\r\n");
+                            outputStreamWriter.flush();
+                        }
+                    }
+                    outputStreamWriter.write(endLineString + "\r\n" + commandLineString);
+                    outputStreamWriter.flush();
+                }
+                
+            } catch (Exception e) {
+                // TODO: handle exception
+                e.printStackTrace();
             }
         }
 
@@ -361,8 +433,8 @@ class InfectStatistic {
             String[] afterSplitStrings = lineString.split(" ");
             int numAfterSplit = afterSplitStrings.length; // 切割后数量
             int number = ToolMethods.getNumber(afterSplitStrings[numAfterSplit - 1]); // 一行信息中涉及的人数
-            String[] provinceNameStrings = ToolMethods.getNeedModifyProvinceNames(afterSplitStrings);
-            int operateType = ToolMethods.getOperateType(afterSplitStrings);
+            String[] provinceNameStrings = ToolMethods.getNeedModifyProvinceNames(afterSplitStrings);   //需要修改数据的省份名称
+            int operateType = ToolMethods.getOperateType(afterSplitStrings);    // 获得操作类型
 
             if (provinceNameStrings[1].equals("")) { // 只有一个省
                 if (!hashtable.containsKey(provinceNameStrings[0])) { // 哈希表中没有该省
@@ -420,6 +492,22 @@ class InfectStatistic {
             }
             hashtable.put("全国", wholeNation);
         }
+        
+        /**
+         * description：HashMap根据value获取key
+         * @param map 要反转的HashMap
+         * @param value map的值
+         * @return 返回获得的key值，如果没找到返回-1
+         */
+        public static int getKey(HashMap<Integer, String> map, String value) {
+            int res = -1;
+            for(int getKey:map.keySet()) {
+                if(map.get(getKey).equals(value)) {
+                    res = getKey;
+                }
+            }
+            return res;
+        }
 
         /**
          * description：按城市首字母排序，“全国”置顶
@@ -474,105 +562,7 @@ class InfectStatistic {
             
             return list;
         }
-
-        /* description：写入文件
-         * @param hashtable 保存着所有参与统计的省份
-         * @param fileOutputStream 输出文件流
-         * @param paramenterOfType -type的参数值
-         * @param paramenterOfProvice -province的参数值
-         * @param commandLineStrings 命令行数组 argv
-         */
-        public static void writeFile(Hashtable<String, Province> hashtable, FileOutputStream fileOutputStream, 
-            String[] paramentersOfType, String[] paramentersOfProvince,String[] commandLineStrings) {
-            /*System.out.println("指定类型：");
-            for(int i=0; paramentersOfType[i]!=null; i++) {
-                System.out.println(paramentersOfType[i]);
-            }
-            System.out.println("指定省份：");
-            for(int i=0; paramentersOfProvince[i]!=null; i++) {
-                System.out.println(paramentersOfProvince[i]);
-            }*/
-            String endLineString = "// 该文档并非真实数据，仅供测试使用";
-            String commandLineString = "// 命令：";
-            for(int i=0; i<commandLineStrings.length; i++) {
-                commandLineString = commandLineString + commandLineStrings[i] + " ";
-            }
-            InfectStatistic infectStatistic = new InfectStatistic();
-            Province wholeNation = hashtable.get("全国");
-            try {
-                //fileWriter.write(wholeNation.getResult() + "\r\n");
-               
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,"UTF8");
-                
-                if(paramentersOfProvince[0].equals("null")) {   //没有指定省份
-                    Set set = hashtable.keySet();
-                    Iterator iterator = set.iterator();
-                    List<Map.Entry<String,Province>> list = sortByHeadAlphabet(hashtable);       //排序
-                    for (Map.Entry entry : list){
-                        Province province = (Province) entry.getValue();
-                        
-                        if(paramentersOfType[0].equals("null")) {   //没有指定输出类型
-                            outputStreamWriter.write(province.getAllResult() + "\r\n");
-                            outputStreamWriter.flush();
-                        }else {
-                            outputStreamWriter.write(province.getResultByRequest(paramentersOfType) + "\r\n");
-                            outputStreamWriter.flush();
-                        }
-                    }
-                    outputStreamWriter.write(endLineString + "\r\n" + commandLineString);
-                    outputStreamWriter.flush();
-                }else { //指定省份
-                    Hashtable<String, Province> requestProvinceHashtable = new Hashtable<String, InfectStatistic.Province>();
-//                    for(int i=0; i<paramentersOfProvince.length; i++) {
-                    for(int i=0; paramentersOfProvince[i] != null; i++) {
-                        if(!hashtable.containsKey(paramentersOfProvince[i])) {  //哈希表中不存在
-                            Province province = infectStatistic.new Province(paramentersOfProvince[i], 0, 0, 0, 0);
-                            requestProvinceHashtable.put(paramentersOfProvince[i], province);
-                        }else { //哈希表中存在
-                            Province province = hashtable.get(paramentersOfProvince[i]);
-                            requestProvinceHashtable.put(paramentersOfProvince[i], province);
-                        }
-                    }
-                   
-                    List<Map.Entry<String,Province>> list = sortByHeadAlphabet(requestProvinceHashtable);       //排序
-
-                    for (Map.Entry entry : list){
-                        Province province = (Province) entry.getValue();
-                        
-                        if(paramentersOfType[0].equals("null")) {   //没有指定输出类型
-                            outputStreamWriter.write(province.getAllResult() + "\r\n");
-                            outputStreamWriter.flush();
-                        }else {
-                            outputStreamWriter.write(province.getResultByRequest(paramentersOfType) + "\r\n");
-                            outputStreamWriter.flush();
-                        }
-                    }
-                    outputStreamWriter.write(endLineString + "\r\n" + commandLineString);
-                    outputStreamWriter.flush();
-                }
-                
-            } catch (Exception e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        }
-
-        /**
-         * description：HashMap根据value获取key
-         * @param map 要反转的HashMap
-         * @param value map的值
-         * @return 返回获得的key值，如果没找到返回-1
-         */
-        public static int getKey(HashMap<Integer, String> map, String value) {
-            int res = -1;
-            for(int getKey:map.keySet()) {
-                if(map.get(getKey).equals(value)) {
-                    res = getKey;
-                }
-            }
-            return res;
-        }
-
+        
         /**
          * description：初始化参数名哈希表
          * @return 返回一个包含所有参数名的哈希表
@@ -587,13 +577,14 @@ class InfectStatistic {
             
             return paramenterHashMap;
         }
-
+    
     
     }
 
     public static void main(String[] args) {
+        
         HashMap<Integer, String> paramenterHashMap = ToolMethods.initParamentHashMap(); //一个包含所有参数名的哈希表
-
+        
         String[] paramenterStrings = new String[args.length - 1];   //存储传入的参数名、参数值
         for(int i=1; i<args.length; i++) {
             paramenterStrings[i-1] = args[i];
@@ -607,20 +598,20 @@ class InfectStatistic {
                 indexOfParamenterStrings[key] = i;   //key对应的参数名在patamenterStrings的i下标位置,值为-1则代表无此参数名
             }
         }
-
-        String directoryString = "./log";
+        
+        String directoryString = "./log";   // log 日志文件目录
         String outputFileNameString = "./result/testOutput.txt";    //输出路径/文件名
         String toDateString = ToolMethods.getToday(); //统计到哪一天
         String[] paramentersOfType = new String[10];;  //type的参数值
         String[] paramentersOfProvince = new String[25];  //province的参数值
         paramentersOfType[0] = "null";
         paramentersOfProvince[0] = "null";
-
+        
         //接着处理每个参数名对应的参数值
         for(int i=1; i<=5; i++) {
             if(indexOfParamenterStrings[i] != -1) { //传入了该参数名
                 if(i == 1) {    // -log
-                    directoryString = "./" + paramenterStrings[indexOfParamenterStrings[i] + 1];    //配置log路径
+                    directoryString = paramenterStrings[indexOfParamenterStrings[i] + 1];    //配置log路径
                 }else if(i == 2) {  //-out
                     outputFileNameString = paramenterStrings[indexOfParamenterStrings[i] + 1];      //配置输出文件路径
                 }else if(i == 3) {  //-date
@@ -646,7 +637,7 @@ class InfectStatistic {
                 }
             }
         }
-
+        
         InfectStatistic infectStatistic = new InfectStatistic();
         Hashtable<String, Province> hashtable = new Hashtable<String, Province>(40);    //存储省份的哈希表
         ArrayList<String> listFileNameArrayList = new ArrayList<String>();      //用来保存一个文件夹下的文件夹名的数组
@@ -687,5 +678,7 @@ class InfectStatistic {
             // TODO: handle exception
             e.printStackTrace();
         }
+
+
     }
 }

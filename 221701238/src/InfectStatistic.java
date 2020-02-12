@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -16,7 +17,7 @@ public class InfectStatistic {
     //全局变量statisticsInformationArrayList，存储所有省份的疾病信息
     public static ArrayList<StatisticsInformation> statisticsInformationArrayList = initStatisticsInformation();
     /**
-     * 初始化各省份信息数组
+     * 初始化各省份信息数组的方法
      * @return ArrayList<StatisticsInformation>    返回一个ArrayList<StatisticsInformation>数组
      */
     public static ArrayList<StatisticsInformation> initStatisticsInformation() {
@@ -26,7 +27,41 @@ public class InfectStatistic {
         }
         return statisticsInformationArrayList;
     }
-
+    /**
+     * 读取一个日志文件的方法
+     * @param filepath
+     */
+    public void readFile(String filepath) {
+        File file = new File(filepath);
+        BufferedReader reader = null;
+        if (file.exists()) {
+            try {
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+                String tempString = null;
+                while ((tempString = reader.readLine()) != null) {
+                    String opString = tempString.trim();
+                    if (opString.startsWith("//")) {
+                        //如果内容带有“//”注释开头，则不读取
+                    }else {
+                        //进行相关操作
+                    }
+                }
+            }catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    }catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        }else {
+            System.out.println("错误，文件不存在");
+            System.exit(0);
+        }
+    }
     /**
      * 主程序执行的函数方法
      * @param args     读取命令行参数的数组

@@ -14,9 +14,80 @@ import java.util.Date;
  * @version xxx
  * @since xxx
  */
-class InfectStatistic {
+class province {
 
-    public String get_name()// 获取特定时间的日志名
+    protected int infected;   // 记录感染人数
+    protected int suspected;  // 记录疑似人数
+    protected int cure;   // 记录治愈人数
+    protected int death;  // 记录死亡人数
+    protected String pro_name;    // 记录省名字
+    
+    public province ()
+    {
+        
+        this.infected = 0;
+        
+        this.suspected = 0;
+
+        this.cure = 0;
+
+        this.death = 0;
+    }
+
+    public void set_infected (int sum)
+    {
+
+        this.infected = sum;
+
+    }
+
+    public void set_suspected (int sum)
+    {
+
+        this.suspected = sum;
+
+    }
+
+    public void set_cure (int sum)
+    {
+
+        this.cure = sum;
+
+    }
+
+    public void set_death (int sum)
+    {
+
+        this.death = sum;
+
+    }
+
+    public void set_pro_name (String str)
+    {
+
+        this.pro_name = str;
+
+    }
+
+}
+
+public class InfectStatistic {
+
+    public void init_province(province[] pro , String[] str) //初始化各个省情况
+    {
+
+        for(int i = 0 ;i < 5 ;i++)
+        {
+
+            pro[i] = new province();
+
+            pro[i].set_pro_name(str[i]);
+
+        }
+
+    }
+
+    public String get_name()    // 获取特定时间的日志名
     {
 
         Date dd = new Date();
@@ -31,7 +102,7 @@ class InfectStatistic {
 
     }
 
-    public boolean find_log_name(String log_name)// 寻找名称相应的日志
+    public boolean find_log_name(String log_name)   // 寻找名称相应的日志
     {
 
         File path = new File("D:\\221701213\\example\\log");
@@ -40,7 +111,8 @@ class InfectStatistic {
 
         boolean find = false;
 
-        for (File file : list) {
+        for (File file : list)
+        {
 
             if (log_name.equals(file.getName())) {
 
@@ -52,12 +124,10 @@ class InfectStatistic {
 
     }
 
-    public void process_log(String log_name) throws IOException
+    public void process_log(String log_name) throws IOException // 读取日志内容
     {
 
         String result = new String ("D:\\221701213\\example\\log\\"+log_name);
-
-        System.out.println(result);
 
         FileInputStream fstream = new FileInputStream(new File(result));
 
@@ -68,7 +138,7 @@ class InfectStatistic {
         while((strLine = br.readLine()) != null)
         {
 
-            System.out.println(strLine);
+            //System.out.println(strLine);
 
         }
 
@@ -76,11 +146,19 @@ class InfectStatistic {
 
     }
 
-
-
     public static void main(String[] args) throws IOException {
 
         InfectStatistic in = new InfectStatistic();
+
+        String[] province_name = new String[] {"安徽","福建","甘肃","广东","广西",
+        "贵州","海南","河北","河南","黑龙江","湖北","湖南","江西","吉林","江苏","辽宁","内蒙古",
+        "宁夏","青海","山西","山东","陕西","四川","西藏","新疆","云南","浙江"};
+
+        province[] pro;
+
+        pro = new province[province_name.length];
+
+        in.init_province(pro , province_name);
 
         String log_name = in.get_name()+".txt";
 

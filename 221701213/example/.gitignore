@@ -6,6 +6,8 @@
 .idea
 *.iml
 out
+log
+result
 gen
 .idea/
 InfectStatistic-example.iml

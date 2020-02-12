@@ -1,15 +1,19 @@
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * InfectStatistic
  * @author HHQ
- * @version 1.4
+ * @version 1.5
  */
 class InfectStatistic {
 
@@ -88,6 +92,16 @@ class InfectStatistic {
             return dead;
         }
 
+        /**
+         * description：打印全部统计的数据结果
+         * @return resString 返回值为字符串
+         */
+        public String getAllResult() {
+            String resString = provinceName + " " + "感染患者" + ip + "人" + " " + "疑似患者" + sp + "人" + " " + "治愈" + cure
+                    + "人" + " " + "死亡" + dead + "人";
+            return resString;
+        }
+
     }
 
     /**
@@ -99,7 +113,7 @@ class InfectStatistic {
         /**
          * description：将一个字符串以空格" "分割
          * @param string 传入的字符串
-         * @return 返回值为分割后的数组数量
+         * @return 返回值为分割后的数组
          */
         public static int numAfterSplit(String string) {
             String[] afterSplitStrings = string.split(" ");
@@ -370,6 +384,60 @@ class InfectStatistic {
                 wholeNation.dead += hashtable.get(keyObject).getDead();
             }
             hashtable.put("全国", wholeNation);
+        }
+
+        /**
+         * description：按城市首字母排序，“全国”置顶
+         * @param hashtable 保存着所有参与统计的省份，是要排序的对象
+         * @return 返回排序后的lis集合
+         */
+        public static List<Map.Entry<String,Province>> sortByHeadAlphabet(Hashtable<String, Province> hashtable) {
+            Hashtable<String, String> alphabetOfProvince = new Hashtable<String, String>(35);
+            alphabetOfProvince.put("全国", "AAAQG");
+            alphabetOfProvince.put("北京", "BJ");
+            alphabetOfProvince.put("天津", "TJ");
+            alphabetOfProvince.put("上海", "SH");
+            alphabetOfProvince.put("重庆", "CQ");
+            alphabetOfProvince.put("河北", "HB");
+            alphabetOfProvince.put("山西", "SX");
+            alphabetOfProvince.put("辽宁", "LN");
+            alphabetOfProvince.put("吉林", "JL");
+            alphabetOfProvince.put("黑龙江", "HLJ");
+            alphabetOfProvince.put("江苏", "JS");
+            alphabetOfProvince.put("浙江", "ZJ");
+            alphabetOfProvince.put("安徽", "AH");
+            alphabetOfProvince.put("福建", "FJ");
+            alphabetOfProvince.put("江西", "JX");
+            alphabetOfProvince.put("山东", "SD");
+            alphabetOfProvince.put("河南", "HN");
+            alphabetOfProvince.put("湖北", "HB");
+            alphabetOfProvince.put("湖南", "HN");
+            alphabetOfProvince.put("广东", "GD");
+            alphabetOfProvince.put("海南", "HN");
+            alphabetOfProvince.put("四川", "SC");
+            alphabetOfProvince.put("贵州", "GZ");
+            alphabetOfProvince.put("云南", "YN");
+            alphabetOfProvince.put("陕西", "SX");
+            alphabetOfProvince.put("甘肃", "GS");
+            alphabetOfProvince.put("青海", "QH");
+            alphabetOfProvince.put("台湾", "TW");
+            alphabetOfProvince.put("内蒙古自治区", "NMG");
+            alphabetOfProvince.put("广西壮族自治区", "GXZZ");
+            alphabetOfProvince.put("西藏自治区", "XZZZQ");
+            alphabetOfProvince.put("宁夏回族自治区", "NX");
+            alphabetOfProvince.put("新疆维吾尔自治区", "XZ");
+            alphabetOfProvince.put("香港", "XG");
+            alphabetOfProvince.put("澳门", "AM");        
+            
+            List<Map.Entry<String,Province>> list = new ArrayList<>(hashtable.entrySet());
+            Collections.sort(list, new Comparator<Map.Entry<String, Province>>() {
+                @Override
+                public int compare(Map.Entry<String, Province> o1, Map.Entry<String, Province> o2) {
+                    return alphabetOfProvince.get(o1.getKey()).compareTo(alphabetOfProvince.get(o2.getKey()));
+                }
+            });
+            
+            return list;
         }
 
     

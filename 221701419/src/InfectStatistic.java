@@ -1,5 +1,8 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,7 +19,7 @@ import java.util.Set;
 /**
  * InfectStatistic
  * @author HHQ
- * @version 1.8
+ * @version 1.9
  */
 class InfectStatistic {
 
@@ -642,6 +645,47 @@ class InfectStatistic {
                     }
                 }
             }
+        }
+
+        InfectStatistic infectStatistic = new InfectStatistic();
+        Hashtable<String, Province> hashtable = new Hashtable<String, Province>(40);    //存储省份的哈希表
+        ArrayList<String> listFileNameArrayList = new ArrayList<String>();      //用来保存一个文件夹下的文件夹名的数组
+        ToolMethods.getBeforeDateFileName(directoryString, toDateString, listFileNameArrayList);    //初始化listFileNameArrayList
+        
+        try {
+            File file = null;
+            File outputFile = new File(outputFileNameString);
+            FileOutputStream fileOutputStream = null;
+            InputStreamReader reader = null;
+            for (int cnt = 0; cnt < listFileNameArrayList.size(); cnt++) {
+                String filePathString = "./log/" + listFileNameArrayList.get(cnt);
+                file = new File(filePathString);
+                
+                if (!outputFile.exists()) {
+                    outputFile.createNewFile();
+                }
+                if (file.isFile() && file.exists()) {
+                    reader = new InputStreamReader(new FileInputStream(file), "UTF8");
+                    BufferedReader bufferedReader = new BufferedReader(reader);
+                    fileOutputStream = new FileOutputStream(outputFileNameString);
+
+                    String lineString = null;
+                    while ((lineString = bufferedReader.readLine()) != null) {
+                        if (!ToolMethods.isAnnotation(lineString)) { // 不是注释行
+                            ToolMethods.calcProvince(lineString, hashtable); // 进行统计
+                        } else { // 是注释行，不执行任何操作
+                            ;
+                        }
+                    }
+                }
+            }
+            
+            ToolMethods.calcWholeNation(hashtable);
+            ToolMethods.writeFile(hashtable, fileOutputStream, paramentersOfType, paramentersOfProvince, args);
+            reader.close();
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
         }
     }
 }

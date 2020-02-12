@@ -1,4 +1,6 @@
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,10 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 /**
  * InfectStatistic
  * @author HHQ
- * @version 1.5
+ * @version 1.6
  */
 class InfectStatistic {
 
@@ -99,6 +102,35 @@ class InfectStatistic {
         public String getAllResult() {
             String resString = provinceName + " " + "感染患者" + ip + "人" + " " + "疑似患者" + sp + "人" + " " + "治愈" + cure
                     + "人" + " " + "死亡" + dead + "人";
+            return resString;
+        }
+
+        /**
+         * description：按指定参数值要求给出结果
+         * @param paramenterOf 一个保存着-type的参数值的数组
+         * @return resString 返回值为字符串
+         */
+        public String getResultByRequest(String[] paramentersOfType) {
+            String resString = provinceName + " ";
+            for(int i=0; paramentersOfType[i] != null; i++) {
+                switch (paramentersOfType[i]) {
+                case "ip":
+                    resString += "感染患者" + ip + "人" + " ";
+                    break;
+                case "sp":
+                    resString += "疑似患者" + sp + "人" + " ";
+                    break;
+                case "cure":
+                    resString += "治愈" + cure + "人" + " ";
+                    break;
+                case "dead":
+                    resString += "死亡" + dead + "人" + " ";
+                    break;
+                default:
+                    break;
+                }
+            }
+            
             return resString;
         }
 
@@ -438,6 +470,88 @@ class InfectStatistic {
             });
             
             return list;
+        }
+
+        /* description：写入文件
+         * @param hashtable 保存着所有参与统计的省份
+         * @param fileOutputStream 输出文件流
+         * @param paramenterOfType -type的参数值
+         * @param paramenterOfProvice -province的参数值
+         * @param commandLineStrings 命令行数组 argv
+         */
+        public static void writeFile(Hashtable<String, Province> hashtable, FileOutputStream fileOutputStream, 
+            String[] paramentersOfType, String[] paramentersOfProvince,String[] commandLineStrings) {
+            /*System.out.println("指定类型：");
+            for(int i=0; paramentersOfType[i]!=null; i++) {
+                System.out.println(paramentersOfType[i]);
+            }
+            System.out.println("指定省份：");
+            for(int i=0; paramentersOfProvince[i]!=null; i++) {
+                System.out.println(paramentersOfProvince[i]);
+            }*/
+            String endLineString = "// 该文档并非真实数据，仅供测试使用";
+            String commandLineString = "// 命令：";
+            for(int i=0; i<commandLineStrings.length; i++) {
+                commandLineString = commandLineString + commandLineStrings[i] + " ";
+            }
+            InfectStatistic infectStatistic = new InfectStatistic();
+            Province wholeNation = hashtable.get("全国");
+            try {
+                //fileWriter.write(wholeNation.getResult() + "\r\n");
+               
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,"UTF8");
+                
+                if(paramentersOfProvince[0].equals("null")) {   //没有指定省份
+                    Set set = hashtable.keySet();
+                    Iterator iterator = set.iterator();
+                    List<Map.Entry<String,Province>> list = sortByHeadAlphabet(hashtable);       //排序
+                    for (Map.Entry entry : list){
+                        Province province = (Province) entry.getValue();
+                        
+                        if(paramentersOfType[0].equals("null")) {   //没有指定输出类型
+                            outputStreamWriter.write(province.getAllResult() + "\r\n");
+                            outputStreamWriter.flush();
+                        }else {
+                            outputStreamWriter.write(province.getResultByRequest(paramentersOfType) + "\r\n");
+                            outputStreamWriter.flush();
+                        }
+                    }
+                    outputStreamWriter.write(endLineString + "\r\n" + commandLineString);
+                    outputStreamWriter.flush();
+                }else { //指定省份
+                    Hashtable<String, Province> requestProvinceHashtable = new Hashtable<String, InfectStatistic.Province>();
+//                    for(int i=0; i<paramentersOfProvince.length; i++) {
+                    for(int i=0; paramentersOfProvince[i] != null; i++) {
+                        if(!hashtable.containsKey(paramentersOfProvince[i])) {  //哈希表中不存在
+                            Province province = infectStatistic.new Province(paramentersOfProvince[i], 0, 0, 0, 0);
+                            requestProvinceHashtable.put(paramentersOfProvince[i], province);
+                        }else { //哈希表中存在
+                            Province province = hashtable.get(paramentersOfProvince[i]);
+                            requestProvinceHashtable.put(paramentersOfProvince[i], province);
+                        }
+                    }
+                   
+                    List<Map.Entry<String,Province>> list = sortByHeadAlphabet(requestProvinceHashtable);       //排序
+
+                    for (Map.Entry entry : list){
+                        Province province = (Province) entry.getValue();
+                        
+                        if(paramentersOfType[0].equals("null")) {   //没有指定输出类型
+                            outputStreamWriter.write(province.getAllResult() + "\r\n");
+                            outputStreamWriter.flush();
+                        }else {
+                            outputStreamWriter.write(province.getResultByRequest(paramentersOfType) + "\r\n");
+                            outputStreamWriter.flush();
+                        }
+                    }
+                    outputStreamWriter.write(endLineString + "\r\n" + commandLineString);
+                    outputStreamWriter.flush();
+                }
+                
+            } catch (Exception e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
         }
 
     

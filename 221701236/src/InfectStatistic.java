@@ -13,6 +13,8 @@ import java.util.List;
  */
 class InfectStatistic 
 {
+	//所有省份名称
+	private String[] provinceName;
 	//接收命令行参数
 	private String[] arg;
 	//是否读取所有日志文件
@@ -33,18 +35,37 @@ class InfectStatistic
 	private boolean isOutput;
 	//输出参数的顺序
 	private String[] output;
+	//是否输出全国和所有省的情况
+	private boolean isOutputAll;
+	//存放-province参数下要输出的省份
+	private List<String> provinces;
+	//
+	private boolean isFinish;
 		
 	//构造函数
 	public InfectStatistic(String[] args)
 	{
+		provinceName = new String[]{"安徽","北京","重庆","福建","甘肃","广东",
+			      "广西壮族","贵州","海南","河北","河南","黑龙江","湖北","湖南",
+                  "江西","吉林","江苏","辽宁","内蒙古","宁夏回族","青海","山西","山东","陕西","上海",
+                  "四川","天津","西藏","新疆维吾尔","云南","浙江"};
 		isRead = true;
 		arg = args;
-		logPath = "G:/log/";
-		name = new ArrayList<>();
+		logPath = "G:\\example\\log";
+		outputPath = "G:\\example\\result\\output.txt";
+		name = new ArrayList<>();		
 		map = new HashMap<String,Province>();
 		country = new Province("全国");
 		isOutput = true;
+		isOutputAll = true;
+		provinces = new ArrayList<>();
 		output = new String[4];		
+		isFinish = false;
+		for(int i=0;i<provinceName.length;i++)
+		{
+			name.add(provinceName[i]);
+			map.put(name.get(i),new Province(name.get(i)));
+		}
 		for(int i=0;i<4;i++)
 		{
 			output[i] = "";
@@ -55,35 +76,47 @@ class InfectStatistic
 	//处理日志文件
 	public void deal() throws IOException
 	{	    
-						
+		String logDate;		
+		String[] sArray;
 	    List<String> files = new ArrayList<String>();
 	    File file = new File(logPath);
 	    File[] tempList = file.listFiles();
+	    
+	    if(!isRead)
+	    {
+		    //判断-date提供的日期是否晚于日志最晚一天的日期
+		    logDate = new String(tempList[tempList.length-1].getName());	                  
+	        sArray = logDate.split("\\.");	                  
+	        logDate = new String(sArray[0]);
+	        if((logDate.compareTo(date)) < 0)
+	        {
+	        	isFinish = true;
+	        	System.out.println("日期超出范围!");
+	        	return;
+	        }
+	    }
 	    
 	    //读取日志文件
 	    for (int i = 0; i < tempList.length; i++) 	                
 	    {     	
 	                  
-	        String logDate = new String(tempList[i].getName());	                  
-	        String[] sArray = logDate.split("\\.");	                  
+	        logDate = new String(tempList[i].getName());	                  
+	        sArray = logDate.split("\\.");	                  
 	        logDate = new String(sArray[0]);
 	                      	                   
+	        
 	        if (isRead || (logDate.compareTo(date)) <= 0) 	                   
-	        {	                 	
+	        {	              
 	        	BufferedReader br = null;	        	
-	        	String line = null;
-	        	FileReader fr = new FileReader(tempList[i]);	        	
-                br = new BufferedReader(fr);
+	        	String line = null;        	
+	        	br = new BufferedReader(new InputStreamReader(new FileInputStream(tempList[i].toString()), "UTF-8"));  
                 
 	        	while((line = br.readLine()) != null)
 	        	{
+	        		//System.out.println(line);
 	        		String[] array = line.split(" ");
 	        		dealOneLine(array);
-	        		//System.out.println(line);
-	        	}
-	        		        	        	
-	        	//files.add(tempList[i].toString());   	        	
-	        	//System.out.println(logDate);	                    
+	        	}	           	        	
 	        }            	                
 	    }
 	    //统计全国的情况
@@ -98,13 +131,7 @@ class InfectStatistic
 		{
 			return;
 		}
-		//未录入该省份则创建该省份的实例
-		if(!name.contains(array[0]))
-		{
-			name.add(array[0]);
-			map.put(array[0],new Province(array[0]));
-		}
-				
+						
 		switch(array[1])
 		{
 		    case "新增":
@@ -189,16 +216,62 @@ class InfectStatistic
 			index++;
 		}
 	}
+	
+	//处理-province参数
+	private void dealProvince(int index) 
+	{
+		while(index<arg.length)
+		{
+			switch(arg[index])
+			{
+			case "-date":
+			    return;
+		    case "-log":
+			    return;
+		    case "-out":
+			    return;
+		    case "-type":
+		    	return;
+		    default:
+		    	provinces.add(arg[index]);
+		    	map.put(arg[index],new Province(arg[index]));
+			}	
+			index++;
+		}				
+	}
 
 	//生成output.txt文件
-	public void output()
+	public void output() throws IOException
 	{
-		country.output(isOutput,output);
-		for(int i=0;i<name.size();i++)
-		{			
-			//System.out.println(i+":"+name.get(i));
-			map.get(name.get(i)).output(isOutput,output);
+		if(isFinish)
+		{
+			return;
 		}
+	    BufferedWriter bw = new BufferedWriter(new FileWriter(outputPath)) ;
+		if(isOutputAll)
+		{
+			country.output(isOutput,output,bw);
+			for(int i=0;i<name.size();i++)
+			{			
+				map.get(name.get(i)).output(isOutput,output,bw);
+			}
+		}
+		else
+		{
+			for(int i=0;i<provinces.size();i++)
+			{			
+				if(provinces.get(i).equals("全国"))
+				{
+					country.output(isOutput,output,bw);
+				}
+				else
+				{
+					map.get(provinces.get(i)).output(isOutput,output,bw);
+				}
+			}
+		}
+		bw.write("// 该文档并非真实数据，仅供测试使用");
+		bw.close();
 	}
 		
 	//初始化
@@ -222,13 +295,18 @@ class InfectStatistic
 			    	isOutput = false;
 			    	dealType(i+1);
 			    	break;
+			    case "-province":
+			    	isOutputAll = false;
+			    	dealProvince(i+1);
 				default:	
 					break;
 			}			
 		}
 	}
 				
-    public static void main(String[] args) throws IOException 
+    
+
+	public static void main(String[] args) throws IOException 
     {
     	if(args[0].equalsIgnoreCase("list"))
     	{
@@ -307,41 +385,42 @@ class Province
 		this.dead += p.dead;
 	}
 	//输出本省情况
-	public void output(boolean isOutput,String[] output)
+	public void output(boolean isOutput,String[] output,BufferedWriter bw) throws IOException
 	{
 		//默认输出
 		if(isOutput)
 		{
-			System.out.println(name + " 感染患者 " + infectionPatients + "人 " +
+			bw.write(name + " 感染患者 " + infectionPatients + "人 " +
                     "疑似患者 " + suspectedPatients + "人 " +
 	                  "治愈 " + cure + "人 " +
                     "死亡 " + dead + "人");
+			bw.newLine();
 		}
 		//有-type参数情况下的输出
 		else
 		{
-			System.out.print(name);
+			bw.write(name);
 			for(int i=0;i<4;i++)
 			{
 				switch(output[i])
 				{
 				    case "ip":			    	
-				    	System.out.print(" 感染患者 " + infectionPatients + "人");	    	
+				    	bw.write(" 感染患者 " + infectionPatients + "人");	    	
 				    	break;
 			        case "sp":			    	
-			        	System.out.print(" 疑似患者 " + suspectedPatients + "人");		    	
+			        	bw.write(" 疑似患者 " + suspectedPatients + "人");		    	
 			        	break;
 			        case "cure":			    	
-			        	System.out.print(" 治愈 " + cure + "人");			    	
+			        	bw.write(" 治愈 " + cure + "人");			    	
 			        	break;
 			        case "dead":			     	
-			        	System.out.print(" 死亡 " + dead + "人");	    	
+			        	bw.write(" 死亡 " + dead + "人");	    	
 			        	break;
 			        default:		    	
 			        	break;
 				}
 			}
-			System.out.print("\n");
+			bw.newLine();
 		}		
 	}
 }

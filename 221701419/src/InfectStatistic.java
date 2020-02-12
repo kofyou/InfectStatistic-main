@@ -1,8 +1,12 @@
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * InfectStatistic
  * @author HHQ
- * @version 1.2
+ * @version 1.3
  */
 class InfectStatistic {
 
@@ -213,6 +217,88 @@ class InfectStatistic {
                 break;
             }
         }
+
+        /**
+         * description：简单判断该行是注释行，仅判断前两个字符"//"
+         * @param string 传入一行字符串
+         * @return 布尔值
+         */
+        public static boolean isAnnotation(String lineString) {
+            if (lineString.charAt(0) == '/' && lineString.charAt(1) == '/') {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * description：取得所有log中最大的日期
+         * @param nameStrings 传入的文件名数组
+         * @return 最大的日期，类型：Date
+         */
+        public static Date getMaxDate(String[] nameStrings) {
+            SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String maxDateString = "2000-01-01";
+            Date maxDate = null;
+            try {
+                maxDate = dFormat.parse(maxDateString);
+                for(int i=0; i<nameStrings.length; i++) {
+                    Date tmpDate = dFormat.parse(nameStrings[i]);
+                    if(tmpDate.getTime() >= maxDate.getTime()) {
+                        maxDate = tmpDate;
+                    }
+                }
+            } catch (Exception e) {
+                // TODO: handle exception
+                e.printStackTrace();
+            }
+            return maxDate;
+        }
+
+        /** description：取得今天的日期 */
+        public static String getToday() {
+            Date todayDate = new Date();
+            SimpleDateFormat sdfDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String todayString = sdfDateFormat.format(todayDate);
+            return todayString;
+        }
+
+        /**
+         * description：获取文件夹下指定日期前的所有文件文件名
+         * @param path 文件夹路径
+         * @param date 指定的日期
+         * @param fileName 获得的文件名列表
+         */
+        public static void getBeforeDateFileName(String path, String date, ArrayList<String> fileName) {
+            SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
+            File file = new File(path);
+            File[] files = file.listFiles();
+            String[] nameStrings = file.list();
+            Date maxDate = getMaxDate(nameStrings);
+            if (nameStrings != null) {
+                for (int i = 0; i < nameStrings.length; i++) {
+                    String dateOfFileNameString = nameStrings[i].substring(0, nameStrings[i].indexOf('.'));
+                    try {
+                        Date dateOfFileNameDate = dFormat.parse(dateOfFileNameString);
+                        Date limitDate = dFormat.parse(date);
+                        if(limitDate.getTime() > maxDate.getTime()) {
+                            System.out.println("日期超出范围");
+                        }else {
+                            if (dateOfFileNameDate.getTime() <= limitDate.getTime()) {
+                                fileName.add(nameStrings[i]);
+                            }
+                        }
+                        
+                    } catch (Exception e) {
+                        // TODO: handle exception
+                        e.printStackTrace();
+                    }
+
+//                    fileName.addAll(Arrays.asList(nameStrings));
+                }
+            }
+        }
+
     
     }
 

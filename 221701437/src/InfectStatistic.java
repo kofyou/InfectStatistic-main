@@ -20,10 +20,12 @@ class InfectStatistic {
         ArrayList<String> param = cmdArgs.argVals("-log");
         fileProcess.FileInit(param.get(0));
         ArrayList<File> fileList = fileProcess.InputFileData();
-        for(int i = 0; i < fileList.size(); i++){
-            ArrayList<String> data = fileProcess.getFileData(fileList.get(i));
-            for(int j = 0; j < data.size(); j++)
-                dataHandle.dataProcessing(data.get(j));
+        for(int i = 0; i < fileList.size(); i++) {
+            if (fileList.get(i).getName().substring(0,10).compareTo(cmdArgs.argVals("-date").get(0)) <= 0) {
+                ArrayList<String> data = fileProcess.getFileData(fileList.get(i));
+                for (int j = 0; j < data.size(); j++)
+                    dataHandle.dataProcessing(data.get(j));
+            }
         }
         pd.LogData(cmdArgs.argVals("-out").get(0),cmdArgs.argVals("-province"),cmdArgs.argVals("-type"));
     }
@@ -119,7 +121,10 @@ class ProvinceData{
         }
         PrintStream stream=null;
         stream=new PrintStream(path);
-        if(typeList.isEmpty()){
+        if(typeList == null || typeList.isEmpty()){
+            if(typeList == null){
+                typeList = new ArrayList<>();
+            }
             typeList.add("ip");
             typeList.add("sp");
             typeList.add("cure");
@@ -382,6 +387,12 @@ class FileProcess{
                 }
             }
         }
+        Collections.sort(fileArrayList, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         return fileArrayList;
     }
 

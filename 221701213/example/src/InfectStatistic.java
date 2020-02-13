@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
@@ -111,7 +113,7 @@ public class InfectStatistic {
     public void init_province(province[] pro , String[] str) //初始化各个省情况
     {
 
-        for(int i = 0 ;i < 5 ;i++)
+        for(int i = 0 ;i < str.length ;i++)
         {
 
             pro[i] = new province();
@@ -169,7 +171,7 @@ public class InfectStatistic {
         for(int i = 0 ;i < str.length() ;i++)
         {
 
-            if(str.charAt(i) > '0' && str.charAt(i) <= '9')
+            if(str.charAt(i) >= '0' && str.charAt(i) <= '9')
             {
 
                 str2 += str.charAt(i);
@@ -206,37 +208,67 @@ public class InfectStatistic {
                     if(spString[2].equals("感染患者"))
                     {
 
-                        pro[i].set_infected(this.get_num(spString[3]));
+                        int add = this.get_num(spString[3]);
+
+                        int new_infected = pro[i].get_infected() + add;
+
+                        pro[i].set_infected(new_infected);
 
                     }
 
                     else if(spString[2].equals("疑似患者"))
                     {
 
-                        pro[i].set_suspected(this.get_num(spString[3]));
+                        int add = this.get_num(spString[3]);
+
+                        int new_suspected = pro[i].get_suspected() + add;
+
+                        pro[i].set_suspected(new_suspected);
 
                     }
 
-                }
-
-                if(spString[1].equals("死亡"))
-                {
-
-                    pro[i].set_death(this.get_num(spString[2]));
+                    break;
 
                 }
 
-                if(spString[1].equals("治愈"))
+                else if(spString[1].equals("死亡"))
                 {
 
-                    pro[i].set_cure(this.get_num(spString[2]));
+                    int add = this.get_num(spString[2]);
+
+                    int new_infected = pro[i].get_infected() - add;
+
+                    int new_death = pro[i].get_death() + add;
+
+                    pro[i].set_infected(new_infected);
+
+                    pro[i].set_death(new_death);
+
+                    break;
 
                 }
 
-                if(spString[1].equals("疑似患者"))
+                else if(spString[1].equals("治愈"))
                 {
 
-                    if(spString[2].equals("感染确诊"))
+                    int add = this.get_num(spString[2]);
+
+                    int new_infected = pro[i].get_infected() - add;
+
+                    int new_cure = pro[i].get_cure() + add;
+
+                    pro[i].set_infected(new_infected);
+
+                    pro[i].set_cure(new_cure);
+
+                    break;
+
+                }
+
+                else if(spString[1].equals("疑似患者"))
+                {
+
+                    if(spString[2].equals("确诊感染"))
                     {
 
                         int add = this.get_num(spString[3]);
@@ -251,9 +283,37 @@ public class InfectStatistic {
 
                     }
 
+                    else if(spString[2].equals("流入"))
+                    {
+
+                        for(int x = 0 ; x <pro.length ; x++)
+                        {
+
+                            if(spString[3].equals(pro[x].get_pro_name()))
+                            {
+
+                                int add = this.get_num(spString[4]);
+
+                                int new_suspected_i = pro[i].get_suspected() - add;
+
+                                int new_suspected_x = pro[x].get_suspected() + add;
+
+                                pro[i].set_suspected(new_suspected_i);
+
+                                pro[x].set_suspected(new_suspected_x);
+
+                                break;
+
+                            }
+                        
+                        }
+                    }
+
+                    break;
+
                 }
 
-                if(spString[1].equals("排除"))
+                else if(spString[1].equals("排除"))
                 {
 
                     if(spString[2].equals("疑似患者"))
@@ -266,13 +326,68 @@ public class InfectStatistic {
                         pro[i].set_suspected(new_suspected);
 
                     }
+
+                    break;
+
                 }
+                else if(spString[1].equals("感染患者"))
+                {
+
+                    if(spString[2].equals("流入"))
+                    {
+
+                        for(int x = 0 ; x < pro.length ; x++)
+                        {
+
+                            if(spString[3].equals(pro[x].get_pro_name()))
+                            {
+
+                                int add = this.get_num(spString[4]);
+                                
+                                int new_infected_i = pro[i].get_infected() - add;
+                                
+                                int new_infected_x = pro[x].get_infected() + add;
+
+                                pro[i].set_infected(new_infected_i);
+
+                                pro[x].set_infected(new_infected_x);
+
+                                break;
+
+                            }
+                        }
+                    }
+
+                    break;
+
+                }
+                
             }
 
         }
     }
 
-    public void process_log(String log_name , province[] pro) throws IOException // 读取并处理日志内容
+    public void process_country(province[] pro) // 统计全国疫情感染情况
+    {
+
+        for(int i = 0 ;i < pro.length ;i++)
+        {
+
+            if(pro[i].get_cure() != 0 ||pro[i].get_death() != 0 ||pro[i].get_infected() != 0 ||pro[i].get_suspected() != 0)
+            {
+
+                pro[0].set_infected(pro[0].get_infected()+pro[i].get_infected());
+                pro[0].set_suspected(pro[0].get_suspected()+pro[i].get_suspected());
+                pro[0].set_cure(pro[0].get_cure()+pro[i].get_cure());
+                pro[0].set_death(pro[0].get_death()+pro[i].get_death());
+
+            }
+
+        }
+
+    }
+
+    public void process_log(String log_name , province[] pro) throws IOException // 读取日志并统计日志内疫情情况
     {
 
         String result = new String ("D:\\221701213\\example\\log\\"+log_name);
@@ -286,41 +401,53 @@ public class InfectStatistic {
         while((strLine = br.readLine()) != null)
         {
 
-            this.process_string(strLine , pro);
+            this.process_string(strLine , pro); // 处理日志中每一行的疫情统计情况
 
         }
+
+        this.process_country(pro);  // 统计全国疫情情况
 
         br.close();
 
     }
 
-    public void print(province[] pro)   // 打印各省疫情情况（用于调试）
+    public void output(province[] pro) throws IOException   // 将统计结果输出到output.txt
     {
 
-        for(int i = 0 ;i < pro.length ;i++)
+        String path = new String("D:\\221701213\\example\\result\\output.txt");
+
+        FileWriter fwriter = new FileWriter(path);
+
+        for(int i = 0 ; i < pro.length ; i++)
         {
 
-            if(pro[i].get_cure() != 0 ||pro[i].get_death() != 0 ||pro[i].get_infected() != 0 ||pro[i].get_suspected() != 0)
+            String word = new String();
+
+            if(pro[i].get_cure() != 0 || pro[i].get_death() != 0 || pro[i].get_infected() != 0 || pro[i].get_suspected() != 0)
             {
 
-                System.out.print(pro[i].get_pro_name());
-                System.out.print(" 感染患者");
-                System.out.print(pro[i].get_infected());
-                System.out.print(" 疑似患者");
-                System.out.print(pro[i].get_suspected());
-                System.out.print(" 治愈");
-                System.out.print(pro[i].get_cure());
-                System.out.print(" 死亡");
-                System.out.println(pro[i].get_death());
+                word += pro[i].get_pro_name() + " 感染患者" + pro[i].get_infected() + " 疑似患者" + 
+                pro[i].get_suspected() + " 治愈" + pro[i].get_cure() + " 死亡" + pro[i].get_death() + "\n";
+
+                fwriter.write(word);
+
+                word = "";
+
             }
+
         }
+
+        fwriter.flush();
+
+        fwriter.close();
+
     }
 
     public static void main(String[] args) throws IOException {
 
         InfectStatistic in = new InfectStatistic();
 
-        String[] province_name = new String[] {"安徽","福建","甘肃","广东","广西",
+        String[] province_name = new String[] {"全国","安徽","福建","甘肃","广东","广西",
         "贵州","海南","河北","河南","黑龙江","湖北","湖南","江西","吉林","江苏","辽宁","内蒙古",
         "宁夏","青海","山西","山东","陕西","四川","西藏","新疆","云南","浙江"};
 
@@ -338,6 +465,8 @@ public class InfectStatistic {
         {
 
             in.process_log(log_name , pro);
+
+            in.output(pro);
 
         }
 

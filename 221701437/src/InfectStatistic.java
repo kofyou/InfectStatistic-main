@@ -13,20 +13,22 @@ import java.util.regex.Pattern;
  */
 class InfectStatistic {
     public static void main(String[] args) throws IOException {
-        /*ProvinceData pd = ProvinceData.getInstance();
+        CmdArgs cmdArgs = new CmdArgs(args);
+        ProvinceData pd = ProvinceData.getInstance();
         AbstractDataHandle dataHandle = AbstractDataHandle.getChainOfDataHandle();
         FileProcess fileProcess = FileProcess.getInstance();
+        ArrayList<String> param = cmdArgs.argVals("-log");
+        fileProcess.FileInit(param.get(0));
         ArrayList<File> fileList = fileProcess.InputFileData();
         for(int i = 0; i < fileList.size(); i++){
             ArrayList<String> data = fileProcess.getFileData(fileList.get(i));
             for(int j = 0; j < data.size(); j++)
                 dataHandle.dataProcessing(data.get(j));
         }
-        pd.LogData("./221701437/result/output.txt");*/
-        CmdArgs cmdArgs = new CmdArgs(args);
-        System.out.println(cmdArgs.paramToValue.get("-province"));
+        pd.LogData(cmdArgs.argVals("-out").get(0),cmdArgs.argVals("-province"),cmdArgs.argVals("-type"));
     }
 }
+
 class ProvinceData{
     private static ProvinceData provinceData = new ProvinceData();
 
@@ -37,11 +39,25 @@ class ProvinceData{
             "江西", "辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
             "四川", "台湾","天津","西藏","香港","新疆","云南","浙江"
     };
+
+    private HashMap<String,Integer> STATUS = new HashMap<>();
+
+    private HashMap<String,String> STATUSCHINESE = new HashMap<>();
+
+
     private ProvinceData(){
         for(int i = 0; i < initStr.length; i++){
             int[] initArray = {0,0,0,0};
             AllData.put(initStr[i],initArray);
         }
+        STATUS.put("ip", 0);
+        STATUS.put("sp", 1);
+        STATUS.put("cure", 2);
+        STATUS.put("dead", 3);
+        STATUSCHINESE.put("ip","感染患者");
+        STATUSCHINESE.put("sp","疑似患者");
+        STATUSCHINESE.put("cure","治愈");
+        STATUSCHINESE.put("dead","死亡");
     }
 
     public static ProvinceData getInstance(){
@@ -96,17 +112,38 @@ class ProvinceData{
         }
     }
 
-    public void LogData(String path) throws IOException {
+    public void LogData(String path, ArrayList<String> provinceList, ArrayList<String>typeList) throws IOException {
         File outFile = new File(path);
         if(!outFile.exists()){
             outFile.createNewFile();
         }
         PrintStream stream=null;
         stream=new PrintStream(path);
+        if(typeList.isEmpty()){
+            typeList.add("ip");
+            typeList.add("sp");
+            typeList.add("cure");
+            typeList.add("dead");
+        }
         String data = new String();
-        for(int i = 0; i < initStr.length; i++){
-            int[] datavalue = AllData.get(initStr[i]);
-            data = data + initStr[i] + " 感染患者" + datavalue[0] + "人 疑似患者" + datavalue[1] + "人 治愈" + datavalue[2] + "人 死亡" + datavalue[3] + "人\n";
+        if(provinceList == null) {
+            for (int i = 0; i < initStr.length; i++) {
+                int[] datavalue = AllData.get(initStr[i]);
+                data = data + initStr[i] + " ";
+                for(int j = 0; j < typeList.size(); j++){
+                    data = data + STATUSCHINESE.get(typeList.get(j)) + datavalue[STATUS.get(typeList.get(j))] +  "人 ";
+                }
+                data += "\n";
+            }
+        }else{
+            for(int i = 0; i < provinceList.size(); i++){
+                int[] datavalue = AllData.get(initStr[i]);
+                data = data + initStr[i] + " ";
+                for(int j = 0; j < typeList.size(); j++){
+                    data = data + STATUSCHINESE.get(typeList.get(j)) + datavalue[STATUS.get(typeList.get(j))] +  "人 ";
+                }
+                data += "\n";
+            }
         }
         System.out.println(data);
         stream.print(data);
@@ -318,16 +355,18 @@ class SureInfectPeople extends AbstractDataHandle{
 }
 
 class FileProcess{
-    private final static String INPUTFILEPATH = "./221701437/log";
-    private final static String OUTPUTFILEPATH = "./221701437/result";
     private final static String GETFLENAME = "(\\d{4})-(\\d{2})-(\\d{2})\\.log\\.txt";
     private static FileProcess fileProcess = new FileProcess();
-    private File file = new File(INPUTFILEPATH);
+    private File file;
 
     private FileProcess(){};
 
     public static FileProcess getInstance(){
         return fileProcess;
+    }
+
+    public void FileInit(String in){
+        file = new File(in);
     }
 
     public ArrayList<File> InputFileData(){
@@ -362,10 +401,7 @@ class FileProcess{
 
 class CmdArgs{
     private String[] args;
-    public HashMap<String, ArrayList<String>> paramToValue = new HashMap<>();
-    //private static final String CMDPROCESS = "list (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)* -log (\\s) (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)* -out (\\s) (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)*";
-    //private static final String CMDPROCESS1 = "list (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)* -out (\\s) (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)* -log (\\s) (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)*";
-
+    private HashMap<String, ArrayList<String>> paramToValue = new HashMap<>();
 
     CmdArgs(String[] args){
         this.args = args;
@@ -376,7 +412,7 @@ class CmdArgs{
         return this.args[0];
     }
 
-    public void argsProcess(){
+    private void argsProcess(){
         ArrayList<String> tempValue = new ArrayList<>();
         String tempKey = new String();
         int index = 0;

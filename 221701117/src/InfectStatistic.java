@@ -132,5 +132,128 @@ public class InfectStatistic
     		//System.out.println(posVec.elementAt(i)-posVec.elementAt(i-1)-1);
     	}
 	}
+    
+    
+    /*******************
+     * 作用:判断参数选项
+     * 参数:存放命令行参数的Vector数据结构
+     *******************/
+    private static void dealParameter(Vector<String> vector) {
+		// TODO Auto-generated method stub
+    	int pos=0;
+    	if(vector.get(0).equals("list")) 
+    	{
+    		for(int i = 0;i < vector.size();i ++ )
+        	{
+        		if(vector.get(i).charAt(0) == '-') {
+        			if(vector.get(i).equals("-log"))
+        			{
+        				//System.out.print("-log:");
+        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
+        				//System.out.print("(pos):"+pos);
+        				for(int j = 0;j < interval.elementAt(pos);j ++ )
+        				{
+        					//System.out.print(vector.get(i+j+1));
+        					inputAddress = vector.get(i+j+1);
+        				}
+        				//System.out.println();
+        				i += interval.elementAt(pos);
+        				pos ++ ;
+        				continue;
+        			}
+        			if(vector.get(i).equals("-out"))
+        			{
+        				//System.out.print("-out:");
+        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
+        				//System.out.print("(pos):"+pos);
+        				for(int j = 0;j < interval.elementAt(pos);j ++ )
+        				{
+        					//System.out.print(vector.get(i+j+1));
+        					outputFileAddress = vector.get(i+j+1);
+        					//System.out.print(outputFileAddress);
+        				}
+        				//System.out.println();
+        				i += interval.elementAt(pos);
+        				pos ++ ;
+        				continue;
+        			}
+        			if(vector.get(i).equals("-date"))
+        			{
+        				//System.out.print("-date:");
+        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
+        				//System.out.print("(pos):"+pos);
+        				for(int j = 0;j < interval.elementAt(pos);j ++ )
+        				{
+        					//System.out.print(vector.get(i+j+1));
+        					inputEndDate = vector.get(i+j+1);
+        					//System.out.print("inputEndDate=" + inputEndDate);
+        				}
+        				//System.out.println();
+        				i += interval.elementAt(pos);
+        				pos ++ ;
+        				continue;
+        			}
+        			if(vector.get(i).equals("-type"))
+        			{
+        				//System.out.print("-type:");
+        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
+        				//System.out.print("(pos):"+pos);
+        				for(int j = 0;j < interval.elementAt(pos);j ++ )
+        				{
+        					//System.out.print(vector.get(i+j+1));
+        					if(vector.get(i+j+1).equals("ip")) {
+        						listType[0] = 1;
+        					}
+        					if(vector.get(i+j+1).equals("sp")) {
+        						listType[1] = 1;
+        					}
+        					if(vector.get(i+j+1).equals("cure")) {
+        						listType[2] = 1;
+        					}
+        					if(vector.get(i+j+1).equals("dead")) {
+        						listType[3] = 1;
+        					}
+        				}
+        				//System.out.println();
+        				i += interval.elementAt(pos);
+        				pos ++ ;
+        				//判断输出的列
+        				continue;
+        			}
+        			if(vector.get(i).equals("-province"))
+        			{
+        				//System.out.print("-province:");
+        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
+        				//System.out.print("(pos):"+pos);
+        				for(int j = 0;j < interval.elementAt(pos);j ++ )
+        				{
+        					if(vector.get(i+j+1).equals("全国"))
+        					{
+        						isOutCountry = true;
+        					}
+        					//System.out.print(vector.get(i+j+1));
+        					if(i+j+1 >= countryPos)
+        					{
+        						temp.add(vector.get(i+j+2));//跳过“全国”
+        					}
+        					else
+        					{
+        						temp.add(vector.get(i+j+1));
+        					}
+        				}
+        				//System.out.println();
+        				i += interval.elementAt(pos);
+        				pos ++ ;
+        				continue;
+        			}
+        			i += interval.elementAt(pos);
+    				pos ++ ;
+        			
+        		}
+        	}
+    		
+    	}
+    	
+	}
 
 }

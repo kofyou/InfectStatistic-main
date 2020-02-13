@@ -1,8 +1,8 @@
 /***********************
 FileName:InfectStatistic.cpp
 Author:Cazenove
-Version:v1.1
-Date:2020.02.11
+Version:v1.2
+Date:2020.02.13
 Description:
     本程序为疫情统计程序，通过读取list命令中给定了log路径下的日志文件，以及给定的具体参数，将统计结果输出到给定out路径的文件中
     list命令 支持以下命令行参数：
@@ -16,9 +16,10 @@ Description:
     作业要求链接：https://edu.cnblogs.com/campus/fzu/2020SPRINGS/homework/10287
     项目github链接：https://github.com/Cazenove/InfectStatistic-main
 Version Description:
-    使用面向对象方法重新编排代码，将省份信息与操作进行了封装。
+    使用enum+map来将if else结构替换为switch结构、美化了部分代码。
 History:
     V1.0:参照作业要求初步完成了所有基本命令
+    v1.1:使用面向对象方法重新编排代码，将省份信息与操作进行了封装。
 ************************/
 
 #include <iostream>
@@ -45,6 +46,9 @@ class CProvince
     unsigned int sp;//疑似患者数量
     unsigned int cure;//治愈患者数量
     unsigned int dead;//死亡患者数量
+
+    bool isInLog;//是否在日志文件中出现过
+    bool isPrint;//该省份是否要打印
 
     //初始化
     CProvince();
@@ -77,7 +81,7 @@ class CProvince
 /***********************
 Description:存放各省份名称
 ***********************/
-string PROVINCENAME[35] = 
+static string PROVINCENAME[35] = 
 {
     "全国","安徽","澳门","北京","重庆","福建","甘肃",
     "广东","广西","贵州","海南","河北","河南","黑龙江",
@@ -85,6 +89,31 @@ string PROVINCENAME[35] =
     "宁夏","青海","山东","山西","陕西","上海","四川",
     "台湾","天津","西藏","香港","新疆","云南","浙江"
 };
+
+/***********************
+Description:将list命令参数与枚举类型建立映射关系，用于简化if else结构
+***********************/
+enum EListValue
+{
+    logValue,
+    outValue,
+    dateValue,
+    typeValue,
+    provinceValue
+};
+map<string,EListValue> mapListValue;
+
+/***********************
+Description:将输出的命令类型与枚举类型建立映射关系，用于简化if else结构
+***********************/
+enum EDataValue
+{
+    ipValue,
+    spValue,
+    cureValue,
+    deadValue
+};
+map<string,EDataValue> mapDataValue;
 
 /***********************
 Description:使用STL的map来建立省份名称和省份信息结构体之间的映射关系
@@ -199,29 +228,10 @@ Others:none
 void OutLog(string filePath, vector<string> type, vector<string> province);
 
 
-/***********************
-Description:输出指定省份的人员信息
-Input:strProvince:省份名称
-Output:省份 感染患者a人 疑似患者b人 治愈c人 死亡d人
-Return:none
-Others:用于测试
-***********************/
-void ShowProvince(string strProvince);
-
-
-/***********************
-Description:输出所有省份的人员信息
-Input:
-Output:省份 感染患者a人 疑似患者b人 治愈c人 死亡d人
-Return:none
-Others:用于测试
-***********************/
-void ShowAllProvince();
-
-
 /*主函数*/
 int main(int argc,char *argv[])
 {
+    init();//初始化
     ProcessOption(argc,argv);//处理命令行参数
     return 0;
 }
@@ -229,6 +239,17 @@ int main(int argc,char *argv[])
 
 void init()//初始化
 {
+    mapListValue["-log"] = logValue;
+    mapListValue["-out"] = outValue;;
+    mapListValue["-date"] = dateValue;
+    mapListValue["-type"] = typeValue;
+    mapListValue["-province"] = provinceValue;
+
+    mapDataValue["ip"] = ipValue;
+    mapDataValue["sp"] = spValue;
+    mapDataValue["cure"] = cureValue;
+    mapDataValue["dead"] = deadValue;
+
     mapProvince.clear();//清空map
     string strProvince;
     for(int i=0; i<35; i++)
@@ -329,7 +350,7 @@ void ReadAllLog(string path, string date)//读取到date之前的给定路径中
         //date比最新日志文件的日期还大，提示超出范围并关闭程序。
         if(datecmp(date, fileinfo.name) > 0)
         {
-            cout<<"out of range"<<endl;
+            cout<<"out of range\n";
             exit(0);
         }
         _findclose(hFile);
@@ -341,7 +362,7 @@ void ReadLog(string filePath)
     ifstream ifLog(filePath.c_str());//打开日志文件
     if(!ifLog)
     {
-        cout<<filePath<<"文件打开失败\n";
+        cout<<filePath<<" open failure.\n";
         return ;
     }
 
@@ -362,51 +383,44 @@ void ReadLog(string filePath)
 
         if(cBuffer[0][0]!='/')//跳过注释
         {
+            char *province = cBuffer[0];
             if(strcmp(cBuffer[1],"新增") == 0)
             {
                 if(strcmp(cBuffer[2],"感染患者") == 0)//新增感染患者
                 {
-                    mapProvince[cBuffer[0]].AddIP(atoi(cBuffer[3]));
-                    //AddIP(cBuffer[0],atoi(cBuffer[3]));
+                    mapProvince[province].AddIP(atoi(cBuffer[3]));
                 }
                 else//新增疑似患者
                 {
-                    mapProvince[cBuffer[0]].AddSP(atoi(cBuffer[3]));
-                    //AddSP(cBuffer[0],atoi(cBuffer[3]));
+                    mapProvince[province].AddSP(atoi(cBuffer[3]));
                 }
             }
             else if(strcmp(cBuffer[1],"感染患者") == 0)//省1感染患者流入省2
             {
-                mapProvince[cBuffer[0]].MoveIP(cBuffer[3],atoi(cBuffer[4]));
-                //MoveIP(cBuffer[0],cBuffer[3],atoi(cBuffer[4]));
+                mapProvince[province].MoveIP(cBuffer[3],atoi(cBuffer[4]));
             }
             else if(strcmp(cBuffer[1],"疑似患者") == 0)
             {
                 if(strcmp(cBuffer[2],"流入") == 0)//省1疑似患者流入省2
                 {
-                    mapProvince[cBuffer[0]].MoveSP(cBuffer[3],atoi(cBuffer[4]));
-                    //MoveSP(cBuffer[0],cBuffer[3],atoi(cBuffer[4]));
+                    mapProvince[province].MoveSP(cBuffer[3],atoi(cBuffer[4]));
                 }
                 else//疑似患者确认感染
                 {
-                    mapProvince[cBuffer[0]].SPtoIP(atoi(cBuffer[3]));
-                    //SPtoIP(cBuffer[0],atoi(cBuffer[3]));
+                    mapProvince[province].SPtoIP(atoi(cBuffer[3]));
                 }
             }
             else if(strcmp(cBuffer[1],"死亡") == 0)//感染患者死亡
             {
-                mapProvince[cBuffer[0]].IPtoDead(atoi(cBuffer[2]));
-                //IPtoDead(cBuffer[0],atoi(cBuffer[2]));
+                mapProvince[province].IPtoDead(atoi(cBuffer[2]));
             }
             else if(strcmp(cBuffer[1],"治愈") == 0)//感染患者治愈
             {
-                mapProvince[cBuffer[0]].IPtoCure(atoi(cBuffer[2]));
-                //IPtoCure(cBuffer[0],atoi(cBuffer[2]));
+                mapProvince[province].IPtoCure(atoi(cBuffer[2]));
             }
             else if(strcmp(cBuffer[1],"排除") == 0)//排除疑似患者患者
             {
-                mapProvince[cBuffer[0]].SubSP(atoi(cBuffer[3]));
-                //SubSP(cBuffer[0],atoi(cBuffer[3]));
+                mapProvince[province].SubSP(atoi(cBuffer[3]));
             }
         }
     }
@@ -415,96 +429,85 @@ void ReadLog(string filePath)
 
 void ProcessOption(int argc,char *argv[])//处理参数
 {
-    if(argc > 1)//有参数
+    if((argc > 1) && !strcmp(argv[1], "list"))
     {
-        if(strcmp(argv[1], "list") == 0)
-        {
-            string logPath = "";
-            string outPath = "";
-            string date ="";
-            vector<string> type;
-            vector<string> province;
+        string logPath = "";
+        string outPath = "";
+        string date = "";
+        vector<string> type;
+        vector<string> province;
 
-            int index = 2;
-            while(argv[index])
+        int index = 2;
+        while(argv[index])
+        {
+            switch(mapListValue[argv[index]])
             {
-                if(strcmp(argv[index], "-log") == 0)
-                {
+                case logValue:
                     if(argv[index+1])
                     {
                         logPath = argv[index+1];
                         index++;
                     }
-                }
-                else if(strcmp(argv[index], "-out") == 0)
-                {
+                    break;
+                case outValue:
                     if(argv[index+1])
                     {
                         outPath = argv[index+1];
                         index++;
                     }
-                }
-                else if(strcmp(argv[index], "-date") == 0)
-                {
+                    break;
+                case dateValue:
                     if(argv[index+1][0] != '-')//如果下一位不是其他操作符，那么则是date的参数值
                     {
                         date = argv[index+1];
                         index++;
                     }
-                }
-                else if(strcmp(argv[index], "-type") == 0)
-                {
+                    break;
+                case typeValue:
                     while((argv[index+1]) && (argv[index+1][0] != '-'))//-type后面可能有0到多个参数值
                     {
                         type.push_back(argv[index+1]);
                         index++;
                     }
-                }
-                else if(strcmp(argv[index], "-province") == 0)//-province后面可能有0到多个参数
-                {
+                    break;
+                case provinceValue:
                     while((argv[index+1]) && (argv[index+1][0] != '-'))
                     {
-                        //将gbk转为utf-8，以免出现乱码
-                        province.push_back(GbkToUtf8(argv[index+1]));
+                        province.push_back(GbkToUtf8(argv[index+1]));//将gbk转为utf-8，以免出现乱码
+                        mapProvince[GbkToUtf8(argv[index+1])].isPrint = true;//要输出
                         index++;
                     }
-                }
-                else
-                {
+                    break;
+                default:
                     if(argv[index][0] == '-')
                     {
-                        cout<<"未知的操作符"<<argv[index]<<endl;
+                        cout<<"Unknown command: -"<<argv[index]<<"\n";
                     }
-                }
-                index++;
+                    break;
             }
-
-            if(logPath == "" || outPath == "")
-            {
-                cout<<"-log和-out指令参数不能为空！\n";
-                exit(0);
-            }
-            if(type.size() == 0)//如果没有设置type，则为默认顺序
-            {
-                //默认顺序为感染患者 疑似患者 治愈 死亡
-                type.push_back("ip");
-                type.push_back("sp");
-                type.push_back("cure");
-                type.push_back("dead");
-            }
-            if(province.size() == 0)
-            {
-                vector<string> vecString(PROVINCENAME, PROVINCENAME+35);
-                province = vecString;
-            }
-            list(logPath, outPath, date, type, province);//交由list函数处理
+            index++;
         }
+
+        list(logPath, outPath, date, type, province);//交由list函数处理
     }
 }
 
 void list(string logPath, string outPath, string date, vector<string> type, vector<string> province)//list命令
 {
-    init();//初始化
+    //文件读入和输出路径为空
+    if(logPath == "" || outPath == "")
+    {
+        cout<<"Parameter value -log and -out cannot be empty\n";
+        exit(0);
+    }
+    if(type.size() == 0)//如果没有设置type，则为默认顺序
+    {
+        //默认顺序为感染患者 疑似患者 治愈 死亡
+        type.push_back("ip");
+        type.push_back("sp");
+        type.push_back("cure");
+        type.push_back("dead");
+    }
     ReadAllLog(logPath, date);//读取date之前所有的日志文件
     OutLog(outPath, type, province);//按照指定格式输出
 }
@@ -514,111 +517,115 @@ void OutLog(string filePath, vector<string> type, vector<string> province)
     ofstream ofLog(filePath.c_str(),ios::out);//创建并写入新的日志文件
     if(!ofLog)
     {
-        cout<<"输出目录打开失败！";
+        cout<<filePath<<" open failure.\n";
         exit(0);
     }
-    for(int i=0; i<province.size(); i++)//按照省份列表的顺序输出每个省份的数据信息
+    for(int i=0; i<35; i++)//按照省份列表的顺序输出每个省份的数据信息
     {
-        ofLog<<province[i]<<" ";
-        for(int j=0; j<type.size(); j++)
+        //指定打印参数中出现过的省份，若参数为空，输出日志文件中出现过的省份
+        if((mapProvince[PROVINCENAME[i]].isPrint) || (!province.size() && mapProvince[PROVINCENAME[i]].isInLog))
         {
-            if(strcmp(type[j].c_str(), "ip") == 0)
+            ofLog<<PROVINCENAME[i]<<" ";
+            for(int j=0; j<type.size(); j++)
             {
-                ofLog<<"感染患者"<<mapProvince[province[i]].ip<<"人 ";
+                switch(mapDataValue[type[j]])
+                {
+                    case ipValue:
+                        ofLog<<"感染患者"<<mapProvince[PROVINCENAME[i]].ip<<"人 ";
+                        break;
+                    case spValue:
+                        ofLog<<"疑似患者"<<mapProvince[PROVINCENAME[i]].sp<<"人 ";
+                        break;
+                    case cureValue:
+                        ofLog<<"治愈"<<mapProvince[PROVINCENAME[i]].cure<<"人 ";
+                        break;
+                    case deadValue:
+                        ofLog<<"死亡"<<mapProvince[PROVINCENAME[i]].dead<<"人 ";
+                        break;
+                    default:
+                        break;
+                }
             }
-            else if(strcmp(type[j].c_str(), "sp") == 0)
-            {
-                ofLog<<"疑似患者"<<mapProvince[province[i]].sp<<"人 ";
-            }
-            else if(strcmp(type[j].c_str(), "dead") == 0)
-            {
-                ofLog<<"死亡"<<mapProvince[province[i]].dead<<"人 ";
-            }
-            else if(strcmp(type[j].c_str(), "cure") == 0)
-            {
-                ofLog<<"治愈"<<mapProvince[province[i]].cure<<"人 ";
-            }
+            ofLog<<"\n";
         }
-        ofLog<<"\n";
     }
     ofLog<<"// 该文档并非真实数据，仅供测试使用";
     
     ofLog.close();
 }
 
-void ShowProvince(string strProvince)//按省份名称输出数据
-{
-    CProvince *pProvince=&mapProvince[strProvince];
-    cout<<strProvince;
-    printf(" 感染患者%d人 ",pProvince->ip);
-    printf("疑似患者%d人 ",pProvince->sp);
-    printf("治愈%d人 ",pProvince->cure);
-    printf("死亡%d人\n",pProvince->dead);
-    delete(pProvince);
-}
 
-void ShowAllProvince()//输出所有省份的数据信息
-{
-    for(int i=0;i<35;i++)//按照省份列表的顺序输出每个省份的数据信息
-    {
-        cout<<PROVINCENAME[i]<<" 感染患者"<<mapProvince[PROVINCENAME[i]].ip<<"人 ";
-        cout<<"疑似患者"<<mapProvince[PROVINCENAME[i]].sp<<"人 ";
-        cout<<"治愈"<<mapProvince[PROVINCENAME[i]].cure<<"人 ";
-        cout<<"死亡"<<mapProvince[PROVINCENAME[i]].dead<<"人\n";
-    }
-}
-
-CProvince::CProvince()
+CProvince::CProvince()//类初始化
 {
     ip = 0;
     sp = 0;
     cure = 0;
     dead = 0;
+    isInLog = false;
+    isPrint = false;
 }
 
-void CProvince::AddIP(int num)
+/* 数据变化处理函数 */
+
+void CProvince::AddIP(int num)//感染患者增加
 {
+    this->isInLog = true;
     this->ip += num;
+    mapProvince["全国"].isInLog = true;
     mapProvince["全国"].ip += num;
 }
-void CProvince::AddSP(int num)
+void CProvince::AddSP(int num)//疑似患者增加
 {
+    this->isInLog = true;
     this->sp += num;
+    mapProvince["全国"].isInLog = true;
     mapProvince["全国"].sp += num;
 }
-void CProvince::MoveIP(string strProvince,int num)
+void CProvince::MoveIP(string strProvince,int num)//感染患者流动
 {
+    this->isInLog = true;
     this->ip -= num;
+    mapProvince[strProvince].isInLog = true;
     mapProvince[strProvince].ip += num;
 }
-void CProvince::MoveSP(string strProvince,int num)
+void CProvince::MoveSP(string strProvince,int num)//疑似患者流动
 {
+    this->isInLog = true;
     this->sp -= num;
+    mapProvince[strProvince].isInLog = true;
     mapProvince[strProvince].sp += num;
 }
-void CProvince::IPtoDead(int num)
+void CProvince::IPtoDead(int num)//感染患者死亡
 {
+    this->isInLog = true;
     this->ip -= num;
     this->dead += num;
+    mapProvince["全国"].isInLog = true;
     mapProvince["全国"].ip -= num;
     mapProvince["全国"].dead += num;
 }
-void CProvince::IPtoCure(int num)
+void CProvince::IPtoCure(int num)//感染患者治愈
 {
+    this->isInLog = true;
     this->ip -= num;
     this->cure += num;
+    mapProvince["全国"].isInLog = true;
     mapProvince["全国"].ip -= num;
     mapProvince["全国"].cure += num;
 }
-void CProvince::SPtoIP(int num)
+void CProvince::SPtoIP(int num)//疑似患者确诊
 {
+    this->isInLog = true;
     this->sp -= num;
     this->ip += num;
+    mapProvince["全国"].isInLog = true;
     mapProvince["全国"].sp -= num;
     mapProvince["全国"].ip += num;
 }
-void CProvince::SubSP(int num)
+void CProvince::SubSP(int num)//疑似患者排除
 {
+    this->isInLog = true;
     this->sp -= num;
+    mapProvince["全国"].isInLog = true;
     mapProvince["全国"].sp -= num;
 }

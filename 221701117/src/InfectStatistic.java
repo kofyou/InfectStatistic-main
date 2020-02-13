@@ -541,4 +541,32 @@ public class InfectStatistic
 		out.close();
 	}
     
+    
+    /**********************************************
+     * 作用:txt文件按行分割
+     * 参数:文件名
+     * 返回结果:分割结果放入ArrayList
+     **********************************************/
+    public static ArrayList<String> FileReadLine(String name)
+    {
+    	//System.out.println(name);
+    	ArrayList<String> arrayList = new ArrayList<>();
+		try {
+			File file = new File(name);
+			InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file));
+			BufferedReader bf = new BufferedReader(inputReader);
+			// 按行读取字符串
+			String str;
+			while ((str = bf.readLine()) != null) {
+				arrayList.add(str);
+			}
+			bf.close();
+			inputReader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	return arrayList;
+    } 
+    
+    
 }

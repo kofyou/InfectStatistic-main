@@ -148,59 +148,38 @@ public class InfectStatistic
         		if(vector.get(i).charAt(0) == '-') {
         			if(vector.get(i).equals("-log"))
         			{
-        				//System.out.print("-log:");
-        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
-        				//System.out.print("(pos):"+pos);
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
-        					//System.out.print(vector.get(i+j+1));
         					inputAddress = vector.get(i+j+1);
         				}
-        				//System.out.println();
         				i += interval.elementAt(pos);
         				pos ++ ;
         				continue;
         			}
         			if(vector.get(i).equals("-out"))
         			{
-        				//System.out.print("-out:");
-        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
-        				//System.out.print("(pos):"+pos);
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
-        					//System.out.print(vector.get(i+j+1));
         					outputFileAddress = vector.get(i+j+1);
-        					//System.out.print(outputFileAddress);
         				}
-        				//System.out.println();
         				i += interval.elementAt(pos);
         				pos ++ ;
         				continue;
         			}
         			if(vector.get(i).equals("-date"))
         			{
-        				//System.out.print("-date:");
-        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
-        				//System.out.print("(pos):"+pos);
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
-        					//System.out.print(vector.get(i+j+1));
         					inputEndDate = vector.get(i+j+1);
-        					//System.out.print("inputEndDate=" + inputEndDate);
         				}
-        				//System.out.println();
         				i += interval.elementAt(pos);
         				pos ++ ;
         				continue;
         			}
         			if(vector.get(i).equals("-type"))
         			{
-        				//System.out.print("-type:");
-        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
-        				//System.out.print("(pos):"+pos);
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
-        					//System.out.print(vector.get(i+j+1));
         					if(vector.get(i+j+1).equals("ip")) {
         						listType[0] = 1;
         					}
@@ -214,7 +193,6 @@ public class InfectStatistic
         						listType[3] = 1;
         					}
         				}
-        				//System.out.println();
         				i += interval.elementAt(pos);
         				pos ++ ;
         				//判断输出的列
@@ -222,16 +200,12 @@ public class InfectStatistic
         			}
         			if(vector.get(i).equals("-province"))
         			{
-        				//System.out.print("-province:");
-        				//System.out.print("interval.elementAt(pos):"+interval.elementAt(pos));
-        				//System.out.print("(pos):"+pos);
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
         					if(vector.get(i+j+1).equals("全国"))
         					{
         						isOutCountry = true;
         					}
-        					//System.out.print(vector.get(i+j+1));
         					if(i+j+1 >= countryPos)
         					{
         						temp.add(vector.get(i+j+2));//跳过“全国”
@@ -241,7 +215,6 @@ public class InfectStatistic
         						temp.add(vector.get(i+j+1));
         					}
         				}
-        				//System.out.println();
         				i += interval.elementAt(pos);
         				pos ++ ;
         				continue;
@@ -287,24 +260,15 @@ public class InfectStatistic
 		{
 			 //加一天
 			 calBegin.add(Calendar.DAY_OF_MONTH, 1);
-			 //System.out.println(sdf.format(calBegin.getTime()));
 			 //记得加上前缀，不是在当前文件的目录
 			 fileName = inputAddress +  sdf.format(calBegin.getTime()) + ".log.txt";
-			 /*			  
-			  fileName =  sdf.format(calBegin.getTime()) + ".log.txt";
-			  */
-			 //System.out.println(fileName);
 			 file = new File(fileName);
 			 if(!file.exists()) 
 			 {
-				 //提示文件不存在
-				 //不存在文件，则跳过当日，默认趋势保持不变
-				 //System.out.println(fileName == "2020-01-22.log.txt");
 				 continue;
 			 }
 			 else 
 			 {
-				 //System.out.println(fileName);
 				 String[] ss ;
 				 String st;
 				 dataFile = FileReadLine(fileName);
@@ -324,22 +288,13 @@ public class InfectStatistic
 							 pos = k;
 							 break;
 						 }
-					 }					 
-					 //System.out.println(pos);
-					 /*
-					 for (int j=0;j<ss.length;j++) {
-						 System.out.print(ss[j] + "*");						 
 					 }
-					 System.out.println();
-					 */
 					 //行分三份
 					 if(ss.length == 3) 
 					 {
 						 String sTemp = ss[2].substring(0,ss[2].length() - 1);
 						 if(ss[1].equals("死亡"))
 						 {
-							 //System.out.println(ss[2].substring(0,ss[2].length() - 1));							 
-							 //System.out.println(Integer.parseInt(sTemp));
 							 //死亡数+num
 							 provinces.elementAt(pos).AddDied(Integer.parseInt(sTemp));
 							 //感染数-num
@@ -411,7 +366,6 @@ public class InfectStatistic
 						 for(int k = 0; k < provinces.size(); k++) 
 						 {
 							 st = provinces.elementAt(k).getName();
-							 //System.out.println(st+" "+ss[0]);
 							 if(st.contentEquals(ss[3]))
 							 {
 								 pos_2 = k;
@@ -451,7 +405,6 @@ public class InfectStatistic
 		
 		for(String s:temp) 
 		{
-			//System.out.println(s);
 			int provincePos=0;
 			for(int i = 0;i < arrayProvinces.length;i ++ )
 			{
@@ -533,10 +486,6 @@ public class InfectStatistic
 			}
 			out.write("\n");
 			System.out.println();
-			/*
-			System.out.println(s.getName() + "\t" + "感染患者" + s.Infected() + "人" + "\t" + "疑似患者" + 
-		    s.Suspected() + "人" + "\t" + "治愈" + s.Cured() + "人" + "\t\t" + "死亡" + s.Died() + "人");
-		    */
 		}
 		out.close();
 	}

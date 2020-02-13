@@ -282,7 +282,7 @@ class InfectStatistic
             country.output(isOutput,output,bw);
             for (int i = 0; i < name.size(); i ++ )
             {           
-                map.get(name.get(i)).output(isOutput,output,bw);
+                map.get(name.get(i)).output(isOutput, output, bw);
             }
         }
         else
@@ -291,11 +291,11 @@ class InfectStatistic
             {           
                 if (provinces.get(i).equals("全国"))
                 {
-                    country.output(isOutput,output,bw);
+                    country.output(isOutput, output, bw);
                 }
                 else
                 {
-                    map.get(provinces.get(i)).output(isOutput,output,bw);
+                    map.get(provinces.get(i)).output(isOutput, output, bw);
                 }
             }
         }

@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * TODO
  *
  * @author 221701238_周宇靖
- * @version 1.7
+ * @version 1.8
  * @since 2020-02-08
  */
 public class InfectStatistic {
@@ -781,12 +781,49 @@ public class InfectStatistic {
     }
 
     /**
+     * 执行所有操作的方法
+     * @param str    含有命令的字符串数组
+     */
+    public void allOperate(String[] str){
+        boolean b = isRightCommand(str);
+        //如果输入的命令有误，错误退出
+        if (b == false) {
+            System.exit(0);
+        }
+        //读取指定文件夹下所有文件
+        readDirectory(readfile);
+        if (datetime == null){
+            //如果date选项不存在
+            for (int i = 0;i < fileList.size();i ++) {
+                readFile(readfile + fileList.get(i));
+            }
+        }else{
+            //如果date选项存在，判断该日期与该文件夹下以日期为命名的所有文件的关系，通过filelist的下标定位
+            int pos = -1;
+            for (int i = 0;i < fileList.size();i ++) {
+                if (datetime.compareTo(fileList.get(i)) < 0){
+                    pos = i;
+                    break;
+                }
+            }
+            if (pos == -1){
+                pos = fileList.size();
+            }
+            for (int i = 0;i < pos;i ++) {
+                readFile(readfile + fileList.get(i));
+            }
+        }
+        writeFile(writefile);
+    }
+
+    /**
      * 主程序执行的函数方法
      * @param args     读取命令行参数的数组
      * @return null
      */
     public static void main(String[] args) {
-
+        InfectStatistic infectStatistic = new InfectStatistic();
+        infectStatistic.allOperate(args);
     }
 }
 
@@ -794,11 +831,16 @@ public class InfectStatistic {
  * 统计全国和所有省的情况的类
  */
 class StatisticsInformation{
-    public String name;    //省份名字
-    public int infection;  //感染患者人数
-    public int suspect;    //疑似患者人数
-    public int cure;       //已治愈人数
-    public int dead;       //已死亡人数
+    //省份名字
+    public String name;
+    //感染患者人数
+    public int infection;
+    //疑似患者人数
+    public int suspect;
+    //已治愈人数
+    public int cure;
+    //已死亡人数
+    public int dead;
 
     /**
      * 构造函数，用于给类成员赋值

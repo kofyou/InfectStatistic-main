@@ -7,12 +7,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.annotation.PostConstruct;
 import javax.print.attribute.standard.OutputDeviceAssigned;
 
 import sun.nio.cs.ext.IBM037;
+
 
 
 
@@ -30,6 +34,8 @@ class InfectStatistic {
 	private static String inputPath = "C://";
 	private static String outputPath = "C://";
 	private static String targetDate = "";
+	private static ArrayList<String> provinceArray = new ArrayList<String>();
+	private static Map<String, Province> map = new HashMap<String, Province>();
 	 
 	//将命令行参数转换成对象存储起来
 	private static void solveArgs(String[] args, Vector<Order> orders) {
@@ -87,6 +93,15 @@ class InfectStatistic {
 		}
 	}
 	
+	//测试打印结果
+	private static void printResult() {
+		if(map.get("福建") != null) {
+			Province province  = map.get("福建");
+			System.out.println("福建感染人数" + province.infect);
+			System.out.println("福建疑似人数" + province.seeming);
+		}
+	}
+	
 	//处理待处理文件的每一个文件
 	private static void solveEveryFile(Vector<String> toHandleDate) {
 		
@@ -99,22 +114,66 @@ class InfectStatistic {
 	    		InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
 	    		BufferedReader bf = new BufferedReader(inputReader);
 	    		
-	    		File output = new File(outputPath + ".output.txt");
-	    		if(!output.exists()){
-	    			output.createNewFile();
-	    		}
-	    		FileWriter fileWriter = new FileWriter(output.getAbsoluteFile());
-	    		BufferedWriter bw = new BufferedWriter(fileWriter);
+//	    		File output = new File(outputPath + ".output.txt");
+//	    		if(!output.exists()){
+//	    			output.createNewFile();
+//	    		}
+//	    		FileWriter fileWriter = new FileWriter(output.getAbsoluteFile());
+//	    		BufferedWriter bw = new BufferedWriter(fileWriter);
 	    		
 	    		
 	    		String str;
 	    		while ((str = bf.readLine()) != null) {
-	    			//fw.append(str);
+	    			String[] information = str.split("\\s+");
+	    			String province = information[0];//先取到省份
+	    			if(map.get(province) != null) {//省份已经出现过
+	    				Province p = map.get(province);
+	    				switch (information[1]) {
+						case "新增":
+							System.out.println(province + "新增");
+							break;
+						case "感染患者":
+							System.out.println(province + "感染患者");
+							break;
+						default:
+							break;
+						}
+	    			}
+	    			else {//省份还未出现过
+	    				Province p = new Province();
+	    				switch (information[1]) {
+						case "新增":
+							if(information[2].equals("感染患者")) {
+								//获取人数
+								String numString = information[information.length - 1];
+								int index = numString.indexOf("人");
+								numString = numString.substring(0, index);
+								int num = Integer.parseInt(numString);
+								p.infect += num;
+								//System.out.println(num);
+							}
+							else {//疑似患者的情况
+								//获取人数
+								String numString = information[information.length - 1];
+								int index = numString.indexOf("人");
+								numString = numString.substring(0, index);
+								int num = Integer.parseInt(numString);
+								p.seeming += num;
+							}
+							break;
+						case "感染患者":
+							System.out.println(province + "感染患者");
+							break;
+						default:
+							break;
+						}
+	    				map.put(province, p);
+	    			}
 	    			//System.out.println(str);
-	    			bw.write(str);
+	    			//bw.write(str);
 	    		}			
 	    		bf.close();		
-	    		bw.close();
+	    	//	bw.close();
 	    		inputReader.close();
 	    	
 			} 
@@ -228,6 +287,7 @@ class InfectStatistic {
     	System.out.println(inputPath);
     	System.out.println(outputPath);
     	solveDateOrder(targetDate);
+    	printResult();
     	//setVariable(orders);
     }
 }
@@ -236,5 +296,17 @@ class Order{
 	Vector<String> orderParams;//该命令的参数
 	 Order() {
 		 orderParams =  new Vector<String>();
+	}
+}
+
+class Province{
+	String name;//省名
+	int infect;//感染人数
+	int seeming;//疑似人数
+	int dead;//死亡人数
+	int cured;//治愈人数
+	
+	public Province() {
+		infect = seeming = dead = cured = 0;
 	}
 }

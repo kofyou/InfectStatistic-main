@@ -16,14 +16,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Test;
+
 /**
  * InfectStatistic TODO
  *
  * @author HHQ
- * @version 2.0
+ * @version 2.1
  */
 class InfectStatistic {
-
+    
     /**
      * Province类
      * @author HHQ
@@ -119,16 +121,16 @@ class InfectStatistic {
             for(int i=0; paramentersOfType[i] != null; i++) {
                 switch (paramentersOfType[i]) {
                 case "ip":
-                    resString += "感染患者" + ip + "人" + " ";
+                    resString += "感染患者" + " " + ip + "人" + " ";
                     break;
                 case "sp":
-                    resString += "疑似患者" + sp + "人" + " ";
+                    resString += "疑似患者" + " " + sp + "人" + " ";
                     break;
                 case "cure":
-                    resString += "治愈" + cure + "人" + " ";
+                    resString += "治愈" + " " + cure + "人" + " ";
                     break;
                 case "dead":
-                    resString += "死亡" + dead + "人" + " ";
+                    resString += "死亡" + " " + dead + "人" + " ";
                     break;
                 default:
                     break;
@@ -353,9 +355,9 @@ class InfectStatistic {
          * description：写入文件
          * @param hashtable 保存着所有参与统计的省份
          * @param fileOutputStream 输出文件流
-         * @param paramenterOfType -type的参数值
-         * @param paramenterOfProvice -province的参数值
-         * @param commandLineStrings 命令行数组 argv
+         * @param paramenterOfType数组 -type的参数值
+         * @param paramenterOfProvice数组 -province的参数值
+         * @param commandLineStrings数组 命令行数组 argv
          */
         public static void writeFile(Hashtable<String, Province> hashtable, FileOutputStream fileOutputStream, 
             String[] paramentersOfType, String[] paramentersOfProvince,String[] commandLineStrings) {
@@ -599,7 +601,7 @@ class InfectStatistic {
             }
         }
         
-        String directoryString = "./log";   // log 日志文件目录
+        String directoryString = "./log";   // log 日志文件目录,项目必会附带，如果没有，从项目里的log取
         String outputFileNameString = "./result/testOutput.txt";    //输出路径/文件名
         String toDateString = ToolMethods.getToday(); //统计到哪一天
         String[] paramentersOfType = new String[10];;  //type的参数值
@@ -646,12 +648,17 @@ class InfectStatistic {
         try {
             File file = null;
             File outputFile = new File(outputFileNameString);
+            String outputDirString = outputFileNameString.substring(0,outputFileNameString.lastIndexOf("/"));
+            File outputDir = new File(outputDirString);
             FileOutputStream fileOutputStream = null;
             InputStreamReader reader = null;
             for (int cnt = 0; cnt < listFileNameArrayList.size(); cnt++) {
-                String filePathString = "./log/" + listFileNameArrayList.get(cnt);
+                String filePathString = directoryString + "/" + listFileNameArrayList.get(cnt);  //输入文件路径
                 file = new File(filePathString);
                 
+                if(!outputDir.exists()) {
+                    outputDir.mkdir();
+                }
                 if (!outputFile.exists()) {
                     outputFile.createNewFile();
                 }
@@ -668,6 +675,9 @@ class InfectStatistic {
                             ;
                         }
                     }
+                }else {
+                    System.out.println("输入文件路径："+filePathString);
+                    System.out.println("找不到输入文件");
                 }
             }
             

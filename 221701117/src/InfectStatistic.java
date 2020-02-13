@@ -58,7 +58,7 @@ public class InfectStatistic
     		vector.add("-out");
     		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt");
     		vector.add("-date");
-    		vector.add("2020-02-22");
+    		vector.add("2020-02-30");
     		/*
     		vector.add("-type");
     		vector.add("sp");
@@ -175,6 +175,18 @@ public class InfectStatistic
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
         					inputEndDate = vector.get(i+j+1);
+        					//获取当前日期的年月日
+        					//Calendar now = Calendar.getInstance();
+        			        Date d = new Date();
+        			        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");  
+        			        String dateNowStr = sdf.format(d);  
+        			        //System.out.println("格式化后的日期：" + dateNowStr);  
+        			        //System.out.println(dateNowStr.compareTo(inputEndDate));
+        					if(!checkDate(inputEndDate)||dateNowStr.compareTo(inputEndDate) < 0)
+        					{
+        						System.out.println("日期有误!");
+        						System.exit(0);
+        					}
         				}
         				i += interval.elementAt(pos);
         				pos ++ ;
@@ -229,13 +241,10 @@ public class InfectStatistic
         				continue;
         			}
         			i += interval.elementAt(pos);
-    				pos ++ ;
-        			
+    				pos ++ ;        			
         		}
-        	}
-    		
-    	}
-    	
+        	}    		
+    	}    	
 	}
     
     
@@ -551,4 +560,23 @@ public class InfectStatistic
     } 
     
     
+    /**************************************************
+     * 作用:判断日期合法
+     * 参数:String
+     * 1返回类型:boolean
+     ***************************************************/
+    private static boolean checkDate(String date)
+    {
+    	//判断日期合法
+		SimpleDateFormat sd=new SimpleDateFormat("yyyy-MM-dd");//括号内为日期格式，y代表年份，
+		//M代表年份中的月份（为避免与小时中的分钟数m冲突，此处用M），d代表月份中的天数
+		try {
+			sd.setLenient(false);//此处指定日期/时间解析是否不严格，在true是不严格，false时为严格
+			sd.parse(inputEndDate);//从给定字符串的开始解析文本，以生成一个日期
+		}
+		catch (Exception e) {
+			return false;
+		}
+		return true;
+    }
 }

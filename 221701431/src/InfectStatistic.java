@@ -19,9 +19,10 @@ class InfectStatistic {
 //        int a = new CommandJudge().judge(args);
 //        new Test().test();
 //        new Test().files();
-        new Test().toFile(new Test().files());
+//        new Test().toFile(new Test().files());
 //        new Execute().log(args);
-//        new InfectStatisticApplication().log(args);
+        new InfectStatisticApplication().log(args);
+//        new Test().out();
     }
 }
 
@@ -115,77 +116,10 @@ class Province{
 
 
 class Test{
-    public void test(){
-        int i = 1;
-        HashMap<Integer, String> hashMap = new HashMap<Integer, String>();
-        hashMap.put(i++,"安徽"); hashMap.put(i++,"北京"); hashMap.put(i++,"重庆"); hashMap.put(i++,"福建"); hashMap.put(i++,"甘肃");
-        hashMap.put(i++,"广东"); hashMap.put(i++,"广西"); hashMap.put(i++,"贵州"); hashMap.put(i++,"海南"); hashMap.put(i++,"河北");
-        hashMap.put(i++,"河南"); hashMap.put(i++,"黑龙江"); hashMap.put(i++,"湖北"); hashMap.put(i++,"湖南"); hashMap.put(i++,"吉林");
-        hashMap.put(i++,"江苏"); hashMap.put(i++,"江西"); hashMap.put(i++,"辽宁"); hashMap.put(i++,"内蒙古"); hashMap.put(i++,"宁夏");
-        hashMap.put(i++,"青海"); hashMap.put(i++,"山东"); hashMap.put(i++,"山西"); hashMap.put(i++,"陕西"); hashMap.put(i++,"上海");
-        hashMap.put(i++,"四川"); hashMap.put(i++,"天津"); hashMap.put(i++,"西藏"); hashMap.put(i++,"新疆"); hashMap.put(i++,"云南");
-        hashMap.put(i++,"浙江");
-
-        java.util.List<Province> provinceList = new LinkedList<Province>();
-        for (int j = 0 ; j < hashMap.size() ; j++){
-//            provinceList.set(j).setName(hashMap.get(j));
-            provinceList.add(new Province(hashMap.get(j)));
-        }
-
-        for (int j = 0 ; j < provinceList.size() ; j++){
-            System.out.println(provinceList.get(j).getName());
-        }
-
-
-//        System.out.println(hashMap.get());
-//        System.out.println();
-    }
-
-    public String[] files(){
-        File file = new File("/Users/a/Desktop/近期作业/InfectStatistic-main/example/log");
-        File[] files = file.listFiles();
-//        java.util.List<String> filesName = new LinkedList<>();
-        String[] filesName = new String[files.length];
-        for (int i = 0 ; i < files.length ; i++){
-            filesName[i] = files[i].getName();
-        }
-
-        for (int i = 0; i < filesName.length; i++) {
-            for (int j = 0; j < filesName.length - i - 1; j++) {
-                if (filesName[j].compareTo(filesName[j + 1]) > 0) {
-                    String s = filesName[j];
-                    filesName[j] = filesName[j + 1];
-                    filesName[j + 1] = s;
-                }
-            }
-        }
-
-        System.out.println(filesName[0].compareTo(filesName[1]));
-
-        for (int i = 0 ; i < files.length ; i++){
-            System.out.println(filesName[i]);
-        }
-        return filesName;
-    }
-
-    public void changeList(LinkedList<Province> provinces){
-        provinces.get(0).setName("aaa");
-    }
-
-    public void toFile(String[] filesName ) throws IOException {
+    public void out() throws IOException {
         int i = 0;
-        HashMap<String , Integer> hashMap = new HashMap<String , Integer>();
-        hashMap.put("安徽",i++); hashMap.put("北京",i++); hashMap.put("重庆",i++); hashMap.put("福建",i++); hashMap.put("甘肃",i++);
-        hashMap.put("广东",i++); hashMap.put("广西",i++); hashMap.put("贵州",i++); hashMap.put("海南",i++); hashMap.put("河北",i++);
-        hashMap.put("河南",i++); hashMap.put("黑龙江",i++); hashMap.put("湖北",i++); hashMap.put("湖南",i++); hashMap.put("吉林",i++);
-        hashMap.put("江苏",i++); hashMap.put("江西",i++); hashMap.put("辽宁",i++); hashMap.put("内蒙古",i++); hashMap.put("宁夏",i++);
-        hashMap.put("青海",i++); hashMap.put("山东",i++); hashMap.put("山西",i++); hashMap.put("陕西",i++); hashMap.put("上海",i++);
-        hashMap.put("四川",i++); hashMap.put("天津",i++); hashMap.put("西藏",i++); hashMap.put("新疆",i++); hashMap.put("云南",i++);
-        hashMap.put("浙江",i++);
-
-        i = 0;
         HashMap<Integer, String> map = new HashMap<Integer, String>();
-        map.put(i++,"安徽"); map.put(i++,"北京"); map.put(i++,"重庆"); map.put(i++,"福建"); map.put(i++,"甘肃");
+        map.put(i++,"全国");map.put(i++,"安徽"); map.put(i++,"北京"); map.put(i++,"重庆"); map.put(i++,"福建"); map.put(i++,"甘肃");
         map.put(i++,"广东"); map.put(i++,"广西"); map.put(i++,"贵州"); map.put(i++,"海南"); map.put(i++,"河北");
         map.put(i++,"河南"); map.put(i++,"黑龙江"); map.put(i++,"湖北"); map.put(i++,"湖南"); map.put(i++,"吉林");
         map.put(i++,"江苏"); map.put(i++,"江西"); map.put(i++,"辽宁"); map.put(i++,"内蒙古"); map.put(i++,"宁夏");
@@ -195,116 +129,28 @@ class Test{
 
         LinkedList<Province> provinceList = new LinkedList<Province>();
         for (int j = 0 ; j < map.size() ; j++){
-//            provinceList.set(j).setName(hashMap.get(j));
             provinceList.add(new Province(map.get(j)));
         }
 
-        System.out.println(map);
 
-        System.out.println(hashMap);
+        File file = new File("/Users/a/Desktop/a.txt");
+        if (!file.exists())
+            file.createNewFile();
+        FileOutputStream fos=new FileOutputStream(file);
+        OutputStreamWriter osw=new OutputStreamWriter(fos, "UTF-8");
+        BufferedWriter  bw=new BufferedWriter(osw);
 
-        System.out.println(hashMap.get("福建"));
-
-        System.out.println("省份个数:" + provinceList.size());
-
+        String[] putins = new String[provinceList.size()];
         for (int j = 0 ; j < provinceList.size() ; j++){
-            System.out.println(provinceList.get(j).getName());
+            putins[j] = provinceList.get(j).getName() + " 感染患者" + provinceList.get(j).getSp() + "人 疑似患者" + provinceList.get(j).getIp() + "人 治愈" +
+                    provinceList.get(j).getCure() + "人 死亡" + provinceList.get(j).getDead() + "人";
+            bw.write(putins[j] + "\n");
         }
+        bw.write("// 该文档并非真实数据，仅供测试使用");
+        bw.close();
+        osw.close();
+        fos.close();
 
-//        changeList(provinceList);
-//        System.out.println(provinceList.get(0).getName());
-
-        java.util.List<Integer> infectProvinces = new LinkedList<>();
-
-        String log1 = "(\\S+) 新增 感染患者 (\\d+)人";
-        String log2 = "(\\S+) 新增 疑似患者 (\\d+)人";
-        String log3 = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
-        String log4 = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
-        String log5 = "(\\S+) 死亡 (\\d+)人";
-        String log6 = "(\\S+) 治愈 (\\d+)人";
-        String log7 = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
-        String log8 = "(\\S+) 排除 疑似患者 (\\d+)人";
-        String regEx="[^0-9]";
-
-        FileInputStream fis = null;
-        InputStreamReader isr = null;
-        BufferedReader br = null;
-
-        for (int j = 0 ; j < filesName.length ; j++) {
-            fis = new FileInputStream("/Users/a/Desktop/Infectlog/" + filesName[j]);
-            isr = new InputStreamReader(fis);// InputStreamReader 是字节流通向字符流的桥梁,
-            br = new BufferedReader(isr);
-            String str = "";
-            String str1 = "";
-            while ((str = br.readLine()) != null) {
-                str1 = "";
-                str1 += str;
-                System.out.println(str1);
-                String[] provinces = str1.split(" ");
-//                System.out.println(provinces.length);
-                String s = provinces[provinces.length - 1].replaceAll(regEx , "");
-//                System.out.println(s);
-                int peopleNumber = 0;
-
-                if (!s.isEmpty())
-                    peopleNumber = Integer.parseInt(s);
-//                System.out.println(peopleNumber);
-                if (Pattern.matches(log1 , str1)) {
-                    provinceList.get(hashMap.get(provinces[0])).setIp(provinceList.get(hashMap.get(provinces[0])).getIp() + peopleNumber);
-                    if (!infectProvinces.contains(hashMap.get(provinces[0])))
-                        infectProvinces.add(hashMap.get(provinces[0]));
-                    System.out.println(1);
-                }
-
-                if (Pattern.matches(log2 , str1)) {
-                    provinceList.get(hashMap.get(provinces[0])).setSp(provinceList.get(hashMap.get(provinces[0])).getSp() + peopleNumber);
-                    if (!infectProvinces.contains(hashMap.get(provinces[0])))
-                        infectProvinces.add(hashMap.get(provinces[0]));
-                    System.out.println(2);
-                }
-
-                if (Pattern.matches(log3 , str1)) {
-                    
-                    System.out.println(3);
-                }
-
-                if (Pattern.matches(log4 , str1)) {
-                    System.out.println(4);
-                }
-
-                if (Pattern.matches(log5 , str1)) {
-                    System.out.println(5);
-                }
-
-                if (Pattern.matches(log6 , str1)) {
-                    System.out.println(6);
-                }
-
-                if (Pattern.matches(log7 , str1)) {
-                    System.out.println(7);
-                }
-
-                if (Pattern.matches(log8 , str1)) {
-                    System.out.println(8);
-                }
-
-            }
-
-        }
-
-        System.out.println("被影响的省份个数" + infectProvinces.size());
-
-        for (int j = 0 ; j < infectProvinces.size() ; j++){
-            System.out.println(infectProvinces.get(j));
-        }
-        System.out.println("总省份个数" + provinceList.size());
-        for (int j = 0 ; j < infectProvinces.size() ; j++){
-            System.out.println(provinceList.get(infectProvinces.get(j)).getName());
-        }
-
-        fis.close();
-        isr.close();
-        br.close();
     }
 }
 
@@ -318,7 +164,7 @@ class Test{
 * */
 class InfectStatisticApplication{
 
-  public void log(String[] args){
+  public void log(String[] args) throws IOException {
       int judgeNum = new CommandJudge().judge(args);
       if (judgeNum == 1){
           System.out.println("judgeNum: " + judgeNum);
@@ -374,6 +220,36 @@ class REUtil{
         String type = "ip|sp|cure|dead";
         return Pattern.matches(type ,a);
     }
+
+    public int txtType(String a){
+        String log1 = "(\\S+) 新增 感染患者 (\\d+)人";
+        String log2 = "(\\S+) 新增 疑似患者 (\\d+)人";
+        String log3 = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
+        String log4 = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
+        String log5 = "(\\S+) 死亡 (\\d+)人";
+        String log6 = "(\\S+) 治愈 (\\d+)人";
+        String log7 = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
+        String log8 = "(\\S+) 排除 疑似患者 (\\d+)人";
+
+        if (Pattern.matches(log1 , a))
+            return 1;
+        if (Pattern.matches(log2 , a))
+            return 2;
+        if (Pattern.matches(log3 , a))
+            return 3;
+        if (Pattern.matches(log4 , a))
+            return 4;
+        if (Pattern.matches(log5 , a))
+            return 5;
+        if (Pattern.matches(log6 , a))
+            return 6;
+        if (Pattern.matches(log7 , a))
+            return 7;
+        if (Pattern.matches(log8 , a))
+            return 8;
+        return 0;
+    }
+
 }
 
 
@@ -469,10 +345,12 @@ class CommandJudge{
                         if ((i+1) == integers.size()){
                             if (args.length-2 != integers.get(i)){
                                 System.out.println("Error Command6");
+                                return 0;
                             }
                             File file = new File(args[integers.get(i)+1]);
                             if (!file.isDirectory()){
                                 System.out.println("It should be a directory");
+                                return 0;
                             }
                             else {
                                 File[] fileList = file.listFiles();
@@ -520,6 +398,7 @@ class CommandJudge{
                         if ((i+1) == integers.size()){
                             if (args.length-2 != integers.get(i)){
                                 System.out.println("Error Command7");
+                                return 0;
                             }
                             File f = new File(args[integers.get(i) + 1]);
                             if (f.isDirectory()){
@@ -634,6 +513,7 @@ class CommandJudge{
 
                     if(outJudge > 1 || logJudge > 1 || dateJudge > 1 || typeJudge > 1 || provinceJudge > 1){
                         System.out.println("Parameter repeat");
+                        return 0;
                     }
                 }
                 return 1;
@@ -673,8 +553,6 @@ class CommandJudge{
         return 0;
     }
 
-
-
     public boolean foundSpecial(String[] args , String special){
         for (int i = 0 ; i < args.length ; i++){
             if (args[i].equals(special))
@@ -683,6 +561,35 @@ class CommandJudge{
         return false;
     }
 
+    public LinkedList<String> foundProvinces(String[] args){
+        LinkedList<String> provincesList = new LinkedList<>();
+        for (int i = 0 ; i < args.length ; i++){
+            if (args[i].equals("-province")){
+                for (int j = i + 1 ; j < args.length ; j++){
+                    if (args[j].equals("-out") || args[j].equals("-log") || args[j].equals("-date") || args[j].equals("-type"))
+                        return provincesList;
+                    provincesList.add(args[j]);
+                }
+                return provincesList;
+            }
+        }
+        return provincesList;
+    }
+
+    public LinkedList<String> foundType(String[] args){
+        LinkedList<String> provincesList = new LinkedList<>();
+        for (int i = 0 ; i < args.length ; i++){
+            if (args[i].equals("-type")){
+                for (int j = i + 1 ; j < args.length ; j++){
+                    if (args[j].equals("-out") || args[j].equals("-log") || args[j].equals("-date") || args[j].equals("-province"))
+                        return provincesList;
+                    provincesList.add(args[j]);
+                }
+                return provincesList;
+            }
+        }
+        return provincesList;
+    }
 }
 
 
@@ -692,10 +599,10 @@ class CommandJudge{
 *
 * */
 class ListCommand{
-    public void Command(String[] args){
+    public void Command(String[] args) throws IOException {
         int i = 0;
         HashMap<String , Integer> hashMap = new HashMap<String , Integer>();
-        hashMap.put("安徽",i++); hashMap.put("北京",i++); hashMap.put("重庆",i++); hashMap.put("福建",i++); hashMap.put("甘肃",i++);
+        hashMap.put("全国",i++); hashMap.put("安徽",i++); hashMap.put("北京",i++); hashMap.put("重庆",i++); hashMap.put("福建",i++); hashMap.put("甘肃",i++);
         hashMap.put("广东",i++); hashMap.put("广西",i++); hashMap.put("贵州",i++); hashMap.put("海南",i++); hashMap.put("河北",i++);
         hashMap.put("河南",i++); hashMap.put("黑龙江",i++); hashMap.put("湖北",i++); hashMap.put("湖南",i++); hashMap.put("吉林",i++);
         hashMap.put("江苏",i++); hashMap.put("江西",i++); hashMap.put("辽宁",i++); hashMap.put("内蒙古",i++); hashMap.put("宁夏",i++);
@@ -705,7 +612,7 @@ class ListCommand{
 
         i = 0;
         HashMap<Integer, String> map = new HashMap<Integer, String>();
-        map.put(i++,"安徽"); map.put(i++,"北京"); map.put(i++,"重庆"); map.put(i++,"福建"); map.put(i++,"甘肃");
+        map.put(i++,"全国"); map.put(i++,"安徽"); map.put(i++,"北京"); map.put(i++,"重庆"); map.put(i++,"福建"); map.put(i++,"甘肃");
         map.put(i++,"广东"); map.put(i++,"广西"); map.put(i++,"贵州"); map.put(i++,"海南"); map.put(i++,"河北");
         map.put(i++,"河南"); map.put(i++,"黑龙江"); map.put(i++,"湖北"); map.put(i++,"湖南"); map.put(i++,"吉林");
         map.put(i++,"江苏"); map.put(i++,"江西"); map.put(i++,"辽宁"); map.put(i++,"内蒙古"); map.put(i++,"宁夏");
@@ -715,9 +622,9 @@ class ListCommand{
 
         LinkedList<Province> provinceList = new LinkedList<Province>();
         for (int j = 0 ; j < map.size() ; j++){
-//            provinceList.set(j).setName(hashMap.get(j));
             provinceList.add(new Province(map.get(j)));
         }
+        LinkedList<Integer> infectProvinces = new LinkedList<>();
 
 
         String logPath = args[new CommandJudge().foundSpecialIndex(args , "-log") + 1];
@@ -728,9 +635,7 @@ class ListCommand{
             filesName[j] = files[j].getName();
         }
         sort(filesName);
-        for (int j = 0 ; j < filesName.length ; j++){
-            System.out.println(filesName[j]);
-        }
+
         LinkedList<String> realfilesName = new LinkedList<>();
         if (new CommandJudge().foundSpecial(args , "-date")){
             for (int j = 0 ; j < filesName.length ; j++){
@@ -748,11 +653,165 @@ class ListCommand{
             return;
         }
 
+
+        FileInputStream fis = null;
+        InputStreamReader isr = null;
+        BufferedReader br = null;
         for (int j = 0 ; j < realfilesName.size() ; j++){
-            System.out.println(realfilesName.get(j));
+            fis = new FileInputStream(logPath + "/" + realfilesName.get(j));
+            isr = new InputStreamReader(fis);// InputStreamReader 是字节流通向字符流的桥梁,
+            br = new BufferedReader(isr);
+            String str = "";
+            String str1 = "";
+            while ((str = br.readLine()) != null){
+                str1 = "";
+                str1 += str;
+                getProvinceInfect(str1 , provinceList);
+            }
+        }
+        br.close();
+        isr.close();
+        fis.close();
+
+        if (new CommandJudge().foundSpecial(args , "-province")){
+            infectProvinces.clear();
+            LinkedList<String> list = new CommandJudge().foundProvinces(args);
+            System.out.println(list);
+            for (int k = 0 ; k < list.size() ; k++){
+                System.out.println(list.get(k));
+                int num = hashMap.get(list.get(k));
+                infectProvinces.add(num);
+            }
+        }else {
+            infectProvinces.clear();
+            for (int k = 0 ; k < provinceList.size() ; k++){
+                infectProvinces.add(k);
+            }
         }
 
 
+        for (int k = 0; k < infectProvinces.size(); k++) {
+            for (int l = 0; l < infectProvinces.size() - k - 1; l++) {
+                if (infectProvinces.get(l) > infectProvinces.get(l+1)) {
+                    int a = infectProvinces.get(l);
+                    infectProvinces.set(l , infectProvinces.get(l+1));
+                    infectProvinces.set(l+1 , a);
+                }
+            }
+        }
+
+
+//        System.out.println(1);
+//        System.out.println(args[new CommandJudge().foundSpecialIndex(args , "-out")+1]);
+
+        FileOutputStream fos=new FileOutputStream(args[new CommandJudge().foundSpecialIndex(args , "-out")+1]);
+        OutputStreamWriter osw=new OutputStreamWriter(fos, "UTF-8");
+        BufferedWriter  bw=new BufferedWriter(osw);
+
+        if (new CommandJudge().foundSpecial(args , "-type")){
+            LinkedList<String> types = new CommandJudge().foundType(args);
+            for (int k = 0 ; k < infectProvinces.size() ; k++){
+                String putIn = provinceList.get(infectProvinces.get(k)).getName();
+                for (int p = 0 ; p < types.size() ; p++){
+                    if (types.get(p).equals("ip"))
+                        putIn += (" 感染患者" + provinceList.get(infectProvinces.get(k)).getIp() + "人");
+                    if (types.get(p).equals("sp"))
+                        putIn += (" 疑似患者" + provinceList.get(infectProvinces.get(k)).getSp() + "人");
+                    if (types.get(p).equals("cure"))
+                        putIn += (" 治愈" + provinceList.get(infectProvinces.get(k)).getCure() + "人");
+                    if (types.get(p).equals("dead"))
+                        putIn += (" 死亡" + provinceList.get(infectProvinces.get(k)).getDead() + "人");
+                }
+                bw.write(putIn + "\n");
+            }
+        }else{
+            for (int k = 0 ; k < infectProvinces.size() ; k++){
+                String putIn = provinceList.get(k).getName() + " 感染患者" + provinceList.get(k).getSp() + "人 疑似患者" + provinceList.get(k).getIp() + "人 治愈" +
+                        provinceList.get(k).getCure() + "人 死亡" + provinceList.get(k).getDead() + "人";
+                bw.write(putIn + "\n");
+            }
+        }
+
+        bw.write("// 该文档并非真实数据，仅供测试使用");
+        bw.close();
+        osw.close();
+        fos.close();
+
+//        /*测试代码
+        for (int k = 0 ; k < infectProvinces.size() ; k++){
+            System.out.println("==================================");
+            System.out.println(provinceList.get(infectProvinces.get(k)).getName());
+            System.out.println(provinceList.get(infectProvinces.get(k)).getIp());
+            System.out.println(provinceList.get(infectProvinces.get(k)).getSp());
+            System.out.println(provinceList.get(infectProvinces.get(k)).getCure());
+            System.out.println(provinceList.get(infectProvinces.get(k)).getDead());
+            System.out.println(provinceList.get(infectProvinces.get(k)).isIpCheck());
+            System.out.println(provinceList.get(infectProvinces.get(k)).isSpCheck());
+            System.out.println(provinceList.get(infectProvinces.get(k)).isCureCheck());
+            System.out.println(provinceList.get(infectProvinces.get(k)).isDeadCheck());
+
+            System.out.println("===================================");
+        }
+//        */
+    }
+
+    public void getProvinceInfect(String input , LinkedList<Province> provinceList){
+        int i = 0;
+        HashMap<String , Integer> hashMap = new HashMap<String , Integer>();
+        hashMap.put("全国",i++); hashMap.put("安徽",i++); hashMap.put("北京",i++); hashMap.put("重庆",i++); hashMap.put("福建",i++); hashMap.put("甘肃",i++);
+        hashMap.put("广东",i++); hashMap.put("广西",i++); hashMap.put("贵州",i++); hashMap.put("海南",i++); hashMap.put("河北",i++);
+        hashMap.put("河南",i++); hashMap.put("黑龙江",i++); hashMap.put("湖北",i++); hashMap.put("湖南",i++); hashMap.put("吉林",i++);
+        hashMap.put("江苏",i++); hashMap.put("江西",i++); hashMap.put("辽宁",i++); hashMap.put("内蒙古",i++); hashMap.put("宁夏",i++);
+        hashMap.put("青海",i++); hashMap.put("山东",i++); hashMap.put("山西",i++); hashMap.put("陕西",i++); hashMap.put("上海",i++);
+        hashMap.put("四川",i++); hashMap.put("天津",i++); hashMap.put("西藏",i++); hashMap.put("新疆",i++); hashMap.put("云南",i++);
+        hashMap.put("浙江",i++);
+        String regEx="[^0-9]";
+        String[] provinces = input.split(" ");
+
+        String s = provinces[provinces.length - 1].replaceAll(regEx , "");
+//                System.out.println(s);
+        int peopleNumber = 0;
+
+        if (!s.isEmpty())
+            peopleNumber = Integer.parseInt(s);
+
+        int inputType = new REUtil().txtType(input);
+        if (inputType == 1) {
+            provinceList.get(hashMap.get(provinces[0])).setIp(provinceList.get(hashMap.get(provinces[0])).getIp() + peopleNumber);
+        }
+
+        if (inputType == 2) {
+            provinceList.get(hashMap.get(provinces[0])).setSp(provinceList.get(hashMap.get(provinces[0])).getSp() + peopleNumber);
+        }
+
+        if (inputType == 3) {
+            provinceList.get(hashMap.get(provinces[0])).setIp(provinceList.get(hashMap.get(provinces[0])).getIp() - peopleNumber);
+            provinceList.get(hashMap.get(provinces[3])).setIp(provinceList.get(hashMap.get(provinces[3])).getIp() + peopleNumber);
+        }
+
+        if (inputType == 4) {
+            provinceList.get(hashMap.get(provinces[0])).setSp(provinceList.get(hashMap.get(provinces[0])).getSp() - peopleNumber);
+            provinceList.get(hashMap.get(provinces[3])).setSp(provinceList.get(hashMap.get(provinces[3])).getSp() + peopleNumber);
+        }
+
+        if (inputType == 5) {
+            provinceList.get(hashMap.get(provinces[0])).setDead(provinceList.get(hashMap.get(provinces[0])).getDead() + peopleNumber);
+            provinceList.get(hashMap.get(provinces[0])).setIp(provinceList.get(hashMap.get(provinces[0])).getIp() - peopleNumber);
+        }
+
+        if (inputType == 6) {
+            provinceList.get(hashMap.get(provinces[0])).setCure(provinceList.get(hashMap.get(provinces[0])).getCure() + peopleNumber);
+            provinceList.get(hashMap.get(provinces[0])).setIp(provinceList.get(hashMap.get(provinces[0])).getIp() - peopleNumber);
+        }
+
+        if (inputType == 7) {
+            provinceList.get(hashMap.get(provinces[0])).setSp(provinceList.get(hashMap.get(provinces[0])).getSp() - peopleNumber);
+            provinceList.get(hashMap.get(provinces[0])).setIp(provinceList.get(hashMap.get(provinces[0])).getIp() + peopleNumber);
+        }
+
+        if (inputType == 8) {
+            provinceList.get(hashMap.get(provinces[0])).setSp(provinceList.get(hashMap.get(provinces[0])).getSp() - peopleNumber);
+        }
     }
 
     public void sort(String[] filesName){

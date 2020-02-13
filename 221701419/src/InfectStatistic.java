@@ -22,7 +22,7 @@ import org.junit.Test;
  * InfectStatistic TODO
  *
  * @author HHQ
- * @version 2.1
+ * @version 2.2
  */
 class InfectStatistic {
     
@@ -142,11 +142,11 @@ class InfectStatistic {
     }
 
     /**
-     * description：静态的一个工具类，一些静态的方法
+     * description:关于操作单行字符串（从文本读入的一行数据）的一些方法
      * @author HHQ
      */
-    static class ToolMethods {
-
+    static class OpLineStringMethods{
+        
         /**
          * description：将一个字符串以空格" "分割
          * @param string 传入的字符串
@@ -242,6 +242,14 @@ class InfectStatistic {
             }
         }
 
+
+    }
+    
+    /**
+     * description:获取输入文件的相关方法
+     * @author HHQ
+     */
+    static class GetFileMethods{
         /**
          * description：取得所有log中最大的日期
          * @param nameStrings 传入的文件名数组
@@ -308,6 +316,83 @@ class InfectStatistic {
             }
         }
 
+    }
+    
+    /**
+     * description:涉及到Province的一些方法
+     * @author HHQ
+     */
+    static class RelativeProviceMethods{
+        /**
+         * description：统计省份数据
+         * @param lineString 一行字符串
+         * @param hashtable 保存参与统计的省份
+         */
+        public static void calcProvince(String lineString, Hashtable<String, Province> hashtable) {
+            InfectStatistic infectStatistic = new InfectStatistic();
+            String[] afterSplitStrings = lineString.split(" ");
+            int numAfterSplit = afterSplitStrings.length; // 切割后数量
+            int number = OpLineStringMethods.getNumber(afterSplitStrings[numAfterSplit - 1]); // 一行信息中涉及的人数
+            String[] provinceNameStrings = OpLineStringMethods.getNeedModifyProvinceNames(afterSplitStrings);   //需要修改数据的省份名称
+            int operateType = OpLineStringMethods.getOperateType(afterSplitStrings);    // 获得操作类型
+
+            if (provinceNameStrings[1].equals("")) { // 只有一个省
+                if (!hashtable.containsKey(provinceNameStrings[0])) { // 哈希表中没有该省
+                    Province province = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
+                    RelativeProviceMethods.executeOperate(province, province, operateType, number);
+                    hashtable.put(province.getProvinceName(), province);
+                } else {
+                    Province province = hashtable.get(provinceNameStrings[0]);
+                    RelativeProviceMethods.executeOperate(province, province, operateType, number);
+                }
+            } else if (!provinceNameStrings[1].equals("")) { // 有两个省
+                Province province1 = null;
+                Province province2 = null;
+                if (hashtable.containsKey(provinceNameStrings[0]) && hashtable.containsKey(provinceNameStrings[1])) {
+                    province1 = hashtable.get(provinceNameStrings[0]);
+                    province2 = hashtable.get(provinceNameStrings[1]);
+                } else if (hashtable.containsKey(provinceNameStrings[0])
+                        && !hashtable.containsKey(provinceNameStrings[1])) {
+                    province1 = hashtable.get(provinceNameStrings[0]);
+                    province2 = infectStatistic.new Province(provinceNameStrings[1], 0, 0, 0, 0);
+                    hashtable.put(provinceNameStrings[1], province2);
+                } else if (!hashtable.containsKey(provinceNameStrings[0])
+                        && hashtable.containsKey(provinceNameStrings[1])) {
+                    province1 = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
+                    hashtable.put(provinceNameStrings[0], province1);
+                    province2 = hashtable.get(provinceNameStrings[1]);
+                } else if (!hashtable.containsKey(provinceNameStrings[0])
+                        && !hashtable.containsKey(provinceNameStrings[1])) {
+                    province1 = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
+                    province2 = infectStatistic.new Province(provinceNameStrings[1], 0, 0, 0, 0);
+                    hashtable.put(provinceNameStrings[0], province1);
+                    hashtable.put(provinceNameStrings[1], province2);
+
+                }
+                RelativeProviceMethods.executeOperate(province1, province2, operateType, number);
+            }
+
+        }
+
+        /**
+         * description：统计全国的数据
+         * @param hashtable 保存着所有参与统计的省份
+         */
+        public static void calcWholeNation(Hashtable<String, Province> hashtable) {
+            InfectStatistic infectStatistic = new InfectStatistic();
+            Province wholeNation = infectStatistic.new Province("全国", 0, 0, 0, 0);
+            Set set = hashtable.keySet();
+            Iterator iterator = set.iterator();
+            while(iterator.hasNext()) {
+                Object keyObject = iterator.next();
+                wholeNation.ip += hashtable.get(keyObject).getIp();
+                wholeNation.sp += hashtable.get(keyObject).getSp();
+                wholeNation.cure += hashtable.get(keyObject).getCure();
+                wholeNation.dead += hashtable.get(keyObject).getDead();
+            }
+            hashtable.put("全国", wholeNation);
+        }
+        
         /**
          * description：根据省份和操作类型ID执行相应的操作
          * @param province1 省份1
@@ -351,6 +436,13 @@ class InfectStatistic {
             }
         }
 
+    }
+    
+    /**
+     * description:输出文件的相关方法
+     * @author HHQ
+     */
+    static class OutPutFileMethods{
         /**
          * description：写入文件
          * @param hashtable 保存着所有参与统计的省份
@@ -375,7 +467,7 @@ class InfectStatistic {
                 if(paramentersOfProvince[0].equals("null")) {   //没有指定省份
                     Set set = hashtable.keySet();
                     Iterator iterator = set.iterator();
-                    List<Map.Entry<String,Province>> list = sortByHeadAlphabet(hashtable);       //排序
+                    List<Map.Entry<String,Province>> list = OpHashTableMethods.sortByHeadAlphabet(hashtable);       //排序
                     for (Map.Entry entry : list){
                         Province province = (Province) entry.getValue();
                         
@@ -402,7 +494,7 @@ class InfectStatistic {
                         }
                     }
                    
-                    List<Map.Entry<String,Province>> list = sortByHeadAlphabet(requestProvinceHashtable);       //排序
+                    List<Map.Entry<String,Province>> list = OpHashTableMethods.sortByHeadAlphabet(requestProvinceHashtable);       //排序
 
                     for (Map.Entry entry : list){
                         Province province = (Province) entry.getValue();
@@ -425,76 +517,13 @@ class InfectStatistic {
             }
         }
 
-        /**
-         * description：统计省份数据
-         * @param lineString 一行字符串
-         * @param hashtable 保存参与统计的省份
-         */
-        public static void calcProvince(String lineString, Hashtable<String, Province> hashtable) {
-            InfectStatistic infectStatistic = new InfectStatistic();
-            String[] afterSplitStrings = lineString.split(" ");
-            int numAfterSplit = afterSplitStrings.length; // 切割后数量
-            int number = ToolMethods.getNumber(afterSplitStrings[numAfterSplit - 1]); // 一行信息中涉及的人数
-            String[] provinceNameStrings = ToolMethods.getNeedModifyProvinceNames(afterSplitStrings);   //需要修改数据的省份名称
-            int operateType = ToolMethods.getOperateType(afterSplitStrings);    // 获得操作类型
-
-            if (provinceNameStrings[1].equals("")) { // 只有一个省
-                if (!hashtable.containsKey(provinceNameStrings[0])) { // 哈希表中没有该省
-                    Province province = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
-                    ToolMethods.executeOperate(province, province, operateType, number);
-                    hashtable.put(province.getProvinceName(), province);
-                } else {
-                    Province province = hashtable.get(provinceNameStrings[0]);
-                    ToolMethods.executeOperate(province, province, operateType, number);
-                }
-            } else if (!provinceNameStrings[1].equals("")) { // 有两个省
-                Province province1 = null;
-                Province province2 = null;
-                if (hashtable.containsKey(provinceNameStrings[0]) && hashtable.containsKey(provinceNameStrings[1])) {
-                    province1 = hashtable.get(provinceNameStrings[0]);
-                    province2 = hashtable.get(provinceNameStrings[1]);
-                } else if (hashtable.containsKey(provinceNameStrings[0])
-                        && !hashtable.containsKey(provinceNameStrings[1])) {
-                    province1 = hashtable.get(provinceNameStrings[0]);
-                    province2 = infectStatistic.new Province(provinceNameStrings[1], 0, 0, 0, 0);
-                    hashtable.put(provinceNameStrings[1], province2);
-                } else if (!hashtable.containsKey(provinceNameStrings[0])
-                        && hashtable.containsKey(provinceNameStrings[1])) {
-                    province1 = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
-                    hashtable.put(provinceNameStrings[0], province1);
-                    province2 = hashtable.get(provinceNameStrings[1]);
-                } else if (!hashtable.containsKey(provinceNameStrings[0])
-                        && !hashtable.containsKey(provinceNameStrings[1])) {
-                    province1 = infectStatistic.new Province(provinceNameStrings[0], 0, 0, 0, 0);
-                    province2 = infectStatistic.new Province(provinceNameStrings[1], 0, 0, 0, 0);
-                    hashtable.put(provinceNameStrings[0], province1);
-                    hashtable.put(provinceNameStrings[1], province2);
-
-                }
-                ToolMethods.executeOperate(province1, province2, operateType, number);
-            }
-
-        }
-
-        /**
-         * description：统计全国的数据
-         * @param hashtable 保存着所有参与统计的省份
-         */
-        public static void calcWholeNation(Hashtable<String, Province> hashtable) {
-            InfectStatistic infectStatistic = new InfectStatistic();
-            Province wholeNation = infectStatistic.new Province("全国", 0, 0, 0, 0);
-            Set set = hashtable.keySet();
-            Iterator iterator = set.iterator();
-            while(iterator.hasNext()) {
-                Object keyObject = iterator.next();
-                wholeNation.ip += hashtable.get(keyObject).getIp();
-                wholeNation.sp += hashtable.get(keyObject).getSp();
-                wholeNation.cure += hashtable.get(keyObject).getCure();
-                wholeNation.dead += hashtable.get(keyObject).getDead();
-            }
-            hashtable.put("全国", wholeNation);
-        }
-        
+    }
+    
+    /**
+     * description:有关哈希表的一些操作
+     * @author HHQ
+     */
+    static class OpHashTableMethods{
         /**
          * description：HashMap根据value获取key
          * @param map 要反转的HashMap
@@ -524,7 +553,7 @@ class InfectStatistic {
             alphabetOfProvince.put("上海", "SH");
             alphabetOfProvince.put("重庆", "CQ");
             alphabetOfProvince.put("河北", "HB");
-            alphabetOfProvince.put("山西", "SX");
+            alphabetOfProvince.put("山西", "SXA");
             alphabetOfProvince.put("辽宁", "LN");
             alphabetOfProvince.put("吉林", "JL");
             alphabetOfProvince.put("黑龙江", "HLJ");
@@ -542,15 +571,15 @@ class InfectStatistic {
             alphabetOfProvince.put("四川", "SC");
             alphabetOfProvince.put("贵州", "GZ");
             alphabetOfProvince.put("云南", "YN");
-            alphabetOfProvince.put("陕西", "SX");
+            alphabetOfProvince.put("陕西", "SXB");
             alphabetOfProvince.put("甘肃", "GS");
             alphabetOfProvince.put("青海", "QH");
             alphabetOfProvince.put("台湾", "TW");
-            alphabetOfProvince.put("内蒙古自治区", "NMG");
-            alphabetOfProvince.put("广西壮族自治区", "GXZZ");
-            alphabetOfProvince.put("西藏自治区", "XZZZQ");
-            alphabetOfProvince.put("宁夏回族自治区", "NX");
-            alphabetOfProvince.put("新疆维吾尔自治区", "XZ");
+            alphabetOfProvince.put("内蒙古", "NMG");
+            alphabetOfProvince.put("广西", "GX");
+            alphabetOfProvince.put("西藏", "XZ");
+            alphabetOfProvince.put("宁夏", "NX");
+            alphabetOfProvince.put("新疆", "XZ");
             alphabetOfProvince.put("香港", "XG");
             alphabetOfProvince.put("澳门", "AM");        
             
@@ -580,12 +609,14 @@ class InfectStatistic {
             return paramenterHashMap;
         }
     
-    
     }
 
+    
     public static void main(String[] args) {
-        
-        HashMap<Integer, String> paramenterHashMap = ToolMethods.initParamentHashMap(); //一个包含所有参数名的哈希表
+        /**
+         * 分离命令行中的参数名、参数值     
+         */
+        HashMap<Integer, String> paramenterHashMap = OpHashTableMethods.initParamentHashMap(); //一个包含所有参数名的哈希表
         
         String[] paramenterStrings = new String[args.length - 1];   //存储传入的参数名、参数值
         for(int i=1; i<args.length; i++) {
@@ -595,15 +626,19 @@ class InfectStatistic {
         int[] indexOfParamenterStrings = {-1, -1, -1, -1, -1, -1};
         //找到参数名，并记录位置
         for(int i=0; i<paramenterStrings.length; i++) {
-            int key = ToolMethods.getKey(paramenterHashMap, paramenterStrings[i]);
+            int key = OpHashTableMethods.getKey(paramenterHashMap, paramenterStrings[i]);
             if( key != -1) {   //是参数名
                 indexOfParamenterStrings[key] = i;   //key对应的参数名在patamenterStrings的i下标位置,值为-1则代表无此参数名
             }
         }
         
+        
+        /**
+         * 初始化输入路径、输出路径、截至日期、type参数值、province参数值
+         */
         String directoryString = "./log";   // log 日志文件目录,项目必会附带，如果没有，从项目里的log取
         String outputFileNameString = "./result/testOutput.txt";    //输出路径/文件名
-        String toDateString = ToolMethods.getToday(); //统计到哪一天
+        String toDateString = GetFileMethods.getToday(); //统计到哪一天
         String[] paramentersOfType = new String[10];;  //type的参数值
         String[] paramentersOfProvince = new String[25];  //province的参数值
         paramentersOfType[0] = "null";
@@ -623,7 +658,7 @@ class InfectStatistic {
                     int cnt = 0;
                     //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
                      for(int j=indexOfParamenterStrings[i]+1; 
-                        j<paramenterStrings.length && ToolMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
+                        j<paramenterStrings.length && OpHashTableMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
                         paramenterValues[cnt++] = paramenterStrings[j];
                         paramentersOfType = paramenterValues;
                     }
@@ -632,7 +667,7 @@ class InfectStatistic {
                     int cnt = 0;
                     //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
                      for(int j=indexOfParamenterStrings[i]+1; 
-                        j<paramenterStrings.length && ToolMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
+                        j<paramenterStrings.length && OpHashTableMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
                         paramenterValues[cnt++] = paramenterStrings[j];
                         paramentersOfProvince = paramenterValues;
                     }
@@ -643,7 +678,7 @@ class InfectStatistic {
         InfectStatistic infectStatistic = new InfectStatistic();
         Hashtable<String, Province> hashtable = new Hashtable<String, Province>(40);    //存储省份的哈希表
         ArrayList<String> listFileNameArrayList = new ArrayList<String>();      //用来保存一个文件夹下的文件夹名的数组
-        ToolMethods.getBeforeDateFileName(directoryString, toDateString, listFileNameArrayList);    //初始化listFileNameArrayList
+        GetFileMethods.getBeforeDateFileName(directoryString, toDateString, listFileNameArrayList);    //初始化listFileNameArrayList
         
         try {
             File file = null;
@@ -669,8 +704,8 @@ class InfectStatistic {
 
                     String lineString = null;
                     while ((lineString = bufferedReader.readLine()) != null) {
-                        if (!ToolMethods.isAnnotation(lineString)) { // 不是注释行
-                            ToolMethods.calcProvince(lineString, hashtable); // 进行统计
+                        if (!OpLineStringMethods.isAnnotation(lineString)) { // 不是注释行
+                            RelativeProviceMethods.calcProvince(lineString, hashtable); // 进行统计
                         } else { // 是注释行，不执行任何操作
                             ;
                         }
@@ -681,8 +716,8 @@ class InfectStatistic {
                 }
             }
             
-            ToolMethods.calcWholeNation(hashtable);
-            ToolMethods.writeFile(hashtable, fileOutputStream, paramentersOfType, paramentersOfProvince, args);
+            RelativeProviceMethods.calcWholeNation(hashtable);
+            OutPutFileMethods.writeFile(hashtable, fileOutputStream, paramentersOfType, paramentersOfProvince, args);
             reader.close();
         } catch (Exception e) {
             // TODO: handle exception

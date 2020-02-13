@@ -1,4 +1,4 @@
-# InfectStatistic-学号
+# InfectStatistic-221701124
 疫情统计
 
 描述你的项目，包括如何运行、功能简介、作业链接、博客链接等

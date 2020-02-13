@@ -1,9 +1,12 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Writer;
 import java.util.Vector;
 
 import javax.annotation.PostConstruct;
@@ -40,10 +43,10 @@ class InfectStatistic {
 	    		Order oneOrder = new Order();
 	    		oneOrder.orderName = arg;
 	    		if(arg.equals("-log")) {//处理输入路径
-	    			inputPath = args[pos + 1];
+	    			inputPath = args[pos + 1] + "\\";
 	    		}
 	    		else if(arg.equals("-out")) {//处理输出路径
-	    			outputPath = args[pos + 1];
+	    			outputPath = args[pos + 1] + "\\";
 	    		}
 	    		else if(arg.equals("-date")) {//处理日期
 	    			targetDate = args[pos + 1];
@@ -84,6 +87,45 @@ class InfectStatistic {
 		}
 	}
 	
+	//处理待处理文件的每一个文件
+	private static void solveEveryFile(Vector<String> toHandleDate) {
+		
+		
+		StringBuffer sb = new StringBuffer();
+		for(String dateFile : toHandleDate) {
+			dateFile = inputPath + dateFile + ".log.txt";
+			try {
+	    		File file = new File(dateFile);
+	    		InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
+	    		BufferedReader bf = new BufferedReader(inputReader);
+	    		
+	    		File output = new File(outputPath + ".output.txt");
+	    		if(!output.exists()){
+	    			output.createNewFile();
+	    		}
+	    		FileWriter fileWriter = new FileWriter(output.getAbsoluteFile());
+	    		BufferedWriter bw = new BufferedWriter(fileWriter);
+	    		
+	    		
+	    		String str;
+	    		while ((str = bf.readLine()) != null) {
+	    			//fw.append(str);
+	    			//System.out.println(str);
+	    			bw.write(str);
+	    		}			
+	    		bf.close();		
+	    		bw.close();
+	    		inputReader.close();
+	    	
+			} 
+	    	catch (IOException  e) {
+				// TODO: handle exception
+	    		e.printStackTrace();
+			}
+		}
+		
+	}
+	
 	//处理date命令
 	private static void solveDateOrder(String targetDate) {
 		//获取输入路径下的所有文件
@@ -111,8 +153,11 @@ class InfectStatistic {
 			else {
 				flag = false;
 			}
-			for(String aString : toHandleDate) {
-				System.out.println(aString);
+//			for(String aString : toHandleDate) {
+//				System.out.println(aString);
+//			}
+			if(toHandleDate.size() > 0) {
+				solveEveryFile(toHandleDate);
 			}
 		}
 		
@@ -149,6 +194,36 @@ class InfectStatistic {
 //			// TODO: handle exception
 //    		e.printStackTrace();
 //		}
+
+//		try {
+//
+//				String content = "a dog will be write in file";
+//
+//				File file = new File("test_appendfile2.txt");
+//
+//				if(!file.exists()){
+//
+//					file.createNewFile();
+//
+//				}
+//
+//				FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
+//
+//				BufferedWriter bw = new BufferedWriter(fileWriter);
+//
+//				bw.write(content);
+//
+//				bw.close();
+//
+//				System.out.println("finish");
+//
+//		    } catch (IOException e) {
+//
+//		        e.printStackTrace();
+//
+//		    }
+
+
     	printOrders(orders);
     	System.out.println(inputPath);
     	System.out.println(outputPath);

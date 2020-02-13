@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * TODO
  *
  * @author 221701238_周宇靖
- * @version 1.6
+ * @version 1.7
  * @since 2020-02-08
  */
 public class InfectStatistic {
@@ -369,53 +369,212 @@ public class InfectStatistic {
      * 将统计好的日志信息写入文件的方法
      * @param filepath    指定文件路径
      */
-    public void writeFile(String filepath){
+    public void writeFile(String filepath) {
         File file = new File(filepath);
         BufferedWriter writer = null;
-        if(!file.exists())
-        {
-            try{
+        if (!file.exists()) {
+            try {
                 file.createNewFile();
-            }catch (IOException e){
+            }catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        try{
+        try {
             writer = new BufferedWriter(new FileWriter(filepath));
             StatisticsInformation nation = new StatisticsInformation("全国",
-                    0, 0, 0 ,0);
+                    0, 0, 0, 0);
             //统计目前全国的感染情况
-            for (int i = 0; i < statisticsInformationArrayList.size(); i++){
+            for (int i = 0;i < statisticsInformationArrayList.size();i ++) {
                 nation.infection += statisticsInformationArrayList.get(i).infection;
                 nation.suspect += statisticsInformationArrayList.get(i).suspect;
                 nation.dead += statisticsInformationArrayList.get(i).dead;
                 nation.cure += statisticsInformationArrayList.get(i).cure;
             }
-            writer.write(nation.name + " 感染患者" + nation.infection + "人 疑似患者" + nation.suspect + "人 治愈"
-                    + nation.cure + "人 死亡" + nation.dead + "人");
-            writer.newLine();
-            for (int i = 0; i < statisticsInformationArrayList.size(); i++){
-                if (statisticsInformationArrayList.get(i).infection == 0
-                        && statisticsInformationArrayList.get(i).suspect == 0
-                        && statisticsInformationArrayList.get(i).dead == 0
-                        && statisticsInformationArrayList.get(i).cure == 0 ){
+            //判断需要打印的情况
+            int ipNum = 0;
+            int spNum = 0;
+            int cureNum = 0;
+            int deadNum = 0;
+            //判断需要打印的省份，存储对应provinceList的下标
+            ArrayList<Integer> provinceCountList = new ArrayList<Integer>();
+            //判断是否打印“全国”，含有“全国”则设为1
+            int nationNum = 0;
+            //存储要写到文件里的一行内容
+            String writeContent = "";
+            //只有type选项没有province选项的情况
+            if (typelist != null && provincelist == null){
+                for (int i = 0;i < typelist.size();i ++ ){
+                    if (typelist.get(i).equals("ip")){
+                        ipNum = 1;
+                    }else if (typelist.get(i).equals("sp")){
+                        spNum = 1;
+                    }else if (typelist.get(i).equals("cure")){
+                        cureNum = 1;
+                    }else{
+                        deadNum = 1;
+                    }
+                }
+                writeContent = nation.name;
+                if (ipNum == 1){
+                    writeContent += " 感染患者" + nation.infection +"人";
+                }
+                if (spNum ==1){
+                    writeContent += " 疑似患者" + nation.suspect + "人";
+                }
+                if (cureNum == 1){
+                    writeContent += " 治愈" + nation.cure + "人";
+                }
+                if (deadNum == 1){
+                    writeContent += " 死亡" + nation.dead + "人";
+                }
+                writer.write(writeContent);
+                writer.newLine();
+                for (int i = 0; i < statisticsInformationArrayList.size(); i++) {
+                    if (statisticsInformationArrayList.get(i).infection == 0
+                            && statisticsInformationArrayList.get(i).suspect == 0
+                            && statisticsInformationArrayList.get(i).dead == 0
+                            && statisticsInformationArrayList.get(i).cure == 0) {
 
-                }else{
-                    writer.write(statisticsInformationArrayList.get(i).name + " 感染患者"
-                            + statisticsInformationArrayList.get(i).infection + "人 疑似患者"
-                            + statisticsInformationArrayList.get(i).suspect + "人 治愈"
-                            + statisticsInformationArrayList.get(i).cure + "人 死亡"
-                            + statisticsInformationArrayList.get(i).dead + "人");
+                    }else {
+                        writeContent = statisticsInformationArrayList.get(i).name;
+                        if (ipNum == 1){
+                            writeContent += " 感染患者" + statisticsInformationArrayList.get(i).infection +"人";
+                        }
+                        if (spNum ==1){
+                            writeContent += " 疑似患者" + statisticsInformationArrayList.get(i).suspect + "人";
+                        }
+                        if (cureNum == 1){
+                            writeContent += " 治愈" + statisticsInformationArrayList.get(i).cure + "人";
+                        }
+                        if (deadNum == 1){
+                            writeContent += " 死亡" + statisticsInformationArrayList.get(i).dead + "人";
+                        }
+                        writer.write(writeContent);
+                        writer.newLine();
+                    }
+                }
+            }else if (typelist == null && provincelist != null){
+                //只有province选项没有type选项的情况
+                for (int i = 0;i < provincelist.size();i ++){
+                    if (provincelist.get(i).equals("全国")){
+                        nationNum = 1;
+                    }else{
+                        for (int j = 0;j < PROVINCE_ARRAY.length;j ++){
+                            if (provincelist.get(i).equals(PROVINCE_ARRAY[j])){
+                                provinceCountList.add(j);
+                                break;
+                            }
+                        }
+                    }
+                }
+                Collections.sort(provinceCountList);
+                if (nationNum == 1){
+                    writer.write(nation.name + " 感染患者" + nation.infection + "人 疑似患者" + nation.suspect
+                            + "人 治愈" + nation.cure + "人 死亡" + nation.dead + "人");
                     writer.newLine();
                 }
+                for (int i = 0; i < provinceCountList.size(); i++){
+                    writer.write(statisticsInformationArrayList.get(provinceCountList.get(i)).name + " 感染患者"
+                            + statisticsInformationArrayList.get(provinceCountList.get(i)).infection + "人 疑似患者"
+                            + statisticsInformationArrayList.get(provinceCountList.get(i)).suspect + "人 治愈"
+                            + statisticsInformationArrayList.get(provinceCountList.get(i)).cure + "人 死亡"
+                            + statisticsInformationArrayList.get(provinceCountList.get(i)).dead + "人");
+                    writer.newLine();
+                }
+            }else if (typelist != null && provincelist != null){
+                //type选项和province选项都存在的情况
+                for (int i = 0;i < typelist.size();i ++ ){
+                    if (typelist.get(i).equals("ip")){
+                        ipNum = 1;
+                    }else if (typelist.get(i).equals("sp")){
+                        spNum = 1;
+                    }else if (typelist.get(i).equals("cure")){
+                        cureNum = 1;
+                    }else{
+                        deadNum = 1;
+                    }
+                }
+                for (int i = 0;i < provincelist.size();i ++){
+                    if (provincelist.get(i).equals("全国")){
+                        nationNum = 1;
+                    }else{
+                        for (int j = 0;j < PROVINCE_ARRAY.length;j ++){
+                            if (provincelist.get(i).equals(PROVINCE_ARRAY[j])){
+                                provinceCountList.add(j);
+                                break;
+                            }
+                        }
+                    }
+                }
+                Collections.sort(provinceCountList);
+                if (nationNum == 1){
+                    writeContent = nation.name;
+                    if (ipNum == 1){
+                        writeContent += " 感染患者" + nation.infection +"人";
+                    }
+                    if (spNum ==1){
+                        writeContent += " 疑似患者" + nation.suspect + "人";
+                    }
+                    if (cureNum == 1){
+                        writeContent += " 治愈" + nation.cure + "人";
+                    }
+                    if (deadNum == 1){
+                        writeContent += " 死亡" + nation.dead + "人";
+                    }
+                    writer.write(writeContent);
+                    writer.newLine();
+                }
+                for (int i = 0; i < provinceCountList.size(); i++) {
+                    writeContent = statisticsInformationArrayList.get(provinceCountList.get(i)).name;
+                    if (ipNum == 1){
+                        writeContent += " 感染患者"
+                                + statisticsInformationArrayList.get(provinceCountList.get(i)).infection +"人";
+                    }
+                    if (spNum ==1){
+                        writeContent += " 疑似患者"
+                                + statisticsInformationArrayList.get(provinceCountList.get(i)).suspect + "人";
+                    }
+                    if (cureNum == 1){
+                        writeContent += " 治愈"
+                                + statisticsInformationArrayList.get(provinceCountList.get(i)).cure + "人";
+                    }
+                    if (deadNum == 1){
+                        writeContent += " 死亡"
+                                + statisticsInformationArrayList.get(provinceCountList.get(i)).dead + "人";
+                    }
+                    writer.write(writeContent);
+                    writer.newLine();
+                }
+            }else {
+                //type选项和province选项都不存在的情况
+                writer.write(nation.name + " 感染患者" + nation.infection + "人 疑似患者" + nation.suspect + "人 治愈"
+                        + nation.cure + "人 死亡" + nation.dead + "人");
+                writer.newLine();
+                for (int i = 0; i < statisticsInformationArrayList.size(); i++) {
+                    if (statisticsInformationArrayList.get(i).infection == 0
+                            && statisticsInformationArrayList.get(i).suspect == 0
+                            && statisticsInformationArrayList.get(i).dead == 0
+                            && statisticsInformationArrayList.get(i).cure == 0) {
+
+                    }else {
+                        writer.write(statisticsInformationArrayList.get(i).name + " 感染患者"
+                                + statisticsInformationArrayList.get(i).infection + "人 疑似患者"
+                                + statisticsInformationArrayList.get(i).suspect + "人 治愈"
+                                + statisticsInformationArrayList.get(i).cure + "人 死亡"
+                                + statisticsInformationArrayList.get(i).dead + "人");
+                        writer.newLine();
+                    }
+                }
+                writer.write("// 该文档并非真实数据，仅供测试使用");
+                writer.newLine();
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        }finally{
-            if (writer != null){
-                try{
+        } finally {
+            if (writer != null) {
+                try {
                     writer.close();
-                }catch (IOException e1){
+                } catch (IOException e1) {
                     e1.printStackTrace();
                 }
             }

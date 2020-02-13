@@ -1,7 +1,7 @@
 /***********************
 FileName:InfectStatistic.cpp
 Author:Cazenove
-Version:v1.0正式版
+Version:v1.1
 Date:2020.02.11
 Description:
     本程序为疫情统计程序，通过读取list命令中给定了log路径下的日志文件，以及给定的具体参数，将统计结果输出到给定out路径的文件中
@@ -16,28 +16,9 @@ Description:
     作业要求链接：https://edu.cnblogs.com/campus/fzu/2020SPRINGS/homework/10287
     项目github链接：https://github.com/Cazenove/InfectStatistic-main
 Version Description:
-    参照作业要求初步完成了所有基本命令
-Function List:
-    void init();
-    string GbkToUtf8(const char *gbk);
-    int datecmp(string date1, string date2);
-    void ReadAllLog(string path, string date);
-    void ReadLog(string filePath);
-    void ProcessOption(int argc,char *argv[]);
-    void list(string logPath, string outPath, string date, vector<string> type, vector<string> province);
-    void OutLog(string filePath, vector<string> type, vector<string> province);
-    void ShowProvince(string strProvince);
-    void ShowAllProvince();
-    void AddIP(string strProvince,int num);
-    void AddSP(string strProvince,int num);
-    void MoveIP(string strProvinceA,string strProvinceB,int num);
-    void MoveSP(string strProvinceA,string strProvinceB,int num);
-    void IPtoDead(string strProvince,int num);
-    void IPtoCure(string strProvince,int num);
-    void SPtoIP(string strProvince,int num);
-    void SubSP(string strProvince,int num);
+    使用面向对象方法重新编排代码，将省份信息与操作进行了封装。
 History:
-    none
+    V1.0:参照作业要求初步完成了所有基本命令
 ************************/
 
 #include <iostream>
@@ -55,20 +36,48 @@ History:
 using namespace std;
 
 /***********************
-Description:省份信息结构体，用于存储单个省份的确诊、疑似、治愈、死亡数量
+Description:存放某省份的数据以及对数据的操作
 ***********************/
-struct SProvinceInformation
+class CProvince
 {
+    public:
     unsigned int ip;//确诊患者数量
     unsigned int sp;//疑似患者数量
     unsigned int cure;//治愈患者数量
     unsigned int dead;//死亡患者数量
+
+    //初始化
+    CProvince();
+
+    //感染患者增加
+    void AddIP(int num);
+    
+    //疑似患者增加
+    void AddSP(int num);
+    
+    //感染患者流入其他省
+    void MoveIP(string strProvince,int num);
+    
+    //疑似患者流入其他省
+    void MoveSP(string strProvince,int num);
+    
+    //感染患者死亡
+    void IPtoDead(int num);
+    
+    //感染患者治愈
+    void IPtoCure(int num);
+    
+    //疑似患者确诊为感染患者
+    void SPtoIP(int num);
+    
+    //排除疑似患者
+    void SubSP(int num);
 };
 
 /***********************
 Description:存放各省份名称
 ***********************/
-string PROVINCE[35] = 
+string PROVINCENAME[35] = 
 {
     "全国","安徽","澳门","北京","重庆","福建","甘肃",
     "广东","广西","贵州","海南","河北","河南","黑龙江",
@@ -80,7 +89,7 @@ string PROVINCE[35] =
 /***********************
 Description:使用STL的map来建立省份名称和省份信息结构体之间的映射关系
 ***********************/
-map<string,SProvinceInformation> mapProvince;
+map<string,CProvince> mapProvince;
 
 
 /***********************
@@ -210,109 +219,10 @@ Others:用于测试
 void ShowAllProvince();
 
 
-/***********************
-Description:<省> 新增 感染患者 n人
-Input:
-    string strProvince:省份名称
-    int num:人数
-Output:none
-Return:none
-Others:none
-***********************/
-void AddIP(string strProvince,int num);
-
-
-/***********************
-Description:<省> 新增 疑似患者 n人
-Input:
-    string strProvince:省份名称
-    int num:人数
-Output:none
-Return:none
-Others:none
-***********************/
-void AddSP(string strProvince,int num);
-
-
-/***********************
-Description:<省1> 感染患者 流入 <省2> n人
-Input:
-    string strProvinceA:省份1名称
-    string strProvinceB:省份2名称
-    int num:人数
-Output:none
-Return:none
-Others:none
-***********************/
-void MoveIP(string strProvinceA,string strProvinceB,int num);
-
-
-/***********************
-Description:<省1> 疑似患者 流入 <省2> n人
-Input:
-    string strProvinceA:省份1名称
-    string strProvinceB:省份2名称
-    int num:人数
-Output:none
-Return:none
-Others:none
-***********************/
-void MoveSP(string strProvinceA,string strProvinceB,int num);
-
-
-/***********************
-Description:<省> 死亡 n人
-Input:
-    string strProvince:省份名称
-    int num:人数
-Output:none
-Return:none
-Others:none
-***********************/
-void IPtoDead(string strProvince,int num);
-
-
-/***********************
-Description:<省> 治愈 n人
-Input:
-    string strProvince:省份名称
-    int num:人数
-Output:none
-Return:none
-Others:none
-***********************/
-void IPtoCure(string strProvince,int num);
-
-
-/***********************
-Description:<省> 疑似患者 确诊感染 n人
-Input:
-    string strProvince:省份名称
-    int num:人数
-Output:none
-Return:none
-Others:none
-***********************/
-void SPtoIP(string strProvince,int num);
-
-
-/***********************
-Description:<省> 排除 疑似患者 n人
-Input:
-    string strProvince:省份名称
-    int num:人数
-Output:none
-Return:none
-Others:none
-***********************/
-void SubSP(string strProvince,int num);
-
-
 /*主函数*/
 int main(int argc,char *argv[])
 {
     ProcessOption(argc,argv);//处理命令行参数
-    system("pause");
     return 0;
 }
 
@@ -324,8 +234,8 @@ void init()//初始化
     for(int i=0; i<35; i++)
     {
         //ifProvince>>strProvince;//从文件中读取省份名称
-        SProvinceInformation spiProvince = {0};
-        mapProvince[PROVINCE[i]] = spiProvince;//建立省份名称与信息存储结构的映射关系
+        CProvince cprovince;
+        mapProvince[PROVINCENAME[i]] = cprovince;//建立省份名称与信息存储结构的映射关系
     }
 }
 
@@ -456,39 +366,47 @@ void ReadLog(string filePath)
             {
                 if(strcmp(cBuffer[2],"感染患者") == 0)//新增感染患者
                 {
-                    AddIP(cBuffer[0],atoi(cBuffer[3]));
+                    mapProvince[cBuffer[0]].AddIP(atoi(cBuffer[3]));
+                    //AddIP(cBuffer[0],atoi(cBuffer[3]));
                 }
                 else//新增疑似患者
                 {
-                    AddSP(cBuffer[0],atoi(cBuffer[3]));
+                    mapProvince[cBuffer[0]].AddSP(atoi(cBuffer[3]));
+                    //AddSP(cBuffer[0],atoi(cBuffer[3]));
                 }
             }
             else if(strcmp(cBuffer[1],"感染患者") == 0)//省1感染患者流入省2
             {
-                MoveIP(cBuffer[0],cBuffer[3],atoi(cBuffer[4]));
+                mapProvince[cBuffer[0]].MoveIP(cBuffer[3],atoi(cBuffer[4]));
+                //MoveIP(cBuffer[0],cBuffer[3],atoi(cBuffer[4]));
             }
             else if(strcmp(cBuffer[1],"疑似患者") == 0)
             {
                 if(strcmp(cBuffer[2],"流入") == 0)//省1疑似患者流入省2
                 {
-                    MoveSP(cBuffer[0],cBuffer[3],atoi(cBuffer[4]));
+                    mapProvince[cBuffer[0]].MoveSP(cBuffer[3],atoi(cBuffer[4]));
+                    //MoveSP(cBuffer[0],cBuffer[3],atoi(cBuffer[4]));
                 }
                 else//疑似患者确认感染
                 {
-                    SPtoIP(cBuffer[0],atoi(cBuffer[3]));
+                    mapProvince[cBuffer[0]].SPtoIP(atoi(cBuffer[3]));
+                    //SPtoIP(cBuffer[0],atoi(cBuffer[3]));
                 }
             }
             else if(strcmp(cBuffer[1],"死亡") == 0)//感染患者死亡
             {
-                IPtoDead(cBuffer[0],atoi(cBuffer[2]));
+                mapProvince[cBuffer[0]].IPtoDead(atoi(cBuffer[2]));
+                //IPtoDead(cBuffer[0],atoi(cBuffer[2]));
             }
             else if(strcmp(cBuffer[1],"治愈") == 0)//感染患者治愈
             {
-                IPtoCure(cBuffer[0],atoi(cBuffer[2]));
+                mapProvince[cBuffer[0]].IPtoCure(atoi(cBuffer[2]));
+                //IPtoCure(cBuffer[0],atoi(cBuffer[2]));
             }
             else if(strcmp(cBuffer[1],"排除") == 0)//排除疑似患者患者
             {
-                SubSP(cBuffer[0],atoi(cBuffer[3]));
+                mapProvince[cBuffer[0]].SubSP(atoi(cBuffer[3]));
+                //SubSP(cBuffer[0],atoi(cBuffer[3]));
             }
         }
     }
@@ -576,7 +494,7 @@ void ProcessOption(int argc,char *argv[])//处理参数
             }
             if(province.size() == 0)
             {
-                vector<string> vecString(PROVINCE, PROVINCE+35);
+                vector<string> vecString(PROVINCENAME, PROVINCENAME+35);
                 province = vecString;
             }
             list(logPath, outPath, date, type, province);//交由list函数处理
@@ -624,13 +542,13 @@ void OutLog(string filePath, vector<string> type, vector<string> province)
         ofLog<<"\n";
     }
     ofLog<<"// 该文档并非真实数据，仅供测试使用";
-
+    
     ofLog.close();
 }
 
 void ShowProvince(string strProvince)//按省份名称输出数据
 {
-    SProvinceInformation *pProvince=&mapProvince[strProvince];
+    CProvince *pProvince=&mapProvince[strProvince];
     cout<<strProvince;
     printf(" 感染患者%d人 ",pProvince->ip);
     printf("疑似患者%d人 ",pProvince->sp);
@@ -643,56 +561,64 @@ void ShowAllProvince()//输出所有省份的数据信息
 {
     for(int i=0;i<35;i++)//按照省份列表的顺序输出每个省份的数据信息
     {
-        cout<<PROVINCE[i]<<" 感染患者"<<mapProvince[PROVINCE[i]].ip<<"人 ";
-        cout<<"疑似患者"<<mapProvince[PROVINCE[i]].sp<<"人 ";
-        cout<<"治愈"<<mapProvince[PROVINCE[i]].cure<<"人 ";
-        cout<<"死亡"<<mapProvince[PROVINCE[i]].dead<<"人\n";
+        cout<<PROVINCENAME[i]<<" 感染患者"<<mapProvince[PROVINCENAME[i]].ip<<"人 ";
+        cout<<"疑似患者"<<mapProvince[PROVINCENAME[i]].sp<<"人 ";
+        cout<<"治愈"<<mapProvince[PROVINCENAME[i]].cure<<"人 ";
+        cout<<"死亡"<<mapProvince[PROVINCENAME[i]].dead<<"人\n";
     }
 }
 
-void AddIP(string strProvince,int num)
+CProvince::CProvince()
 {
-    mapProvince[strProvince].ip += num;
+    ip = 0;
+    sp = 0;
+    cure = 0;
+    dead = 0;
+}
+
+void CProvince::AddIP(int num)
+{
+    this->ip += num;
     mapProvince["全国"].ip += num;
 }
-void AddSP(string strProvince,int num)
+void CProvince::AddSP(int num)
 {
-    mapProvince[strProvince].sp += num;
+    this->sp += num;
     mapProvince["全国"].sp += num;
 }
-void MoveIP(string strProvinceA,string strProvinceB,int num)
+void CProvince::MoveIP(string strProvince,int num)
 {
-    mapProvince[strProvinceA].ip -= num;
-    mapProvince[strProvinceB].ip += num;
+    this->ip -= num;
+    mapProvince[strProvince].ip += num;
 }
-void MoveSP(string strProvinceA,string strProvinceB,int num)
+void CProvince::MoveSP(string strProvince,int num)
 {
-    mapProvince[strProvinceA].sp -= num;
-    mapProvince[strProvinceB].sp += num;
+    this->sp -= num;
+    mapProvince[strProvince].sp += num;
 }
-void IPtoDead(string strProvince,int num)
+void CProvince::IPtoDead(int num)
 {
-    mapProvince[strProvince].ip -= num;
-    mapProvince[strProvince].dead += num;
+    this->ip -= num;
+    this->dead += num;
     mapProvince["全国"].ip -= num;
     mapProvince["全国"].dead += num;
 }
-void IPtoCure(string strProvince,int num)
+void CProvince::IPtoCure(int num)
 {
-    mapProvince[strProvince].ip -= num;
-    mapProvince[strProvince].cure += num;
+    this->ip -= num;
+    this->cure += num;
     mapProvince["全国"].ip -= num;
     mapProvince["全国"].cure += num;
 }
-void SPtoIP(string strProvince,int num)
+void CProvince::SPtoIP(int num)
 {
-    mapProvince[strProvince].sp -= num;
-    mapProvince[strProvince].ip += num;
+    this->sp -= num;
+    this->ip += num;
     mapProvince["全国"].sp -= num;
     mapProvince["全国"].ip += num;
 }
-void SubSP(string strProvince,int num)
+void CProvince::SubSP(int num)
 {
-    mapProvince[strProvince].sp -= num;
+    this->sp -= num;
     mapProvince["全国"].sp -= num;
 }

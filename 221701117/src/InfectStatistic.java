@@ -43,6 +43,7 @@ public class InfectStatistic
 	static boolean isOutCountry = false;//是否输出全国感染信息
 	static int countryPos = 0;//”全国“所处的下标
 	static int countList = 0;//记录输出列个个数
+	static boolean IsOutputDefautList = true;//参数选项是否有-type
 	
 	
     public static void main(String args[ ]) throws IOException
@@ -58,10 +59,12 @@ public class InfectStatistic
     		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt");
     		vector.add("-date");
     		vector.add("2020-02-22");
+    		/*
     		vector.add("-type");
     		vector.add("sp");
     		vector.add("ip");
     		vector.add("dead");
+    		*/
     		vector.add("-province");
     		vector.add("福建");
     		vector.add("全国");
@@ -179,6 +182,7 @@ public class InfectStatistic
         			}
         			if(vector.get(i).equals("-type"))
         			{
+        				IsOutputDefautList = false;
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
         					if(vector.get(i+j+1).equals("ip")) {
@@ -410,8 +414,7 @@ public class InfectStatistic
 		int arrayPos[] = new int [temp.size()];
 		int provincePos = 0;//好神奇，如果变量在函数内，则循环体内赋值失败。
 		for(String s:temp) //需要列出的省份的数组下标组成新数组
-		{
-			
+		{			
 			for(int i = 0;i < arrayProvinces.length;i ++ )
 			{
 				if(s.equals(arrayProvinces[i]))
@@ -420,13 +423,22 @@ public class InfectStatistic
 					break;
 				}
 			}			
-		}
+		}		
 		Arrays.sort(arrayPos);
 		for(int i = 0;i < arrayPos.length;i++) 
 		{
 			limitProvince.add(provinces.elementAt(arrayPos[i]));
 		}
-		//是否输出全国感染信息
+		//无设定-type选项，默认全部输出，输出顺序为1,2,3,4
+		if(IsOutputDefautList)
+		{
+			for(int i = 0;i < listType.length;i++)
+			{
+				listType[i] = i + 1;
+			}			
+			countList = 4;
+		}
+		//是否输出全国感染信息		
 		if(isOutCountry) 
 		{
 			J_Province s = allCountry;

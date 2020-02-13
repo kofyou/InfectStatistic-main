@@ -256,7 +256,6 @@ class CommandArgs {
 
 class LogParser {
 
-    final static public String NATION_NAME = "全国";
     final static private String regex1 = "(^\\W+) 新增 感染患者 (\\d+)人";
     final static private String regex2 = "(^\\W+) 新增 疑似患者 (\\d+)人";
     final static private String regex3 = "(^\\W+) 感染患者 流入 (\\W+) (\\d+)人";

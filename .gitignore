@@ -5,7 +5,8 @@
 # IntelliJ project files
 .idea
 *.iml
-out
-gen
+221701225/out
+221701225/*.class
 .idea/
+.class
 InfectStatistic-example.iml

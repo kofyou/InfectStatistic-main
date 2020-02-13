@@ -9,16 +9,24 @@ import java.util.ArrayList;
  * @since xxx
  */
 class InfectStatistic {
+    //从命令行读取到的参数
     private String inputPath;
     private String outputPath;
     private String date=null;
     private ArrayList<String> types=null;
     private ArrayList<String> provinces=null;
 
+    //统计用的对象
+    private LogList logList=new LogList();
+    private Country country=new Country();
+
     public static void main(String[] args) {
         InfectStatistic infectInfoOperator=new InfectStatistic();
-//        System.out.println("helloworld");
+
+        //从命令行读取参数到该类
         infectInfoOperator.readParameter(args);
+        //
+        infectInfoOperator.readLogs();
     }
 
     public void readParameter(String[] args){
@@ -42,8 +50,12 @@ class InfectStatistic {
         }
 
         //读取各个参数到类属性中
-        inputPath=args[inputPosition+1];
-        outputPath=args[outputPosition+1];
+        if(inputPosition!=-1) {
+            inputPath = args[inputPosition + 1];
+        }
+        if(outputPosition!=-1) {
+            outputPath = args[outputPosition + 1];
+        }
         if(datePosition!=-1){
             date=args[datePosition+1];
         }
@@ -73,6 +85,9 @@ class InfectStatistic {
 
     }
 
+    public void readLogs(){
+        logList.readLogsFromPath(inputPath);
+    }
     @Override
     public String toString() {
         return "InfectStatistic{" +

@@ -255,5 +255,187 @@ public class InfectStatistic
     	}
     	
 	}
-
+    
+    
+    /*****************************
+     * 作用:处理日志文件
+     * 参数:null
+     *****************************/
+    private static void processLogFile()
+    {
+    	//读取文件，读取从2019-12-31到指定日期的所有文件。没有则continue。
+    	//定义变量
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date dBegin = null,dEnd = null;
+        String fileName = new String();
+        ArrayList<String> dataFile;
+        File file;
+		try {
+			dBegin = sdf.parse("2019-12-31");
+			dEnd = sdf.parse(inputEndDate);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        //设置Calendar时间
+    	Calendar calBegin = Calendar.getInstance();
+		calBegin.setTime(dBegin);
+		Calendar calEnd = Calendar.getInstance();
+		calEnd.setTime(dEnd);
+		//在选择的日期内循环。
+		while(dEnd.after(calBegin.getTime()))
+		{
+			 //加一天
+			 calBegin.add(Calendar.DAY_OF_MONTH, 1);
+			 //System.out.println(sdf.format(calBegin.getTime()));
+			 //记得加上前缀，不是在当前文件的目录
+			 fileName = inputAddress +  sdf.format(calBegin.getTime()) + ".log.txt";
+			 /*			  
+			  fileName =  sdf.format(calBegin.getTime()) + ".log.txt";
+			  */
+			 //System.out.println(fileName);
+			 file = new File(fileName);
+			 if(!file.exists()) 
+			 {
+				 //提示文件不存在
+				 //不存在文件，则跳过当日，默认趋势保持不变
+				 //System.out.println(fileName == "2020-01-22.log.txt");
+				 continue;
+			 }
+			 else 
+			 {
+				 //System.out.println(fileName);
+				 String[] ss ;
+				 String st;
+				 dataFile = FileReadLine(fileName);
+				 for(int i = 0; i < dataFile.size(); i++) {
+					 //获取文件行
+			         //System.out.println(dataFile.get(i));
+			         //按空格分割
+					 ss = dataFile.get(i).split("\\s+");
+					 //获取对应省份下标
+					 int pos = 0;
+					 for(int k = 0;k < provinces.size();k++) 
+					 {
+						 st = provinces.elementAt(k).getName();
+						 //System.out.println(st+" "+ss[0]);
+						 if(st.contentEquals(ss[0]))
+						 {
+							 pos = k;
+							 break;
+						 }
+					 }					 
+					 //System.out.println(pos);
+					 /*
+					 for (int j=0;j<ss.length;j++) {
+						 System.out.print(ss[j] + "*");						 
+					 }
+					 System.out.println();
+					 */
+					 //行分三份
+					 if(ss.length == 3) 
+					 {
+						 String sTemp = ss[2].substring(0,ss[2].length() - 1);
+						 if(ss[1].equals("死亡"))
+						 {
+							 //System.out.println(ss[2].substring(0,ss[2].length() - 1));							 
+							 //System.out.println(Integer.parseInt(sTemp));
+							 //死亡数+num
+							 provinces.elementAt(pos).AddDied(Integer.parseInt(sTemp));
+							 //感染数-num
+							 provinces.elementAt(pos).DecInfected(Integer.parseInt(sTemp));
+							 //全国死亡数+num
+							 allCountry.AddDied(Integer.parseInt(sTemp));
+							 //全国感染数-num
+							 allCountry.DecInfected(Integer.parseInt(sTemp));
+						 }
+						 if(ss[1].equals("治愈"))
+						 {
+							 //治愈数+num
+							 provinces.elementAt(pos).AddCured(Integer.parseInt(sTemp));
+							 //感染数-num
+							 provinces.elementAt(pos).DecInfected(Integer.parseInt(sTemp));
+							 //全国治愈数+num
+							 allCountry.AddCured(Integer.parseInt(sTemp));
+							 //全国感染数-num
+							 allCountry.DecInfected(Integer.parseInt(sTemp));
+						 }
+					 }
+					//行分四份
+					 if(ss.length == 4)
+					 {
+						 //获取人数
+						 String sTemp = ss[3].substring(0,ss[3].length() - 1);
+						 if(ss[1].equals("新增"))
+						 {
+							 if(ss[2].equals("感染患者"))
+							 {
+								 //感染数+num
+								 provinces.elementAt(pos).AddInfected(Integer.parseInt(sTemp));
+								 //全国感染数+num
+								 allCountry.AddInfected(Integer.parseInt(sTemp));
+							 }
+							 if(ss[2].equals("疑似患者"))
+							 {
+								 //疑似数+num
+								 provinces.elementAt(pos).AddSuspected(Integer.parseInt(sTemp));
+								 //全国疑似数+num
+								 allCountry.AddSuspected(Integer.parseInt(sTemp));
+							 }
+						 }
+						 if(ss[1].equals("疑似患者"))
+						 {
+							 //感染数+num
+							 provinces.elementAt(pos).AddInfected(Integer.parseInt(sTemp));
+							 //疑似数-num
+							 provinces.elementAt(pos).DecSuspected(Integer.parseInt(sTemp));
+							 //全国感染数+num
+							 allCountry.AddInfected(Integer.parseInt(sTemp));
+							 //全国疑似数-num
+							 allCountry.DecSuspected(Integer.parseInt(sTemp));
+						 }
+						 if(ss[1].equals("排除"))
+						 {
+							 //疑似数-num
+							 provinces.elementAt(pos).DecSuspected(Integer.parseInt(sTemp));
+							 //全国疑似数-num
+							 allCountry.DecSuspected(Integer.parseInt(sTemp));
+						 }
+					 }
+					//行分五份
+					 if(ss.length == 5)
+					 {
+						 String sTemp = ss[4].substring(0,ss[4].length() - 1);
+						 //流入的城市的下标
+						 int pos_2 = 0;
+						 for(int k = 0; k < provinces.size(); k++) 
+						 {
+							 st = provinces.elementAt(k).getName();
+							 //System.out.println(st+" "+ss[0]);
+							 if(st.contentEquals(ss[3]))
+							 {
+								 pos_2 = k;
+								 break;
+							 }
+						 }
+						 if(ss[1].equals("感染患者"))
+						 {
+							 //感染数+num
+							 provinces.elementAt(pos_2).AddInfected(Integer.parseInt(sTemp));
+							 //疑似数-num
+							 provinces.elementAt(pos).DecInfected(Integer.parseInt(sTemp));
+						 }
+						 if(ss[1].equals("疑似患者"))
+						 {
+							 //疑似数+num
+							 provinces.elementAt(pos_2).AddSuspected(Integer.parseInt(sTemp));
+							 //疑似数-num
+							 provinces.elementAt(pos).DecSuspected(Integer.parseInt(sTemp));
+						 }
+					 }
+			     }
+			 }	  
+		}
+    }
+    
 }

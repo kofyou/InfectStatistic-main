@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * TODO
  *
  * @author 221701238_周宇靖
- * @version 1.8
+ * @version 1.9
  * @since 2020-02-08
  */
 public class InfectStatistic {
@@ -52,6 +52,7 @@ public class InfectStatistic {
      * @return ArrayList<StatisticsInformation>    返回一个ArrayList<StatisticsInformation>数组
      */
     public static ArrayList<StatisticsInformation> initStatisticsInformation() {
+        ArrayList<StatisticsInformation> statisticsInformationArrayList = new ArrayList<StatisticsInformation>();
         for (int i = 0; i < PROVINCE_ARRAY.length; i++) {
             statisticsInformationArrayList.add(new StatisticsInformation(PROVINCE_ARRAY[i],
                     0, 0, 0, 0));

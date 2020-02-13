@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * TODO
  *
  * @author 221701238_周宇靖
- * @version 1.5
+ * @version 1.6
  * @since 2020-02-08
  */
 public class InfectStatistic {
@@ -22,6 +22,31 @@ public class InfectStatistic {
     //存储指定文件夹下所有日志文件的文件名
     public static ArrayList<String> fileList = new ArrayList<String>();
 
+    //获取选项后的参数并保存
+    //-log 读取
+    public static String readfile = null;
+    //-out 输出
+    public static String writefile = null;
+    //-date 指定日期
+    public static String datetime = null;
+    //-type 指定类型
+    public static ArrayList<String> typelist = null;
+    //-province 指定省份
+    public static ArrayList<String> provincelist = null;
+
+    //记录选项出现的次数
+    public int logNum = 0;
+    public int outNum = 0;
+    public int dateNum = 0;
+    public int typeNum = 0;
+    public int provinceNum = 0;
+
+    //定位选项在命令行字符串中的位置
+    public int logPosition = -1;
+    public int outPosition = -1;
+    public int datePosition = -1;
+    public int typePosition = -1;
+    public int provincePosition = -1;
     /**
      * 初始化各省份信息数组的方法
      * @return ArrayList<StatisticsInformation>    返回一个ArrayList<StatisticsInformation>数组
@@ -395,6 +420,205 @@ public class InfectStatistic {
                 }
             }
         }
+    }
+
+    /**
+     * 判断是否为合法命令的方法
+     * @param str          含有命令的字符串数组
+     * @return boolean     合法命令则返回true，非法命令则返回false
+     */
+    public Boolean isRightCommand(String[] str) {
+        //没有list，则为错误命令
+        if (!str[0].equalsIgnoreCase("list")) {
+            System.out.println("错误的命令");
+            return false;
+        }else {
+            for (int i = 0;i < str.length;i ++) {
+                //判断在命令行字符串数组中是否有出现相应选项，有则记录
+                if (str[i].equals("-log")) {
+                    logNum++;
+                    logPosition = i;
+                }else if (str[i].equals("-out")) {
+                    outNum++;
+                    outPosition = i;
+                }else if (str[i].equals("-date")) {
+                    dateNum++;
+                    datePosition = i;
+                }else if (str[i].equals("-type")) {
+                    typeNum++;
+                    typePosition = i;
+                }else if (str[i].equals("-province")) {
+                    provinceNum++;
+                    provincePosition = i;
+                }else if (str[i].startsWith("-")) {
+                    //除了以上5种选项，其余选项都是有问题的
+                    System.out.println("错误，" + str[i] + "选项不存在");
+                    return false;
+                }
+            }
+            //判断选项是否存在及选项后参数是否正确存在
+            if (logNum == 0) {
+                System.out.println("错误，log是必选选项，不可缺少");
+                return false;
+            }else if (outNum == 0) {
+                System.out.println("错误，out是必选选项，不可缺少");
+                return false;
+            }else if (logNum > 1 || outNum > 1 || dateNum > 1 || typeNum > 1 || provinceNum > 1) {
+                System.out.println("错误，选项不可重复");
+                return false;
+            }else {
+                if (logPosition + 2 < str.length && !str[logPosition + 2].startsWith("-")) {
+                    System.out.println("错误，log选项后只能有一个参数");
+                    return false;
+                }
+                if (outPosition + 2 < str.length && !str[outPosition + 2].startsWith("-")) {
+                    System.out.println("错误，out选项后只能有一个参数");
+                    return false;
+                }
+                if (logPosition + 1 < str.length && str[logPosition + 1].startsWith("-")) {
+                    System.out.println("错误，log选项后必须要有一个参数");
+                    return false;
+                }
+                if (outPosition + 1 < str.length && str[outPosition + 1].startsWith("-")) {
+                    System.out.println("错误，out选项后必须要有一个参数");
+                    return false;
+                }
+                readfile = str[logPosition + 1];
+                writefile = str[outPosition + 1];
+                if (!readfile.endsWith("\\") && !readfile.endsWith("/")){
+                    System.out.println("目录名错误");
+                    return false;
+                }
+                if (dateNum == 1) {
+                    if (datePosition + 2 < str.length && !str[datePosition + 2].startsWith("-")) {
+                        System.out.println("错误，date选项后只能有一个参数");
+                        return false;
+                    }else {
+                        datetime = str[datePosition + 1] + ".log.txt";
+                    }
+                }
+                if (typeNum == 1) {
+                    typelist = new ArrayList<String>();
+                    int num = getNearLargeNum(typePosition, logPosition, outPosition, datePosition, provincePosition);
+                    //如果type选项不是命令种的最后一个选项
+                    if (num != typePosition) {
+                        for (int i = typePosition + 1; i < num;i ++) {
+                            if (str[i].equals("ip") || str[i].equals("sp") || str[i].equals("cure")
+                                    || str[i].equals("dead")) {
+                                typelist.add(str[i]);
+                            } else {
+                                System.out.println("错误，不存在" + str[i] + "选项");
+                                return false;
+                            }
+                        }
+                    }else {
+                        for (int i = typePosition + 1;i < str.length;i ++) {
+                            if (str[i].equals("ip") || str[i].equals("sp") || str[i].equals("cure")
+                                    || str[i].equals("dead")) {
+                                typelist.add(str[i]);
+                            }else {
+                                System.out.println("错误，不存在" + str[i] + "选项");
+                                return false;
+                            }
+                        }
+                        //判断ip,sp,cure,dead是否重复出现
+                        if (isRepeatValue(typelist)) {
+                            System.out.println("错误，存在重复选项");
+                            return false;
+                        }
+                    }
+                }
+                if (provinceNum == 1) {
+                    provincelist = new ArrayList<String>();
+                    int num = getNearLargeNum(provincePosition, logPosition, outPosition, datePosition, typeNum);
+                    //如果province选项不是命令种的最后一个选项
+                    if (num != provincePosition) {
+                        for (int i = provincePosition + 1; i < num;i ++) {
+                            if (isRightProvince(str[i])) {
+                                provincelist.add(str[i]);
+                            } else {
+                                System.out.println("错误，不存在该省份");
+                                return false;
+                            }
+                        }
+                    }else {
+                        for (int i = provincePosition + 1;i < str.length;i ++) {
+                            if (isRightProvince(str[i])) {
+                                provincelist.add(str[i]);
+                            }else {
+                                System.out.println("错误，不存在该省份");
+                                return false;
+                            }
+                        }
+                        //判断省份是否重复出现
+                        if (isRepeatValue(provincelist)) {
+                            System.out.println("错误，存在重复选项");
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 用一个数与其他四个数比较，找到最接近比它大的那个数的方法
+     * 用指定选项的下标与其他四个选项的下标进行比较，判断该选项是否是命令的最后一个选项
+     * 如果是，返回该选项的下标，不是则返回在它后面离它最近的下标
+     * @param num       指定数
+     * @param a         整型数a
+     * @param b         整形数b
+     * @param c         整形数c
+     * @param d         整形数d
+     * @return int      返回一个整数
+     */
+    public int getNearLargeNum(int num, int a, int b, int c, int d) {
+        ArrayList<Integer> arrayList = new ArrayList<Integer>();
+        arrayList.add(a);
+        arrayList.add(b);
+        arrayList.add(c);
+        arrayList.add(d);
+        Collections.sort(arrayList);
+        for (int i = 0;i < arrayList.size();i ++) {
+            if (arrayList.get(i) > num) {
+                return arrayList.get(i);
+            }
+        }
+        return num;
+    }
+
+    /**
+     * 判断字符串是否是正确的省份名字的方法
+     * @param str         待判断字符串
+     * @return boolean    一个boolean值，是正确的省份和全国返回true，否则返回false
+     */
+    public boolean isRightProvince(String str) {
+        if (str.equals("全国")) {
+            return true;
+        }
+        for (int i = 0;i < PROVINCE_ARRAY.length;i ++) {
+            if (PROVINCE_ARRAY[i].equals(str)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断ArrayList数组里是否有重复的字符串的方法
+     * @param arrayList    一个arraylist数组
+     * @return boolean     一个Boolean值，重复返回true，否则返回false
+     */
+    public boolean isRepeatValue(ArrayList<String> arrayList) {
+        for (int i = 0; i < arrayList.size() - 1; i++) {
+            for (int j = i + 1; j < arrayList.size(); j++) {
+                if (arrayList.get(i).equals(arrayList.get(j))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

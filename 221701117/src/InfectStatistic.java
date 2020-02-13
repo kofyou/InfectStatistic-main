@@ -438,4 +438,107 @@ public class InfectStatistic
 		}
     }
     
+    
+    /*********************************
+     * 作用:输出结果到指定文件
+     * 参数:存放需要输出的省份
+     ********************************/
+    private static void ListProvince(Vector<String> temp) throws IOException {
+		// TODO Auto-generated method stub
+		File outFile = new File(outputFileAddress);
+		Writer out = new FileWriter(outFile);
+		Vector<J_Province> limitProvince = new Vector<J_Province>();
+		
+		for(String s:temp) 
+		{
+			//System.out.println(s);
+			int provincePos=0;
+			for(int i = 0;i < arrayProvinces.length;i ++ )
+			{
+				if(s.equals(arrayProvinces[i]))
+				{
+					provincePos = i;
+					break;
+				}
+			}
+			limitProvince.add(provinces.elementAt(provincePos));
+			
+		}
+		//是否输出全国感染信息
+		if(isOutCountry) 
+		{
+			J_Province s = allCountry;
+			out.write(s.getName() + "\t" );
+			System.out.print(s.getName() + "\t" );
+			for(int i = 0;i < 4;i ++ )
+			{
+				if(listType[i] == 0)
+				{
+					continue;
+				}
+				if(i == 0)
+				{
+					out.write("感染患者" + s.Infected() + "人" + "\t");
+					System.out.print("感染患者" + s.Infected() + "人" + "\t");
+				}
+				if(i == 1)
+				{
+					out.write("疑似患者" +  s.Suspected() + "人" + "\t" );
+					System.out.print("疑似患者" +  s.Suspected() + "人" + "\t" );
+				}
+				if(i == 2)
+				{
+					out.write("治愈" + s.Cured() + "人" + "\t");
+					System.out.print("治愈" + s.Cured() + "人" + "\t");
+				}
+				if(i == 3)
+				{
+					out.write("死亡" + s.Died() + "人" + "\t");
+					System.out.print( "死亡" + s.Died() + "人" + "\t");
+				}
+			}
+			out.write("\n");
+			System.out.println();
+		}
+		for(J_Province s:limitProvince) 
+		{
+			out.write(s.getName() + "\t" );
+			System.out.print(s.getName() + "\t" );
+			for(int i = 0;i < 4;i ++ )
+			{
+				if(listType[i] == 0)
+				{
+					continue;
+				}
+				if(i == 0)
+				{
+					out.write("感染患者" + s.Infected() + "人" + "\t");
+					System.out.print("感染患者" + s.Infected() + "人" + "\t");
+				}
+				if(i == 1)
+				{
+					out.write("疑似患者" +  s.Suspected() + "人" + "\t" );
+					System.out.print("疑似患者" +  s.Suspected() + "人" + "\t" );
+				}
+				if(i == 2)
+				{
+					out.write("治愈" + s.Cured() + "人" + "\t");
+					System.out.print("治愈" + s.Cured() + "人" + "\t");
+				}
+				if(i == 3)
+				{
+					out.write("死亡" + s.Died() + "人" + "\t");
+					System.out.print( "死亡" + s.Died() + "人" + "\t");
+				}
+			}
+			out.write("\n");
+			System.out.println();
+			/*
+			System.out.println(s.getName() + "\t" + "感染患者" + s.Infected() + "人" + "\t" + "疑似患者" + 
+		    s.Suspected() + "人" + "\t" + "治愈" + s.Cured() + "人" + "\t\t" + "死亡" + s.Died() + "人");
+		    */
+		}
+		out.close();
+	}
+    
 }

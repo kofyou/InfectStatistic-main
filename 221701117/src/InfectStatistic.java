@@ -43,6 +43,7 @@ public class InfectStatistic
 	static Vector<String> vector=new Vector<String>();
 	static boolean isOutCountry = false;//是否输出全国感染信息
 	static int countryPos = 0;//”全国“所处的下标
+	static int countList = 0;//记录输出列个个数
 	
 	
     public static void main(String args[ ]) throws IOException
@@ -59,8 +60,8 @@ public class InfectStatistic
     		vector.add("-date");
     		vector.add("2020-02-22");
     		vector.add("-type");
-    		vector.add("ip");
     		vector.add("sp");
+    		vector.add("ip");
     		vector.add("dead");
     		vector.add("-province");
     		vector.add("福建");
@@ -181,16 +182,20 @@ public class InfectStatistic
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
         					if(vector.get(i+j+1).equals("ip")) {
-        						listType[0] = 1;
+        						listType[0] = j+1;//向listType传入参数顺序，从1开始以免和0混淆
+        						countList++;
         					}
         					if(vector.get(i+j+1).equals("sp")) {
-        						listType[1] = 1;
+        						listType[1] = j+1;
+        						countList++;
         					}
         					if(vector.get(i+j+1).equals("cure")) {
-        						listType[2] = 1;
+        						listType[2] = j+1;
+        						countList++;
         					}
         					if(vector.get(i+j+1).equals("dead")) {
-        						listType[3] = 1;
+        						listType[3] = j+1;
+        						countList++;
         					}
         				}
         				i += interval.elementAt(pos);
@@ -423,33 +428,39 @@ public class InfectStatistic
 			J_Province s = allCountry;
 			out.write(s.getName() + "\t" );
 			System.out.print(s.getName() + "\t" );
-			for(int i = 0;i < 4;i ++ )
+			for(int j = 1;j < countList + 1;j ++ )
 			{
-				if(listType[i] == 0)
+				for(int i = 0;i < 4;i ++ )
 				{
-					continue;
+					if(listType[i] == 0)
+					{
+						continue;
+					}
+					if(listType[i] == j)
+					{
+						if(i == 0)
+						{
+							out.write("感染患者" + s.Infected() + "人" + "\t");
+							System.out.print("感染患者" + s.Infected() + "人" + "\t");
+						}
+						if(i == 1)
+						{
+							out.write("疑似患者" +  s.Suspected() + "人" + "\t" );
+							System.out.print("疑似患者" +  s.Suspected() + "人" + "\t" );
+						}
+						if(i == 2)
+						{
+							out.write("治愈" + s.Cured() + "人" + "\t");
+							System.out.print("治愈" + s.Cured() + "人" + "\t");
+						}
+						if(i == 3)
+						{
+							out.write("死亡" + s.Died() + "人" + "\t");
+							System.out.print( "死亡" + s.Died() + "人" + "\t");
+						}
+					}
 				}
-				if(i == 0)
-				{
-					out.write("感染患者" + s.Infected() + "人" + "\t");
-					System.out.print("感染患者" + s.Infected() + "人" + "\t");
-				}
-				if(i == 1)
-				{
-					out.write("疑似患者" +  s.Suspected() + "人" + "\t" );
-					System.out.print("疑似患者" +  s.Suspected() + "人" + "\t" );
-				}
-				if(i == 2)
-				{
-					out.write("治愈" + s.Cured() + "人" + "\t");
-					System.out.print("治愈" + s.Cured() + "人" + "\t");
-				}
-				if(i == 3)
-				{
-					out.write("死亡" + s.Died() + "人" + "\t");
-					System.out.print( "死亡" + s.Died() + "人" + "\t");
-				}
-			}
+			}			
 			out.write("\n");
 			System.out.println();
 		}
@@ -457,31 +468,37 @@ public class InfectStatistic
 		{
 			out.write(s.getName() + "\t" );
 			System.out.print(s.getName() + "\t" );
-			for(int i = 0;i < 4;i ++ )
+			for(int j = 1;j < countList + 1;j ++ )
 			{
-				if(listType[i] == 0)
+				for(int i = 0;i < 4;i ++ )
 				{
-					continue;
-				}
-				if(i == 0)
-				{
-					out.write("感染患者" + s.Infected() + "人" + "\t");
-					System.out.print("感染患者" + s.Infected() + "人" + "\t");
-				}
-				if(i == 1)
-				{
-					out.write("疑似患者" +  s.Suspected() + "人" + "\t" );
-					System.out.print("疑似患者" +  s.Suspected() + "人" + "\t" );
-				}
-				if(i == 2)
-				{
-					out.write("治愈" + s.Cured() + "人" + "\t");
-					System.out.print("治愈" + s.Cured() + "人" + "\t");
-				}
-				if(i == 3)
-				{
-					out.write("死亡" + s.Died() + "人" + "\t");
-					System.out.print( "死亡" + s.Died() + "人" + "\t");
+					if(listType[i] == 0)
+					{
+						continue;
+					}
+					if(listType[i] == j)
+					{
+						if(i == 0)
+						{
+							out.write("感染患者" + s.Infected() + "人" + "\t");
+							System.out.print("感染患者" + s.Infected() + "人" + "\t");
+						}
+						if(i == 1)
+						{
+							out.write("疑似患者" +  s.Suspected() + "人" + "\t" );
+							System.out.print("疑似患者" +  s.Suspected() + "人" + "\t" );
+						}
+						if(i == 2)
+						{
+							out.write("治愈" + s.Cured() + "人" + "\t");
+							System.out.print("治愈" + s.Cured() + "人" + "\t");
+						}
+						if(i == 3)
+						{
+							out.write("死亡" + s.Died() + "人" + "\t");
+							System.out.print( "死亡" + s.Died() + "人" + "\t");
+						}
+					}
 				}
 			}
 			out.write("\n");

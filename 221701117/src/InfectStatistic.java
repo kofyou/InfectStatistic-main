@@ -32,7 +32,6 @@ public class InfectStatistic
 			"河北","河南","黑龙江","湖北","湖南","江西","吉林","江苏","辽宁","内蒙古","宁夏",
 			"青海","山西","山东","陕西","上海","四川","天津","西藏","新疆","云南","浙江","香港",
 			"台湾","澳门"};
-
 	static int[] listType = {0,0,0,0};
 	static String inputEndDate;
 	static String inputAddress;
@@ -67,6 +66,8 @@ public class InfectStatistic
     		vector.add("福建");
     		vector.add("全国");
     		vector.add("湖南");
+    		vector.add("广东");
+    		vector.add("安徽");    		
     	}
     	//保存全国的感染情况
     	allCountry.setName("全国");
@@ -86,8 +87,7 @@ public class InfectStatistic
     	for(int i = 0;i < 34;i++) {
     		J_Province temp = new J_Province();
     		temp.setName(arrayProvinces[i]);
-    		provinces.add(temp);
-    		
+    		provinces.add(temp);    		
     	}
     	//初始化vector
     	initialVector();
@@ -406,21 +406,25 @@ public class InfectStatistic
 		// TODO Auto-generated method stub
 		File outFile = new File(outputFileAddress);
 		Writer out = new FileWriter(outFile);
-		Vector<J_Province> limitProvince = new Vector<J_Province>();
-		
-		for(String s:temp) 
+		Vector<J_Province> limitProvince = new Vector<J_Province>();	
+		int arrayPos[] = new int [temp.size()];
+		int provincePos = 0;//好神奇，如果变量在函数内，则循环体内赋值失败。
+		for(String s:temp) //需要列出的省份的数组下标组成新数组
 		{
-			int provincePos=0;
+			
 			for(int i = 0;i < arrayProvinces.length;i ++ )
 			{
 				if(s.equals(arrayProvinces[i]))
 				{
-					provincePos = i;
+					arrayPos[provincePos++] = i;
 					break;
 				}
-			}
-			limitProvince.add(provinces.elementAt(provincePos));
-			
+			}			
+		}
+		Arrays.sort(arrayPos);
+		for(int i = 0;i < arrayPos.length;i++) 
+		{
+			limitProvince.add(provinces.elementAt(arrayPos[i]));
 		}
 		//是否输出全国感染信息
 		if(isOutCountry) 

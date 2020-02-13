@@ -12,32 +12,9 @@ import java.util.regex.Pattern;
  * @since
  */
 class InfectStatistic {
-
-    private static AbstractDataHandle getChainOfDataHandle(){
-        AbstractDataHandle addInfect = new AddInfectPeople(AbstractDataHandle.s1);
-        AbstractDataHandle addDoubt = new AddDoubtPeople(AbstractDataHandle.s2);
-        AbstractDataHandle addDead = new AddDeadPeople(AbstractDataHandle.s3);
-        AbstractDataHandle addCure = new AddCurePeople(AbstractDataHandle.s4);
-        AbstractDataHandle subDoubt = new SubDoubtPeople(AbstractDataHandle.s5);
-        AbstractDataHandle sureDoubt = new SureInfectPeople(AbstractDataHandle.s6);
-        AbstractDataHandle infectInflow = new InfectInflow(AbstractDataHandle.s7);
-        AbstractDataHandle doubtInflow = new DoubtInflow(AbstractDataHandle.s8);
-
-        addInfect.setNextDataHandle(addDoubt);
-        addDoubt.setNextDataHandle(addDead);
-        addDead.setNextDataHandle(addCure);
-        addCure.setNextDataHandle(subDoubt);
-        subDoubt.setNextDataHandle(sureDoubt);
-        sureDoubt.setNextDataHandle(doubtInflow);
-        doubtInflow.setNextDataHandle(infectInflow);
-
-        return addInfect;
-    }
-
     public static void main(String[] args) throws IOException {
-        ProvinceData pd = ProvinceData.getInstance();
-        //pd.AllPrint();
-        AbstractDataHandle dataHandle = getChainOfDataHandle();
+        /*ProvinceData pd = ProvinceData.getInstance();
+        AbstractDataHandle dataHandle = AbstractDataHandle.getChainOfDataHandle();
         FileProcess fileProcess = FileProcess.getInstance();
         ArrayList<File> fileList = fileProcess.InputFileData();
         for(int i = 0; i < fileList.size(); i++){
@@ -45,8 +22,9 @@ class InfectStatistic {
             for(int j = 0; j < data.size(); j++)
                 dataHandle.dataProcessing(data.get(j));
         }
-        pd.LogData("./221701437/result/output.txt");
-        //pd.AllPrint();
+        pd.LogData("./221701437/result/output.txt");*/
+        CmdArgs cmdArgs = new CmdArgs(args);
+        System.out.println(cmdArgs.paramToValue.get("-province"));
     }
 }
 class ProvinceData{
@@ -164,6 +142,27 @@ abstract class AbstractDataHandle{
         }else if(nextDataHandle != null){
             nextDataHandle.dataProcessing(str);
         }
+    }
+
+    public static AbstractDataHandle getChainOfDataHandle(){
+        AbstractDataHandle addInfect = new AddInfectPeople(AbstractDataHandle.s1);
+        AbstractDataHandle addDoubt = new AddDoubtPeople(AbstractDataHandle.s2);
+        AbstractDataHandle addDead = new AddDeadPeople(AbstractDataHandle.s3);
+        AbstractDataHandle addCure = new AddCurePeople(AbstractDataHandle.s4);
+        AbstractDataHandle subDoubt = new SubDoubtPeople(AbstractDataHandle.s5);
+        AbstractDataHandle sureDoubt = new SureInfectPeople(AbstractDataHandle.s6);
+        AbstractDataHandle infectInflow = new InfectInflow(AbstractDataHandle.s7);
+        AbstractDataHandle doubtInflow = new DoubtInflow(AbstractDataHandle.s8);
+
+        addInfect.setNextDataHandle(addDoubt);
+        addDoubt.setNextDataHandle(addDead);
+        addDead.setNextDataHandle(addCure);
+        addCure.setNextDataHandle(subDoubt);
+        subDoubt.setNextDataHandle(sureDoubt);
+        sureDoubt.setNextDataHandle(doubtInflow);
+        doubtInflow.setNextDataHandle(infectInflow);
+
+        return addInfect;
     }
 
     public abstract void processing(String str);
@@ -358,5 +357,64 @@ class FileProcess{
         bf.close();
         inputReader.close();
         return arrayList;
+    }
+}
+
+class CmdArgs{
+    private String[] args;
+    public HashMap<String, ArrayList<String>> paramToValue = new HashMap<>();
+    //private static final String CMDPROCESS = "list (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)* -log (\\s) (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)* -out (\\s) (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)*";
+    //private static final String CMDPROCESS1 = "list (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)* -out (\\s) (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)* -log (\\s) (-data (\\d)-(\\d)-(\\d))* (-type (\\s)*)* (-province (//s)*)*";
+
+
+    CmdArgs(String[] args){
+        this.args = args;
+        argsProcess();
+    }
+
+    String getCmd(){
+        return this.args[0];
+    }
+
+    public void argsProcess(){
+        ArrayList<String> tempValue = new ArrayList<>();
+        String tempKey = new String();
+        int index = 0;
+        for(int i = 1; i < args.length; i++){
+            if(args[i].contains("-") && !HasDigit(args[i]) && index == 0){
+                tempKey = args[i];
+            }else if(args[i].contains("-") && index == 1){
+                ArrayList<String> tempForValue = (ArrayList<String>) tempValue.clone();
+                paramToValue.put(tempKey,tempForValue);
+                tempKey = args[i];
+                tempValue.clear();
+            }else{
+                tempValue.add(args[i]);
+                index = 1;
+            }
+        }
+        paramToValue.put(tempKey,tempValue);
+    }
+
+    public ArrayList<String> argVals(String key){
+        return paramToValue.get(key);
+    }
+
+    public boolean hasParam(String key){
+        if(paramToValue.containsKey(key)){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    public boolean HasDigit(String content) {
+        boolean flag = false;
+        Pattern p = Pattern.compile(".*\\d+.*");
+        Matcher m = p.matcher(content);
+        if (m.matches()) {
+            flag = true;
+        }
+        return flag;
     }
 }

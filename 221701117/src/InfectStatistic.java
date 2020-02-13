@@ -34,6 +34,7 @@ public class InfectStatistic
 			"台湾","澳门"};
 	static int[] listType = {0,0,0,0};
 	static String inputEndDate;
+	static String currentStringDate;
 	static String inputAddress;
 	static String outputFileAddress;
 	static Vector<Integer> posVec = new Vector<Integer>();
@@ -45,6 +46,7 @@ public class InfectStatistic
 	static int countList = 0;//记录输出列个个数
 	static boolean IsOutputDefautList = true;//参数选项是否有-type
 	static boolean IsOutputDefautProvince = true;//参数选项是否有-province
+	static boolean IsOutputDefautDate = true;//参数选项是否有-date
 	
 	
     public static void main(String args[ ]) throws IOException
@@ -58,8 +60,10 @@ public class InfectStatistic
     		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\infectstatistic_yjchen\\");
     		vector.add("-out");
     		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt");
+    		/*
     		vector.add("-date");
     		vector.add("2020-02-02");
+    		*/
     		/*
     		vector.add("-type");
     		vector.add("sp");
@@ -175,6 +179,7 @@ public class InfectStatistic
         			}
         			if(vector.get(i).equals("-date"))
         			{
+        				IsOutputDefautDate = false;
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
         					inputEndDate = vector.get(i+j+1);
@@ -183,6 +188,7 @@ public class InfectStatistic
         			        Date d = new Date();
         			        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");  
         			        String dateNowStr = sdf.format(d);  
+        			        currentStringDate = dateNowStr;
         			        //System.out.println("格式化后的日期：" + dateNowStr);  
         			        //System.out.println(dateNowStr.compareTo(inputEndDate));
         					if(!checkDate(inputEndDate)||dateNowStr.compareTo(inputEndDate) < 0)
@@ -258,6 +264,16 @@ public class InfectStatistic
      *****************************/
     private static void processLogFile()
     {
+    	//判断是否默认-date
+    	if(IsOutputDefautDate)
+    	{
+    		Date d = new Date();
+	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");  
+	        String dateNowStr = sdf.format(d);  
+	        currentStringDate = dateNowStr;
+    		inputEndDate = currentStringDate;
+    	}
+    	//System.out.println(currentStringDate);
     	//读取文件，读取从2019-12-31到指定日期的所有文件。没有则continue。
     	//定义变量
     	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

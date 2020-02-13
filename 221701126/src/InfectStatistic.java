@@ -100,6 +100,11 @@ class InfectStatistic {
 			System.out.println("福建感染人数" + province.infect);
 			System.out.println("福建疑似人数" + province.seeming);
 		}
+		if(map.get("湖北") != null) {
+			Province province  = map.get("湖北");
+			System.out.println("湖北感染人数" + province.infect);
+			System.out.println("湖北疑似人数" + province.seeming);
+		}
 	}
 	
 	//处理待处理文件的每一个文件
@@ -130,7 +135,23 @@ class InfectStatistic {
 	    				Province p = map.get(province);
 	    				switch (information[1]) {
 						case "新增":
-							System.out.println(province + "新增");
+							if(information[2].equals("感染患者")) {
+								//获取人数
+								String numString = information[information.length - 1];
+								int index = numString.indexOf("人");
+								numString = numString.substring(0, index);
+								int num = Integer.parseInt(numString);
+								p.infect += num;
+								//System.out.println(num);
+							}
+							else {//疑似患者的情况
+								//获取人数
+								String numString = information[information.length - 1];
+								int index = numString.indexOf("人");
+								numString = numString.substring(0, index);
+								int num = Integer.parseInt(numString);
+								p.seeming += num;
+							}
 							break;
 						case "感染患者":
 							System.out.println(province + "感染患者");

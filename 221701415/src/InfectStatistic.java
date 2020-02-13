@@ -112,10 +112,12 @@ public class InfectStatistic {
 		if (!file.exists()) {
 			file.createNewFile();
 		}
+		BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
 		List<String> result = parseType(typeList, provinceList);
 		for (int i = 0; i < result.size(); i++) {
 			if (result.get(i).contains("全国")) {
-				System.out.println(result.get(i));
+//				System.out.println(result.get(i));
+				bufferedWriter.write(result.get(i)+"\n");
 				result.remove(i);
 				break;
 			}
@@ -125,8 +127,11 @@ public class InfectStatistic {
 		result.sort(cmp);
 		for (String s: result
 		     ) {
-			System.out.println(s);
+//			System.out.println(s);
+			bufferedWriter.write(s+"\n");
 		}
+		bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
+		bufferedWriter.close();
 	}
 
 

@@ -44,6 +44,7 @@ public class InfectStatistic
 	static int countryPos = 0;//”全国“所处的下标
 	static int countList = 0;//记录输出列个个数
 	static boolean IsOutputDefautList = true;//参数选项是否有-type
+	static boolean IsOutputDefautProvince = true;//参数选项是否有-province
 	
 	
     public static void main(String args[ ]) throws IOException
@@ -58,19 +59,21 @@ public class InfectStatistic
     		vector.add("-out");
     		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt");
     		vector.add("-date");
-    		vector.add("2020-02-30");
+    		vector.add("2020-02-02");
     		/*
     		vector.add("-type");
     		vector.add("sp");
     		vector.add("ip");
     		vector.add("dead");
     		*/
+    		/*
     		vector.add("-province");
     		vector.add("福建");
     		vector.add("全国");
     		vector.add("湖南");
     		vector.add("广东");
-    		vector.add("安徽");    		
+    		vector.add("安徽"); 
+    		*/   		
     	}
     	//保存全国的感染情况
     	allCountry.setName("全国");
@@ -221,6 +224,7 @@ public class InfectStatistic
         			}
         			if(vector.get(i).equals("-province"))
         			{
+        				IsOutputDefautProvince = false;
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
         					if(vector.get(i+j+1).equals("全国"))
@@ -243,7 +247,7 @@ public class InfectStatistic
         			i += interval.elementAt(pos);
     				pos ++ ;        			
         		}
-        	}    		
+        	}  
     	}    	
 	}
     
@@ -299,7 +303,21 @@ public class InfectStatistic
 					 int pos = 0;
 					 for(int k = 0;k < provinces.size();k++) 
 					 {
-						 st = provinces.elementAt(k).getName();
+						 st = provinces.elementAt(k).getName();	
+						 //判断是否默认输出所有涉及的省份代码
+						 boolean isInTemp = false;
+						 for(String s:temp)
+						 {
+							 if(s.equals(ss[0]))
+							 {
+								 isInTemp = true;
+								 break;
+							 }
+						 }
+				    	 if(IsOutputDefautProvince && !isInTemp)
+				    	 {
+				    		 temp.add(ss[0]);
+				    	 }								    	 
 						 //System.out.println(st+" "+ss[0]);
 						 if(st.contentEquals(ss[0]))
 						 {
@@ -447,8 +465,9 @@ public class InfectStatistic
 			}			
 			countList = 4;
 		}
+		//是否输出默认省份疫情信息		
 		//是否输出全国感染信息		
-		if(isOutCountry) 
+		if(isOutCountry || IsOutputDefautProvince) 
 		{
 			J_Province s = allCountry;
 			out.write(s.getName() + "\t" );

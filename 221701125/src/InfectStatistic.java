@@ -25,6 +25,15 @@ import java.util.TreeMap;
 
 class InfectStatistic {
 	
+	 static String [] areas= {"安徽","北京","重庆","福建","甘肃","广东","广西","贵州",
+			 "海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁",
+			 "内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏",
+			 "新疆","云南","浙江",};
+	 
+	 static String [] parameters= {"-log","-out","-date","-type","-province"};
+	 
+	 
+	
 	
 	public static void infectInto(Area source,Area destination, int num)
 	{
@@ -45,7 +54,13 @@ class InfectStatistic {
     public static void main(String[] args) {
     	
 
+    	
+    	
     	Map<String, Area> map = new HashMap<String,Area>(); 
+    	
+    	String logPath=null;
+		String outputPath=null;
+		String date=null;
 
 //        if (args.length!=0)
 //    	{
@@ -59,6 +74,23 @@ class InfectStatistic {
 //    	{
 //    		System.out.println("没有参数");
 //    	}
+        
+        for (int i=0;i<args.length;i++)
+        {
+        	if (args[i].equals("-log"))
+        	{
+        		logPath=args[i+1];
+        	}
+        	
+        	if (args[i].equals("-out"))
+        	{
+        		outputPath=args[i+1];
+        	}
+        	
+        }
+        
+        
+//        System.out.println(logPath+"    "+outputPath);
         
         
         
@@ -108,12 +140,12 @@ class InfectStatistic {
         	}
         
         
-        int position=args[4].lastIndexOf('/');
+        int position=logPath.lastIndexOf('/');
         
        
         
-        args[4].substring(0, position);
-        File dir = new File(args[4]);
+        logPath.substring(0, position);
+        File dir = new File(logPath);
         
         
 //        if (dir.isDirectory())
@@ -219,6 +251,23 @@ class InfectStatistic {
 		}
         
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         for (Map.Entry<String, Area> entry : map.entrySet()) 
         {
         	if (entry.getValue().getIsRelate()==true)
@@ -257,7 +306,7 @@ class InfectStatistic {
 
 //        System.out.println(args[6]);
         
-        File output = new File(args[6]);
+        File output = new File(outputPath);
         
       
         
@@ -297,256 +346,19 @@ class InfectStatistic {
 			
 //			bufferedWriter.newLine();
 			
+			for (int i=0;i<areas.length;i++)
+			{
+				if (map.get(areas[i]).getIsRelate()==true)
+				{
+					bufferedWriter.write(areas[i]+" 感染患者"+map.get(areas[i]).getInfectNum()
+							+"人 疑似患者"+map.get(areas[i]).getSuspectNum()
+							+"人 治愈"+map.get(areas[i]).getCureNum()
+							+"人 死亡"+map.get(areas[i]).getDeathNum()+"人\n");
+				}
+			}
 			
 			
-			if (map.get("安徽").getIsRelate()==true)
-			{
-				bufferedWriter.write("安徽 感染患者"+map.get("安徽").getInfectNum()
-						+"人 疑似患者"+map.get("安徽").getSuspectNum()
-						+"人 治愈"+map.get("安徽").getCureNum()
-						+"人 死亡"+map.get("安徽").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("北京").getIsRelate()==true)
-			{
-				bufferedWriter.write("北京 感染患者"+map.get("北京").getInfectNum()
-						+"人 疑似患者"+map.get("北京").getSuspectNum()
-						+"人 治愈"+map.get("北京").getCureNum()
-						+"人 死亡"+map.get("北京").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("重庆").getIsRelate()==true)
-			{
-				bufferedWriter.write("重庆 感染患者"+map.get("重庆").getInfectNum()
-						+"人 疑似患者"+map.get("重庆").getSuspectNum()
-						+"人 治愈"+map.get("重庆").getCureNum()
-						+"人 死亡"+map.get("重庆").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("福建").getIsRelate()==true)
-			{
-				bufferedWriter.write("福建 感染患者"+map.get("福建").getInfectNum()
-						+"人 疑似患者"+map.get("福建").getSuspectNum()
-						+"人 治愈"+map.get("福建").getCureNum()
-						+"人 死亡"+map.get("福建").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("甘肃").getIsRelate()==true)
-			{
-				bufferedWriter.write("甘肃 感染患者"+map.get("甘肃").getInfectNum()
-						+"人 疑似患者"+map.get("甘肃").getSuspectNum()
-						+"人 治愈"+map.get("甘肃").getCureNum()
-						+"人 死亡"+map.get("甘肃").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("广东").getIsRelate()==true)
-			{
-				bufferedWriter.write("广东 感染患者"+map.get("广东").getInfectNum()
-						+"人 疑似患者"+map.get("广东").getSuspectNum()
-						+"人 治愈"+map.get("广东").getCureNum()
-						+"人 死亡"+map.get("广东").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("广西").getIsRelate()==true)
-			{
-				bufferedWriter.write("广西 感染患者"+map.get("广西").getInfectNum()
-						+"人 疑似患者"+map.get("广西").getSuspectNum()
-						+"人 治愈"+map.get("广西").getCureNum()
-						+"人 死亡"+map.get("广西").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("贵州").getIsRelate()==true)
-			{
-				bufferedWriter.write("贵州 感染患者"+map.get("贵州").getInfectNum()
-						+"人 疑似患者"+map.get("贵州").getSuspectNum()
-						+"人 治愈"+map.get("贵州").getCureNum()
-						+"人 死亡"+map.get("贵州").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("海南").getIsRelate()==true)
-			{
-				bufferedWriter.write("海南 感染患者"+map.get("海南").getInfectNum()
-						+"人 疑似患者"+map.get("海南").getSuspectNum()
-						+"人 治愈"+map.get("海南").getCureNum()
-						+"人 死亡"+map.get("海南").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("河北").getIsRelate()==true)
-			{
-				bufferedWriter.write("河北 感染患者"+map.get("河北").getInfectNum()
-						+"人 疑似患者"+map.get("河北").getSuspectNum()
-						+"人 治愈"+map.get("河北").getCureNum()
-						+"人 死亡"+map.get("河北").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("河南").getIsRelate()==true)
-			{
-				bufferedWriter.write("河南 感染患者"+map.get("河南").getInfectNum()
-						+"人 疑似患者"+map.get("河南").getSuspectNum()
-						+"人 治愈"+map.get("河南").getCureNum()
-						+"人 死亡"+map.get("河南").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("黑龙江").getIsRelate()==true)
-			{
-				bufferedWriter.write("黑龙江 感染患者"+map.get("黑龙江").getInfectNum()
-						+"人 疑似患者"+map.get("黑龙江").getSuspectNum()
-						+"人 治愈"+map.get("黑龙江").getCureNum()
-						+"人 死亡"+map.get("黑龙江").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("湖北").getIsRelate()==true)
-			{
-				bufferedWriter.write("湖北 感染患者"+map.get("湖北").getInfectNum()
-						+"人 疑似患者"+map.get("湖北").getSuspectNum()
-						+"人 治愈"+map.get("湖北").getCureNum()
-						+"人 死亡"+map.get("湖北").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("湖南").getIsRelate()==true)
-			{
-				bufferedWriter.write("湖南 感染患者"+map.get("湖南").getInfectNum()
-						+"人 疑似患者"+map.get("湖南").getSuspectNum()
-						+"人 治愈"+map.get("湖南").getCureNum()
-						+"人 死亡"+map.get("湖南").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("吉林").getIsRelate()==true)
-			{
-				bufferedWriter.write("吉林 感染患者"+map.get("吉林").getInfectNum()
-						+"人 疑似患者"+map.get("吉林").getSuspectNum()
-						+"人 治愈"+map.get("吉林").getCureNum()
-						+"人 死亡"+map.get("吉林").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("江苏").getIsRelate()==true)
-			{
-				bufferedWriter.write("江苏 感染患者"+map.get("江苏").getInfectNum()
-						+"人 疑似患者"+map.get("江苏").getSuspectNum()
-						+"人 治愈"+map.get("江苏").getCureNum()
-						+"人 死亡"+map.get("江苏").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("江西").getIsRelate()==true)
-			{
-				bufferedWriter.write("江西 感染患者"+map.get("江西").getInfectNum()
-						+"人 疑似患者"+map.get("江西").getSuspectNum()
-						+"人 治愈"+map.get("江西").getCureNum()
-						+"人 死亡"+map.get("江西").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("辽宁").getIsRelate()==true)
-			{
-				bufferedWriter.write("辽宁 感染患者"+map.get("辽宁").getInfectNum()
-						+"人 疑似患者"+map.get("辽宁").getSuspectNum()
-						+"人 治愈"+map.get("辽宁").getCureNum()
-						+"人 死亡"+map.get("辽宁").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("内蒙古").getIsRelate()==true)
-			{
-				bufferedWriter.write("内蒙古 感染患者"+map.get("内蒙古").getInfectNum()
-						+"人 疑似患者"+map.get("内蒙古").getSuspectNum()
-						+"人 治愈"+map.get("内蒙古").getCureNum()
-						+"人 死亡"+map.get("内蒙古").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("宁夏").getIsRelate()==true)
-			{
-				bufferedWriter.write("宁夏 感染患者"+map.get("宁夏").getInfectNum()
-						+"人 疑似患者"+map.get("宁夏").getSuspectNum()
-						+"人 治愈"+map.get("宁夏").getCureNum()
-						+"人 死亡"+map.get("宁夏").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("青海").getIsRelate()==true)
-			{
-				bufferedWriter.write("青海 感染患者"+map.get("青海").getInfectNum()
-						+"人 疑似患者"+map.get("青海").getSuspectNum()
-						+"人 治愈"+map.get("青海").getCureNum()
-						+"人 死亡"+map.get("青海").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("山东").getIsRelate()==true)
-			{
-				bufferedWriter.write("山东 感染患者"+map.get("山东").getInfectNum()
-						+"人 疑似患者"+map.get("山东").getSuspectNum()
-						+"人 治愈"+map.get("山东").getCureNum()
-						+"人 死亡"+map.get("山东").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("山西").getIsRelate()==true)
-			{
-				bufferedWriter.write("山西 感染患者"+map.get("山西").getInfectNum()
-						+"人 疑似患者"+map.get("山西").getSuspectNum()
-						+"人 治愈"+map.get("山西").getCureNum()
-						+"人 死亡"+map.get("山西").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("陕西").getIsRelate()==true)
-			{
-				bufferedWriter.write("陕西 感染患者"+map.get("陕西").getInfectNum()
-						+"人 疑似患者"+map.get("陕西").getSuspectNum()
-						+"人 治愈"+map.get("陕西").getCureNum()
-						+"人 死亡"+map.get("陕西").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("上海").getIsRelate()==true)
-			{
-				bufferedWriter.write("上海 感染患者"+map.get("上海").getInfectNum()
-						+"人 疑似患者"+map.get("上海").getSuspectNum()
-						+"人 治愈"+map.get("上海").getCureNum()
-						+"人 死亡"+map.get("上海").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("四川").getIsRelate()==true)
-			{
-				bufferedWriter.write("四川 感染患者"+map.get("四川").getInfectNum()
-						+"人 疑似患者"+map.get("四川").getSuspectNum()
-						+"人 治愈"+map.get("四川").getCureNum()
-						+"人 死亡"+map.get("四川").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("天津").getIsRelate()==true)
-			{
-				bufferedWriter.write("天津 感染患者"+map.get("天津").getInfectNum()
-						+"人 疑似患者"+map.get("天津").getSuspectNum()
-						+"人 治愈"+map.get("天津").getCureNum()
-						+"人 死亡"+map.get("天津").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("西藏").getIsRelate()==true)
-			{
-				bufferedWriter.write("西藏 感染患者"+map.get("西藏").getInfectNum()
-						+"人 疑似患者"+map.get("西藏").getSuspectNum()
-						+"人 治愈"+map.get("西藏").getCureNum()
-						+"人 死亡"+map.get("西藏").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("新疆").getIsRelate()==true)
-			{
-				bufferedWriter.write("新疆 感染患者"+map.get("新疆").getInfectNum()
-						+"人 疑似患者"+map.get("新疆").getSuspectNum()
-						+"人 治愈"+map.get("新疆").getCureNum()
-						+"人 死亡"+map.get("新疆").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("云南").getIsRelate()==true)
-			{
-				bufferedWriter.write("云南 感染患者"+map.get("云南").getInfectNum()
-						+"人 疑似患者"+map.get("云南").getSuspectNum()
-						+"人 治愈"+map.get("云南").getCureNum()
-						+"人 死亡"+map.get("云南").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
-			if (map.get("浙江").getIsRelate()==true)
-			{
-				bufferedWriter.write("浙江 感染患者"+map.get("浙江").getInfectNum()
-						+"人 疑似患者"+map.get("浙江").getSuspectNum()
-						+"人 治愈"+map.get("浙江").getCureNum()
-						+"人 死亡"+map.get("浙江").getDeathNum()+"人\n");
-//				bufferedWriter.newLine();
-			}
+			
 			
 			
 			
@@ -564,6 +376,7 @@ class InfectStatistic {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        
         
         
         
@@ -611,7 +424,6 @@ class Area{
 		if (isRelate==false)
 		isRelate=true;
 	}
-	
 	
 	public void addInfect(int num)
 	{

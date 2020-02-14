@@ -37,6 +37,10 @@ class InfectStatistic {
 	private static ArrayList<String> provinceArray = new ArrayList<String>();
 	private static Map<String, Province> map = new HashMap<String, Province>();
 	private static Province country = new Province();//用于统计全国人数
+	private static boolean ip = false;
+	private static boolean sp = false;
+	private static boolean cure = false;
+	private static boolean dead = false;
 	
 	//将命令行参数转换成对象存储起来
 	private static void solveArgs(String[] args, Vector<Order> orders) {
@@ -51,66 +55,143 @@ class InfectStatistic {
 	    		oneOrder.orderName = arg;
 	    		if(arg.equals("-log")) {//处理输入路径
 	    			inputPath = args[pos + 1] + "\\";
+	    			pos+=2;
 	    		}
 	    		else if(arg.equals("-out")) {//处理输出路径
 	    			outputPath = args[pos + 1] + "\\";
+	    			pos+=2;
 	    		}
 	    		else if(arg.equals("-date")) {//处理日期
 	    			targetDate = args[pos + 1];
+	    			pos+=2;
 	    		}
-	    		for(i = pos + 1; i < args.length; i++) {
-	    			//System.out.println("I:" + i);
-	    			String newArg = args[i];
-	    			if(newArg.indexOf('-') != 0) {//这是参数
-	    				oneOrder.orderParams.add(newArg);
-	    			}
-	    			else {
-	    				pos = i;
-	    				break;
+	    		else if(arg.equals("-type")) {
+	    			for(i = pos + 1; i < args.length; i++) {
+	    				String param = args[i];
+	    				if(param.indexOf('-') != 0) {//这是参数
+		    				switch (param) {
+							case "ip":
+								ip = true;
+								break;
+							case "sp":
+								sp = true;
+								break;
+							case "cure":
+								cure = true;
+								break;
+							case "dead":
+								dead = true;
+								break;
+							default:
+								break;
+		    				}
+		    			}
+		    			else {
+		    				pos = i;
+		    				break;
+		    			}
 	    			}
 	    		}
+	    		
+//	    		for(i = pos + 1; i < args.length; i++) {
+//	    			//System.out.println("I:" + i);
+//	    			String newArg = args[i];
+//	    			if(newArg.indexOf('-') != 0) {//这是参数
+//	    				oneOrder.orderParams.add(newArg);
+//	    			}
+//	    			else {
+//	    				pos = i;
+//	    				break;
+//	    			}
+//	    		}
 	    		orders.add(oneOrder);
 	    		if(i == args.length) {
 	    			break;
 	    		}
 	    	}
-			try {
-				Thread.sleep(2000);
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
+//			
 		}
 		
 	}
 	
 	//打印命令对象数组
-	private static void printOrders(Vector<Order> orders) {
-		for(Order order : orders) {
-			System.out.println("命令名为" + order.orderName);
-			System.out.println("命令参数为");
-			for(String param : order.orderParams) {
-				System.out.println(param + " ");
-			}
-		}
-	}
+//	private static void printOrders(Vector<Order> orders) {
+//		for(Order order : orders) {
+//			System.out.println("命令名为" + order.orderName);
+//			System.out.println("命令参数为");
+//			for(String param : order.orderParams) {
+//				System.out.println(param + " ");
+//			}
+//		}
+//	}
 	
 	//测试打印结果
 	private static void printResult() {
-		System.out.println("全国" + "感染人数" + country.infect + " 疑似人数" + country.seeming + " 治愈人数" + country.cured + " 死亡人数" + country.dead);
+		System.out.print("全国");
+		if(ip) {
+			System.out.print(" 感染患者" + country.infect);
+		}
+		if(sp) {
+			System.out.print(" 疑似患者" + country.seeming);
+		}
+		if(cure) {
+			System.out.print(" 治愈" + country.cured);
+		}
+		if(dead) {
+			System.out.print(" 死亡" + country.dead);
+		}
+		System.out.println();
+		//System.out.println("全国" + "感染人数" + country.infect + " 疑似人数" + country.seeming + " 治愈人数" + country.cured + " 死亡人数" + country.dead);
 		if(map.get("福建") != null) {
-			Province province  = map.get("福建");
-			System.out.println("福建感染人数" + province.infect);
-			System.out.println("福建疑似人数" + province.seeming);
-			System.out.println("福建治愈人数" + province.cured);
-			System.out.println("福建死亡人数" + province.dead);
+			//System.out.println("yeas");
+			Province province = map.get("福建");
+			System.out.print("福建");
+			if(ip) {
+				System.out.print(" 感染患者" + province.infect);
+			}
+			if(sp) {
+				System.out.print(" 疑似患者" + province.seeming);
+			}
+			if(cure) {
+				System.out.print(" 治愈" + province.cured);
+			}
+			if(dead) {
+				System.out.print(" 死亡" + province.dead);
+			}
 		}
+		System.out.println();
 		if(map.get("湖北") != null) {
-			Province province  = map.get("湖北");
-			System.out.println("湖北感染人数" + province.infect);
-			System.out.println("湖北疑似人数" + province.seeming);
-			System.out.println("湖北治愈人数" + province.cured);
-			System.out.println("湖北死亡人数" + province.dead);
+			Province province = map.get("湖北");
+			System.out.print("福建");
+			if(ip) { 
+				System.out.print(" 感染患者" + province.infect);
+			}
+			if(sp) { 
+				System.out.print(" 疑似患者" + province.seeming);
+			}
+			if(cure) {
+				System.out.print(" 治愈" + province.cured);
+			}
+			if(dead) {
+				System.out.print(" 死亡" + province.dead);
+			}
 		}
+		System.out.println();
+		
+//		if(map.get("福建") != null) {
+//			Province province  = map.get("福建");
+//			System.out.println("福建感染人数" + province.infect);
+//			System.out.println("福建疑似人数" + province.seeming);
+//			System.out.println("福建治愈人数" + province.cured);
+//			System.out.println("福建死亡人数" + province.dead);
+//		}
+//		if(map.get("湖北") != null) {
+//			Province province  = map.get("湖北");
+//			System.out.println("湖北感染人数" + province.infect);
+//			System.out.println("湖北疑似人数" + province.seeming);
+//			System.out.println("湖北治愈人数" + province.cured);
+//			System.out.println("湖北死亡人数" + province.dead);
+//		}
 	}
 	
 	//获取各行的人数
@@ -389,7 +470,7 @@ class InfectStatistic {
 //		    }
 
 
-    	printOrders(orders);
+    	//printOrders(orders);
     	System.out.println(inputPath);
     	System.out.println(outputPath);
     	solveDateOrder(targetDate);

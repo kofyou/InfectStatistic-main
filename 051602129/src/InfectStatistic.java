@@ -24,6 +24,7 @@ class InfectStatistic {
     private HashMap<Boolean, ArrayList<String>> type;
     private HashMap<Boolean,ArrayList<String>> province;
     private HashMap<String,HashMap<String,Integer>> data;
+    private boolean web;
     private String[] options = {"感染患者","疑似患者","治愈","死亡"};
 
     /**
@@ -81,6 +82,9 @@ class InfectStatistic {
                     province.put(true,pri);
                     i--;
                     break;
+                case "-web":
+                    web = true;
+                    break;
             }
         }
     }
@@ -125,6 +129,9 @@ class InfectStatistic {
         }
     }
 
+    /**
+     * 运行命令行
+     */
     public void runCommand() {
         try {
             this.checkoutCommand();
@@ -153,6 +160,11 @@ class InfectStatistic {
        return path;
     }
 
+    /**
+     * 检查时间是否符合格式
+     * @param time 日期时间格式的字符串
+     * @return Boolean变量 正确为true 错误为false
+     */
     public boolean checkTime(String time){
 
         SimpleDateFormat check = new SimpleDateFormat("yyyy-MM-dd");
@@ -199,6 +211,19 @@ class InfectStatistic {
 
     }
 
+    /**
+     * 读取文件中的每一行信息，匹配字符串
+     * 字符串匹配信息为
+     * "(\\W+) 新增 感染患者 (\\d+)人",
+     * "(\\W+) 新增 疑似患者 (\\d+)人",
+     * "(\\W+) 感染患者 流入 (\\W+) (\\d+)人",
+     * "(\\W+) 疑似患者 流入 (\\W+) (\\d+)人",
+     * "(\\W+) 死亡 (\\d+)人",
+     * "(\\W+) 治愈 (\\d+)人",
+     * "(\\W+) 疑似患者 确诊感染 (\\d+)人",
+     * "(\\W+) 排除 疑似患者 (\\d+)人"};
+     * @param fileName 读取的文件名称
+     */
     public void readFileContent(String fileName){
         String[] type1 ={
                 "(\\W+) 新增 感染患者 (\\d+)人",
@@ -227,6 +252,11 @@ class InfectStatistic {
         }
     }
 
+    /**
+     * 匹配读取到的内容与匹配字符串做匹配
+     * @param pattern 正则表达式
+     * @param line 需要匹配的内容
+     */
     public void matchingString(String pattern, String line){
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(line);
@@ -235,6 +265,10 @@ class InfectStatistic {
         }
     }
 
+    /**
+     * 处理匹配到的信息
+     * @param matcher 匹配到的匹配器
+     */
     public void statisticalData(Matcher matcher){
         int count = matcher.groupCount();
         String temp = matcher.group(0);
@@ -261,6 +295,12 @@ class InfectStatistic {
         }
     }
 
+    /**
+     * 处理 新增 治愈 死亡 排除的数据
+     * @param matcher 匹配到的匹配器
+     * @param type 患者类型
+     * @param sub 数据加减判断
+     */
     public void processIncreasedData(Matcher matcher, String type,boolean sub){
         String provinceName = matcher.group(1);
         if (sub) {
@@ -298,6 +338,11 @@ class InfectStatistic {
 
     }
 
+    /**
+     * 处理 流入 确诊感染数据
+     * @param matcher 匹配到的匹配器
+     * @param type 患者类型
+     */
     public void processFlowData(Matcher matcher,String type){
         if (matcher.groupCount()==2){
             String provinceName = matcher.group(1);
@@ -324,24 +369,37 @@ class InfectStatistic {
         }
     }
 
-    public String processCountryData(){
+    /**
+     * 计算全国的累计数
+     * @return
+     */
+    public String processCountryData(ArrayList<String> types){
         String result = new String();
-        int[] num = new int[options.length];
+        int[] num = new int[type.size()+1];
         Set<String> provinceNames = data.keySet();
         for (String provinceName : provinceNames){
             HashMap<String,Integer> temp = data.get(provinceName);
-            for (int i =0; i <options.length; i++){
-                num[i] += temp.get(options[i]);
+            int i = 0;
+            for (String type :types){
+                num[i] += temp.get(type);
+                i++;
             }
         }
         result = "全国";
-        for (int i = 0; i<options.length; i++){
-            result += " " + options[i] + num[i] + "人";
+        int i = 0;
+        for (String type :types){
+            result += " " + type + num[i] + "人";
+            i++;
         }
         result += "\n";
         return result;
     }
 
+    /**
+     * 将省份按照首字母进行排序
+     * @param list
+     * @return
+     */
     public ArrayList sortByProvinceName(ArrayList<String> list) {
         ArrayList<String> provinceName = new ArrayList<>();
         for (String s :list){
@@ -352,6 +410,11 @@ class InfectStatistic {
         return provinceName;
     }
 
+    /**
+     * 将结果输出到文件中
+     * @param provinceNames 省份名称
+     * @param types 患者类型
+     */
     public void outFile(ArrayList<String> provinceNames,ArrayList<String> types){
         String outFileName = out.get(true);
         try {
@@ -359,19 +422,27 @@ class InfectStatistic {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream,"utf8");
             BufferedWriter writer = new BufferedWriter(outputStreamWriter);
             if (provinceNames.contains("全国")) {
-                writer.write(processCountryData());
+                writer.write(processCountryData(types));
+                provinceNames.remove("全国");
             }
             Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
             ArrayList<String> sortNames = this.sortByProvinceName(provinceNames);
             System.out.println(sortNames);
             for(String provinceName : sortNames){
-                HashMap<String,Integer> temp = data.get(provinceName);
                 String result = provinceName;
-                for (String string:types){
-                    int num = temp.get(string);
-                    result += " " + string + num + "人";
+                if(data.containsKey(provinceName)) {
+                    HashMap<String, Integer> temp = data.get(provinceName);
+                    for (String string : types) {
+                        int num = temp.get(string);
+                        result += " " + string + num + "人";
+                    }
+                    writer.write(result + "\n");
+                } else {
+                    for (String string : types) {
+                        result += " " + string + 0 + "人";
+                    }
+                    writer.write(result);
                 }
-                writer.write(result+"\n");
             }
             writer.write("// 该文档并非真实数据，仅供测试使用\n");
             writer.write("// 命令 "+command);
@@ -380,10 +451,15 @@ class InfectStatistic {
             outputStreamWriter.close();
             outputStream.close();
         }catch (Exception e){
+            e.printStackTrace();
             System.exit(-1);
         }
     }
 
+    /**
+     * 处理是否传入要查询到类型
+     * @return 返回查询类型 若无-type参数,返回所有类型
+     */
     public ArrayList getType(){
         if (type.keySet().contains(true)){
             ArrayList<String> types = type.get(true);
@@ -409,6 +485,10 @@ class InfectStatistic {
         return new ArrayList<String>(Arrays.asList(options));
     }
 
+    /**
+     * 处理是否传入要查询省份名称
+     * @return 返回查询类型 若无-province参数,返回所有省份
+     */
     public ArrayList getProvince(){
         if (province.keySet().contains(true)){
             return province.get(true);

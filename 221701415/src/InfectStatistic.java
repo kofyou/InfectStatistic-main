@@ -32,7 +32,7 @@ public class InfectStatistic {
 				map.put("死亡", 0);
 				infectMap.put(province, map);
 			}
-			int count, country;
+			int count;
 			//解析当前行
 			if (textLine.contains("新增")) {
 				//新增人数
@@ -94,17 +94,14 @@ public class InfectStatistic {
 		if (date != null) {
 			for (File f:fileList) {
 				if (f.getName().substring(0,f.getName().indexOf('.')).compareTo(date) <= 0) {
-//					System.out.println(f.getName());
 					readFile(f);
 				}
 			}
 		} else {
 			for (File f: fileList) {
-//				System.out.println(f.getName());
 				readFile(f);
 			}
 		}
-
 	}
 
 	public void output(String path, List<String> typeList, List<String> provinceList) throws IOException {
@@ -113,23 +110,22 @@ public class InfectStatistic {
 			file.createNewFile();
 		}
 		BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-		List<String> result = parseType(typeList, provinceList);
-		for (int i = 0; i < result.size(); i++) {
-			if (result.get(i).contains("全国")) {
-//				System.out.println(result.get(i));
-				bufferedWriter.write(result.get(i)+"\n");
-				result.remove(i);
-				break;
-			}
-		}
+		List<String> results = parseType(typeList, provinceList);
+		StringBuilder stringBuilder = new StringBuilder();
+		String country = null;
 		//排序
 		Collator cmp = Collator.getInstance(Locale.CHINA);
-		result.sort(cmp);
-		for (String s: result
-		     ) {
-//			System.out.println(s);
-			bufferedWriter.write(s+"\n");
+		results.sort(cmp);
+		for (String s : results) {
+			if (s.contains("全国")) {
+				country = s+"\n";
+				continue;
+			}
+			stringBuilder.append(s+"\n");
 		}
+		String result = country == null ? stringBuilder.toString() : country + stringBuilder.toString();
+		System.out.println(result); //仅供测试
+		bufferedWriter.write(result);
 		bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
 		bufferedWriter.close();
 	}
@@ -138,13 +134,14 @@ public class InfectStatistic {
 	public List<String> parseType(List<String> typeList, List<String> provinceList) {
 		List<String> typeName = new LinkedList<>();
 		List<String> result = new LinkedList<>();
-		if (typeList != null) {
+		if (typeList.size() != 0) {
 			for (String s:typeList) {
 				switch (s) {
 					case "ip": typeName.add("感染患者"); break;
 					case "sp": typeName.add("疑似患者"); break;
 					case "cure": typeName.add("治愈"); break;
 					case "dead": typeName.add("死亡"); break;
+					default:break; //忽略其余错误信息
 				}
 			}
 		} else {
@@ -153,14 +150,20 @@ public class InfectStatistic {
 			typeName.add("治愈");
 			typeName.add("死亡");
 		}
-		if (provinceList != null) {
-			provinceList.add("全国");
+		if (provinceList.size() != 0) {
 			for (String province : provinceList) {
 				StringBuilder sb = new StringBuilder();
 				sb.append(province+ " ");
-				for (String type : typeName) {
-					sb.append(type+infectMap.get(province).get(type)+"人 ");
+				if (infectMap.containsKey(province)) {
+					for (String type : typeName) {
+						sb.append(type+infectMap.get(province).get(type)+"人 ");
+					}
+				} else {
+					for (String type : typeName) {
+						sb.append(type+"0人 ");
+					}
 				}
+
 				result.add(sb.toString());
 			}
 		} else {
@@ -176,7 +179,7 @@ public class InfectStatistic {
 		return result;
 	}
 
-	public void parseArgs(String[] args) {
+	public void parseArgs(String[] args) throws IOException {
 		int optNumber = 0;
 		if (args[0].equals("list")) {
 			String input = null, output = null, date = null;
@@ -209,20 +212,14 @@ public class InfectStatistic {
 					optNumber++;
 				}
 			}
-			System.out.println(input + " " + output + " " + date);
-			for (String type: typeList
-			     ) {
-				System.out.println(type);
-			}
-
-			for (String p:provinceList)
-				System.out.println(p);
+			parseDirectory(input, date);
+			output(output, typeList, provinceList);
 		}
 	}
 
-	public static void main(String[] args) {
-//		InfectStatistic infectStatistic = new InfectStatistic();
-//		infectStatistic.parseArgs(args);
+	public static void main(String[] args) throws IOException {
+		InfectStatistic infectStatistic = new InfectStatistic();
+		infectStatistic.parseArgs(args);
 	}
 
 	public HashMap<String, Map<String, Integer>> getInfectMap() {

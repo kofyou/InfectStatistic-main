@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 /**
@@ -12,7 +13,7 @@ class InfectStatistic {
     //从命令行读取到的参数
     private String inputPath;
     private String outputPath;
-    private String date=null;
+    private LocalDate date=null;
     private ArrayList<String> types=null;
     private ArrayList<String> provinces=null;
 
@@ -61,7 +62,7 @@ class InfectStatistic {
             outputPath = args[outputPosition + 1];
         }
         if(datePosition!=-1){
-            date=args[datePosition+1];
+            date=LocalDate.parse(args[datePosition+1]);
         }
         if(typesPosition!=-1){
             types=new ArrayList<String>();
@@ -94,6 +95,28 @@ class InfectStatistic {
      */
     public void readLogs(){
         logList.readLogsFromPath(inputPath);
+    }
+
+    /**
+     * 根据获取到的参数的情况进行输出
+     */
+    public void output(){
+        LocalDate beginDate;
+        LocalDate endDate;
+
+        beginDate=logList.getBeginDate();
+        if(date==null)
+            endDate=logList.getEndDate();
+        else
+            endDate=date;
+
+        if(types==null){
+
+        }
+        else{
+
+        }
+
     }
     @Override
     public String toString() {

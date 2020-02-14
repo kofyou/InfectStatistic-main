@@ -1,4 +1,4 @@
-# InfectStatistic-学号
+# InfectStatistic-221701431
 
 ###1.项目简介
 &nbsp;&nbsp;该项目读取用户所输入的文件路径，获得日志，根据其他的-type,-province,-date来做筛选，最后输出到用户指定的文件中

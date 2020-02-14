@@ -36,7 +36,8 @@ class InfectStatistic {
 	private static String targetDate = "";
 	private static ArrayList<String> provinceArray = new ArrayList<String>();
 	private static Map<String, Province> map = new HashMap<String, Province>();
-	 
+	private static Province country = new Province();//用于统计全国人数
+	
 	//将命令行参数转换成对象存储起来
 	private static void solveArgs(String[] args, Vector<Order> orders) {
 		int i = 0;
@@ -95,6 +96,7 @@ class InfectStatistic {
 	
 	//测试打印结果
 	private static void printResult() {
+		System.out.println("全国" + "感染人数" + country.infect + " 疑似人数" + country.seeming + " 治愈人数" + country.cured + " 死亡人数" + country.dead);
 		if(map.get("福建") != null) {
 			Province province  = map.get("福建");
 			System.out.println("福建感染人数" + province.infect);
@@ -155,10 +157,12 @@ class InfectStatistic {
 						case "新增":
 							if(information[2].equals("感染患者")) {
 								p.infect += number;
+								country.infect += number;
 								//System.out.println(num);
 							}
 							else {//疑似患者的情况
 								p.seeming += number;
+								country.seeming += number;
 							}
 							break;
 						case "感染患者":
@@ -182,18 +186,25 @@ class InfectStatistic {
 							else {//确诊
 								p.infect += number;
 								p.seeming -= number;
+								country.infect += number;
+								country.seeming -= number;
 							}
 							break;
 						case "死亡":
 							p.infect -= number;
 							p.dead += number;
+							country.infect -= number;
+							country.dead += number;
 							break;
 						case "治愈":
 							p.infect -= number;
 							p.cured += number;
+							country.infect -= number;
+							country.cured += number;
 							break;
 						case "排除":
 							p.seeming -= number;
+							country.seeming -= number;
 							break;
 						default:
 							break;
@@ -205,10 +216,12 @@ class InfectStatistic {
 						case "新增":
 							if(information[2].equals("感染患者")) {
 								p.infect += number;
+								country.infect += number;
 								//System.out.println(num);
 							}
 							else {//疑似患者的情况
 								p.seeming += number;
+								country.seeming += number;
 							}
 							break;
 						case "感染患者":
@@ -232,18 +245,25 @@ class InfectStatistic {
 							else {//确诊
 								p.infect += number;
 								p.seeming -= number;
+								country.infect += number;
+								country.seeming -= number;
 							}
 							break;
 						case "死亡":
 							p.infect -= number;
 							p.dead += number;
+							country.infect -= number;
+							country.dead += number;
 							break;
 						case "治愈":
 							p.infect -= number;
 							p.cured += number;
+							country.infect -= number;
+							country.cured += number;
 							break;
 						case "排除":
 							p.seeming -= number;
+							country.seeming -= number;
 							break;
 						default:
 							break;
@@ -279,6 +299,7 @@ class InfectStatistic {
 				//日期比较
 				if(fileName.compareTo(targetDate) <= 0) {
 					toHandleDate.add(fileName);
+					System.out.println(fileName);
 				}
 				else {
 					flag = true;
@@ -306,6 +327,7 @@ class InfectStatistic {
 	public static void main(String[] args) {
 	
     	Vector<Order> orders = new Vector<Order>();
+    	country.name = "全国";
 //    	try {
 //    		if(args.length != 0 && !args[0].equals("list")) {
 //        		System.out.println("请输入正确的命令(list)");

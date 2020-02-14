@@ -61,10 +61,19 @@ class Record{
             return cureNumber;
         else
             return deadNumber;
-
     }
 
+}
 
+
+
+
+class MapKeyComparator implements Comparator<String> {
+    @Override
+    public int compare(String str1, String str2) {
+        Collator collator = Collator.getInstance();
+        return collator.getCollationKey(str1).compareTo(collator.getCollationKey(str2));
+    }
 }
 
 
@@ -87,7 +96,7 @@ class InfectStatistic {
     public InfectStatistic(){
         type = new Vector();
         province = new Vector();
-        result = new TreeMap<String,Record>();
+        result = new TreeMap<String,Record>(new MapKeyComparator());
     }
 
 
@@ -159,7 +168,72 @@ class InfectStatistic {
     }
 
 
-    void statisticData(){
+    /**
+     * @param info 一行数据
+     * @param result 结果集
+     */
+    void countDeadAndCure(String[] info,Map<String,Record> result){
+
+    }
+
+
+    /**
+     * @param info 一行数据
+     * @param result 结果集
+     */
+    void countIpAndSp(String[] info,Map<String,Record> result){
+
+    }
+
+
+    /**
+     * @param info 一行数据
+     * @param result 结果集
+     */
+    void countMovedIpAndSp(String[] info,Map<String,Record> result){
+
+    }
+
+
+    /**
+     * @param path 日志文件的路径
+     * @param date 统计日期
+     * @param fileList 日志文件夹下的文件列表
+     * @param result 结果集
+     */
+    void statisticData(String path,String date,String[] fileList,Map<String,Record> result){
+            date = path + date + ".log.txt";
+            for(String fileName : fileList){
+                if(date.compareTo(fileName) >= 0){//只统计date之前的数据
+                    try {
+                        FileReader fr = new FileReader(fileName);
+                        BufferedReader bf = new BufferedReader(fr);
+                        String line;
+                        while ((line = bf.readLine()) != null) { // 按行读取字符串并统计信息
+                            if(line.startsWith("//"))//忽略文件里的注释
+                                continue;
+                            String info[] = line.split(" "); //以空格将一行分割
+                            switch (info.length){
+                                case 3:{
+                                    countDeadAndCure(info,result);//统计治愈和死亡
+                                };break;
+                                case 4:{
+                                    countIpAndSp(info,result);//统计新增加的感染患者和疑似患者，确诊的，排除的患者
+                                };break;
+                                case 5:{
+                                    countMovedIpAndSp(info,result);//统计流动的感染患者和疑似患者
+                                };break;
+                                default:System.out.println(line+"： 存在格式错误，此条记录无法处理");
+                            }
+                        }
+                        bf.close();
+                        fr.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
 
     }
 
@@ -171,7 +245,7 @@ class InfectStatistic {
 
 
     public static void main(String[] args) {
-        //String[] args = {"list","-log","E:/log/","-out","E:/out/output.txt","-date","2020-01-22","-type","cure","dead","ip","-province","福建","河北",};
+       // String[] args = {"list","-log","E:/log/","-out","E:/out/output.txt","-date","2020-01-22","-type","cure","dead","ip","-province","福建","河北",};
         InfectStatistic statistic = new InfectStatistic();
         int index=1; //args[0]=list,不用处理
         int startIndex,endIndex;
@@ -217,7 +291,7 @@ class InfectStatistic {
 
         //....开始读入文件......
         String[] fileList = statistic.getFileList(statistic.logLocate);//获取文件夹下的文件列表
-        statistic.statisticData();//统计数据
+        statistic.statisticData(statistic.logLocate,statistic.strDate,fileList,statistic.result);//统计数据
         statistic.saveResult();//保存结果
 
 

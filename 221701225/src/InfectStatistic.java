@@ -1,5 +1,6 @@
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * InfectStatistic
@@ -16,18 +17,20 @@ class InfectStatistic {
     private LocalDate date=null;
     private ArrayList<String> types=null;
     private ArrayList<String> provinces=null;
-
+    private Country country;
     //统计用的对象
     private LogList logList=new LogList();
 
+    InfectStatistic(){
+        country=Country.getInstance();
+    }
     public static void main(String[] args) {
         InfectStatistic infectInfoOperator=new InfectStatistic();
-        Country country=Country.getInstance();
         //从命令行读取参数到该类
         infectInfoOperator.readParameter(args);
         //
         infectInfoOperator.readLogs();
-        country.getProvince("福建").printAllInfo();
+        infectInfoOperator.country.getProvince("福建").printAllInfo();
     }
 
     /**
@@ -103,19 +106,22 @@ class InfectStatistic {
     public void output(){
         LocalDate beginDate;
         LocalDate endDate;
+        HashMap<String,DailyInfo> provinceDailyInfos;
+        DailyInfo countryDailyInfo;
 
+        //设置统计的起始时间、结束时间
         beginDate=logList.getBeginDate();
         if(date==null)
             endDate=logList.getEndDate();
         else
             endDate=date;
 
-        if(types==null){
+        //获取全国统计信息
+        countryDailyInfo=country.getCountryDailyInfo(beginDate,endDate);
 
-        }
-        else{
 
-        }
+
+
 
     }
     @Override

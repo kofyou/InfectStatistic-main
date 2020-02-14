@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -52,7 +53,16 @@ public class Country {
         }
     }
 
-    public DailyInfo getCountryDailyInfo(LocalDate date){
+    public DailyInfo getCountryDailyInfo(LocalDate beginDate,LocalDate endDate){
+        DailyInfo infectInfo=new DailyInfo(endDate);
+
+        //亿些计算...TODO
+
+        return infectInfo;
+    }
+
+    public HashMap<String,DailyInfo> getProvinceDailyInfos(LocalDate beginDate,LocalDate endDate,
+                                                           String[] provinceNames){
 
     }
 

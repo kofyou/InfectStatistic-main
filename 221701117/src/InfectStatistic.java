@@ -28,10 +28,10 @@ public class InfectStatistic
 {
 	static J_Province allCountry = new J_Province();
 	static Vector<J_Province> provinces = new Vector<J_Province>();
-	static String[] arrayProvinces={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南",
-			"河北","河南","黑龙江","湖北","湖南","江西","吉林","江苏","辽宁","内蒙古","宁夏",
-			"青海","山西","山东","陕西","上海","四川","天津","西藏","新疆","云南","浙江","香港",
-			"台湾","澳门"};
+	static String[] arrayProvinces={"安徽","澳门","北京","重庆","福建","甘肃","广东","广西","贵州","海南",
+			"河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏",
+			"青海","山东","山西","陕西","上海","四川","台湾","天津","西藏","香港","新疆","云南","浙江"};
+			//已排好序
 	static int[] listType = {0,0,0,0};
 	static String inputEndDate;
 	static String currentStringDate;
@@ -70,22 +70,23 @@ public class InfectStatistic
     		vector.add("ip");
     		vector.add("dead");
     		*/
-    		/*
+    		
     		vector.add("-province");
+    		vector.add("重庆");
     		vector.add("福建");
     		vector.add("全国");
     		vector.add("湖南");
     		vector.add("广东");
     		vector.add("安徽"); 
-    		*/   		
+    		   		
     	}
     	//保存全国的感染情况
     	allCountry.setName("全国");
     	//保存各省市的感染情况
     	//Vector<J_Province> provinces = new Vector<J_Province>();
     	//省份按拼音首字母顺序排序
-    	Comparator<Object> com=Collator.getInstance(java.util.Locale.CHINA);
-    	Arrays.sort(arrayProvinces,com);
+    	//Comparator<Object> com=Collator.getInstance(java.util.Locale.CHINA);
+    	//Arrays.sort(arrayProvinces,com);
     	//输出排序结果
     	/*
     	for(String i:arrayProvinces){

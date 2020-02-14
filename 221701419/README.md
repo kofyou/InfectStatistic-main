@@ -70,9 +70,9 @@ Java InfectStatistic list -log D:/log -out D:/result/ListOut3.txt -date 2020-01-
 >可选参数：
 >
 >* **ip** (infection patients) : 感染患者 
->* **sp **( suspected patients ) :  疑似患者 
->* **cure **:  治愈 
->* **dead **:  死亡患者 
+>* **sp**( suspected patients ) :  疑似患者 
+>* **cure**:  治愈 
+>* **dead**:  死亡患者 
 >
 >示例：
 >

@@ -25,12 +25,14 @@ class InfectStatistic {
         country=Country.getInstance();
     }
     public static void main(String[] args) {
+        String[] debugArgs="-log C:\\Users\\62706\\Documents\\GitHub\\InfectStatistic-main\\221701225\\log -out ../result -date 2020-01-22".split(" ");
         InfectStatistic infectInfoOperator=new InfectStatistic();
         //从命令行读取参数到该类
-        infectInfoOperator.readParameter(args);
+        infectInfoOperator.readParameter(debugArgs);
         //
         infectInfoOperator.readLogs();
-        infectInfoOperator.country.getProvince("福建").printAllInfo();
+        //infectInfoOperator.country.getProvince("福建").printAllInfo();
+        infectInfoOperator.output();
     }
 
     /**
@@ -117,8 +119,17 @@ class InfectStatistic {
             endDate=date;
 
         //获取全国统计信息
-        countryDailyInfo=country.getCountryDailyInfo(beginDate,endDate);
+        provinceDailyInfos=country.getAllProvincesInfo(beginDate,endDate);
 
+        for(String provinceName:Country.PROVINCES){
+            Province province=country.getProvince(provinceName);
+
+            //未指定省份时只打印在日志中出现过的省份
+            if(province.hasOccured==true){
+                DailyInfo provinceInfo=provinceDailyInfos.get(provinceName);
+                System.out.println(provinceName+" " +provinceInfo.toString());
+            }
+        }
 
 
 

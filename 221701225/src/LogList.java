@@ -34,7 +34,12 @@ public class LogList {
                 if(logDate.isAfter(lastDate))
                     lastDate=logDate;
             }
+
+            beginDate=firstDate;
+            endDate=lastDate;
         }
+
+        analyzeLogs();
     }
 
     public void analyzeLogs(){

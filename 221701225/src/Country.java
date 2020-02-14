@@ -61,9 +61,21 @@ public class Country {
         return infectInfo;
     }
 
-    public HashMap<String,DailyInfo> getProvinceDailyInfos(LocalDate beginDate,LocalDate endDate,
-                                                           String[] provinceNames){
+//    public HashMap<String,DailyInfo> getProvinceDailyInfos(LocalDate beginDate,LocalDate endDate,
+//                                                           String[] provinceNames){
+//
+//    }
 
+    public HashMap<String,DailyInfo> getAllProvincesInfo(LocalDate beginDate,LocalDate endDate){
+        HashMap<String,DailyInfo> totalInfos=new HashMap<>();
+
+        for(String provinceName:Country.PROVINCES){
+            Province province=provincesMap.get(provinceName);
+            DailyInfo provinceStatistic=province.getStatistic(beginDate,endDate);
+            totalInfos.put(provinceName,provinceStatistic);
+        }
+
+        return totalInfos;
     }
 
 

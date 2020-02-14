@@ -16,10 +16,12 @@ Desktop.ini
 /.classpath
 /.project
 /.idea
+/test
 
 # ignore Maven generated target folders
 target
 out
+test
 
 # ignore eclipse files
 .project

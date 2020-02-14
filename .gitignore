@@ -9,3 +9,10 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+
+*.exe
+*.jar
+*.project
+*.out
+*.class
+/bin/

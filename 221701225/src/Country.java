@@ -24,11 +24,22 @@ public class Country {
         return country;
     }
 
+    public Province getProvince(String name){
+        return provincesMap.get(name);
+    }
     public boolean getOccured(String province){
         return provincesMap.get(province).hasOccured;
     }
 
     public void setOccured(String province){
         provincesMap.get(province).hasOccured=true;
+    }
+
+    public void logData(HashMap<String,DailyInfo> dailyInfos){
+        for(String provinceName:PROVINCES){
+            Province province=provincesMap.get(provinceName);
+            DailyInfo info=dailyInfos.get(provinceName);
+            province.addDailyInfo(info);
+        }
     }
 }

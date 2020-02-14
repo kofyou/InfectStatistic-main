@@ -18,17 +18,21 @@ class InfectStatistic {
 
     //统计用的对象
     private LogList logList=new LogList();
-    private Country country=Country.getInstance();
 
     public static void main(String[] args) {
         InfectStatistic infectInfoOperator=new InfectStatistic();
-
+        Country country=Country.getInstance();
         //从命令行读取参数到该类
         infectInfoOperator.readParameter(args);
         //
-        //infectInfoOperator.readLogs();
+        infectInfoOperator.readLogs();
+        country.getProvince("福建").printAllInfo();
     }
 
+    /**
+     * 读取命令行参数到类属性
+     * @param args 命令行参数
+     */
     public void readParameter(String[] args){
         int inputPosition=-1;
         int outputPosition=-1;
@@ -85,6 +89,9 @@ class InfectStatistic {
 
     }
 
+    /**
+     * 从输入路径读取日志
+     */
     public void readLogs(){
         logList.readLogsFromPath(inputPath);
     }

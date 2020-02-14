@@ -31,4 +31,13 @@ public class DailyInfo {
     public void changeCured(int change){
         cured+=change;
     }
+
+    @Override
+    public String toString() {
+        return "日期" + date +
+                "\n新增感染" + infected +
+                "\n新增疑似" + suspected +
+                "\n新增死亡" + dead +
+                "\n新增治愈" + cured;
+    }
 }

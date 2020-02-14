@@ -12,5 +12,13 @@ public class Province {
         hasOccured=false;
     }
 
+    public void addDailyInfo(DailyInfo dailyInfo){
+        dailyInfos.add(dailyInfo);
+    }
 
+    public void printAllInfo(){
+        for(DailyInfo info:dailyInfos){
+            System.out.println(info.toString());
+        }
+    }
 }

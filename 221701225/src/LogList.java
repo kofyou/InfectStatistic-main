@@ -19,7 +19,7 @@ public class LogList {
         }
 
         for(Log log:logs){
-            log.logData();
+            log.analyzeLog();
         }
     }
 }

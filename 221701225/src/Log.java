@@ -16,14 +16,14 @@ public class Log {
 
         country=Country.getInstance();
         dailyInfos=new HashMap<>();
-        for(String province:Country.PROVINCES){
+        for(String provinceName:Country.PROVINCES){
             DailyInfo dailyInfo=new DailyInfo(date);
-            dailyInfos.put(province,dailyInfo);
+            dailyInfos.put(provinceName,dailyInfo);
         }
 //        date=LocalDate.parse(filePath.substring())
     }
 
-    public void logData(){
+    public void analyzeLog(){
         FileInputStream fis = null;
 
         System.out.println("开始处理日志");
@@ -79,6 +79,7 @@ public class Log {
             e.printStackTrace();
         }
 
+        country.logData(dailyInfos);
 
 
     }
@@ -86,36 +87,80 @@ public class Log {
     public void addInfected(String line){
         String[] words=line.split(" ");
         String province=words[0];
+        String numberString=words[3];
+        int number=Integer.parseInt(numberString.substring(0,numberString.length()-1));
 
+        dailyInfos.get(province).changeInfected(number);
+        //System.out.println(province+"新增感染"+number+"人");
     }
 
     public void addSuspected(String line){
-        System.out.println("新增疑似");
+        String[] words=line.split(" ");
+        String province=words[0];
+        String numberString=words[3];
+        int number=Integer.parseInt(numberString.substring(0,numberString.length()-1));
 
+        dailyInfos.get(province).changeSuspected(number);
+        //System.out.println(province+"新增疑似"+number+"人");
     }
 
     public void flowInfected(String line){
+        String[] words=line.split(" ");
+        String province1=words[0];
+        String province2=words[3];
+        String numberString=words[4];
+        int number=Integer.parseInt(numberString.substring(0,numberString.length()-1));
 
+        dailyInfos.get(province1).changeInfected(-number);
+        dailyInfos.get(province2).changeInfected(number);
     }
 
     public void flowSuspected(String line){
+        String[] words=line.split(" ");
+        String province1=words[0];
+        String province2=words[3];
+        String numberString=words[4];
+        int number=Integer.parseInt(numberString.substring(0,numberString.length()-1));
 
+        dailyInfos.get(province1).changeSuspected(-number);
+        dailyInfos.get(province2).changeSuspected(number);
     }
 
     public void addDead(String line){
+        String[] words=line.split(" ");
+        String province=words[0];
+        String numberString=words[2];
+        int number=Integer.parseInt(numberString.substring(0,numberString.length()-1));
 
+        dailyInfos.get(province).changeDead(number);
     }
 
     public void addCured(String line){
+        String[] words=line.split(" ");
+        String province=words[0];
+        String numberString=words[2];
+        int number=Integer.parseInt(numberString.substring(0,numberString.length()-1));
 
+        dailyInfos.get(province).changeCured(number);
     }
 
     public void suspectedToInfected(String line){
+        String[] words=line.split(" ");
+        String province=words[0];
+        String numberString=words[3];
+        int number=Integer.parseInt(numberString.substring(0,numberString.length()-1));
 
+        dailyInfos.get(province).changeInfected(number);
+        dailyInfos.get(province).changeSuspected(-number);
     }
 
     public void suspectedToHealthy(String line){
+        String[] words=line.split(" ");
+        String province=words[0];
+        String numberString=words[3];
+        int number=Integer.parseInt(numberString.substring(0,numberString.length()-1));
 
+        dailyInfos.get(province).changeSuspected(-number);
     }
 
 }

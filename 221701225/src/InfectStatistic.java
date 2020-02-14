@@ -18,7 +18,7 @@ class InfectStatistic {
 
     //统计用的对象
     private LogList logList=new LogList();
-    private Country country=new Country();
+    private Country country=Country.getInstance();
 
     public static void main(String[] args) {
         InfectStatistic infectInfoOperator=new InfectStatistic();
@@ -26,7 +26,7 @@ class InfectStatistic {
         //从命令行读取参数到该类
         infectInfoOperator.readParameter(args);
         //
-        infectInfoOperator.readLogs();
+        //infectInfoOperator.readLogs();
     }
 
     public void readParameter(String[] args){

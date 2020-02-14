@@ -11,4 +11,6 @@ public class Province {
         dailyInfos=new ArrayList<>();
         hasOccured=false;
     }
+
+
 }

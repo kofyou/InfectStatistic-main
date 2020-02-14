@@ -173,6 +173,31 @@ class InfectStatistic {
      * @param result 结果集
      */
     void countDeadAndCure(String[] info,Map<String,Record> result){
+        int number = Integer.valueOf(info[info.length-1].substring(0,info[info.length-1].length()-1));//获得人数
+        String province = info[0];
+        if(!result.containsKey(province)){ //result 中还未出现过这个省的记录
+            Record newRecord = new Record();
+            if (info[1].equals("死亡")) {
+            }
+                newRecord.countCure(number);
+                newRecord.countInfection(-number);
+            }
+            result.put(province,newRecord);
+        }
+
+        else { //result 中出现过这个省的记录
+            Record aRecord = result.get(province);//获得这个省的数据记录
+            if (info[1].equals("死亡")) {
+                aRecord.countDead(number);//将数据加上去
+                aRecord.countInfection(-number);
+            }
+            else if(info[1].equals("治愈")){
+                aRecord.countCure(number);
+                aRecord.countInfection(-number);
+            }
+            result.put(province,aRecord);
+        }
+
 
     }
 
@@ -182,7 +207,7 @@ class InfectStatistic {
      * @param result 结果集
      */
     void countIpAndSp(String[] info,Map<String,Record> result){
-
+        
     }
 
 

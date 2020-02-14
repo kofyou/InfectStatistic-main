@@ -109,7 +109,7 @@ public class InfectStatistic {
 			String[] line = new String[2000];
 			Dates begindate = Dates[ss.length - 1];
 			for (int i = 0; i <ss.length; i++) {
-				FileInputStream f1 = new FileInputStream(path + ss[i]);
+				FileInputStream f1 = new FileInputStream(path + ss[ss.length-1-i]);
 				InputStreamReader reader = new InputStreamReader(f1, "UTF-8");
 				BufferedReader bf = new BufferedReader(reader);
 				BufferedReader bf2 = new BufferedReader(reader);
@@ -123,9 +123,125 @@ public class InfectStatistic {
 			}
 			for (int k = 0; k < num; k++)
 			{
+				String[] as = line[k].split(" ");
+				//String mes=as[0];
+				if(as[1].equals("新增")) {
+					String mes=as[0];
+					if(as[2].equals("感染患者")) {
+						int ki=0;
+						String coun=as[3].substring(0,as[3].length()-1);
+						int count = Integer.parseInt(coun);
+						for(ki=0;ki<34;ki++) {
+							if(provinces[ki].name.equals(mes)){
+								provinces[ki].ip +=count;
+								break;
+							}
+						}
+					}
+					else if(as[2].equals("疑似患者")) {
+						int ki=0;
+						String coun=as[3].substring(0,as[3].length()-1);
+						int count = Integer.parseInt(coun);
+						for(ki=0;ki<34;ki++) {
+							if(provinces[ki].name.equals(mes)){
+								provinces[ki].sp +=count;
+								break;
+							}
+						}
+					}
+				}
+				else if(as[1].equals("死亡")) {
+					String mes=as[0];
+					int ki=0;
+					String coun=as[2].substring(0,as[2].length()-1);
+					int count = Integer.parseInt(coun);
+					for(ki=0;ki<34;ki++) {
+						if(provinces[ki].name.equals(mes)){
+							provinces[ki].death +=count;
+							break;
+						}
+					}
+				}
+				else if(as[1].equals("治愈")) {
+					String mes=as[0];
+					int ki=0;
+					String coun=as[2].substring(0,as[2].length()-1);
+					int count = Integer.parseInt(coun);
+					for(ki=0;ki<34;ki++) {
+						if(provinces[ki].name.equals(mes)){
+							provinces[ki].cure +=count;
+							break;
+						}
+					}
+				}
+				else if(as[1].equals("排除")) {
+					String mes=as[0];
+					int ki=0;
+					String coun=as[3].substring(0,as[3].length()-1);
+					int count = Integer.parseInt(coun);
+					for(ki=0;ki<34;ki++) {
+						if(provinces[ki].name.equals(mes)){
+							provinces[ki].ip -=count;
+							break;
+						}
+					}
+				}
+				else if(as[1].equals("感染患者")) {
+					String mes=as[0];
+					String mes1=as[3];
+					int ki=0,num1=0;
+					String coun=as[4].substring(0,as[4].length()-1);
+					int count = Integer.parseInt(coun);
+					for(ki=0;ki<34;ki++) {
+						if(provinces[ki].name.equals(mes)){
+							provinces[ki].ip -=count;
+							num1++;
+						}
+						if(provinces[ki].name.equals(mes1)){
+							provinces[ki].ip +=count;
+							num1++;
+						}
+						if(num1==2) break;
+					}
+				}
+				else if(as[1].equals("疑似患者")) {
+					if(as[2].equals("流入")) {
+					    String mes=as[0];
+					    String mes1=as[3];
+					    int ki=0,num1=0;
+					    String coun=as[4].substring(0,as[4].length()-1);
+					    int count = Integer.parseInt(coun);
+					    for(ki=0;ki<34;ki++) {
+							if(provinces[ki].name.equals(mes)){
+								provinces[ki].sp -=count;
+								num1++;
+							}
+							if(provinces[ki].name.equals(mes1)){
+								provinces[ki].sp +=count;
+								num1++;
+							}
+							if(num1==2) break;
+						}
+					}
+					else if (as[2].equals("确诊感染")) {
+						String mes = as[0];
+						int ki = 0, num1 = 0;
+						String coun = as[3].substring(0, as[3].length() - 1);
+						int count = Integer.parseInt(coun);
+						for (ki = 0; ki < 34; ki++) {
+							if (provinces[ki].name.equals(mes)) {
+								provinces[ki].ip += count;
+								provinces[ki].sp -= count;
+								break;
+							}
+						}
+					}
+				}
 				System.out.println(line[k]);
 			}
-			System.out.println();
+			for(int j=0;j<34;j++)
+			    System.out.println(provinces[j].name+" 感染患者"+provinces[j].ip+"人 "
+			    		+ " 疑似患者"+provinces[j].sp+"人 "+ "治愈"+provinces[j].cure+"人 "+ "死亡"+provinces[j].death+"人");
 		}
 	}
 }

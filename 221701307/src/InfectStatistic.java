@@ -16,7 +16,7 @@ public class InfectStatistic
     Date currentDate = new Date(System.currentTimeMillis());
     public String date = dateFormat.format(currentDate);   //设置默认日期
 
-    public String journalFile = date+".log.txt";
+    public String journalFileName = date+".log.txt";  //日志文件名
 
     public String log;  //日志文件位置
 
@@ -28,7 +28,14 @@ public class InfectStatistic
      * cure：治愈 ，dead：死亡患者
      */
     public String[] type = {"ip", "sp", "cure", "dead"};
+
+    /*
+     * typeCheck：确认-type输出顺序
+     * type[0]:ip  type[1]:sp
+     * type[2]:cure   iptype[3]:dead
+     */
     public int[] typeCheck = {0,0,0,0};
+
     /*
      * province：各省份列表 除去港澳台 31个省份 + "全国"
      * 全国0 , 安徽1 , 北京2 , 重庆3 , 福建4 , 甘肃5, 广东6 , 广西7 ,
@@ -43,19 +50,28 @@ public class InfectStatistic
 
     /*
      * statistics：各省份各感染类型统计列表
+     * statistics[32][]：除去港澳台31个省份 + "全国"
+     * statistics[][5]：-type四种可选值 + -provice查询确认位
      */
     public int[][] statistics = new int[32][5];
 
+    /*
+     * 解析cmd命令
+     */
     class CommondAnalysis
     {
-        public String[] strCmd;  //当前输入的命令
+        public String[] strCmd;  //当前输入cmd命令
 
         CommondAnalysis(String[] arg)
         {
             strCmd = arg;
         }
 
-        public int getValidLog(int itemLog)    //getValidLog：日志文件路径有效
+        /*
+         * getValidLog：获取有效日志文件路径
+         * itemLog：cmd命令中-log路径在arg[]的索引值
+         */
+        public int getValidLog(int itemLog)
         {
         /*    if (strCmd[itemLog].matches("^[A-z]:\\\\(.+?s\\\\)*$"))
                     log = strCmd[itemLog];
@@ -67,7 +83,11 @@ public class InfectStatistic
             return itemLog;
         }
 
-        public int getValidOut(int itemOut)  //getValidOut：输出文件路径有效
+        /*
+         * getValidOut：获取有效输出文件路径
+         * itemOut：cmd命令中-out路径在arg[]的索引值
+         */
+        public int getValidOut(int itemOut)
         {
 
         /*    if (strCmd[itemOut].matches("^[A-z]:\\\\(\\S+)+(\\.txt)$"))
@@ -80,7 +100,11 @@ public class InfectStatistic
             return itemOut;
         }
 
-        public boolean isDate (String dateStr)  // isDate：判断输入日期格式正确
+        /*
+         * isDate：判断输入日期格式正确
+         * dateStr：cmd命令中-date的值
+         */
+        public boolean isDate (String dateStr)
         {
             // boolean validDate = true;
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -102,7 +126,11 @@ public class InfectStatistic
             return true;
         }
 
-        public int getValidDate(int itemDate)    //getValidDate：日期有效
+        /*
+         * getValidDate：获取有效日期
+         * itemDate：cmd命令中-date值在arg[]的索引值
+         */
+        public int getValidDate(int itemDate)
         {
             String dateStr = strCmd[itemDate];
             if (isDate(dateStr))
@@ -119,7 +147,11 @@ public class InfectStatistic
                 return -1;
         }
 
-        public int getValidType(int itemType)  //getValidType：感染类型有效
+        /*
+         * getValidType：获取有效感染种类
+         * itemType：cmd命令中-type值在arg[]的索引值
+         */
+        public int getValidType(int itemType)
         {
             int typeOrder = 1;
             int itemTypeFlag = itemType;
@@ -158,7 +190,11 @@ public class InfectStatistic
                 return (itemType-1);
         }
 
-        public int getValidProvince(int itemProvince)    //getValidProvince：省份有效
+        /*
+         * getValidType：获取有效查询省份
+         * itemProvince：cmd命令中-province值在arg[]的索引值
+         */
+        public int getValidProvince(int itemProvince)
         {
             int end;
             int itemProvinceFlag = itemProvince;
@@ -184,7 +220,9 @@ public class InfectStatistic
                 return (itemProvince - 1);
         }
 
-
+        /*
+         * validCmd：解析cmd命令并判断是否有效
+         */
         public boolean validCmd()  //validCmd：输入命令有效
         {
             int i;
@@ -193,7 +231,6 @@ public class InfectStatistic
                 System.out.println("命令应以'list'开始！请重新输入！");
                 return false;
             }
-
             for (i = 1; i < strCmd.length; i++)
             {
                 if (strCmd[i].equals("-log"))
@@ -248,6 +285,50 @@ public class InfectStatistic
                 }
             }
             return true;
+        }
+    }
+
+    class FileOpration
+    {
+        FileOpration()
+        {
+
+        }
+
+        /*
+         * getLogList：获取指定目录下的所有文件
+         * log：-log指定日志文件目录
+         */
+        public void getLogList (String log)
+        {
+
+        }
+
+        /*
+         * readJournalFile：按行读取所需日志文件
+         * journalFileName：所需日志文件名
+         */
+        public void readJournalFile (String journalFileName)
+        {
+
+        }
+
+        /*
+         * infectedCount：统计各省感染情况
+         * journalFileContent：每行日志文件内容
+         */
+        public void infectedCount (String journalFileContent)
+        {
+
+        }
+
+        /*
+         * writeOutFile：输出统计结果
+         * journalFileContent：-out指定输出文件路径
+         */
+        public void writeOutFile (String journalFileName)
+        {
+
         }
     }
 

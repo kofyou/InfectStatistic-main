@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
  * InfectStatistic
  * TODO
  *
- * @author luckyzcccc
- * @version 1.0
+ * @author luckyzzzzc
+ * @version 5.1
  * @since
  */
 class InfectStatistic {
@@ -17,8 +17,7 @@ class InfectStatistic {
         ProvinceData pd = ProvinceData.getInstance();
         AbstractDataHandle dataHandle = AbstractDataHandle.getChainOfDataHandle();
         FileProcess fileProcess = FileProcess.getInstance();
-        ArrayList<String> param = cmdArgs.argVals("-log");
-        fileProcess.FileInit(param.get(0));
+        fileProcess.FileInit(cmdArgs.argVals("-log").get(0),cmdArgs.argVals("-out").get(0));
         ArrayList<File> fileList = fileProcess.InputFileData();
         for(int i = 0; i < fileList.size(); i++) {
             if (fileList.get(i).getName().substring(0,10).compareTo(cmdArgs.argVals("-date").get(0)) <= 0) {
@@ -27,39 +26,42 @@ class InfectStatistic {
                     dataHandle.dataProcessing(data.get(j));
             }
         }
-        pd.LogData(cmdArgs.argVals("-out").get(0),cmdArgs.argVals("-province"),cmdArgs.argVals("-type"));
+        fileProcess.LogData(cmdArgs.argVals("-province"),cmdArgs.argVals("-type"));
     }
 }
 
 class ProvinceData{
     private static ProvinceData provinceData = new ProvinceData();
 
-    private TreeMap<String,int[]> AllData = new TreeMap<>();
-    private String[] initStr = {
-            "全国","安徽","澳门","北京","重庆","福建","甘肃","广东","广西",
-            "贵州", "海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏",
-            "江西", "辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
-            "四川", "台湾","天津","西藏","香港","新疆","云南","浙江"
-    };
-
-    private HashMap<String,Integer> STATUS = new HashMap<>();
-
-    private HashMap<String,String> STATUSCHINESE = new HashMap<>();
-
+    private HashMap<String,int[]> AllData = new HashMap<>();
 
     private ProvinceData(){
-        for(int i = 0; i < initStr.length; i++){
+        for(int i = 0; i < Constant.initStr.length; i++){
             int[] initArray = {0,0,0,0};
-            AllData.put(initStr[i],initArray);
+            AllData.put(Constant.initStr[i],initArray);
         }
-        STATUS.put("ip", 0);
-        STATUS.put("sp", 1);
-        STATUS.put("cure", 2);
-        STATUS.put("dead", 3);
-        STATUSCHINESE.put("ip","感染患者");
-        STATUSCHINESE.put("sp","疑似患者");
-        STATUSCHINESE.put("cure","治愈");
-        STATUSCHINESE.put("dead","死亡");
+    }
+
+    public String logProcess(ArrayList<String> allData, ArrayList<String>typeList){
+        String data = new String();
+        int count = 0;
+        for(int i = 0; i < AllData.size(); i++){
+            if(allData.get(count).equals(Constant.initStr[i])) {
+                int[] dataValue = AllData.get(Constant.initStr[i]);
+                data = data + Constant.initStr[i] + " ";
+                for (int j = 0; j < typeList.size(); j++) {
+                    data = data + Constant.STATUSCHINESE.get(typeList.get(j)) + dataValue[Constant.STATUS.get(typeList.get(j))] + "人 ";
+                }
+                data += "\n";
+                if(count < allData.size() - 1) {
+                    count++;
+                }else{
+                    break;
+                }
+
+            }
+        }
+        return data;
     }
 
     public static ProvinceData getInstance(){
@@ -101,73 +103,9 @@ class ProvinceData{
         temp[3]+=num;
         AllData.put(province,temp);
     }
-
-    public void AllPrint() {
-        Iterator<String> it = AllData.keySet().iterator();
-        while(it.hasNext()){
-            String key = it.next();
-            System.out.print(key+"=");
-            int[] temp = AllData.get(key);
-            for(int i = 0; i < temp.length; i++)
-                System.out.print(temp[i]+",");
-            System.out.println();
-        }
-    }
-
-    public void LogData(String path, ArrayList<String> provinceList, ArrayList<String>typeList) throws IOException {
-        File outFile = new File(path);
-        if(!outFile.exists()){
-            outFile.createNewFile();
-        }
-        PrintStream stream=null;
-        stream=new PrintStream(path);
-        if(typeList == null || typeList.isEmpty()){
-            if(typeList == null){
-                typeList = new ArrayList<>();
-            }
-            typeList.add("ip");
-            typeList.add("sp");
-            typeList.add("cure");
-            typeList.add("dead");
-        }
-        String data = new String();
-        if(provinceList == null) {
-            for (int i = 0; i < initStr.length; i++) {
-                int[] datavalue = AllData.get(initStr[i]);
-                data = data + initStr[i] + " ";
-                for(int j = 0; j < typeList.size(); j++){
-                    data = data + STATUSCHINESE.get(typeList.get(j)) + datavalue[STATUS.get(typeList.get(j))] +  "人 ";
-                }
-                data += "\n";
-            }
-        }else{
-            for(int i = 0; i < provinceList.size(); i++){
-                int[] datavalue = AllData.get(initStr[i]);
-                data = data + initStr[i] + " ";
-                for(int j = 0; j < typeList.size(); j++){
-                    data = data + STATUSCHINESE.get(typeList.get(j)) + datavalue[STATUS.get(typeList.get(j))] +  "人 ";
-                }
-                data += "\n";
-            }
-        }
-        System.out.println(data);
-        stream.print(data);
-    }
 }
 
 abstract class AbstractDataHandle{
-    public final static String s1 = "^[\\u4e00-\\u9fa5]*\\s(新增)\\s(感染患者)\\s(\\d+)人?";
-    public final static String s2 = "^[\\u4e00-\\u9fa5]*\\s(新增)\\s(疑似患者)\\s(\\d+)人?";
-    public final static String s3 = "^[\\u4e00-\\u9fa5]*\\s(死亡)\\s(\\d+)人?";
-    public final static String s4 = "^[\\u4e00-\\u9fa5]*\\s(治愈)\\s(\\d+)人?";
-    public final static String s5 = "^[\\u4e00-\\u9fa5]*\\s(排除)\\s(疑似患者)\\s(\\d+)人?";
-    public final static String s6 = "^[\\u4e00-\\u9fa5]*\\s(疑似患者)\\s(确诊感染)\\s(\\d+)人?";
-    public final static String s7 = "^[\\u4e00-\\u9fa5]*\\s(感染患者)\\s(流入)\\s[\\u4e00-\\u9fa5]*\\s(\\d+)人?";
-    public final static String s8 = "^[\\u4e00-\\u9fa5]*\\s(疑似患者)\\s(流入)\\s[\\u4e00-\\u9fa5]*\\s(\\d+)人?";
-    public final static String PICKUPDIGIT = "[^0-9]";
-
-    public static int count = 0;
-
     protected String model;
     protected AbstractDataHandle nextDataHandle;
 
@@ -187,14 +125,14 @@ abstract class AbstractDataHandle{
     }
 
     public static AbstractDataHandle getChainOfDataHandle(){
-        AbstractDataHandle addInfect = new AddInfectPeople(AbstractDataHandle.s1);
-        AbstractDataHandle addDoubt = new AddDoubtPeople(AbstractDataHandle.s2);
-        AbstractDataHandle addDead = new AddDeadPeople(AbstractDataHandle.s3);
-        AbstractDataHandle addCure = new AddCurePeople(AbstractDataHandle.s4);
-        AbstractDataHandle subDoubt = new SubDoubtPeople(AbstractDataHandle.s5);
-        AbstractDataHandle sureDoubt = new SureInfectPeople(AbstractDataHandle.s6);
-        AbstractDataHandle infectInflow = new InfectInflow(AbstractDataHandle.s7);
-        AbstractDataHandle doubtInflow = new DoubtInflow(AbstractDataHandle.s8);
+        AbstractDataHandle addInfect = new AddInfectPeople(Constant.s1);
+        AbstractDataHandle addDoubt = new AddDoubtPeople(Constant.s2);
+        AbstractDataHandle addDead = new AddDeadPeople(Constant.s3);
+        AbstractDataHandle addCure = new AddCurePeople(Constant.s4);
+        AbstractDataHandle subDoubt = new SubDoubtPeople(Constant.s5);
+        AbstractDataHandle sureDoubt = new SureInfectPeople(Constant.s6);
+        AbstractDataHandle infectInflow = new InfectInflow(Constant.s7);
+        AbstractDataHandle doubtInflow = new DoubtInflow(Constant.s8);
 
         addInfect.setNextDataHandle(addDoubt);
         addDoubt.setNextDataHandle(addDead);
@@ -218,13 +156,14 @@ class AddInfectPeople extends AbstractDataHandle{
     @Override
     public void processing(String str) {
         ProvinceData provinceData = ProvinceData.getInstance();
-        Pattern pattern = Pattern.compile(PICKUPDIGIT);
+        Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
         int num = Integer.valueOf(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.AddInfectPeople(province[0],num);
+        provinceData.AddInfectPeople("全国",num);
     }
 }
 
@@ -236,13 +175,14 @@ class AddDoubtPeople extends AbstractDataHandle{
     @Override
     public void processing(String str) {
         ProvinceData provinceData = ProvinceData.getInstance();
-        Pattern pattern = Pattern.compile(PICKUPDIGIT);
+        Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
         int num = Integer.valueOf(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.AddDoubtPeople(province[0],num);
+        provinceData.AddDoubtPeople("全国",num);
     }
 }
 
@@ -254,13 +194,14 @@ class SubDoubtPeople extends AbstractDataHandle{
     @Override
     public void processing(String str) {
         ProvinceData provinceData = ProvinceData.getInstance();
-        Pattern pattern = Pattern.compile(PICKUPDIGIT);
+        Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
         int num = Integer.valueOf(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.SubDoubtPeople(province[0],num);
+        provinceData.SubDoubtPeople("全国",num);
     }
 }
 
@@ -272,7 +213,7 @@ class AddCurePeople extends AbstractDataHandle{
     @Override
     public void processing(String str) {
         ProvinceData provinceData = ProvinceData.getInstance();
-        Pattern pattern = Pattern.compile(PICKUPDIGIT);
+        Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
         int num = Integer.valueOf(matcher.replaceAll("").trim());
@@ -280,6 +221,8 @@ class AddCurePeople extends AbstractDataHandle{
 
         provinceData.AddCurePeople(province[0],num);
         provinceData.SubInfectPeople(province[0],num);
+        provinceData.AddCurePeople("全国",num);
+        provinceData.SubInfectPeople("全国",num);
     }
 }
 
@@ -291,7 +234,7 @@ class AddDeadPeople extends AbstractDataHandle{
     @Override
     public void processing(String str) {
         ProvinceData provinceData = ProvinceData.getInstance();
-        Pattern pattern = Pattern.compile(PICKUPDIGIT);
+        Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
         int num = Integer.valueOf(matcher.replaceAll("").trim());
@@ -299,6 +242,8 @@ class AddDeadPeople extends AbstractDataHandle{
 
         provinceData.AddDeadPeople(province[0],num);
         provinceData.SubInfectPeople(province[0],num);
+        provinceData.AddDeadPeople("全国",num);
+        provinceData.SubInfectPeople("全国",num);
     }
 }
 
@@ -310,7 +255,7 @@ class DoubtInflow extends AbstractDataHandle{
     @Override
     public void processing(String str) {
         ProvinceData provinceData = ProvinceData.getInstance();
-        Pattern pattern = Pattern.compile(PICKUPDIGIT);
+        Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
         int num = Integer.valueOf(matcher.replaceAll("").trim());
@@ -329,7 +274,7 @@ class InfectInflow extends AbstractDataHandle{
     @Override
     public void processing(String str) {
         ProvinceData provinceData = ProvinceData.getInstance();
-        Pattern pattern = Pattern.compile(PICKUPDIGIT);
+        Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
         int num = Integer.valueOf(matcher.replaceAll("").trim());
@@ -348,7 +293,7 @@ class SureInfectPeople extends AbstractDataHandle{
     @Override
     public void processing(String str) {
         ProvinceData provinceData = ProvinceData.getInstance();
-        Pattern pattern = Pattern.compile(PICKUPDIGIT);
+        Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
         int num = Integer.valueOf(matcher.replaceAll("").trim());
@@ -356,6 +301,8 @@ class SureInfectPeople extends AbstractDataHandle{
 
         provinceData.AddInfectPeople(province[0],num);
         provinceData.SubDoubtPeople(province[0],num);
+        provinceData.AddInfectPeople("全国",num);
+        provinceData.SubDoubtPeople("全国",num);
     }
 }
 
@@ -363,6 +310,7 @@ class FileProcess{
     private final static String GETFLENAME = "(\\d{4})-(\\d{2})-(\\d{2})\\.log\\.txt";
     private static FileProcess fileProcess = new FileProcess();
     private File file;
+    private File outfile;
 
     private FileProcess(){};
 
@@ -370,8 +318,9 @@ class FileProcess{
         return fileProcess;
     }
 
-    public void FileInit(String in){
+    public void FileInit(String in, String out){
         file = new File(in);
+        outfile = new File(out);
     }
 
     public ArrayList<File> InputFileData(){
@@ -407,6 +356,33 @@ class FileProcess{
         bf.close();
         inputReader.close();
         return arrayList;
+    }
+
+    public void LogData(ArrayList<String> provinceList, ArrayList<String>typeList) throws IOException {
+        ProvinceData provinceData = ProvinceData.getInstance();
+        PrintStream stream=null;
+        stream=new PrintStream(outfile);
+        if(typeList == null || typeList.isEmpty()){
+            if(typeList == null){
+                typeList = new ArrayList<>();
+            }
+            typeList.add("ip");
+            typeList.add("sp");
+            typeList.add("cure");
+            typeList.add("dead");
+        }
+        String data = new String();
+        if(provinceList == null) {
+            provinceList = new ArrayList<>();
+            for(int i = 0; i < Constant.initStr.length; i++){
+                provinceList.add(Constant.initStr[i]);
+            }
+            data = provinceData.logProcess(provinceList,typeList);
+        }else{
+            data = provinceData.logProcess(provinceList,typeList);
+        }
+        System.out.println(data);
+        stream.print(data);
     }
 }
 
@@ -463,5 +439,39 @@ class CmdArgs{
             flag = true;
         }
         return flag;
+    }
+}
+
+class Constant{
+    public static final String[] initStr = {
+            "全国","安徽","澳门","北京","重庆","福建","甘肃","广东","广西",
+            "贵州", "海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏",
+            "江西", "辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
+            "四川", "台湾","天津","西藏","香港","新疆","云南","浙江"
+    };
+
+    public final static String s1 = "^[\\u4e00-\\u9fa5]*\\s(新增)\\s(感染患者)\\s(\\d+)人?";
+    public final static String s2 = "^[\\u4e00-\\u9fa5]*\\s(新增)\\s(疑似患者)\\s(\\d+)人?";
+    public final static String s3 = "^[\\u4e00-\\u9fa5]*\\s(死亡)\\s(\\d+)人?";
+    public final static String s4 = "^[\\u4e00-\\u9fa5]*\\s(治愈)\\s(\\d+)人?";
+    public final static String s5 = "^[\\u4e00-\\u9fa5]*\\s(排除)\\s(疑似患者)\\s(\\d+)人?";
+    public final static String s6 = "^[\\u4e00-\\u9fa5]*\\s(疑似患者)\\s(确诊感染)\\s(\\d+)人?";
+    public final static String s7 = "^[\\u4e00-\\u9fa5]*\\s(感染患者)\\s(流入)\\s[\\u4e00-\\u9fa5]*\\s(\\d+)人?";
+    public final static String s8 = "^[\\u4e00-\\u9fa5]*\\s(疑似患者)\\s(流入)\\s[\\u4e00-\\u9fa5]*\\s(\\d+)人?";
+    public final static String PICKUPDIGIT = "[^0-9]";
+
+    public final static HashMap<String,Integer> STATUS = new HashMap<>();
+
+    public final static HashMap<String,String> STATUSCHINESE = new HashMap<>();
+
+    static {
+        STATUS.put("ip", 0);
+        STATUS.put("sp", 1);
+        STATUS.put("cure", 2);
+        STATUS.put("dead", 3);
+        STATUSCHINESE.put("ip","感染患者");
+        STATUSCHINESE.put("sp","疑似患者");
+        STATUSCHINESE.put("cure","治愈");
+        STATUSCHINESE.put("dead","死亡");
     }
 }

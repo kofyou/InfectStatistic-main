@@ -1,3 +1,7 @@
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**
@@ -11,6 +15,97 @@ import java.util.regex.Pattern;
  */
 public class Lib {
 }
+
+
+enum ListKey{
+	LOG, OUT, DATE, TYPE, PROVINCE
+}
+
+//命令模式的command类
+interface Command{
+	void execute(Map<String,List<String>> map);
+}
+
+class ListCommand implements Command{
+	private ListKey listKey;
+	
+	public ListCommand() {	
+	}
+	
+	@Override
+	public void execute(Map<String, List<String>> map) {
+		Set<String> keySet = map.keySet();
+		Iterator<String> it =keySet.iterator();
+		while(it.hasNext()) {
+			String key = it.next();
+			List<String> value = map.get(key);
+			
+			
+			switch (key) {
+				case "date":
+					listKey = ListKey.DATE;
+					break;
+				case "log":
+					listKey = ListKey.LOG;
+					break;
+				case "out":
+					listKey = ListKey.OUT;
+					break;
+				case "type":
+					listKey = ListKey.TYPE;
+					break;
+				case "province":
+					listKey = ListKey.PROVINCE;
+					break;
+			}
+			
+			switch(listKey) {
+				case DATE:
+					dateKey(value);
+					break;
+				case LOG:
+					logKey(value);
+					break;
+				case OUT:
+					outKey(value);
+					break;
+				case TYPE:
+					typeKey(value);
+					break;
+				case PROVINCE:
+					provinceKey(value);
+					break;
+			}
+		}
+	}
+
+	private void provinceKey(List<String> value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void typeKey(List<String> value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void outKey(List<String> value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void logKey(List<String> value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void dateKey(List<String> value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
+
 
 //责任链模式处理日志文件
 abstract class MyHandler{

@@ -13,6 +13,8 @@ import java.text.SimpleDateFormat;
 import java.lang.*;
 import com.sun.org.apache.xpath.internal.operations.String;
 import java.util.*;
+import java.util.HashMap;;
+import java.util.Map;
 
 class InfectStatistic {
 	
@@ -23,7 +25,18 @@ class InfectStatistic {
     Date date = new Date();
     String currentDate = dateFormat.format(date);
 	
+    //创建哈希表
+	HashMap<String,Integer> TypeToNumMap = new HashMap<String,Integer>();
+	HashMap<String,TypeToNumMap> ProvinceToNumMap = new HashMap<String,TypeToNumMap>();
 	
+	//初始化
+	TypeToNumMap.put("感染患者",0);
+    TypeTnNumMap.put("疑似患者",0);
+    TypeToNumMap.put("治愈",0);
+    TypeToNumMap.put("死亡",0);
+    
+    ProvinceToNumMap("全国",TypeToNumMap);
+    
     
 	/*
 	 *函数功能：解析命令行
@@ -86,7 +99,7 @@ class InfectStatistic {
 	}
 	
 /*
- *函数功能：读取文件名称
+ *函数功能：判断命令行格式是否有错误
  *输入参数：args[]
  *输出参数：true,false
  **/
@@ -170,22 +183,18 @@ class InfectStatistic {
 	/*
 	 *函数功能：获取文件内容
 	 *输入参数：文件路径
-	 *输出参数：
+	 *输出参数：无
 	 **/
-	public void readFile(string address) throws IOException {
+	public void readFile(String address) throws IOException {
 	FileInputStream fiStream = new FileInputStream(address);
 	InputStreamReader isReader = new InputStreamReader(fiStream,"UTF-8");
 	BufferedReader bufferedReader = new BufferedReader(isReader);
 	String line = null;
 	while((line=bufferedReader.readLine())! = null) {
 		if(!line.startWith("//")) {
-			
-		}
-		
+			handleInformation(line);
+		}	
 	}
-		
-		
-		
 	}
 	
 	
@@ -196,10 +205,21 @@ class InfectStatistic {
 	 *输入参数：
 	 *输出参数：
 	 **/
-	public void countData() {
+	public void handleInformation(String lineInformation) {
+		//先将每一行的字符串分隔成字符串数组
+		String[] linePart = lineInformation.split(" ");
+		String province = linePart[0];
+		
+		if(lineInformation.contains("新增 感染患者"))
+	
 		
 		
+			
 	}
+		
+	
+	
+	
 	
 	/*
 	 *函数功能：输出统计结果到文件中

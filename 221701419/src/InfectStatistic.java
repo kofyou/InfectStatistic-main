@@ -20,10 +20,10 @@ import java.util.Set;
  * InfectStatistic TODO
  *
  * @author HHQ
- * @version 2.3
+ * @version 2.4
  */
 class InfectStatistic {
-    
+        
     /** 保存args的值 */
     public static String[] paramenterStrings;
     
@@ -44,6 +44,9 @@ class InfectStatistic {
     
     /** province的参数值 */
     public static String[] paramentersOfProvince = new String[25]; 
+    
+    /** 用来存储省份的哈希表 */
+    public static Hashtable<String, Province> hashtable = new Hashtable<String, Province>(40);
 
     /**
      * Province类
@@ -491,15 +494,13 @@ class InfectStatistic {
                 commandLineString = commandLineString + commandLineStrings[i] + " ";
             }
             InfectStatistic infectStatistic = new InfectStatistic();
-            Province wholeNation = hashtable.get("全国");
             try {
                
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,"UTF8");
                 
                 if(paramentersOfProvince[0].equals("null")) {   //没有指定省份
-                    Set set = hashtable.keySet();
-                    Iterator iterator = set.iterator();
                     List<Map.Entry<String,Province>> list = OpHashTableMethods.sortByHeadAlphabet(hashtable);       //排序
+//                    List<Map.Entry<String,Province>> list = new ArrayList<>(hashtable.entrySet());
                     for (Map.Entry entry : list){
                         Province province = (Province) entry.getValue();
                         
@@ -718,7 +719,6 @@ class InfectStatistic {
          * */
         public static void execCalcAndWrite(String[] args) {
             InfectStatistic infectStatistic = new InfectStatistic();
-            Hashtable<String, Province> hashtable = new Hashtable<String, Province>(40);    //用来存储省份的哈希表
             ArrayList<String> listFileNameArrayList = new ArrayList<String>();      //用来保存一个文件夹下的文件夹名的数组
             GetFileMethods.getBeforeDateFileName(inputDir, toDateString, listFileNameArrayList);    //初始化listFileNameArrayList
             
@@ -771,6 +771,7 @@ class InfectStatistic {
     
     
     public static void main(String[] args) {
+        
         StartMethods.separateNameAndValues(args);
         StartMethods.initVariables();
         StartMethods.execCalcAndWrite(args);

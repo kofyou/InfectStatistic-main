@@ -1,8 +1,8 @@
 /***********************
 FileName:InfectStatistic.cpp
 Author:Cazenove
-Version:v1.2
-Date:2020.02.13
+Version:v1.3
+Date:2020.02.15
 Description:
     本程序为疫情统计程序，通过读取list命令中给定了log路径下的日志文件，以及给定的具体参数，将统计结果输出到给定out路径的文件中
     list命令 支持以下命令行参数：
@@ -16,10 +16,11 @@ Description:
     作业要求链接：https://edu.cnblogs.com/campus/fzu/2020SPRINGS/homework/10287
     项目github链接：https://github.com/Cazenove/InfectStatistic-main
 Version Description:
-    使用enum+map来将if else结构替换为switch结构、美化了部分代码。
+    新增了文件名称验证功能
 History:
     V1.0:参照作业要求初步完成了所有基本命令
     v1.1:使用面向对象方法重新编排代码，将省份信息与操作进行了封装。
+    v1.2:使用enum+map来将if else结构替换为switch结构、美化了部分代码，修正了部分对需求理解的偏差。
 ************************/
 
 #include <iostream>
@@ -34,6 +35,7 @@ History:
 #include <sstream>
 #include <strstream>
 #include <getopt.h>
+#include <queue>
 using namespace std;
 
 /***********************
@@ -158,6 +160,18 @@ Return:
 Others:none
 ***********************/
 int datecmp(string date1, string date2);
+
+/***********************
+Description:判断文件是否是日志文件
+Input:
+    stirng fileName:文件名
+Output:none
+Return:
+    true:是
+    false:不是
+Others:none
+***********************/
+bool isLogFile(string fileName);
 
 
 /***********************
@@ -327,28 +341,62 @@ int datecmp(string date1, string date2)
     }
 }
 
+bool isLogFile(string fileName)
+{
+    //文件名格式为yyyy-mm-dd.log.txt 为18
+    if(fileName.length() != 18)
+    {
+        return false;
+    }
+    else
+    {
+        char file[20];
+        strcpy(file, fileName.c_str());
+        if(file[4] != '-' || file[7] != '-')
+        {
+            return false;
+        }
+        for(int i=0; i<10; i++)
+        {
+            if(i != 4 && i !=7)
+            {
+                if((file[i] < '0') || (file[i] > '9'))
+                {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 void ReadAllLog(string path, string date)//读取到date之前的给定路径中所有日志文件
 {
     long hFile = 0;//文件句柄
     struct _finddata_t fileinfo;//文件信息
+    char fileName[10];
+    //priority_queue <string, vector<string>, less<string> > queueLog;
 
     string p;
-    if((hFile = _findfirst(p.assign(path).append("\\*.log.txt").c_str(),&fileinfo)) != -1)
+    if((hFile = _findfirst(p.assign(path).append("\\*.log.txt").c_str(), &fileinfo)) != -1)
     {
         do
         {
-            //当date为默认时，输出最新的情况。否则输出date之前的最新情况。
-            if(((strcmp(date.c_str(), "") == 0)) || datecmp(date, fileinfo.name) >= 0)
+            if(isLogFile(fileinfo.name))//判断文件的名称格式是否是日志文件
             {
-                string fileName = fileinfo.name;
-                string filePath = "\\";
-                filePath = path + filePath + fileName;//构造完整的文件路径及名称
-                ReadLog(filePath);//通过文件名，对文件进行对应处理
+                //当date为默认时，输出最新的情况。否则输出date之前的最新情况。
+                if(((strcmp(date.c_str(), "") == 0)) || datecmp(date.c_str(), fileinfo.name) >= 0)
+                {
+                    string fileName = fileinfo.name;
+                    string filePath = "\\";
+                    filePath = path + filePath + fileName;//构造完整的文件路径及名称
+                    ReadLog(filePath);//通过文件名，对文件进行对应处理
+                }
             }
         } while (_findnext(hFile,&fileinfo) == 0);
         
         //date比最新日志文件的日期还大，提示超出范围并关闭程序。
-        if(datecmp(date, fileinfo.name) > 0)
+        if(datecmp(date.c_str(), fileinfo.name) > 0)
         {
             cout<<"out of range\n";
             exit(0);

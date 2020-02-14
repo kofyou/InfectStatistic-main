@@ -5,6 +5,10 @@
 # IntelliJ project files
 .idea
 *.iml
+*.txt
+*.class
+*.jar
+*.exe
 out
 gen
 .idea/

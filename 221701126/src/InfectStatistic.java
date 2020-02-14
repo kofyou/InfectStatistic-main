@@ -99,11 +99,15 @@ class InfectStatistic {
 			Province province  = map.get("福建");
 			System.out.println("福建感染人数" + province.infect);
 			System.out.println("福建疑似人数" + province.seeming);
+			System.out.println("福建治愈人数" + province.cured);
+			System.out.println("福建死亡人数" + province.dead);
 		}
 		if(map.get("湖北") != null) {
 			Province province  = map.get("湖北");
 			System.out.println("湖北感染人数" + province.infect);
 			System.out.println("湖北疑似人数" + province.seeming);
+			System.out.println("湖北治愈人数" + province.cured);
+			System.out.println("湖北死亡人数" + province.dead);
 		}
 	}
 	
@@ -180,6 +184,17 @@ class InfectStatistic {
 								p.seeming -= number;
 							}
 							break;
+						case "死亡":
+							p.infect -= number;
+							p.dead += number;
+							break;
+						case "治愈":
+							p.infect -= number;
+							p.cured += number;
+							break;
+						case "排除":
+							p.seeming -= number;
+							break;
 						default:
 							break;
 						}
@@ -218,6 +233,17 @@ class InfectStatistic {
 								p.infect += number;
 								p.seeming -= number;
 							}
+							break;
+						case "死亡":
+							p.infect -= number;
+							p.dead += number;
+							break;
+						case "治愈":
+							p.infect -= number;
+							p.cured += number;
+							break;
+						case "排除":
+							p.seeming -= number;
 							break;
 						default:
 							break;

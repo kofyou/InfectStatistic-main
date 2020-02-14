@@ -178,7 +178,10 @@ class InfectStatistic {
         if(!result.containsKey(province)){ //result 中还未出现过这个省的记录
             Record newRecord = new Record();
             if (info[1].equals("死亡")) {
+                newRecord.countDead(number);
+                newRecord.countInfection(-number);
             }
+            else if(info[1].equals("治愈")){
                 newRecord.countCure(number);
                 newRecord.countInfection(-number);
             }
@@ -207,7 +210,67 @@ class InfectStatistic {
      * @param result 结果集
      */
     void countIpAndSp(String[] info,Map<String,Record> result){
-        
+        String tmp = info[info.length-1];
+        String strNumber=tmp.substring(0,tmp.length()-1);
+        int number =  Integer.valueOf(strNumber);//获得人数
+        String province = info[0];
+        String ip="感染患者",sp="疑似患者";
+        if(info[1].equals("新增") && info[2].equals(ip)){//新增感染
+            if(!result.containsKey(province)){//result 中还未出现过这个省的记录
+                Record newRecord = new Record();
+                newRecord.countInfection(number);
+                result.put(province,newRecord);
+            }
+            else{
+                Record aRecord = result.get(province);//获得这个省的数据记录
+                aRecord.countInfection(number);
+                result.put(province,aRecord);
+            }
+
+        }
+
+        else if(info[1].equals("新增") && info[2].equals(sp)){//新增疑似
+            if(!result.containsKey(province)){//result 中还未出现过这个省的记录
+                Record newRecord = new Record();
+                newRecord.countSuspected(number);
+                result.put(province,newRecord);
+            }
+            else{
+                Record aRecord = result.get(province);//获得这个省的数据记录
+                aRecord.countSuspected(number);
+                result.put(province,aRecord);
+            }
+
+        }
+
+        else if(info[1].equals("排除")){//排除疑似
+            if(!result.containsKey(province)){//result 中还未出现过这个省的记录
+                System.out.print("此省份无记录，此条数据有误： ");
+                for(String str : info){
+                    System.out.print(str);
+                }
+                System.out.print("\n");
+            }
+            else{
+                Record aRecord = result.get(province);//获得这个省的数据记录
+                aRecord.countSuspected(-number);
+                result.put(province,aRecord);
+            }
+
+
+        }
+
+        else if(info[2].equals("确诊感染")){
+            Record aRecord = result.get(province);//获得这个省的数据记录
+            aRecord.countSuspected(-number);//疑似减去
+            aRecord.countInfection(number);//感染加上
+            result.put(province,aRecord);
+        }
+
+        else {
+            System.out.println("此条记录包含无法处理部分");
+        }
+
     }
 
 
@@ -216,6 +279,49 @@ class InfectStatistic {
      * @param result 结果集
      */
     void countMovedIpAndSp(String[] info,Map<String,Record> result){
+        int number = Integer.valueOf(info[info.length-1].substring(0,info[info.length-1].length()-1));//获得人数
+        String sourceProvince = info[0];
+        String aimProvince = info[3];
+        String ip = "感染患者",sp = "疑似患者";
+        if(info[1].equals(ip)){//感染患者流入
+            if(!result.containsKey(aimProvince)){//未出现过的省份
+                Record newRecord = new Record();//加上数据
+                newRecord.countInfection(number);
+                result.put(aimProvince,newRecord);
+            }
+            else {
+                Record tmpRecord = result.get(aimProvince);//加上数据
+                tmpRecord.countInfection(number);
+                result.put(aimProvince,tmpRecord);
+            }
+            Record aRecord = result.get(sourceProvince);//减去数据
+            aRecord.countInfection(-number);
+            result.put(sourceProvince,aRecord);
+
+        }
+        else if(info[1].equals(sp)){//疑似患者流入
+            if(!result.containsKey(aimProvince)){//未出现过的省份
+                Record newRecord = new Record();//加上数据
+                newRecord.countSuspected(number);
+                result.put(aimProvince,newRecord);
+            }
+            else {
+                Record tmpRecord = result.get(aimProvince);//加上数据
+                tmpRecord.countSuspected(number);
+                result.put(aimProvince,tmpRecord);
+            }
+            Record aRecord = result.get(sourceProvince);//减去数据
+            aRecord.countSuspected(-number);
+            result.put(sourceProvince,aRecord);
+
+
+        }
+        else {
+            System.out.print("此纪录无法处理： ");
+            for(String str:info)
+                System.out.print(str);
+            System.out.print("\n");
+        }
 
     }
 
@@ -269,8 +375,8 @@ class InfectStatistic {
 
 
 
-    public static void main(String[] args) {
-       // String[] args = {"list","-log","E:/log/","-out","E:/out/output.txt","-date","2020-01-22","-type","cure","dead","ip","-province","福建","河北",};
+    public static void main(String[] ags) {
+        String[] args = {"list","-log","E:/log/","-out","E:/out/output.txt","-date","2020-01-29","-type","cure","dead","ip","-province","全国","福建","河北"};
         InfectStatistic statistic = new InfectStatistic();
         int index=1; //args[0]=list,不用处理
         int startIndex,endIndex;

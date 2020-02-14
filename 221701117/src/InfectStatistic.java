@@ -14,13 +14,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
-import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;  
 import infectstatistic_yjchen.J_Province;
 
@@ -54,23 +52,24 @@ public class InfectStatistic
     	//接收命令行参数
     	for(String temp : args)vector.add(temp);
     	//测试函数dealParameter
+    	
     	{
     		vector.add("list");
     		vector.add("-log");
     		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\infectstatistic_yjchen\\");
     		vector.add("-out");
     		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt");
-    		/*
+    		
     		vector.add("-date");
-    		vector.add("2020-02-02");
-    		*/
+    		vector.add("2020-01-31");
+    		
     		/*
     		vector.add("-type");
     		vector.add("sp");
     		vector.add("ip");
     		vector.add("dead");
     		*/
-    		
+    		/*
     		vector.add("-province");
     		vector.add("重庆");
     		vector.add("福建");
@@ -78,8 +77,9 @@ public class InfectStatistic
     		vector.add("湖南");
     		vector.add("广东");
     		vector.add("安徽"); 
-    		   		
+    		*/
     	}
+    	
     	//保存全国的感染情况
     	allCountry.setName("全国");
     	//保存各省市的感染情况
@@ -331,7 +331,19 @@ public class InfectStatistic
 								 break;
 							 }
 						 }
-				    	 if(IsOutputDefautProvince && !isInTemp)
+						 boolean notProvince = true;//以免例如“//”记录进去
+						 if(ss[0].equals("全国"))
+						 {
+							 notProvince = false;
+						 }
+						 for(String s:arrayProvinces)
+						 {
+							 if(ss[0].equals(s))
+							 {
+								 notProvince = false;
+							 }
+						 }
+				    	 if(IsOutputDefautProvince && !isInTemp && !notProvince)
 				    	 {
 				    		 temp.add(ss[0]);
 				    	 }								    	 
@@ -459,6 +471,7 @@ public class InfectStatistic
 		int provincePos = 0;//好神奇，如果变量在函数内，则循环体内赋值失败。
 		for(String s:temp) //需要列出的省份的数组下标组成新数组
 		{			
+			//System.out.println(s);
 			for(int i = 0;i < arrayProvinces.length;i ++ )
 			{
 				if(s.equals(arrayProvinces[i]))
@@ -467,7 +480,8 @@ public class InfectStatistic
 					break;
 				}
 			}			
-		}		
+		}	
+		//System.out.println("arrayPos=" + arrayPos.length);
 		Arrays.sort(arrayPos);
 		for(int i = 0;i < arrayPos.length;i++) 
 		{

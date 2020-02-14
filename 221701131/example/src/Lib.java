@@ -1,13 +1,11 @@
+
+
 /**
- * Lib
- * TODO
- *
- * @author xxx
- * @version xxx
- * @since xxx
- */
+* 数据库
+* @author SpringAlex
+*/
 public class Lib {
-    public  String[] commands= {"-log","-out","-date","-type","-province"};
+	public  String[] commands= {"-log","-out","-date","-type","-province"};
 	public  String[] types= {"ip","sp","cure","dead"};
 	public  String[] provinces= {
 			"全国",
@@ -19,4 +17,5 @@ public class Lib {
 			"陕西", "甘肃", "青海", "宁夏", "新疆",
 			"香港", "澳门", "台湾"	
 	};
+	public String lastDayFlag="last-day";
 }

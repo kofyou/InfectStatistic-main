@@ -109,7 +109,7 @@ class InfectStatistic {
         LocalDate beginDate;
         LocalDate endDate;
         HashMap<String,DailyInfo> provinceDailyInfos;
-        DailyInfo countryDailyInfo;
+        DailyInfo countryTotalInfo;
 
         //设置统计的起始时间、结束时间
         beginDate=logList.getBeginDate();
@@ -119,8 +119,11 @@ class InfectStatistic {
             endDate=date;
 
         //获取全国统计信息
+        countryTotalInfo=country.getCountryTotalInfo(beginDate,endDate);
+        //获取各省统计信息
         provinceDailyInfos=country.getAllProvincesInfo(beginDate,endDate);
 
+        System.out.println("全国 "+countryTotalInfo.toString());
         for(String provinceName:Country.PROVINCES){
             Province province=country.getProvince(provinceName);
 

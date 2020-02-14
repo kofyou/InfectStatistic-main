@@ -17,7 +17,7 @@ public class LogList {
 
         //使用日志路径创建Log对象列表
         for(int i=0;i<subPaths.length;i++){
-            System.out.println(path+'/'+subPaths[i]);
+            //System.out.println(path+'/'+subPaths[i]);
             Log log=new Log(path+'/'+subPaths[i]);
             logs.add(log);
         }

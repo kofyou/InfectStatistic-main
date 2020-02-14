@@ -51,10 +51,6 @@ public class DailyInfo {
     }
     @Override
     public String toString() {
-        return "日期" + date +
-                "\n新增感染" + infected +
-                "\n新增疑似" + suspected +
-                "\n新增死亡" + dead +
-                "\n新增治愈" + cured;
+        return "感染患者" + infected + "人 疑似患者" + suspected + "人 治愈" + cured + "人 死亡" + dead + "人";
     }
 }

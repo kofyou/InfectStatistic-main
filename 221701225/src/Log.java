@@ -12,7 +12,7 @@ public class Log {
         logFile=new File(filePath);
         String logName=logFile.getName();
         date=LocalDate.parse(logName.substring(0,10));
-        System.out.println("日志对象已创建，日期："+date);
+        //System.out.println("日志对象已创建，日期："+date);
 
         country=Country.getInstance();
         dailyInfos=new HashMap<>();
@@ -26,7 +26,7 @@ public class Log {
     public void analyzeLog(){
         FileInputStream fis = null;
 
-        System.out.println("开始处理日志");
+        //System.out.println("开始处理日志");
         try {
             fis = new FileInputStream(logFile);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis,"UTF-8"));

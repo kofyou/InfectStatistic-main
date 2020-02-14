@@ -12,6 +12,7 @@ public class Country {
         "贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁",
         "内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆",
         "云南","浙江"};
+    HashMap<String,DailyInfo> totalStatistics=null;
     private static final Country country=new Country();
 
     private Country(){
@@ -53,12 +54,16 @@ public class Country {
         }
     }
 
-    public DailyInfo getCountryDailyInfo(LocalDate beginDate,LocalDate endDate){
-        DailyInfo infectInfo=new DailyInfo(endDate);
+    public DailyInfo getCountryTotalInfo(LocalDate beginDate, LocalDate endDate){
+        DailyInfo countryTotalInfo=new DailyInfo(endDate);
+        HashMap<String,DailyInfo> allProvincesInfo=this.getAllProvincesInfo(beginDate,endDate);
 
-        //亿些计算...TODO
+        for(String provinceName:Country.PROVINCES){
+            DailyInfo provinceInfo=allProvincesInfo.get(provinceName);
+            countryTotalInfo.add(provinceInfo);
+        }
 
-        return infectInfo;
+        return countryTotalInfo;
     }
 
 //    public HashMap<String,DailyInfo> getProvinceDailyInfos(LocalDate beginDate,LocalDate endDate,
@@ -67,15 +72,20 @@ public class Country {
 //    }
 
     public HashMap<String,DailyInfo> getAllProvincesInfo(LocalDate beginDate,LocalDate endDate){
-        HashMap<String,DailyInfo> totalInfos=new HashMap<>();
+        if(totalStatistics==null) {
+            HashMap<String, DailyInfo> totalInfos = new HashMap<>();
 
-        for(String provinceName:Country.PROVINCES){
-            Province province=provincesMap.get(provinceName);
-            DailyInfo provinceStatistic=province.getStatistic(beginDate,endDate);
-            totalInfos.put(provinceName,provinceStatistic);
+            for (String provinceName : Country.PROVINCES) {
+                Province province = provincesMap.get(provinceName);
+                DailyInfo provinceStatistic = province.getStatistic(beginDate, endDate);
+                totalInfos.put(provinceName, provinceStatistic);
+            }
+
+            this.totalStatistics=totalInfos;
+            return totalInfos;
         }
-
-        return totalInfos;
+        else
+            return totalStatistics;
     }
 
 

@@ -16,13 +16,7 @@ import java.util.regex.Pattern;
 
 class InfectStatistic {
     public static void main(String[] args) throws IOException {
-//        int a = new CommandJudge().judge(args);
-//        new Test().test();
-//        new Test().files();
-//        new Test().toFile(new Test().files());
-//        new Execute().log(args);
         new InfectStatisticApplication().log(args);
-//        new Test().out();
     }
 }
 
@@ -32,10 +26,6 @@ class Province{
     private int sp = 0;
     private int cure = 0;
     private int dead = 0;
-    private boolean ipCheck =false;
-    private boolean spCheck = false;
-    private boolean cureCheck = false;
-    private boolean deadCheck = false;
 
     public Province(String name){
         this.name = name;
@@ -80,78 +70,10 @@ class Province{
     public void setDead(int dead) {
         this.dead = dead;
     }
-
-    public boolean isIpCheck() {
-        return ipCheck;
-    }
-
-    public void setIpCheck(boolean ipCheck) {
-        this.ipCheck = ipCheck;
-    }
-
-    public boolean isSpCheck() {
-        return spCheck;
-    }
-
-    public void setSpCheck(boolean spCheck) {
-        this.spCheck = spCheck;
-    }
-
-    public boolean isCureCheck() {
-        return cureCheck;
-    }
-
-    public void setCureCheck(boolean cureCheck) {
-        this.cureCheck = cureCheck;
-    }
-
-    public boolean isDeadCheck() {
-        return deadCheck;
-    }
-
-    public void setDeadCheck(boolean deadCheck) {
-        this.deadCheck = deadCheck;
-    }
 }
 
 
 class Test{
-    public void out() throws IOException {
-        int i = 0;
-        HashMap<Integer, String> map = new HashMap<Integer, String>();
-        map.put(i++,"全国");map.put(i++,"安徽"); map.put(i++,"北京"); map.put(i++,"重庆"); map.put(i++,"福建"); map.put(i++,"甘肃");
-        map.put(i++,"广东"); map.put(i++,"广西"); map.put(i++,"贵州"); map.put(i++,"海南"); map.put(i++,"河北");
-        map.put(i++,"河南"); map.put(i++,"黑龙江"); map.put(i++,"湖北"); map.put(i++,"湖南"); map.put(i++,"吉林");
-        map.put(i++,"江苏"); map.put(i++,"江西"); map.put(i++,"辽宁"); map.put(i++,"内蒙古"); map.put(i++,"宁夏");
-        map.put(i++,"青海"); map.put(i++,"山东"); map.put(i++,"山西"); map.put(i++,"陕西"); map.put(i++,"上海");
-        map.put(i++,"四川"); map.put(i++,"天津"); map.put(i++,"西藏"); map.put(i++,"新疆"); map.put(i++,"云南");
-        map.put(i++,"浙江");
-
-        LinkedList<Province> provinceList = new LinkedList<Province>();
-        for (int j = 0 ; j < map.size() ; j++){
-            provinceList.add(new Province(map.get(j)));
-        }
-
-
-        File file = new File("/Users/a/Desktop/a.txt");
-        if (!file.exists())
-            file.createNewFile();
-        FileOutputStream fos=new FileOutputStream(file);
-        OutputStreamWriter osw=new OutputStreamWriter(fos, "UTF-8");
-        BufferedWriter  bw=new BufferedWriter(osw);
-
-        String[] putins = new String[provinceList.size()];
-        for (int j = 0 ; j < provinceList.size() ; j++){
-            putins[j] = provinceList.get(j).getName() + " 感染患者" + provinceList.get(j).getSp() + "人 疑似患者" + provinceList.get(j).getIp() + "人 治愈" +
-                    provinceList.get(j).getCure() + "人 死亡" + provinceList.get(j).getDead() + "人";
-            bw.write(putins[j] + "\n");
-        }
-        bw.write("// 该文档并非真实数据，仅供测试使用");
-        bw.close();
-        osw.close();
-        fos.close();
-
-    }
 }
 
 
@@ -167,7 +89,7 @@ class InfectStatisticApplication{
   public void log(String[] args) throws IOException {
       int judgeNum = new CommandJudge().judge(args);
       if (judgeNum == 1){
-          System.out.println("judgeNum: " + judgeNum);
+//          System.out.println("judgeNum: " + judgeNum);
           new ListCommand().Command(args);
       }
       if (judgeNum == 2){
@@ -255,7 +177,6 @@ class REUtil{
 
 //还差判断-out的路径是否能存在
 class CommandJudge{
-
     public int judge(String[] args){
 //      返回值0为语法错误，1为list语句，2为help,3为present
         java.util.List<Integer> integers = new LinkedList<Integer>();//存储参数的下标
@@ -264,14 +185,6 @@ class CommandJudge{
             return 0;
         }
         else {
-            /*
-             * list语法参数
-             * -log 必选  指定所需文件的目录
-             * -out 必选  指定输出的文件
-             * -type ip sp cure dead 感染患者 疑似患者 治愈 死亡患者
-             * -date 2020-1-1
-             * -province 福建 全国
-             * */
             if (args[0].equals("list")){
                 for (int i = 0 ; i < args.length ; i++){
                     if (new REUtil().checkParameter(args[i])){
@@ -351,8 +264,7 @@ class CommandJudge{
                             if (!file.isDirectory()){
                                 System.out.println("It should be a directory");
                                 return 0;
-                            }
-                            else {
+                            } else {
                                 File[] fileList = file.listFiles();
                                 int judge = 0;
                                 for (int j = 0 ; j < fileList.length ; j++){
@@ -365,8 +277,7 @@ class CommandJudge{
                                     return 0;
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             if ((integers.get(i+1) - integers.get(i)) != 2){
                                 System.out.println("Error Command5");
                                 return 0;
@@ -375,8 +286,7 @@ class CommandJudge{
                             if (!f.isDirectory()){
                                 System.out.println("It should be a directory");
                                 return 0;
-                            }
-                            else {
+                            } else {
                                 File[] files = f.listFiles();
                                 int judge = 0;
                                 for (int j = 0 ; j < files.length ; j++){
@@ -405,8 +315,7 @@ class CommandJudge{
                                 System.out.println("It should be a file");
                                 return 0;
                             }
-                        }
-                        else {
+                        } else {
                             File f = new File(args[integers.get(i) + 1]);
                             if (f.isDirectory()){
                                 System.out.println("It should be a file");
@@ -430,8 +339,7 @@ class CommandJudge{
                                 System.out.println("Please input correct date");
                                 return 0;
                             }
-                        }
-                        else {
+                        } else {
                             if ((integers.get(i+1) - integers.get(i)) != 2){
                                 System.out.println("Error Command10");
                                 return 0;
@@ -457,8 +365,7 @@ class CommandJudge{
                                     return 0;
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             if ((integers.get(i+1) - integers.get(i)) < 2){
                                 System.out.println("Error Type");
                                 return 0;
@@ -491,8 +398,7 @@ class CommandJudge{
                                     return 0;
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             if ((integers.get(i+1) - integers.get(i)) < 2){
                                 System.out.println("Error Type");
                                 return 0;
@@ -601,26 +507,27 @@ class CommandJudge{
 class ListCommand{
     public void Command(String[] args) throws IOException {
         int i = 0;
+        LinkedList<Province> provinceList = new LinkedList<Province>();
         HashMap<String , Integer> hashMap = new HashMap<String , Integer>();
-        hashMap.put("全国",i++); hashMap.put("安徽",i++); hashMap.put("北京",i++); hashMap.put("重庆",i++); hashMap.put("福建",i++); hashMap.put("甘肃",i++);
-        hashMap.put("广东",i++); hashMap.put("广西",i++); hashMap.put("贵州",i++); hashMap.put("海南",i++); hashMap.put("河北",i++);
-        hashMap.put("河南",i++); hashMap.put("黑龙江",i++); hashMap.put("湖北",i++); hashMap.put("湖南",i++); hashMap.put("吉林",i++);
-        hashMap.put("江苏",i++); hashMap.put("江西",i++); hashMap.put("辽宁",i++); hashMap.put("内蒙古",i++); hashMap.put("宁夏",i++);
-        hashMap.put("青海",i++); hashMap.put("山东",i++); hashMap.put("山西",i++); hashMap.put("陕西",i++); hashMap.put("上海",i++);
-        hashMap.put("四川",i++); hashMap.put("天津",i++); hashMap.put("西藏",i++); hashMap.put("新疆",i++); hashMap.put("云南",i++);
-        hashMap.put("浙江",i++);
+        hashMap.put("全国",i++); hashMap.put("安徽",i++); hashMap.put("北京",i++); hashMap.put("重庆",i++); hashMap.put("福建",i++);
+        hashMap.put("甘肃",i++); hashMap.put("广东",i++); hashMap.put("广西",i++); hashMap.put("贵州",i++); hashMap.put("海南",i++);
+        hashMap.put("河北",i++); hashMap.put("河南",i++); hashMap.put("黑龙江",i++); hashMap.put("湖北",i++); hashMap.put("湖南",i++);
+        hashMap.put("吉林",i++); hashMap.put("江苏",i++); hashMap.put("江西",i++); hashMap.put("辽宁",i++); hashMap.put("内蒙古",i++);
+        hashMap.put("宁夏",i++); hashMap.put("青海",i++); hashMap.put("山东",i++); hashMap.put("山西",i++); hashMap.put("陕西",i++);
+        hashMap.put("上海",i++); hashMap.put("四川",i++); hashMap.put("天津",i++); hashMap.put("西藏",i++); hashMap.put("新疆",i++);
+        hashMap.put("云南",i++); hashMap.put("浙江",i++);
 
         i = 0;
         HashMap<Integer, String> map = new HashMap<Integer, String>();
-        map.put(i++,"全国"); map.put(i++,"安徽"); map.put(i++,"北京"); map.put(i++,"重庆"); map.put(i++,"福建"); map.put(i++,"甘肃");
-        map.put(i++,"广东"); map.put(i++,"广西"); map.put(i++,"贵州"); map.put(i++,"海南"); map.put(i++,"河北");
-        map.put(i++,"河南"); map.put(i++,"黑龙江"); map.put(i++,"湖北"); map.put(i++,"湖南"); map.put(i++,"吉林");
-        map.put(i++,"江苏"); map.put(i++,"江西"); map.put(i++,"辽宁"); map.put(i++,"内蒙古"); map.put(i++,"宁夏");
-        map.put(i++,"青海"); map.put(i++,"山东"); map.put(i++,"山西"); map.put(i++,"陕西"); map.put(i++,"上海");
-        map.put(i++,"四川"); map.put(i++,"天津"); map.put(i++,"西藏"); map.put(i++,"新疆"); map.put(i++,"云南");
-        map.put(i++,"浙江");
+        map.put(i++,"全国"); map.put(i++,"安徽"); map.put(i++,"北京"); map.put(i++,"重庆"); map.put(i++,"福建");
+        map.put(i++,"甘肃"); map.put(i++,"广东"); map.put(i++,"广西"); map.put(i++,"贵州"); map.put(i++,"海南");
+        map.put(i++,"河北"); map.put(i++,"河南"); map.put(i++,"黑龙江"); map.put(i++,"湖北"); map.put(i++,"湖南");
+        map.put(i++,"吉林"); map.put(i++,"江苏"); map.put(i++,"江西"); map.put(i++,"辽宁"); map.put(i++,"内蒙古");
+        map.put(i++,"宁夏"); map.put(i++,"青海"); map.put(i++,"山东"); map.put(i++,"山西"); map.put(i++,"陕西");
+        map.put(i++,"上海"); map.put(i++,"四川"); map.put(i++,"天津"); map.put(i++,"西藏"); map.put(i++,"新疆");
+        map.put(i++,"云南"); map.put(i++,"浙江");
 
-        LinkedList<Province> provinceList = new LinkedList<Province>();
+
         for (int j = 0 ; j < map.size() ; j++){
             provinceList.add(new Province(map.get(j)));
         }
@@ -676,9 +583,9 @@ class ListCommand{
         if (new CommandJudge().foundSpecial(args , "-province")){
             infectProvinces.clear();
             LinkedList<String> list = new CommandJudge().foundProvinces(args);
-            System.out.println(list);
+//            System.out.println(list);
             for (int k = 0 ; k < list.size() ; k++){
-                System.out.println(list.get(k));
+//                System.out.println(list.get(k));
                 int num = hashMap.get(list.get(k));
                 infectProvinces.add(num);
             }
@@ -689,7 +596,6 @@ class ListCommand{
             }
         }
 
-
         for (int k = 0; k < infectProvinces.size(); k++) {
             for (int l = 0; l < infectProvinces.size() - k - 1; l++) {
                 if (infectProvinces.get(l) > infectProvinces.get(l+1)) {
@@ -699,10 +605,6 @@ class ListCommand{
                 }
             }
         }
-
-
-//        System.out.println(1);
-//        System.out.println(args[new CommandJudge().foundSpecialIndex(args , "-out")+1]);
 
         FileOutputStream fos=new FileOutputStream(args[new CommandJudge().foundSpecialIndex(args , "-out")+1]);
         OutputStreamWriter osw=new OutputStreamWriter(fos, "UTF-8");
@@ -726,8 +628,8 @@ class ListCommand{
             }
         }else{
             for (int k = 0 ; k < infectProvinces.size() ; k++){
-                String putIn = provinceList.get(k).getName() + " 感染患者" + provinceList.get(k).getSp() + "人 疑似患者" + provinceList.get(k).getIp() + "人 治愈" +
-                        provinceList.get(k).getCure() + "人 死亡" + provinceList.get(k).getDead() + "人";
+                String putIn = provinceList.get(infectProvinces.get(k)).getName() + " 感染患者" + provinceList.get(infectProvinces.get(k)).getSp() + "人 疑似患者" + provinceList.get(infectProvinces.get(k)).getIp() + "人 治愈" +
+                        provinceList.get(infectProvinces.get(k)).getCure() + "人 死亡" + provinceList.get(infectProvinces.get(k)).getDead() + "人";
                 bw.write(putIn + "\n");
             }
         }
@@ -737,7 +639,7 @@ class ListCommand{
         osw.close();
         fos.close();
 
-//        /*测试代码
+        /*测试代码
         for (int k = 0 ; k < infectProvinces.size() ; k++){
             System.out.println("==================================");
             System.out.println(provinceList.get(infectProvinces.get(k)).getName());
@@ -752,19 +654,19 @@ class ListCommand{
 
             System.out.println("===================================");
         }
-//        */
+        */
     }
 
     public void getProvinceInfect(String input , LinkedList<Province> provinceList){
         int i = 0;
         HashMap<String , Integer> hashMap = new HashMap<String , Integer>();
-        hashMap.put("全国",i++); hashMap.put("安徽",i++); hashMap.put("北京",i++); hashMap.put("重庆",i++); hashMap.put("福建",i++); hashMap.put("甘肃",i++);
-        hashMap.put("广东",i++); hashMap.put("广西",i++); hashMap.put("贵州",i++); hashMap.put("海南",i++); hashMap.put("河北",i++);
-        hashMap.put("河南",i++); hashMap.put("黑龙江",i++); hashMap.put("湖北",i++); hashMap.put("湖南",i++); hashMap.put("吉林",i++);
-        hashMap.put("江苏",i++); hashMap.put("江西",i++); hashMap.put("辽宁",i++); hashMap.put("内蒙古",i++); hashMap.put("宁夏",i++);
-        hashMap.put("青海",i++); hashMap.put("山东",i++); hashMap.put("山西",i++); hashMap.put("陕西",i++); hashMap.put("上海",i++);
-        hashMap.put("四川",i++); hashMap.put("天津",i++); hashMap.put("西藏",i++); hashMap.put("新疆",i++); hashMap.put("云南",i++);
-        hashMap.put("浙江",i++);
+        hashMap.put("全国",i++); hashMap.put("安徽",i++); hashMap.put("北京",i++); hashMap.put("重庆",i++); hashMap.put("福建",i++);
+        hashMap.put("甘肃",i++); hashMap.put("广东",i++); hashMap.put("广西",i++); hashMap.put("贵州",i++); hashMap.put("海南",i++);
+        hashMap.put("河北",i++); hashMap.put("河南",i++); hashMap.put("黑龙江",i++); hashMap.put("湖北",i++); hashMap.put("湖南",i++);
+        hashMap.put("吉林",i++); hashMap.put("江苏",i++); hashMap.put("江西",i++); hashMap.put("辽宁",i++); hashMap.put("内蒙古",i++);
+        hashMap.put("宁夏",i++); hashMap.put("青海",i++); hashMap.put("山东",i++); hashMap.put("山西",i++); hashMap.put("陕西",i++);
+        hashMap.put("上海",i++); hashMap.put("四川",i++); hashMap.put("天津",i++); hashMap.put("西藏",i++); hashMap.put("新疆",i++);
+        hashMap.put("云南",i++); hashMap.put("浙江",i++);
         String regEx="[^0-9]";
         String[] provinces = input.split(" ");
 
@@ -825,8 +727,6 @@ class ListCommand{
             }
         }
     }
-
-
 
 }
 

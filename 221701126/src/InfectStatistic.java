@@ -42,6 +42,7 @@ class InfectStatistic {
 	private static boolean cure = false;
 	private static boolean dead = false;
 	private static ArrayList<String> typeItem = new ArrayList<String>();
+	private static ArrayList<String> provinceItem = new ArrayList<String>();
 	
 	//将命令行参数转换成对象存储起来
 	private static void solveArgs(String[] args, Vector<Order> orders) {
@@ -94,8 +95,17 @@ class InfectStatistic {
 		    			}
 	    			}
 	    		}
-	    		else if(arg.equals("-province")) {
-	    			
+	    		else if(arg.equals("-province")) {//处理province命令
+	    			for(i = pos + 1; i < args.length; i++) {
+	    				String param = args[i];
+	    				if(param.indexOf('-') != 0) {//这是参数
+	    					provinceItem.add(param);
+		    			}
+		    			else {
+		    				pos = i;
+		    				break;
+		    			}
+	    			}
 	    		}
 	    		
 //	    		for(i = pos + 1; i < args.length; i++) {
@@ -131,34 +141,67 @@ class InfectStatistic {
 //	}
 	
 	//打印一个省的信息
-	private static void printTheProvince(Province province) {
-		if(typeItem.size() != 0) {
-			for(String item : typeItem) {
-				switch (item) {
-				case "ip":
-					System.out.print(" 感染患者" + province.infect);
-					break;
-				case "sp":
-					System.out.print(" 疑似患者" + province.seeming);
-					break;
-				case "cure":
-					System.out.print(" 治愈" + province.cured);
-					break;
-				case "dead":
-					System.out.print(" 死亡" + province.dead);
-					break;
-				default:
-					break;
+	private static void printTheProvince(String provinceName) {
+		System.out.print(provinceName);
+		if(map.get(provinceName) != null) {
+			Province province = map.get(provinceName);
+			if(typeItem.size() != 0) {
+				for(String item : typeItem) {
+					switch (item) {
+					case "ip":
+						System.out.print(" 感染患者" + province.infect + "人");
+						break;
+					case "sp":
+						System.out.print(" 疑似患者" + province.seeming + "人");
+						break;
+					case "cure":
+						System.out.print(" 治愈" + province.cured + "人");
+						break;
+					case "dead":
+						System.out.print(" 死亡" + province.dead + "人");
+						break;
+					default:
+						break;
+					}
 				}
 			}
-			System.out.println();
+			else {
+				System.out.print(" 感染患者" + province.infect + "人 疑似患者" + province.seeming + "人 治愈" + province.cured + "人 死亡" + province.dead + "人");
+			}
 		}
+		else {
+			if(typeItem.size() != 0) {
+				for(String item : typeItem) {
+					switch (item) {
+					case "ip":
+						System.out.print(" 感染患者0人" );
+						break;
+					case "sp":
+						System.out.print(" 疑似患者0人");
+						break;
+					case "cure":
+						System.out.print(" 治愈0人");
+						break;
+					case "dead":
+						System.out.print(" 死亡0人");
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			else {
+				System.out.print(" 感染患者0人 疑似患者0人 治愈0人 死亡0人");
+			}
+		}
+		System.out.println();
 	}
 	
 	//测试打印结果
 	private static void printResult() {
-		System.out.print("全国");
-		printTheProvince(country);
+		if(provinceItem.contains("全国")) {
+			printTheProvince("全国");
+		}
 //		if(ip) {
 //			System.out.print(" 感染患者" + country.infect);
 //		}
@@ -172,17 +215,20 @@ class InfectStatistic {
 //			System.out.print(" 死亡" + country.dead);
 //		}
 		//System.out.println("全国" + "感染人数" + country.infect + " 疑似人数" + country.seeming + " 治愈人数" + country.cured + " 死亡人数" + country.dead);
-		if(map.get("福建") != null) {
-			//System.out.println("yeas");
-			Province province = map.get("福建");
-			System.out.print("福建");
-			printTheProvince(province);
+		if(provinceItem.contains("福建")) {
+			printTheProvince("福建");
 		}
-		if(map.get("湖北") != null) {
-			Province province = map.get("湖北");
-			System.out.print("湖北");
-			printTheProvince(province);
+		if(provinceItem.contains("河北")) {
+			printTheProvince("河北");
 		}
+		if(provinceItem.contains("湖北")) {
+			printTheProvince("湖北");
+		}
+		
+		if(provinceItem.contains("浙江")) {
+			printTheProvince("浙江");
+		}
+		
 
 		
 //		if(map.get("福建") != null) {
@@ -300,6 +346,7 @@ class InfectStatistic {
 	    			}
 	    			else {//省份还未出现过
 	    				Province p = new Province();
+	    				p.name = province;
 	    				switch (information[1]) {
 						case "新增":
 							if(information[2].equals("感染患者")) {
@@ -411,6 +458,7 @@ class InfectStatistic {
 			if(toHandleDate.size() > 0) {
 				solveEveryFile(toHandleDate);
 			}
+			map.put("全国", country);
 		}
 		
 	}

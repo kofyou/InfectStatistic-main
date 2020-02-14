@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-
 /**
  * InfectStatistic TODO
  *
@@ -25,7 +23,7 @@ import org.junit.Test;
  * @version 2.2
  */
 class InfectStatistic {
-    
+
     /**
      * Province类
      * @author HHQ
@@ -121,16 +119,16 @@ class InfectStatistic {
             for(int i=0; paramentersOfType[i] != null; i++) {
                 switch (paramentersOfType[i]) {
                 case "ip":
-                    resString += "感染患者" + " " + ip + "人" + " ";
+                    resString += "感染患者" + ip + "人" + " ";
                     break;
                 case "sp":
-                    resString += "疑似患者" + " " + sp + "人" + " ";
+                    resString += "疑似患者" + sp + "人" + " ";
                     break;
                 case "cure":
-                    resString += "治愈" + " " + cure + "人" + " ";
+                    resString += "治愈" + cure + "人" + " ";
                     break;
                 case "dead":
-                    resString += "死亡" + " " + dead + "人" + " ";
+                    resString += "死亡" + dead + "人" + " ";
                     break;
                 default:
                     break;
@@ -610,7 +608,6 @@ class InfectStatistic {
         }
     
     }
-
     
     public static void main(String[] args) {
         /**
@@ -723,7 +720,6 @@ class InfectStatistic {
             // TODO: handle exception
             e.printStackTrace();
         }
-
 
     }
 }

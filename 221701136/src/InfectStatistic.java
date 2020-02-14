@@ -3,20 +3,20 @@
  * TODO
  *
  * @author 唐小熊
- * @version 1.0
+ * @version 1.1
  * @since 2.13
  * @function 统计疫情数据
  */
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-
+import java.lang.*;
 import com.sun.org.apache.xpath.internal.operations.String;
 import java.util.*;
 
 class InfectStatistic {
 	
-	string date;
+	string commandDate;
 	
 	//获取当前的系统时间并格式化输出
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -35,7 +35,7 @@ class InfectStatistic {
 	/*	BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
 		string str;
 		str=br.readLine();
-*/
+*/   
 		String date,inputAddress,outputAddress,type,province;
 		//type和province的类型可能不止一种，故创建其字符串数组
 		List<string> typeList=new List<string>();
@@ -45,34 +45,39 @@ class InfectStatistic {
 		if(!args[0].equals("list")) {
 			System.out.println("命令行的格式有误");
 		}
-		
-		
 		else if{
 		for(int commandOrder=1;commandOrder<args.length;commandOrder++) {
 				if(args[commandOrder].equals("-data")) {
-					date=args[++commandOrder];
+					currentDate = changeToValidDate(args[++commandOrder]);
 				}
 				if(args[commandOrder].equals("-log")) {
-					inputAddress=args[++commandOrder];
+					inputAddress = args[++commandOrder];
+					if(!isValidAddress(inputAddress)) {
+						System.out.println("log路径错误！");
+						return;
+					}
 				}
 				if(args[commandOrder].equals("-out")) {
-					outputAdderss=args[++commandOrder];
+					outputAdderss = args[++commandOrder];
+					if(!isValidAddress(outputAddress)) {
+						System.out.println("out路径错误！");
+						return;
+					}
 				}
-				
 				if(args[commandOrder].equals("-type")) {
-					type=args[++commandOrder];
+					type = args[++commandOrder];
 					
 					//若类型是不以-开头的，则不断添加到类型列表中
 					while(!type.startsWith("-")&&commandOrder<args.length-1) {
 						typeList.add(type);
-						type=args[++commandOrder];
+						type = args[++commandOrder];
 					}
 				}
 				if(args[commandOrder].equals("-province")) {
-					province=args[commandOrder++];
-					while(province.startwith("-")&&commandOrder<args.length-1) {
+					province = args[commandOrder++];
+					while(!province.startwith("-")&&commandOrder<args.length-1) {
 						provinceList.add(province);
-						province=args[commandList++];
+						province = args[commandList++];
 					}
 				}
 		}
@@ -80,12 +85,50 @@ class InfectStatistic {
 		}	
 	}
 	
+/*
+ *函数功能：读取文件名称
+ *输入参数：args[]
+ *输出参数：true,false
+ **/
+    public boolean isValidCommand(String args[]) {
+	    if(!args[0].equals("list")) {
+		    System.out.println("命令行的格式有误");
+		    return false;
+	    }
+    }
+
+    /*
+     *函数功能：获取合法的日志日期
+     *输入参数：args[]
+     *输出参数：Date
+     **/
+    public Date changeToValidDate(String date) {
+    	SimpleDateFormat format = new SimpleDataFormat("yyyy-MM-dd");
+    	Date validDate = format.parse(date);
+    	return validDate;
+    }
+    
+    /*
+     *函数功能：判断是否是合法的路径
+     *输入参数：string
+     *输出参数：false,true
+     **/
+    public boolean isValidAddress(String address) {
+    	//用正则表达式判断输入的路径是否正确
+    	if(address.matches("^[A-z]:\\\\(.+?\\\\)*$")) {
+    	ruturn true;
+    	}
+    	else
+    		return false;
+    }
+   
+    
 	/*
-	 *函数功能：读取文件名称
+	 *函数功能：获取文件
 	 *输入参数：-log路径
 	 *输出参数：文件名称
 	 **/
-	public string getFileName(string inputAddress) {
+	public void getFile(string inputAddress) {
 	File file = new File(inputAddress);
 	string fileName;
 	
@@ -106,7 +149,6 @@ class InfectStatistic {
 		}
 	}
 	
-	//当前时间
 	Date commandDate = format.parse(date);
 	
 	//若提供的日期大于当前时间，则报错
@@ -114,39 +156,13 @@ class InfectStatistic {
 		System.out.println("日期超出范围")；
 	}
 	
-	//若commandDate在日期中不存在，则代表疫情不发生变化
-	//
-	if()
-	
-	
-	
-	for(int i=0;i<tempList.length();i++) {
+	//获取所有小于commandDate的日志,并读取内容
+	for(int j=0;j<tempList.length;j++) {
 		fileName = tempList[i].getName();
-		
-		SimpleDateFormat format = new SimpleDataFormat("yyyy-MM-dd");
-		Date commandDate = format.parse(date)
-		Date fileDate = format.parse(fileName)
-		Date latestDate = format.parse(currentDate);
-		
-		
-		
-		//如果提供的日期大于当前日期，则报错
-		if(commandDate.after(Date)) {
-			System.out.println("日期超出范围");
-		}
-		
-		//如果找到命令行对应的日志，则返回日志名
-		else if(commandDate.equals(fileDate)) {
-			return commandDate;
-		}
-		else {
-		
-			
-		}
-		
-	}
-	
-		
+		Date fileDate = format.parse(fileName);
+		if(fileDate.before(commandDate)) {
+			readFile(inputAddress+fileName+".log.txt");
+		}	
 	}
 	}
 	
@@ -156,8 +172,17 @@ class InfectStatistic {
 	 *输入参数：文件路径
 	 *输出参数：
 	 **/
-	public void readFile(string inputAddress) {
-		string filePath=inputAddress+getFileName(inputAddress);
+	public void readFile(string address) throws IOException {
+	FileInputStream fiStream = new FileInputStream(address);
+	InputStreamReader isReader = new InputStreamReader(fiStream,"UTF-8");
+	BufferedReader bufferedReader = new BufferedReader(isReader);
+	String line = null;
+	while((line=bufferedReader.readLine())! = null) {
+		if(!line.startWith("//")) {
+			
+		}
+		
+	}
 		
 		
 		

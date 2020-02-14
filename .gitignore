@@ -9,3 +9,6 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+
+# compile
+*.class

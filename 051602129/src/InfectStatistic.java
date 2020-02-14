@@ -1,9 +1,6 @@
-import java.awt.*;
-import java.awt.desktop.SystemSleepEvent;
 import java.io.*;
-import java.nio.IntBuffer;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
-import java.time.Year;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,26 +16,14 @@ import java.util.regex.Pattern;
 
 class InfectStatistic {
 
-//    private String commond;    //接收命令
-    //命令及参数
+    private String command = "";
     private boolean list;
     private HashMap<Boolean,String> log;
-    //    private boolean log;
-//    private String logContent;
     private HashMap<Boolean,String> out;
-    //    private boolean out;
-//    private String outContent;
     private HashMap<Boolean,String> date;
-    //    private boolean date;
-//    private String dateContene;
     private HashMap<Boolean, ArrayList<String>> type;
-    //    private boolean type;
-    //    private ArrayList<Boolean> typeOption;
     private HashMap<Boolean,ArrayList<String>> province;
-    //    private boolean province;
-    //    private ArrayList<String> provinceContent;
     private HashMap<String,HashMap<String,Integer>> data;
-
     private String[] options = {"感染患者","疑似患者","治愈","死亡"};
 
     /**
@@ -53,6 +38,7 @@ class InfectStatistic {
         province = new HashMap<>();
         data = new HashMap<>();
         for(int i = 0; i<args.length;i++){
+            command += args[i] + " ";
             switch (args[i]){
                 case "list":
                     list = true;
@@ -64,7 +50,15 @@ class InfectStatistic {
                     out.put(true,args[i+1]);
                     break;
                 case "-date":
-                    date.put(true,args[i+1]);
+                    if (i + 1 < args.length) {
+                        if (this.checkTime(args[i + 1])){
+                            date.put(true, args[i + 1]);
+                        } else {
+                            date.put(true,null);
+                        }
+                    }else {
+                        date.put(true,null);
+                    }
                     break;
                 case "-type":
                     i++;
@@ -105,14 +99,28 @@ class InfectStatistic {
         }
 
         if (out.keySet().isEmpty()||out.values().isEmpty()){
-            throw new Exception("缺少date参数");
+            throw new Exception("date参数错误");
         }
 
         if (date.keySet().equals(true)){
-
+            if (!this.checkTime(date.get(true))){
+                throw new Exception("输入日期不正确");
+            }
         }
 
         if (type.keySet().equals(true)){
+            ArrayList<String> temps = new ArrayList<>(){{
+                    add("ip");
+                    add("sp");
+                    add("cure");
+                    add("dead");
+                }};
+            ArrayList<String> types = type.get(true);
+            for (String str :types){
+                if (!temps.contains(str)){
+                    throw new Exception("type参数错误");
+                }
+            }
 
         }
     }
@@ -121,7 +129,9 @@ class InfectStatistic {
         try {
             this.checkoutCommand();
             this.readFileNameFromDir();
-            this.outFile();
+            ArrayList<String> provinceNames = this.getProvince();
+            ArrayList<String> types = this.getType();
+            this.outFile(provinceNames,types);
         }catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
@@ -171,10 +181,10 @@ class InfectStatistic {
                 }
             });
             for (File file : files) {
-               if (log.keySet().equals(true)&&log.get(true)!=null){
-                   Date logDate = format.parse(log.get(true));
-                   Date fileDate = format.parse(file.getName().substring(10));
-                   int result = logDate.compareTo(fileDate);
+               if (date.keySet().contains(true)&(date.get(true)!=null)){
+                   Date logDate = format.parse(date.get(true));
+                   Date fileDate = format.parse(file.getName().substring(0,10));
+                   int result = fileDate.compareTo(logDate);
                    if (result<1){
                        this.readFileContent(file.getName());
                    }
@@ -223,8 +233,6 @@ class InfectStatistic {
         if (m.find()){
             this.statisticalData(m);
         }
-        System.out.println(line);
-        System.out.println(data);
     }
 
     public void statisticalData(Matcher matcher){
@@ -316,30 +324,96 @@ class InfectStatistic {
         }
     }
 
-    public void outFile(){
-        String outFileName = out.get(true);
-        System.out.println(data);
-        try {
+    public String processCountryData(){
+        String result = new String();
+        int[] num = new int[options.length];
+        Set<String> provinceNames = data.keySet();
+        for (String provinceName : provinceNames){
+            HashMap<String,Integer> temp = data.get(provinceName);
+            for (int i =0; i <options.length; i++){
+                num[i] += temp.get(options[i]);
+            }
+        }
+        result = "全国";
+        for (int i = 0; i<options.length; i++){
+            result += " " + options[i] + num[i] + "人";
+        }
+        result += "\n";
+        return result;
+    }
 
+    public ArrayList sortByProvinceName(ArrayList<String> list) {
+        ArrayList<String> provinceName = new ArrayList<>();
+        for (String s :list){
+            provinceName.add(s);
+        }
+        Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+        Collections.sort(provinceName,com);
+        return provinceName;
+    }
+
+    public void outFile(ArrayList<String> provinceNames,ArrayList<String> types){
+        String outFileName = out.get(true);
+        try {
             FileOutputStream outputStream = new FileOutputStream(new File(outFileName));
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream,"utf8");
             BufferedWriter writer = new BufferedWriter(outputStreamWriter);
-            Set<String> provinceNames = data.keySet();
-            for(String provinceName : provinceNames){
+            if (provinceNames.contains("全国")) {
+                writer.write(processCountryData());
+            }
+            Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+            ArrayList<String> sortNames = this.sortByProvinceName(provinceNames);
+            System.out.println(sortNames);
+            for(String provinceName : sortNames){
                 HashMap<String,Integer> temp = data.get(provinceName);
                 String result = provinceName;
-                for (String string:options){
+                for (String string:types){
                     int num = temp.get(string);
                     result += " " + string + num + "人";
                 }
                 writer.write(result+"\n");
             }
+            writer.write("// 该文档并非真实数据，仅供测试使用\n");
+            writer.write("// 命令 "+command);
+
             writer.close();;
             outputStreamWriter.close();
             outputStream.close();
         }catch (Exception e){
-
+            System.exit(-1);
         }
+    }
+
+    public ArrayList getType(){
+        if (type.keySet().contains(true)){
+            ArrayList<String> types = type.get(true);
+            ArrayList<String> temp = new ArrayList<>();
+            for (String str : types){
+                switch (str){
+                    case "ip":
+                        temp.add(options[0]);
+                        break;
+                    case "sp":
+                        temp.add(options[1]);
+                        break;
+                    case "cure":
+                        temp.add(options[2]);
+                        break;
+                    case "dead":
+                        temp.add(options[3]);
+                        break;
+                }
+            }
+            return temp;
+        }
+        return new ArrayList<String>(Arrays.asList(options));
+    }
+
+    public ArrayList getProvince(){
+        if (province.keySet().contains(true)){
+            return province.get(true);
+        }
+        return new ArrayList(data.keySet());
     }
 
     public static void main(String[] args) {

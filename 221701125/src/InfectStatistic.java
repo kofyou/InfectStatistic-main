@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.TreeMap;
 
@@ -60,7 +61,9 @@ class InfectStatistic {
     	
     	String logPath=null;
 		String outputPath=null;
-		String date=null;
+		String dateString=null;
+		
+		Date date=null;
 
 //        if (args.length!=0)
 //    	{
@@ -87,8 +90,27 @@ class InfectStatistic {
         		outputPath=args[i+1];
         	}
         	
+        	if (args[i].equals("-date"))
+        	{
+        		dateString=args[i+1];
+        		int year=Integer.parseInt(dateString.substring(0, 4));
+                int month=Integer.parseInt(dateString.substring(5, 7));
+                int day=Integer.parseInt(dateString.substring(8,10));
+                
+                date=new Date(year-1900, month-1, day);
+        	}
+        	
+        	
         }
         
+        
+        
+//        System.out.println(date);
+        
+//        System.out.println(year+" "+month+" "+day);
+        
+        
+       
         
 //        System.out.println(logPath+"    "+outputPath);
         
@@ -159,16 +181,59 @@ class InfectStatistic {
         
         File[] logs=dir.listFiles();
         
-//        for(int i=0;i<logs.length;i++)
-//        {
-//        	System.out.println(logs[i].getName());
-//        	
-//        }
+        if (date!=null)
+        {
+        	 String log=logs[0].getName();
+             Date latestDate=new Date(Integer.parseInt(log.substring(0, 4))-1900, 
+             		Integer.parseInt(log.substring(5, 7))-1, 
+             		Integer.parseInt(log.substring(8,10)));
+             for (int i=1;i<logs.length;i++)
+             {
+             	log=logs[i].getName();
+             	Date temp=new Date(Integer.parseInt(log.substring(0, 4))-1900, 
+                 		Integer.parseInt(log.substring(5, 7))-1, 
+                 		Integer.parseInt(log.substring(8,10)));
+             	 if (temp.compareTo(latestDate)>0)
+                  {
+             		 latestDate=temp;
+                  }
+             }
+             if (date.compareTo(latestDate)>0)
+             {
+             	System.out.println("-date超出范围");
+             	System.exit(1);
+             }
+//             System.out.println("最晚的一天"+latestDate);
+
+        }
+       
+        
+        
         
         try {
         	
         	for (int i=0;i<logs.length;i++)
         	{
+        		if (date!=null)
+        		{
+//        			System.out.println("***"+logs[i].getName());
+            		String logName=logs[i].getName();
+            		int logYear=Integer.parseInt(logName.substring(0, 4));
+                    int logMonth=Integer.parseInt(logName.substring(5, 7));
+                    int logDay=Integer.parseInt(logName.substring(8,10));
+                    
+                    Date logDate=new Date(logYear-1900, logMonth-1, logDay);
+//                    System.out.println(logDate);
+                    
+                    if (logDate.compareTo(date)>0)
+                    {
+                    	continue;
+                    }
+        		}
+        		
+        		
+        		
+        		
         		InputStreamReader reader=new InputStreamReader(new FileInputStream(logs[i]),"utf-8");
 //        		FileReader fileReader=new FileReader(logs[i]);
     			BufferedReader bufferedReader = new BufferedReader(reader);
@@ -304,7 +369,6 @@ class InfectStatistic {
         }
         
 
-//        System.out.println(args[6]);
         
         File output = new File(outputPath);
         

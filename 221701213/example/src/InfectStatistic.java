@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.time.YearMonth;
 import java.util.Date;
 
 /**
@@ -124,40 +125,27 @@ public class InfectStatistic {
 
     }
 
-    public String get_name()    // 获取特定时间的日志名
+    public String[] read_log_name(String pa)   // 读取路径下的日志名称
     {
 
-        Date dd = new Date();
-
-        SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd");
-
-        String log_name = sim.format(dd);
-
-        log_name += ".log";
-
-        return log_name;
-
-    }
-
-    public boolean find_log_name(String log_name)   // 寻找名称相应的日志
-    {
-
-        File path = new File("D:\\221701213\\example\\log");
+        File path = new File(pa);
 
         File[] list = path.listFiles();
 
-        boolean find = false;
+        String[] file_name = new String[list.length];
+
+        int i = 0;
 
         for (File file : list)
         {
 
-            if (log_name.equals(file.getName())) {
+            file_name[i] = file.getName();
 
-                find = true;
+            i++;
 
-            }
         }
-        return find;
+
+        return file_name;
 
     }
 
@@ -387,10 +375,10 @@ public class InfectStatistic {
 
     }
 
-    public void process_log(String log_name , province[] pro) throws IOException // 读取日志并统计日志内疫情情况
+    public void process_log(String pa,String log_name , province[] pro) throws IOException // 读取日志并统计日志内疫情情况
     {
 
-        String result = new String ("D:\\221701213\\example\\log\\"+log_name);
+        String result = new String (pa+"\\"+log_name);
 
         FileInputStream fstream = new FileInputStream(new File(result));
 
@@ -405,16 +393,14 @@ public class InfectStatistic {
 
         }
 
-        this.process_country(pro);  // 统计全国疫情情况
-
         br.close();
 
     }
 
-    public void output(province[] pro) throws IOException   // 将统计结果输出到output.txt
+    public void output(String pa,province[] pro) throws IOException   // 将统计结果输出到output.txt
     {
 
-        String path = new String("D:\\221701213\\example\\result\\output.txt");
+        String path = new String(pa);
 
         FileWriter fwriter = new FileWriter(path);
 
@@ -443,34 +429,135 @@ public class InfectStatistic {
 
     }
 
+    public void process_command(String[] args , province[] pro) throws IOException  // 处理命令行参数
+    {
+
+        if(!args[0].equals("list"))
+        {
+
+            System.err.println("输入命令错误");
+
+            return;
+
+        }
+
+        boolean if_log = false;
+        boolean if_out = false;
+        boolean if_date = false;
+        boolean if_type = false;
+        boolean if_province = false;
+        String[] path = new String [2];       
+        String date = new String();
+        String[] type;
+        String[] out_pro;       
+        int type_x = 0;
+        int out_pro_x = 0;
+
+        for(int i = 1 ; i < args.length ; i++)
+        {
+
+            if(args[i].equals("-log"))
+            {
+
+                if_log = true;
+
+                path[0] = new String(args[i+1]);
+
+            }
+
+            if(args[i].equals("-out"))
+            {
+
+                if_out = true;
+
+                path[1] = new String(args[i+1]);
+
+            }
+
+            if(args[i].equals("-date"))
+            {
+
+                if_date = true;
+
+                date = args[i+1];
+
+            }
+
+            if(args[i].equals("-type"))
+            {
+
+                if_type = true;
+
+                type_x = i+1;
+
+            }
+
+            if(args[i].equals("-province"))
+            {
+
+                if_province = true;
+
+                out_pro_x = i+1;
+
+            }
+
+        }
+
+        if(!if_log || !if_out)
+        {
+
+            System.err.println("输入命令错误");
+
+            return;
+
+        }
+
+        if(!if_date)
+        {
+
+            Date dd = new Date();
+
+            SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd");
+
+            date = sim.format(dd);
+
+        }
+        
+
+       /* String[] file_name;
+        
+        file_name = this.read_log_name(path[0]);
+
+        for(int i = 0 ; i < file_name.length ; i++)
+        {
+
+            this.process_log(path[0] , file_name[i] , pro);
+
+        }
+
+        this.process_country(pro);
+
+        this.output(path[1], pro);*/
+        
+    }
+
     public static void main(String[] args) throws IOException {
+
+        String[] ar = new String[] {"list","-date","2020-01-22","-log","D:/log/","-out","D:/output.txt","-province","全国","浙江","福建"};
 
         InfectStatistic in = new InfectStatistic();
 
-        String[] province_name = new String[] {"全国","安徽","福建","甘肃","广东","广西",
-        "贵州","海南","河北","河南","黑龙江","湖北","湖南","江西","吉林","江苏","辽宁","内蒙古",
-        "宁夏","青海","山西","山东","陕西","四川","西藏","新疆","云南","浙江"};
+        String[] province_name = new String[] {"全国","安徽","北京","重庆","福建","甘肃","广东","广西",
+        "贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古",
+        "宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
 
         province[] pro;
 
         pro = new province[province_name.length];
 
         in.init_province(pro , province_name);
-
-        String log_name = in.get_name()+".txt";
-
-        boolean find = in.find_log_name(log_name);
-
-        if(find == true)
-        {
-
-            in.process_log(log_name , pro);
-
-            in.output(pro);
-
-        }
-
-        in.print(pro);
+        
+        in.process_command(ar , pro);
         
     }
 }

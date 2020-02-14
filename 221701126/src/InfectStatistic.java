@@ -158,11 +158,26 @@ class InfectStatistic {
 							}
 							break;
 						case "感染患者":
-							String another = information[3];//取出流入的省份名称
-							if(map.get(another) != null) {//若该省份已经出现过
-								Province anotherProvince = map.get(another);
+							String p2 = information[3];//取出流入的省份名称
+							if(map.get(p2) != null) {//若该省份已经出现过
+								Province anotherProvince = map.get(p2);
 								anotherProvince.infect += number;
 								p.infect -= number;
+							}
+							break;
+						case "疑似患者":
+							//判断是流入还是确诊
+							if(information[2].equals("流入")) {
+								String p3 = information[3];//取出流入的省份名称
+								if(map.get(p3) != null) {//若该省份已经出现过
+									Province anotherProvince = map.get(p3);
+									anotherProvince.seeming += number;
+									p.seeming -= number;
+								}
+							}
+							else {//确诊
+								p.infect += number;
+								p.seeming -= number;
 							}
 							break;
 						default:
@@ -182,11 +197,26 @@ class InfectStatistic {
 							}
 							break;
 						case "感染患者":
-							String another = information[3];//取出流入的省份名称
-							if(map.get(another) != null) {//若该省份已经出现过
-								Province anotherProvince = map.get(another);
+							String p2 = information[3];//取出流入的省份名称
+							if(map.get(p2) != null) {//若该省份已经出现过
+								Province anotherProvince = map.get(p2);
 								anotherProvince.infect += number;
 								p.infect -= number;
+							}
+							break;
+						case "疑似患者":
+							//判断是流入还是确诊
+							if(information[2].equals("流入")) {
+								String p3 = information[3];//取出流入的省份名称
+								if(map.get(p3) != null) {//若该省份已经出现过
+									Province anotherProvince = map.get(p3);
+									anotherProvince.seeming += number;
+									p.seeming -= number;
+								}
+							}
+							else {//确诊
+								p.infect += number;
+								p.seeming -= number;
 							}
 							break;
 						default:

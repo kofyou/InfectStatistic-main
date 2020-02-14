@@ -300,6 +300,9 @@ class InfectStatistic {
 				if(fileName.compareTo(targetDate) <= 0) {
 					toHandleDate.add(fileName);
 					System.out.println(fileName);
+					if(fileNames.length == toHandleDate.size()) {
+						flag = true;
+					}
 				}
 				else {
 					flag = true;

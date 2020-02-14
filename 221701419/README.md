@@ -34,15 +34,15 @@
 
 在src目录下打开命令提示符
 
-![命令行提示符](G:\A-大学\大三下学期\软件工程（单红）\软工实践寒假作业（2）\images\项目readme\命令行提示符.png)
+![命令行提示符](https://images.cnblogs.com/cnblogs_com/hhhqqq/1646733/o_200214013938%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%8F%90%E7%A4%BA%E7%AC%A6.png)
 
 进入之后编译文件
 
-![编译文件](G:\A-大学\大三下学期\软件工程（单红）\软工实践寒假作业（2）\images\项目readme\编译文件.png)
+![编译文件](https://images.cnblogs.com/cnblogs_com/hhhqqq/1646733/o_200214013744%E7%BC%96%E8%AF%91%E6%96%87%E4%BB%B6.png)
 
 然后运行程序
 
-![运行](G:\A-大学\大三下学期\软件工程（单红）\软工实践寒假作业（2）\images\项目readme\运行.png)
+![运行](https://images.cnblogs.com/cnblogs_com/hhhqqq/1646733/o_200214013758%E8%BF%90%E8%A1%8C.png)
 
 # 命令行说明
 
@@ -55,7 +55,7 @@ Java InfectStatistic list -log D:/log -out D:/result/ListOut3.txt -date 2020-01-
 
 >  指定日志目录的位置，示例：-log D:/log，里面的文件命名如下
 >
-> ![log](G:\A-大学\大三下学期\软件工程（单红）\软工实践寒假作业（2）\images\项目readme\log.png)
+> ![log](https://images.cnblogs.com/cnblogs_com/hhhqqq/1646733/o_200214013738log.png)
 
 ## -out（必须指定）
 

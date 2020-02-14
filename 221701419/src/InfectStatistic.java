@@ -20,30 +20,9 @@ import java.util.Set;
  * InfectStatistic TODO
  *
  * @author HHQ
- * @version 2.3
+ * @version 2.2
  */
 class InfectStatistic {
-    
-    /** 保存args的值 */
-    public static String[] paramenterStrings;
-    
-    /** index为参数名在哈希表中的位置，值为参数名在paramenterStrings中的下标，不存在参数名则为-1 */
-    public static int[]  indexOfParamenterStrings = {-1, -1, -1, -1, -1, -1};
-    
-    /** log 日志文件目录,项目必会附带 */
-    public static String inputDir = "";
-    
-    /** 统计到哪一天 */
-    public static String toDateString = "";
-    
-    /** 输出路径&文件名 */
-    public static String outputFileNameString = "";
-    
-    /** type的参数值 */
-    public static String[] paramentersOfType = new String[10];
-    
-    /** province的参数值 */
-    public static String[] paramentersOfProvince = new String[25]; 
 
     /**
      * Province类
@@ -160,7 +139,6 @@ class InfectStatistic {
         }
     }
 
-    
     /**
      * description:关于操作单行字符串（从文本读入的一行数据）的一些方法
      * @author HHQ
@@ -311,6 +289,7 @@ class InfectStatistic {
         public static void getBeforeDateFileName(String path, String date, ArrayList<String> fileName) {
             SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
             File file = new File(path);
+            File[] files = file.listFiles();
             String[] nameStrings = file.list();
             Date maxDate = getMaxDate(nameStrings);
             if (nameStrings != null) {
@@ -333,19 +312,6 @@ class InfectStatistic {
                     }
                 }
             }
-        }
-        
-        /**
-         * description：取得指定目录中最大的日期
-         * @param inputDir 指定目录
-         * @return 最大的日期，类型：string
-         */
-        public static String getMaxDateInputDir(String inputDir) {
-            SimpleDateFormat dFormat = new SimpleDateFormat("yyyy-MM-dd");
-            File file = new File(inputDir);
-            String[] nameStrings = file.list();
-            Date maxDate = getMaxDate(nameStrings);
-            return (dFormat.format(maxDate));
         }
 
     }
@@ -643,136 +609,117 @@ class InfectStatistic {
     
     }
     
-    /**
-     * description:命令行操作、变量初始化、执行统计并写入
-     * @author HHQ
-     */
-    static class StartMethods{
-        
-        /**
-         * description:分离参数名和参数值
-         * @param args 存着命令行的数组
-         */
-        public static void separateNameAndValues(String[] args) {
-            HashMap<Integer, String> paramenterHashMap = OpHashTableMethods.initParamentHashMap(); //一个包含所有参数名的哈希表
-            
-            paramenterStrings = new String[args.length - 1];   //存储传入的参数名、参数值
-            for(int i=1; i<args.length; i++) {
-                paramenterStrings[i-1] = args[i];
-            }
-            
-            //找到参数名，并记录位置
-            for(int i=0; i<paramenterStrings.length; i++) {
-                int key = OpHashTableMethods.getKey(paramenterHashMap, paramenterStrings[i]);
-                if( key != -1) {   //是参数名
-                    indexOfParamenterStrings[key] = i;   //key对应的参数名在patamenterStrings的i下标位置,值为-1则代表无此参数名
-                }
-            }
-        }
-        
-        
-        /**
-         * description:初始化输入路径、输出路径、截至日期、type参数值、province参数值
-         */
-        public static void initVariables() {
-            HashMap<Integer, String> paramenterHashMap = OpHashTableMethods.initParamentHashMap(); //一个包含所有参数名的哈希表
-            paramentersOfType[0] = "null";
-            paramentersOfProvince[0] = "null";
-            
-            //接着处理每个参数名对应的参数值
-            for(int i=1; i<=5; i++) {
-                if(indexOfParamenterStrings[i] != -1) { //传入了该参数名
-                    if(i == 1) {    // -log
-                        inputDir = paramenterStrings[indexOfParamenterStrings[i] + 1];    //配置log路径
-                        toDateString = GetFileMethods.getMaxDateInputDir(inputDir); // 得到输入路径后立即初始化指定的日期
-                    }else if(i == 2) {  //-out
-                        outputFileNameString = paramenterStrings[indexOfParamenterStrings[i] + 1];      //配置输出文件路径
-                    }else if(i == 3) {  //-date
-                        toDateString = paramenterStrings[indexOfParamenterStrings[i] + 1];  //统计到哪一天
-                    }else if(i == 4) {  //-type 可能会有多个参数
-                        String[] paramenterValues = new String[20]; //记录所有参数值
-                        int cnt = 0;
-                        //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
-                         for(int j=indexOfParamenterStrings[i]+1; 
-                            j<paramenterStrings.length && OpHashTableMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
-                            paramenterValues[cnt++] = paramenterStrings[j];
-                            paramentersOfType = paramenterValues;
-                        }
-                    }else if(i == 5) {  //-province
-                        String[] paramenterValues = new String[20];
-                        int cnt = 0;
-                        //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
-                         for(int j=indexOfParamenterStrings[i]+1; 
-                            j<paramenterStrings.length && OpHashTableMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
-                            paramenterValues[cnt++] = paramenterStrings[j];
-                            paramentersOfProvince = paramenterValues;
-                        }
-                    }
-                }
-            }
-        }
-        
-        /**
-         * description:执行统计并写入文件
-         * @param 保存命令行的数组
-         * */
-        public static void execCalcAndWrite(String[] args) {
-            InfectStatistic infectStatistic = new InfectStatistic();
-            Hashtable<String, Province> hashtable = new Hashtable<String, Province>(40);    //用来存储省份的哈希表
-            ArrayList<String> listFileNameArrayList = new ArrayList<String>();      //用来保存一个文件夹下的文件夹名的数组
-            GetFileMethods.getBeforeDateFileName(inputDir, toDateString, listFileNameArrayList);    //初始化listFileNameArrayList
-            
-            try {
-                File file = null;
-                File outputFile = new File(outputFileNameString);
-                String outputDirString = outputFileNameString.substring(0,outputFileNameString.lastIndexOf("/"));
-                File outputDir = new File(outputDirString);
-                FileOutputStream fileOutputStream = null;
-                InputStreamReader reader = null;
-                for (int cnt = 0; cnt < listFileNameArrayList.size(); cnt++) {
-                    String filePathString = inputDir + "/" + listFileNameArrayList.get(cnt);  //输入文件路径
-                    file = new File(filePathString);
-                    
-                    if(!outputDir.exists()) {
-                        outputDir.mkdir();
-                    }
-                    if (!outputFile.exists()) {
-                        outputFile.createNewFile();
-                    }
-                    if (file.isFile() && file.exists()) {
-                        reader = new InputStreamReader(new FileInputStream(file), "UTF8");
-                        BufferedReader bufferedReader = new BufferedReader(reader);
-                        fileOutputStream = new FileOutputStream(outputFileNameString);
-
-                        String lineString = null;
-                        while ((lineString = bufferedReader.readLine()) != null) {
-                            if (!OpLineStringMethods.isAnnotation(lineString)) { // 不是注释行
-                                RelativeProviceMethods.calcProvince(lineString, hashtable); // 进行统计
-                            } else { // 是注释行，不执行任何操作
-                                ;
-                            }
-                        }
-                    }else {
-                        System.out.println("输入文件路径："+filePathString);
-                        System.out.println("找不到输入文件");
-                    }
-                }
-                
-                RelativeProviceMethods.calcWholeNation(hashtable);
-                OutPutFileMethods.writeFile(hashtable, fileOutputStream, paramentersOfType, paramentersOfProvince, args);
-                reader.close();
-            } catch (Exception e) {
-                // TODO: handle exception
-                e.printStackTrace();
-            }
-        }
-        
-    }
-    
-    
     public static void main(String[] args) {
-        StartMethods.separateNameAndValues(args);
-        StartMethods.initVariables();
-        StartMethods.execCalcAndWrite(args);
+        /**
+         * 分离命令行中的参数名、参数值     
+         */
+        HashMap<Integer, String> paramenterHashMap = OpHashTableMethods.initParamentHashMap(); //一个包含所有参数名的哈希表
+        
+        String[] paramenterStrings = new String[args.length - 1];   //存储传入的参数名、参数值
+        for(int i=1; i<args.length; i++) {
+            paramenterStrings[i-1] = args[i];
+        }
+        
+        int[] indexOfParamenterStrings = {-1, -1, -1, -1, -1, -1};
+        //找到参数名，并记录位置
+        for(int i=0; i<paramenterStrings.length; i++) {
+            int key = OpHashTableMethods.getKey(paramenterHashMap, paramenterStrings[i]);
+            if( key != -1) {   //是参数名
+                indexOfParamenterStrings[key] = i;   //key对应的参数名在patamenterStrings的i下标位置,值为-1则代表无此参数名
+            }
+        }
+        
+        
+        /**
+         * 初始化输入路径、输出路径、截至日期、type参数值、province参数值
+         */
+        String directoryString = "./log";   // log 日志文件目录,项目必会附带，如果没有，从项目里的log取
+        String outputFileNameString = "./result/testOutput.txt";    //输出路径/文件名
+        String toDateString = GetFileMethods.getToday(); //统计到哪一天
+        String[] paramentersOfType = new String[10];;  //type的参数值
+        String[] paramentersOfProvince = new String[25];  //province的参数值
+        paramentersOfType[0] = "null";
+        paramentersOfProvince[0] = "null";
+        
+        //接着处理每个参数名对应的参数值
+        for(int i=1; i<=5; i++) {
+            if(indexOfParamenterStrings[i] != -1) { //传入了该参数名
+                if(i == 1) {    // -log
+                    directoryString = paramenterStrings[indexOfParamenterStrings[i] + 1];    //配置log路径
+                }else if(i == 2) {  //-out
+                    outputFileNameString = paramenterStrings[indexOfParamenterStrings[i] + 1];      //配置输出文件路径
+                }else if(i == 3) {  //-date
+                    toDateString = paramenterStrings[indexOfParamenterStrings[i] + 1];  //统计到哪一天
+                }else if(i == 4) {  //-type 可能会有多个参数
+                    String[] paramenterValues = new String[20]; //记录所有参数值
+                    int cnt = 0;
+                    //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
+                     for(int j=indexOfParamenterStrings[i]+1; 
+                        j<paramenterStrings.length && OpHashTableMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
+                        paramenterValues[cnt++] = paramenterStrings[j];
+                        paramentersOfType = paramenterValues;
+                    }
+                }else if(i == 5) {  //-province
+                    String[] paramenterValues = new String[20];
+                    int cnt = 0;
+                    //取得参数值，直到找到下一个参数名时停止，   当前参数名 参数值1 参数值2 ... 下一个参数名
+                     for(int j=indexOfParamenterStrings[i]+1; 
+                        j<paramenterStrings.length && OpHashTableMethods.getKey(paramenterHashMap, paramenterStrings[j])==-1; j++) { 
+                        paramenterValues[cnt++] = paramenterStrings[j];
+                        paramentersOfProvince = paramenterValues;
+                    }
+                }
+            }
+        }
+        
+        InfectStatistic infectStatistic = new InfectStatistic();
+        Hashtable<String, Province> hashtable = new Hashtable<String, Province>(40);    //存储省份的哈希表
+        ArrayList<String> listFileNameArrayList = new ArrayList<String>();      //用来保存一个文件夹下的文件夹名的数组
+        GetFileMethods.getBeforeDateFileName(directoryString, toDateString, listFileNameArrayList);    //初始化listFileNameArrayList
+        
+        try {
+            File file = null;
+            File outputFile = new File(outputFileNameString);
+            String outputDirString = outputFileNameString.substring(0,outputFileNameString.lastIndexOf("/"));
+            File outputDir = new File(outputDirString);
+            FileOutputStream fileOutputStream = null;
+            InputStreamReader reader = null;
+            for (int cnt = 0; cnt < listFileNameArrayList.size(); cnt++) {
+                String filePathString = directoryString + "/" + listFileNameArrayList.get(cnt);  //输入文件路径
+                file = new File(filePathString);
+                
+                if(!outputDir.exists()) {
+                    outputDir.mkdir();
+                }
+                if (!outputFile.exists()) {
+                    outputFile.createNewFile();
+                }
+                if (file.isFile() && file.exists()) {
+                    reader = new InputStreamReader(new FileInputStream(file), "UTF8");
+                    BufferedReader bufferedReader = new BufferedReader(reader);
+                    fileOutputStream = new FileOutputStream(outputFileNameString);
+
+                    String lineString = null;
+                    while ((lineString = bufferedReader.readLine()) != null) {
+                        if (!OpLineStringMethods.isAnnotation(lineString)) { // 不是注释行
+                            RelativeProviceMethods.calcProvince(lineString, hashtable); // 进行统计
+                        } else { // 是注释行，不执行任何操作
+                            ;
+                        }
+                    }
+                }else {
+                    System.out.println("输入文件路径："+filePathString);
+                    System.out.println("找不到输入文件");
+                }
+            }
+            
+            RelativeProviceMethods.calcWholeNation(hashtable);
+            OutPutFileMethods.writeFile(hashtable, fileOutputStream, paramentersOfType, paramentersOfProvince, args);
+            reader.close();
+        } catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
+
     }
 }

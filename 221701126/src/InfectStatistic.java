@@ -107,6 +107,16 @@ class InfectStatistic {
 		}
 	}
 	
+	//获取各行的人数
+	private static int getNumber(String[] information) {
+		//获取人数
+		String numString = information[information.length - 1];
+		int index = numString.indexOf("人");
+		numString = numString.substring(0, index);
+		int number = Integer.parseInt(numString);
+		return number;
+	}
+	
 	//处理待处理文件的每一个文件
 	private static void solveEveryFile(Vector<String> toHandleDate) {
 		
@@ -128,33 +138,32 @@ class InfectStatistic {
 	    		
 	    		
 	    		String str;
-	    		while ((str = bf.readLine()) != null) {
+	    		while ((str = bf.readLine()) != null && str.indexOf("//") != 0) {
+	    			//System.out.println(str);
 	    			String[] information = str.split("\\s+");
+	    			//System.out.println(information[0]);
 	    			String province = information[0];//先取到省份
+	    			int number = getNumber(information);//取出各行人数
+	    			
 	    			if(map.get(province) != null) {//省份已经出现过
 	    				Province p = map.get(province);
 	    				switch (information[1]) {
 						case "新增":
 							if(information[2].equals("感染患者")) {
-								//获取人数
-								String numString = information[information.length - 1];
-								int index = numString.indexOf("人");
-								numString = numString.substring(0, index);
-								int num = Integer.parseInt(numString);
-								p.infect += num;
+								p.infect += number;
 								//System.out.println(num);
 							}
 							else {//疑似患者的情况
-								//获取人数
-								String numString = information[information.length - 1];
-								int index = numString.indexOf("人");
-								numString = numString.substring(0, index);
-								int num = Integer.parseInt(numString);
-								p.seeming += num;
+								p.seeming += number;
 							}
 							break;
 						case "感染患者":
-							System.out.println(province + "感染患者");
+							String another = information[3];//取出流入的省份名称
+							if(map.get(another) != null) {//若该省份已经出现过
+								Province anotherProvince = map.get(another);
+								anotherProvince.infect += number;
+								p.infect -= number;
+							}
 							break;
 						default:
 							break;
@@ -165,25 +174,20 @@ class InfectStatistic {
 	    				switch (information[1]) {
 						case "新增":
 							if(information[2].equals("感染患者")) {
-								//获取人数
-								String numString = information[information.length - 1];
-								int index = numString.indexOf("人");
-								numString = numString.substring(0, index);
-								int num = Integer.parseInt(numString);
-								p.infect += num;
+								p.infect += number;
 								//System.out.println(num);
 							}
 							else {//疑似患者的情况
-								//获取人数
-								String numString = information[information.length - 1];
-								int index = numString.indexOf("人");
-								numString = numString.substring(0, index);
-								int num = Integer.parseInt(numString);
-								p.seeming += num;
+								p.seeming += number;
 							}
 							break;
 						case "感染患者":
-							System.out.println(province + "感染患者");
+							String another = information[3];//取出流入的省份名称
+							if(map.get(another) != null) {//若该省份已经出现过
+								Province anotherProvince = map.get(another);
+								anotherProvince.infect += number;
+								p.infect -= number;
+							}
 							break;
 						default:
 							break;

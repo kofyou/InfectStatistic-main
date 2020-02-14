@@ -1,4 +1,6 @@
 import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -75,7 +77,6 @@ class InfectStatistic {
                     i++;
                     ArrayList<String> pri = new ArrayList<>();
                     while (i<args.length&&!(args[i].substring(0,1).equals("-"))){
-                        System.out.println(args[i]);
                         pri.add(args[i]);
                         i++;
                     }
@@ -139,6 +140,10 @@ class InfectStatistic {
             ArrayList<String> provinceNames = this.getProvince();
             ArrayList<String> types = this.getType();
             this.outFile(provinceNames,types);
+            if (web){
+                this.getWebData();
+                this.writerWebFileFoot();
+            }
         }catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
@@ -427,7 +432,6 @@ class InfectStatistic {
             }
             Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
             ArrayList<String> sortNames = this.sortByProvinceName(provinceNames);
-            System.out.println(sortNames);
             for(String provinceName : sortNames){
                 String result = provinceName;
                 if(data.containsKey(provinceName)) {
@@ -494,6 +498,138 @@ class InfectStatistic {
             return province.get(true);
         }
         return new ArrayList(data.keySet());
+    }
+
+    /**
+     * 从网页中获取数据并写入log目录下
+     */
+    public void getWebData(){
+        String result = "";
+        BufferedReader in = null;
+        try {
+            String urlString = "https://ncov.dxy.cn/ncovh5/view/pneumonia";
+            URL url = new URL(urlString);
+            URLConnection connection = url.openConnection();
+            connection.setRequestProperty("accept", "*/*");
+            connection.setRequestProperty("connection", "Keep-Alive");
+            connection.setRequestProperty("user-agent",
+                    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            connection.connect();
+            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                result += line;
+            }
+            String webData = this.getWebProvinceData(result);
+            this.processWebData(webData);
+        }catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    /**
+     * 读取网页中有用的信息
+     * @param webContent 整个网页
+     * @return 各省的数据
+     */
+    public String getWebProvinceData(String webContent) {
+        String reg= "window.getAreaStat = (.*?)}(?=catch)";
+        Pattern pattern = Pattern.compile(reg);
+        Matcher matcher = pattern.matcher(webContent);
+        if (matcher.find()){
+            return matcher.group(1);
+        }else {
+            return null;
+        }
+    }
+
+    /**
+     * 分析网页中的数据
+     * @param webData 各省数据
+     */
+    public void processWebData(String webData){
+        String reg = "\"provinceShortName\":\"(\\W+)\"," +
+                "\"currentConfirmedCount\":(\\d+)," +
+                "\"confirmedCount\":(\\d+)," +
+                "\"suspectedCount\":(\\d+)," +
+                "\"curedCount\":(\\d+)," +
+                "\"deadCount\":(\\d+)";
+        String [] contents = webData.split("cities");
+        for (String content : contents){
+            Pattern pattern = Pattern.compile(reg);
+            Matcher matcher = pattern.matcher(content);
+            if (matcher.find()){
+                ArrayList<String> datas = new ArrayList<>(){{
+                    add(matcher.group(1) + " 新增 感染患者 " + matcher.group(3));
+                    add(matcher.group(1) + " 治愈 " + matcher.group(5));
+                    add(matcher.group(1) + " 死亡 " + matcher.group(6));
+                }};
+                this.writerWebDataToFile(datas);
+            }
+        }
+    }
+
+    /**
+     * 将数据写入文件
+     * @param data 从网页中获取的数据
+     */
+    public void writerWebDataToFile(ArrayList<String> data){
+        try {
+            String outFilePath = log.get(true);
+            Date date = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String nowDate = sdf.format(date);
+            String outFileName = outFilePath + "/" + nowDate + ".log.txt";
+            BufferedWriter writer = this.linkWriterFile(outFileName,true);
+            for (String str : data){
+                writer.write(str + "\n");
+            }
+            writer.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+    }
+
+    /**
+     * 连接写入文件
+     * @param fileName 要写入的文件名
+     * @param append 是否覆盖文件写
+     * @return 返回BufferedWriter 写入器
+     */
+    public BufferedWriter linkWriterFile(String fileName , boolean append){
+        try {
+            FileOutputStream outputStream = new FileOutputStream(new File(fileName),append);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream,"utf8");
+            BufferedWriter writer = new BufferedWriter(outputStreamWriter);
+            return writer;
+        }catch (Exception e){
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        return null;
+    }
+
+    /**
+     * 写入文件的读取信息
+     */
+    public void writerWebFileFoot(){
+        try {
+            Date date = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String nowDate = sdf.format(date);
+            String outFileName = log.get(true) + "/" + nowDate + ".log.txt";
+            BufferedWriter writer = this.linkWriterFile(outFileName,true);
+            writer.write("//本文档从https://ncov.dxy.cn/ncovh5/view/pneumonia获取");
+            writer.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+
     }
 
     public static void main(String[] args) {

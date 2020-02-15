@@ -369,8 +369,75 @@ class InfectStatistic {
     }
 
 
-    void saveResult(){
+    Record statisticTotalNumber(Map<String,Record> result){
+        Record totalCountryNumber = new Record();
+        for (Record value:result.values()){//统计全国数据相加
+            totalCountryNumber.countInfection(value.getInfectionNumber());
+            totalCountryNumber.countSuspected(value.getSuspectedNumber());
+            totalCountryNumber.countCure(value.getCureNumber());
+            totalCountryNumber.countDead(value.getDeadNumber());
+        }
+        return  totalCountryNumber;
 
+    }
+
+
+    void allProvinceAllType(Record totalCountryNumber , FileOutputStream outFile){
+
+    }
+
+
+    void allProvincePartType(Record totalCountryNumber , FileOutputStream outFile,Vector<String> type){
+
+    }
+
+
+    void partProvinceAllType(Record totalCountryNumber , Vector<String> province , FileOutputStream outFile){
+
+    }
+
+    void partProvincePartType(Record totalCountryNumber , Vector<String> province , FileOutputStream outFile,Vector<String> type){
+
+    }
+
+    void saveResult(Map<String,Record> result,String outLocate,String[] command,Vector<String> province,Vector<String> type){
+        Record totalCountryNumber = statisticTotalNumber(result);
+        String record;
+        FileOutputStream outFile = null;
+        try {//创建文件夹和文件
+            Lib.creatFile(outLocate);
+            outFile = new FileOutputStream(outLocate);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if(province.size() == 0){// 全部省份
+            if(type.size() == 0){//全部省份全部类型
+                allProvinceAllType(totalCountryNumber,outFile);
+            }
+            else{// 全部省份部分类型
+                allProvincePartType(totalCountryNumber,outFile,type);
+            }
+
+        }
+        else{// 部分省份
+            if(type.size() == 0){//部分省份全部类型
+                partProvinceAllType(totalCountryNumber,province,outFile);
+            }
+            else{// 部分省份部分类型
+                partProvincePartType(totalCountryNumber,province,outFile,type);
+            }
+
+        }
+
+        try {
+            outFile.write(Lib.explain.getBytes());
+            for(String str : command)
+                outFile.write((str + " ").getBytes());
+            outFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -423,7 +490,7 @@ class InfectStatistic {
         //....开始读入文件......
         String[] fileList = statistic.getFileList(statistic.logLocate);//获取文件夹下的文件列表
         statistic.statisticData(statistic.logLocate,statistic.strDate,fileList,statistic.result);//统计数据
-        statistic.saveResult();//保存结果
+        statistic.saveResult(statistic.result,statistic.outLocate,args,statistic.province,statistic.type);//保存结果
 
 
     }

@@ -23,22 +23,30 @@ class InfectStatistic {
         }
         DataHandle dataHandle = infectStatistic.new DataHandle();
         dataHandle.dataProcess(logHandle.getStringList());
-        dataHandle.output(commandHandle.getOutputPath());
+        dataHandle.output(commandHandle.getOutputPath(), commandHandle.getPatientTypeSign(),
+                commandHandle.getProvinceList(), commandHandle.getProvinceSign(), commandHandle.getTypeSign());
     }
 
     class CommandHandle {
         private String logPath;
         private String outputPath;
         private String endDate;
+        private boolean typeSign;
         private int[] patientTypeSign;
-        private int[] provinceSign;
+        private boolean provinceSign;
+        private int[] provinceList;
+        private String[] provinceString = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南",
+                "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东",
+                "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
 
         public CommandHandle() {
             this.logPath = "";
             this.outputPath = "";
             this.endDate = "";
+            typeSign = false;
             this.patientTypeSign = new int[4];
-            this.provinceSign = new int[32];
+            provinceSign = false;
+            this.provinceList = new int[32];
         }
 
         public String getLogPath() {
@@ -53,12 +61,20 @@ class InfectStatistic {
             return endDate;
         }
 
+        public boolean getTypeSign() {
+            return typeSign;
+        }
+
         public int[] getPatientTypeSign() {
             return patientTypeSign;
         }
 
-        public int[] getProvinceSign() {
+        public boolean getProvinceSign() {
             return provinceSign;
+        }
+
+        public int[] getProvinceList() {
+            return provinceList;
         }
 
         public void setLogPath(String logPath) {
@@ -77,8 +93,8 @@ class InfectStatistic {
             this.patientTypeSign = patientTypeSign;
         }
 
-        public void setProvinceSign(int[] provinceSign) {
-            this.provinceSign = provinceSign;
+        public void provinceList(int[] provinceList) {
+            this.provinceList = provinceList;
         }
 
         public boolean commandProcess(String[] args) {
@@ -97,19 +113,22 @@ class InfectStatistic {
                         this.setEndDate(args[i]);
                     }
                     else if (args[i].equals("-type")) {
-                        while (!args[i+1].startsWith("-")) {
+                        typeSign = true;
+                        int j = 0;
+                        while (i + 1 < args.length && !args[i + 1].startsWith("-")) {
                             i++;
+                            j++;
                             if (args[i].equals("ip")) {
-                                patientTypeSign[0] = 1;
+                                patientTypeSign[0] = j;
                             }
                             else if (args[i].equals("sp")) {
-                                patientTypeSign[1] = 1;
+                                patientTypeSign[1] = j;
                             }
                             else if (args[i].equals("cure")) {
-                                patientTypeSign[2] = 1;
+                                patientTypeSign[2] = j;
                             }
                             else if (args[i].equals("dead")) {
-                                patientTypeSign[3] = 1;
+                                patientTypeSign[3] = j;
                             }
                             else {
                                 return false;
@@ -117,6 +136,15 @@ class InfectStatistic {
                         }
                     }
                     else if (args[i].equals("-province")) {
+                        provinceSign = true;
+                        while (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+                            i++;
+                            for (int j = 0; j < provinceString.length; j++) {
+                                if (args[i].equals(provinceString[j])) {
+                                    provinceList[j] = 1;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -128,7 +156,7 @@ class InfectStatistic {
     }
 
     class LogHandle {
-        ArrayList<String> stringList;
+        private ArrayList<String> stringList;
 
         public LogHandle() {
             this.stringList = new ArrayList<>();
@@ -175,7 +203,9 @@ class InfectStatistic {
         private String[] provinceString = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南",
                 "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东",
                 "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
+        private String[] patientType = {"感染患者", "疑似患者", "治愈", "死亡"};
         private int[][] patient = new int[32][4];
+        private int[] influencedProvince = new int[32];
 
         public void dataProcess(ArrayList<String> stringList) {
             String pattern1 = "\\W+ 新增 感染患者 \\d+人";
@@ -186,6 +216,7 @@ class InfectStatistic {
             String pattern6 = "\\W+ 治愈 \\d+人";
             String pattern7 = "\\W+ 疑似患者 确诊感染 \\d+人";
             String pattern8 = "\\W+ 排除 疑似患者 \\d+人";
+            influencedProvince[0] = 1;
             for(int i = 0; i < stringList.size(); i++){
                 //System.out.println(stringList.size());
                 String str = stringList.get(i);
@@ -235,6 +266,7 @@ class InfectStatistic {
                 if (provinceString[i].equals(province)) {
                     patient[i][0] += ip;
                     patient[0][0] += ip;
+                    influencedProvince[i] = 1;
                 }
             }
         }
@@ -255,6 +287,7 @@ class InfectStatistic {
                 if (provinceString[i].equals(province)) {
                     patient[i][1] += sp;
                     patient[0][1] += sp;
+                    influencedProvince[i] = 1;
                 }
             }
         }
@@ -276,9 +309,11 @@ class InfectStatistic {
             for (int i = 0; i < provinceString.length; i++) {
                 if (provinceString[i].equals(province1)) {
                     patient[i][0] -= ip;
+                    influencedProvince[i] = 1;
                 }
                 else if (provinceString[i].equals(province2)) {
                     patient[i][0] += ip;
+                    influencedProvince[i] = 1;
                 }
             }
         }
@@ -299,10 +334,12 @@ class InfectStatistic {
             }
             for (int i = 0; i < provinceString.length; i++) {
                 if (provinceString[i].equals(province1)) {
-                    patient[i][0] -= sp;
+                    patient[i][1] -= sp;
+                    influencedProvince[i] = 1;
                 }
                 else if (provinceString[i].equals(province2)) {
-                    patient[i][0] += sp;
+                    patient[i][1] += sp;
+                    influencedProvince[i] = 1;
                 }
             }
         }
@@ -325,6 +362,7 @@ class InfectStatistic {
                     patient[0][3] += dead;
                     patient[i][0] -= dead;
                     patient[0][0] -= dead;
+                    influencedProvince[i] = 1;
                 }
             }
         }
@@ -347,6 +385,7 @@ class InfectStatistic {
                     patient[0][2] += cure;
                     patient[i][0] -= cure;
                     patient[0][0] -= cure;
+                    influencedProvince[i] = 1;
                 }
             }
         }
@@ -369,6 +408,7 @@ class InfectStatistic {
                     patient[0][0] += ip;
                     patient[i][1] -= ip;
                     patient[0][1] -= ip;
+                    influencedProvince[i] = 1;
                 }
             }
         }
@@ -389,17 +429,58 @@ class InfectStatistic {
                 if (provinceString[i].equals(province)) {
                     patient[i][1] -= sp;
                     patient[0][1] -= sp;
+                    influencedProvince[i] = 1;
                 }
             }
         }
 
-        public void output(String outputPath) {
+        public void output(String outputPath, int[] patientTypeSign, int[] provinceList, boolean provinceSign, boolean typeSign) {
             try {
                 FileWriter fileWriter = new FileWriter(outputPath);
-                for (int i = 0; i < provinceString.length; i++) {
-                    fileWriter.write(provinceString[i] + " 感染患者" + patient[i][0] + "人 疑似患者" + patient[i][1] +
-                            "人 治愈" + patient[i][2] + "人 死亡" + patient[i][3] + "人\n");
+                if (provinceSign) {
+                    for (int i = 0; i < provinceString.length; i++) {
+                        if (provinceList[i] == 1){
+                            if (typeSign) {
+                                fileWriter.write(provinceString[i]);
+                                for (int j = 1; j <= patientType.length; j++) {
+                                    for (int k = 0; k < patientType.length; k++) {
+                                        if (patientTypeSign[k] == j) {
+                                            fileWriter.write(" " + patientType[k] + patient[i][k] + "人");
+                                            break;
+                                        }
+                                    }
+                                }
+                                fileWriter.write("\n");
+                            }
+                            else {
+                                fileWriter.write(provinceString[i] + " 感染患者" + patient[i][0] + "人 疑似患者"
+                                        + patient[i][1] + "人 治愈" + patient[i][2] + "人 死亡" + patient[i][3] + "人\n");
+                            }
+                        }
+                    }
                 }
+                else {
+                    for (int i = 0; i < provinceString.length; i++) {
+                        if (influencedProvince[i] == 1){
+                            if (typeSign) {
+                                fileWriter.write(provinceString[i]);
+                                for (int j = 1; j <= patientType.length; j++) {
+                                    for (int k = 0; k < patientType.length; k++) {
+                                        if (patientTypeSign[k] == j) {
+                                            fileWriter.write(" " + patientType[k] + patient[i][k] + "人");
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                fileWriter.write(provinceString[i] + " 感染患者" + patient[i][0] + "人 疑似患者"
+                                        + patient[i][1] + "人 治愈" + patient[i][2] + "人 死亡" + patient[i][3] + "人\n");
+                            }
+                        }
+                    }
+                }
+                fileWriter.write("// 该文档并非真实数据，仅供测试使用");
                 fileWriter.close();
             }
             catch (Exception e) {

@@ -1,3 +1,6 @@
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,10 +14,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
+import org.junit.jupiter.api.Test;
 
 /**
  * Lib
@@ -31,17 +36,55 @@ public class Lib {
     private Map<String, ProvinceStat> provinceStatMap;
     private String[] args;
 
-
-    public static void main(String[] args) {
+    public static String run(String[] args)
+        throws IOException, DataFormatException {
         CommandArgs commandArgs = ArgsParser.parse(args);
         System.out.println(commandArgs);
 
         Lib lib = new Lib();
+        lib.parse(args);
+
+        return lib.commandArgs.getOptionValues("out").get(0);
+    }
+
+    public static boolean fileEquals(String firstName, String secondName)
+        throws FileNotFoundException {
+        Scanner input1; // read first file
+        Scanner input2; // read second file
+
+        boolean equals = true;
+
         try {
-            lib.parse(args);
-        } catch (IOException | DataFormatException e) {
-            e.printStackTrace();
+            input1 = new Scanner(new File(firstName));
+            input2 = new Scanner(new File(secondName));
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException(e.getMessage());
         }
+
+        String first;
+        String second;
+        while (input1.hasNextLine() && input2.hasNextLine()) {
+            while ((first = input1.nextLine()).startsWith("//")) {
+                if (!input1.hasNextLine()) {
+                    first = "";
+                    break;
+                }
+            }
+            while ((second = input2.nextLine()).startsWith("//")) {
+                if (!input2.hasNextLine()) {
+                    second = "";
+                    break;
+                }
+            }
+
+            if (!first.equals(second)) {
+                System.out.println("Differences found: " + "\n" + first + '\n' + second);
+                equals = false;
+                break;
+            }
+        }
+
+        return equals;
     }
 
     public void parse(String[] args) throws IOException, DataFormatException {
@@ -94,8 +137,7 @@ public class Lib {
         provinceStatMap.put(NATION_NAME, nationStat);
     }
 
-
-    public void outputResult() {
+    public void outputResult() throws IOException {
         List<String> province2stat;
         if (commandArgs.containsOption("province")) {
             province2stat = commandArgs.getOptionValues("province");
@@ -161,7 +203,136 @@ public class Lib {
 
             System.out.println(">> write result to \"" + outFilename + "\" done.");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IOException(e);
+        }
+    }
+}
+
+class LibTest {
+
+    @Test
+    public void test01() {
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut1.mine.txt -date 2020-01-22"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut1.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void test02() {
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut2.mine.txt -date 2020-01-22 -province 福建 河北"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut2.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void test03() {
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut3.mine.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut3.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void test04() {
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut4.mine.txt -date 2020-01-23 -type cure dead ip"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut4.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void test05() {
+        // java.lang.IllegalArgumentException: option "log" is required
+        String[] args = "list -out .\\result\\ListOut5.mine.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut5.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void test06() {
+        // java.lang.IllegalArgumentException: option "out" is required
+        String[] args = "list -log .\\log\\ -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut6.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void test07() {
+        // java.nio.file.NotDirectoryException: log path must be a directory
+        String[] args = "list -log .\\loggg\\ -out .\\result\\ListOut7.mine.txt"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut7.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void test08() {
+        // java.io.FileNotFoundException: no log file older than deadline
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut8.mine.txt -date 2019-01-23"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut8.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void test09() {
+        // java.io.FileNotFoundException: no log file older than deadline
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut9.mine.txt -date 2020-02-23"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut9.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void test10() {
+        // java.io.FileNotFoundException: no log file older than deadline
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut10.mine.txt -date 2020-02-02"
+            .split(" ");
+        try {
+            String outFile = Lib.run(args);
+            assertTrue(Lib.fileEquals(outFile, "./result/ListOut10.txt"));
+        } catch (IOException | DataFormatException e) {
+            fail(e.getMessage());
         }
     }
 }
@@ -422,6 +593,9 @@ class ProvinceStat {
 
     public void decrNumIP(int variation) {
         this.numIP -= variation;
+        if (this.numIP < 0) {
+            throw new OutOfBoundException(String.valueOf(this.numIP), "0");
+        }
     }
 
     public void incrNumSP(int variation) {
@@ -430,6 +604,9 @@ class ProvinceStat {
 
     public void decrNumSP(int variation) {
         this.numSP -= variation;
+        if (this.numSP < 0) {
+            throw new OutOfBoundException(String.valueOf(this.numSP), "0");
+        }
     }
 
     public void incrNumCure(int variation) {
@@ -438,6 +615,9 @@ class ProvinceStat {
 
     public void decrNumCure(int variation) {
         this.numCure -= variation;
+        if (this.numCure < 0) {
+            throw new OutOfBoundException(String.valueOf(this.numCure), "0");
+        }
     }
 
     public void incrNumDead(int variation) {
@@ -446,6 +626,9 @@ class ProvinceStat {
 
     public void decrNumDead(int variation) {
         this.numDead -= variation;
+        if (this.numDead < 0) {
+            throw new OutOfBoundException(String.valueOf(this.numDead), "0");
+        }
     }
 
     public void migrateIP(ProvinceStat dest, int num) {

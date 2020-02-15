@@ -46,7 +46,7 @@ public class InfectStatistic {
 		//默认时间为当前时间
 		Calendar calendar = Calendar.getInstance();
 		date = ""+calendar.get(Calendar.YEAR)+"-"+(calendar.get(Calendar.MONTH)+1)+"-"+calendar.get(Calendar.DATE)+"";
-		if(cmd=="list")
+		if(cmd.equals("list")){
 		for(int i=1;i<args.length;i++){
 			if(args[i].equals("-date")){
 				date=args[i+1];
@@ -59,7 +59,7 @@ public class InfectStatistic {
 			}
 			else if(args[i].equals("-type")){
 				for(int j=0;j<4;j++)
-				if(!args[i+j+1].isEmpty()) type[j] = args[i+j+1];       //记录type
+				if((j+i+1)<args.length) type[j] = args[i+j+1];       //记录type
 				if(type[0].isEmpty()){
 					System.out.println("请指定type!");
 					System.exit(0);
@@ -67,13 +67,14 @@ public class InfectStatistic {
 			}
 			else if(args[i].equals("-province")){
 				for(int j=0;j<args.length-i;j++)
-				if(!args[i+j+1].isEmpty()) prs[j] = args[i+j+1];       //记录省
+				if((j+i+1)<args.length) prs[j] = args[i+j+1];       //记录省
 				if(prs[0].isEmpty()){
 					System.out.println("请指定省份!");
 					System.exit(0);
 				}
 			}
-	    }
+	      }
+		}
 		else System.out.println("input right cmd.");
 		int num=0,lines=0;
 		//提取输入目录下的所有文件名
@@ -195,7 +196,7 @@ public class InfectStatistic {
 			
 			  if(provinces[i].cure!=0||provinces[i].dead!=0
 				||provinces[i].infected!=0||provinces[i].mayInfect!=0)
-			  	System.out.println(""+print[i]+"");
+			  	System.out.println(print[i]);
 			}
 		/*-type -province*/
 		else{

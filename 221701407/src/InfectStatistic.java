@@ -21,17 +21,10 @@ import java.util.List;
 class InfectStatistic {
 	
     public static void main(String[] args) throws ParseException, IOException {
-    	
-        //String command="";
-        //for(int i=3;i<args.length;i++) {
-        //	command+=(args[i]+" ");//command为java InfectStatistic list后的参数
-        //}
-        
         ArrayList<String> list=new ArrayList<String>();
         for(String i:args) {
         	list.add(i);//把命令加入list
         }
-        //System.out.println("list="+list);
         CommandAnalysis commandanalysis=new CommandAnalysis();//实例化命令行解析对象
 		commandanalysis.CommandRun(list);//处理命令
         
@@ -59,7 +52,6 @@ class InfectStatistic {
     		province=false;
     		log=false;
     		out=false;
-    		
     		date_argument="";
     		log_argument="";
     		out_argument="";
@@ -108,14 +100,12 @@ class InfectStatistic {
     	public void setOutArgument(String argument) {
     		this.out_argument=argument;
     	}
-
     }
     public static class LogControl {
     	
     	public static ArrayList<String> SortLog(String date,String log,ArrayList<String> provin) throws IOException, ParseException {
     		File file=new File(log);
     		File[] tempList=file.listFiles();
-    		
     		ArrayList<String> FileName=new ArrayList<String>();//存储文件名
     		ArrayList<String> OneFile=new ArrayList<String>();//单个log内容
     		ArrayList<String> AllFiles=new ArrayList<String>();//在date前所有log内容
@@ -179,7 +169,6 @@ class InfectStatistic {
     				Provinces.add(AllFiles.get(i).split(" ")[0]);
 				}
     		}
-    		//System.out.println(Provinces);
     		Integer total_ip=0,total_sp=0,total_cure=0,total_dead=0;//ip:感染，sp:疑似，cure:治愈，dead:死亡
     		for(int i=0;i<Provinces.size();i++) {
     			Integer ip=0,sp=0,cure=0,dead=0;
@@ -187,7 +176,6 @@ class InfectStatistic {
     			for(int j=0;j<AllFiles.size();j++) {
     				String[] info=AllFiles.get(j).split(" ");
     				if(province.equals(info[0])) {
-    					
     					if(info.length==3) {
     						//情况1.<省> 死亡 n人  
     						//情况2.<省> 治愈 n人
@@ -227,7 +215,6 @@ class InfectStatistic {
     						}else {
     							sp-=n;
     						}
-    						
     					}
     				}else if(info.length==5) {
     					//外省流入本省的情况
@@ -239,9 +226,7 @@ class InfectStatistic {
     						}else {
     							sp+=n;
     						}
-    						
     					}
-    					
     				}
     			}
     			total_ip+=ip;
@@ -250,7 +235,6 @@ class InfectStatistic {
     			total_dead+=dead;
     			OutputText.add(province+" 感染患者"+ip.toString()+"人 疑似患者"+sp.toString()+"人 治愈"+cure.toString()+"人 死亡"+dead.toString()+"人");
     		}
-    		
     		OutputText.add(0,"全国 感染患者"+total_ip.toString()+"人 疑似患者"+total_sp.toString()+"人 治愈"+total_cure.toString()+"人 死亡"+total_dead.toString()+"人");
     		
     		if(provin.size()>0) {
@@ -268,11 +252,8 @@ class InfectStatistic {
         				OutputText.add(provin.get(i).toString()+" 感染患者0人 疑似患者0人 治愈0人 死亡0人");
         			}
     			}
-    			
     		}
-    		
     		return OutputText;
-	
     	}
     	
     	public void OutLog(String log,String out,String date,ArrayList<String> province,ArrayList<String> type,ArrayList<String> OutputText) throws IOException {
@@ -325,9 +306,7 @@ class InfectStatistic {
     			}
     		}
     		
-    			
     		OutputContent+="// 该文档并非真实数据，仅供测试使用";
-    		
     		File file=new File(out);
     		FileOutputStream fileoutputstream=new FileOutputStream(file);
     		if(!file.exists()) {
@@ -337,7 +316,6 @@ class InfectStatistic {
     		fileoutputstream.write(OutputContent.getBytes());
     		fileoutputstream.flush();
     		fileoutputstream.close();
-		
     	}
     }
     
@@ -348,7 +326,6 @@ class InfectStatistic {
     		Command command=new Command();
     		command=SetCommand(list);
     		//整理日志数据并输出
-    		//boolean listnum=command.list;
     		String log=command.log_argument;
     		String out=command.out_argument;
     		String date=command.date_argument;
@@ -358,8 +335,7 @@ class InfectStatistic {
     		LogControl logcontrol=new LogControl();
     		ArrayList<String> OutputText=logcontrol.SortLog(date,log,province);
     		logcontrol.OutLog(log, out, date, province, type,OutputText);
-    		
-    		
+    			
     	}
 
 		private Command SetCommand(List<String> list) {
@@ -413,8 +389,6 @@ class InfectStatistic {
 			}		 
 			return command;
 		}
-  	
     }
-
 }
 

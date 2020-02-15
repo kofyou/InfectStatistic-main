@@ -60,6 +60,7 @@ class InfectStatistic {
 		String dateString=null;
 		
 		boolean setProvince=false;
+		boolean setType=false;
 		
 		Date date=null;
 		
@@ -111,12 +112,10 @@ class InfectStatistic {
         	{
         		logPath=args[i+1];
         	}
-        	
         	else if (args[i].equals("-out"))
         	{
         		outputPath=args[i+1];
         	}
-        	
         	else if (args[i].equals("-date"))
         	{
         		dateString=args[i+1];
@@ -126,29 +125,45 @@ class InfectStatistic {
                 
                 date=new Date(year-1900, month-1, day);
         	}
-        	
+        	else if (args[i].equals("-type"))
+        	{
+        			setType=true;
+        	}
         	else if (Arrays.asList(types).contains(args[i]))
         	{
-        		type.add(args[i]);
+        		if (setType==true)
+        		{
+        			type.add(args[i]);
+        		}
+        		else
+        		{
+        			System.out.println("请使用-type参数");
+        			System.exit(1);
+        		}
+        		
         	}
-        	
+        	else if (args[i].equals("-province"))
+        	{
+        		setProvince=true;
+        	}
         	else if (Arrays.asList(areas).contains(args[i]))
         	{
-        		if (setProvince==false)
+        		if (setProvince==true)
         		{
-        			setProvince=true;
+        			map.get(args[i]).setIsRelate();
         		}
-        		map.get(args[i]).setIsRelate();
+        		else
+        		{
+        			System.out.println("请使用-province参数");
+        			System.exit(1);
+        		}
         	}
         	
         }
         
-        
-        
         int position=logPath.lastIndexOf('/');
         
        
-        
         logPath.substring(0, position);
         File dir = new File(logPath);
         
@@ -186,12 +201,8 @@ class InfectStatistic {
              	System.out.println("-date超出范围");
              	System.exit(1);
              }
-//             System.out.println("最晚的一天"+latestDate);
-
         }
        
-        
-        
         
         try {
         	
@@ -213,36 +224,20 @@ class InfectStatistic {
         		}
         		
         		
-        		
-        		
         		InputStreamReader reader=new InputStreamReader(new FileInputStream(logs[i]),"utf-8");
     			BufferedReader bufferedReader = new BufferedReader(reader);
     	        String str;
     	        
     			while ((str = bufferedReader.readLine()) != null) {
-    				
-//    			    System.out.println(str);
-    				
+    				    				
     				String[] splitLine=str.split(" "); 
     				
-    				 
-    				 
     				if (setProvince==false)
     				{
     					map.get(splitLine[0]).setIsRelate();
     				}
     				
-    				
-//    				for (int j=0;j<splitLine.length;j++)
-//    				{
-//    					System.out.print(splitLine[j]);
-//    				}
-//    				System.out.println();
-    				
-    				int num=Integer.parseInt(splitLine[splitLine.length-1].substring(0, splitLine[splitLine.length-1].length()-1));
-    				
-//    				System.out.println(num);
-    				
+    				int num=Integer.parseInt(splitLine[splitLine.length-1].substring(0, splitLine[splitLine.length-1].length()-1));			
     				
     				if (splitLine[1].equals("新增"))
     				{
@@ -269,7 +264,6 @@ class InfectStatistic {
     					{
     						map.get(splitLine[0]).suspectToInfect(num);
     					}
-    					
     				}
     				else if (splitLine[1].equals("治愈"))
     				{
@@ -313,79 +307,42 @@ class InfectStatistic {
         
         for (Map.Entry<String, Area> entry : map.entrySet()) 
         {
-        	
-        		        		
-        		
         		infectSum+=entry.getValue().getInfectNum();
         		suspectSum+=entry.getValue().getSuspectNum();
         		cureSum+=entry.getValue().getCureNum();
         		deathSum+=entry.getValue().getDeathNum();
         		
-
-        	
         }
         
         country=new Area(infectSum,suspectSum,cureSum,deathSum);
         
-//        System.out.println("Key = 全国, "
-//      	  		+ "Value ：确诊" +infectSum
-//      	  		+" 疑似" +suspectSum
-//      	  		+" 治愈" +cureSum
-//      	  		+" 死亡" +deathSum);
-        
-        
-        for (Map.Entry<String, Area> entry : map.entrySet()) 
-        {
-        	if (entry.getValue().getIsRelate()==true)
-        	{
-
-//          	  System.out.println("Key = " + entry.getKey() + ", "
-//          	  		+ "Value ：确诊" +entry.getValue().getInfectNum()
-//          	  		+" 疑似" +entry.getValue().getSuspectNum()
-//          	  		+" 治愈" +entry.getValue().getCureNum()
-//          	  		+" 死亡" +entry.getValue().getDeathNum());
-        	}
-        }
-        
-
-        
         File output = new File(outputPath);
         
-      
-        
-        if (output.exists())
+        if (!output.exists())
         {
-//        	System.out.println(""+output.getName());
-        }
-        else
-        {
-//        	System.out.println("不存在输出文件");
-        	try {
+        	try 
+        	{
 				output.createNewFile();
-//				System.out.println("新创建的文件"+output.getName());
 				
-			} catch (IOException e) {
+			} 
+        	catch (IOException e) 
+        	{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}        
         }
         
-        
         try {
-			FileWriter fileWriter = new  FileWriter(output);
-//			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-			
+			FileWriter fileWriter = new  FileWriter(output);			
 			
         	OutputStreamWriter bufferedWriter=new OutputStreamWriter(new FileOutputStream(output),"utf-8");
 
 			if (type.size()==0)
 			{
-//				System.out.println("没有type参数，直接输出全部");
 				bufferedWriter.write("全国 感染患者"+country.getInfectNum()
 				+"人 疑似患者"+country.getSuspectNum()
 				+"人 治愈"+country.getCureNum()
 				+"人 死亡"+country.getDeathNum()+"人\n");
-		
 		
 				for (int i=0;i<areas.length;i++)
 				{
@@ -399,15 +356,12 @@ class InfectStatistic {
 				}
 			}
 			else
-			{
-//				System.out.println("有type参数");
-				
+			{				
 				bufferedWriter.write("全国");
 				for (String item : type) 
 				{
 					bufferedWriter.write(country.outputType(item));
 		        }
-				
 				for (int i=0;i<areas.length;i++)
 				{
 					if (map.get(areas[i]).getIsRelate()==true)
@@ -419,13 +373,9 @@ class InfectStatistic {
 				        }
 					}
 				}
-				
-				
 			}
 			
-			
 			bufferedWriter.flush();
-			
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

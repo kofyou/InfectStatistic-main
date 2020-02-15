@@ -19,8 +19,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 
@@ -33,7 +36,7 @@ class InfectStatistic {
 	 
 	 static String [] parameters= {"-log","-out","-date","-type","-province"};
 	 
-	 
+	 static String [] types= {"ip","sp","cure","dead"};
 	
 	
 	public static void infectInto(Area source,Area destination, int num)
@@ -52,6 +55,7 @@ class InfectStatistic {
 	
 	
 	
+	
     public static void main(String[] args) {
     	
 
@@ -64,6 +68,8 @@ class InfectStatistic {
 		String dateString=null;
 		
 		Date date=null;
+		
+		List<String> type = new ArrayList<>();
 
 //        if (args.length!=0)
 //    	{
@@ -100,17 +106,23 @@ class InfectStatistic {
                 date=new Date(year-1900, month-1, day);
         	}
         	
+        	if (Arrays.asList(types).contains(args[i]))
+        	{
+        		type.add(args[i]);
+        	}
+        	
         	
         }
         
         
         
+//        for (String item : type) {
+//            System.out.println("类型："+item);
+//        }
+        
 //        System.out.println(date);
         
 //        System.out.println(year+" "+month+" "+day);
-        
-        
-       
         
 //        System.out.println(logPath+"    "+outputPath);
         
@@ -120,6 +132,8 @@ class InfectStatistic {
         int suspectSum=0;
         int cureSum=0;
         int deathSum=0;
+        
+        Area country=null;
         
         map.put("安徽", new Area());
         map.put("北京", new Area());
@@ -348,6 +362,8 @@ class InfectStatistic {
         	}
         }
         
+        country=new Area(infectSum,suspectSum,cureSum,deathSum);
+        
 //        System.out.println("Key = 全国, "
 //      	  		+ "Value ：确诊" +infectSum
 //      	  		+" 疑似" +suspectSum
@@ -403,23 +419,54 @@ class InfectStatistic {
 			
         	OutputStreamWriter bufferedWriter=new OutputStreamWriter(new FileOutputStream(output),"utf-8");
 
-			
-			
-			bufferedWriter.write("全国 感染患者"+infectSum+"人 疑似患者"+suspectSum
-					+"人 治愈"+cureSum+"人 死亡"+deathSum+"人\n");
-			
-//			bufferedWriter.newLine();
-			
-			for (int i=0;i<areas.length;i++)
+			if (type.size()==0)
 			{
-				if (map.get(areas[i]).getIsRelate()==true)
+//				System.out.println("没有type参数，直接输出全部");
+				bufferedWriter.write("全国 感染患者"+country.getInfectNum()
+				+"人 疑似患者"+country.getSuspectNum()
+				+"人 治愈"+country.getCureNum()
+				+"人 死亡"+country.getDeathNum()+"人\n");
+		
+		
+				for (int i=0;i<areas.length;i++)
 				{
-					bufferedWriter.write(areas[i]+" 感染患者"+map.get(areas[i]).getInfectNum()
-							+"人 疑似患者"+map.get(areas[i]).getSuspectNum()
-							+"人 治愈"+map.get(areas[i]).getCureNum()
-							+"人 死亡"+map.get(areas[i]).getDeathNum()+"人\n");
+					if (map.get(areas[i]).getIsRelate()==true)
+					{
+						bufferedWriter.write(areas[i]+" 感染患者"+map.get(areas[i]).getInfectNum()
+								+"人 疑似患者"+map.get(areas[i]).getSuspectNum()
+								+"人 治愈"+map.get(areas[i]).getCureNum()
+								+"人 死亡"+map.get(areas[i]).getDeathNum()+"人\n");
+					}
 				}
 			}
+			else
+			{
+//				System.out.println("有type参数");
+				
+				bufferedWriter.write("全国");
+				for (String item : type) 
+				{
+					bufferedWriter.write(country.outputType(item));
+		        }
+				
+				
+				
+				for (int i=0;i<areas.length;i++)
+				{
+					if (map.get(areas[i]).getIsRelate()==true)
+					{
+						bufferedWriter.write("\n"+areas[i]);
+						for (String item : type) 
+						{
+							bufferedWriter.write(map.get(areas[i]).outputType(item));
+				        }
+					}
+				}
+				
+				
+			}
+			
+			
 			
 			
 			
@@ -457,6 +504,22 @@ class Area{
 	private int cureNum=0;
 	private int deathNum=0;
 	private boolean isRelate=false;
+	
+	Area(int infect,int suspect,int cure,int death)
+	{
+		infectNum=infect;
+		suspectNum=suspect;
+		cureNum=cure;
+		deathNum=death;
+	}
+	
+	Area()
+	{
+		infectNum=0;
+		suspectNum=0;
+		cureNum=0;
+		deathNum=0;
+	}
 	
 	public int getInfectNum()
 	{
@@ -530,6 +593,27 @@ class Area{
 	public void exclude(int num)
 	{
 		suspectNum-=num;
+	}
+	
+	public String outputType(String type)
+	{
+		if (type.equals("ip"))
+		{
+			return " 感染患者"+infectNum+"人";
+		}
+		else if (type.equals("sp"))
+		{
+			return " 疑似患者"+suspectNum+"人";
+		}
+		else if (type.equals("cure"))
+		{
+			return " 治愈"+cureNum+"人";
+		}
+		else
+		{
+			return " 死亡"+deathNum+"人";
+		}
+			
 	}
 	
 }

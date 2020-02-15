@@ -15,7 +15,9 @@ import java.util.Map;
  */
 class InfectStatistic {
     public static void main(String[] args) {
-    	String[] test = {"list","-date","2020-01-22","2020-02-14","-log","D:/log/","-out","D:/output.txt"};
+    	String[] test = {"list","-date","2020-01-23","-log",
+    			"C:/Users/jhuy/Documents/GitHub/InfectStatistic-main/221701325/log",
+    			"-out","D:/output.txt"};
     	CmdArgs cmdArgs = new CmdArgs(test,"benjamin");
     	Map<String,List<String>> map = new HashMap<String,List<String>>();
     	
@@ -28,13 +30,13 @@ class InfectStatistic {
     	cmdArgs.fillMap(map);
     	cmdArgs.command.execute(map);
     	
-    	System.out.println(map);
+    	//System.out.println(map);
     	
     	File file = new File("C:\\Users\\jhuy\\Documents\\GitHub\\InfectStatistic-main\\example\\log\\2020-01-22.log.txt");
     	String test1 = TxtTool.txt2String(file);
-    	System.out.println(test1);
+    	//System.out.println(test1);
     	File file2 = new File("C:\\Users\\jhuy\\Documents\\GitHub\\InfectStatistic-main\\example\\log\\output.txt");
-    	TxtTool.string2Txt(file2);
+    	//TxtTool.string2Txt(file2);
     }
     
 }

@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -154,6 +153,7 @@ interface Command{
 class ListCommand implements Command{
 	private ListKey listKey;
 	private List<String[]> result;
+	private String logLine = "";
 	
 	/**
      * 传入参数和值的map并进行处理
@@ -195,27 +195,50 @@ class ListCommand implements Command{
 
 
 	private void provinceKey(Map<String, List<String>> map) {
-		System.out.println("nowProvince");
+		//System.out.println("nowProvince");
 		
 	}
 
 	private void typeKey(Map<String, List<String>> map) {
-		System.out.println("nowType");
+		//System.out.println("nowType");
 		
 	}
 
 	private void outKey(Map<String, List<String>> map) {
-		System.out.println("nowOut");
+		//System.out.println("nowOut");
 		
 	}
 
 	private void logKey(Map<String, List<String>> map) {
-		System.out.println("now is in LogKey Handler");
+		//System.out.println("now is in LogKey Handler");
 		List<String> logList = map.get("log");
-		System.out.println("log is " + logList.get(0));
+		//System.out.println("log is " + logList.get(0));
 	}
 
 	private void dateKey(Map<String, List<String>> map) {
+
+		//System.out.println("now is in DateKey Handler");
+		List<String> logList = map.get("log");
+		List<String> dateList = map.get("date");
+		//System.out.println("date deadline is " + dateList.get(0));
+		String date = dateList.get(0);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			Date dateObj = dateFormat.parse(date);
+			List<File> fileList = TxtTool.getFileList(logList.get(0));
+			//System.out.println("处理前的文件列表  " + fileList);
+			TxtTool.dateScreen(fileList,dateObj);
+			//System.out.println("处理后的文件列表  " + fileList);
+
+			for(int i = 0; i < fileList.size(); i++) {
+				logLine += TxtTool.txt2String(fileList.get(i));
+			}
+			System.out.println(logLine);
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 }
@@ -240,11 +263,10 @@ class TxtTool {
         catch(Exception e){
             e.printStackTrace();
         }
-        
         return result.toString();
     }
-    
-    public static void string2Txt(File file) {
+
+	public static void string2Txt(File file) {
         try {
             file.createNewFile(); // 创建新文件,有同名的文件的话直接覆盖
             FileWriter writer = new FileWriter(file);
@@ -263,19 +285,41 @@ class TxtTool {
         File dir = new File(strPath);
         File[] files = dir.listFiles(); // 该文件目录下文件全部放入数组
         if (files != null) {
+        	//System.out.println("loading the files...");
             for (int i = 0; i < files.length; i++) {
                 if (files[i].isDirectory()) { // 判断是文件还是文件夹
                     getFileList(files[i].getAbsolutePath()); // 获取文件绝对路径
                 } 
                 else { 
                     String strFileName = files[i].getAbsolutePath();
-                    System.out.println("---" + strFileName);
+                    //System.out.println("-" + strFileName);
                     filelist.add(files[i]);
                 }
             }
+        	//System.out.println("loading completed.");
         }
         return filelist;
     }
+    
+    public static void dateScreen(List<File> fileList, Date dateObj) {
+		for(int i = 0; i < fileList.size(); i++) {
+			String pathStr = fileList.get(i).toString();
+			String[] fileStr = pathStr.split("\\\\");
+			String[] dateStr = fileStr[fileStr.length - 1].split("\\.");
+			String date = dateStr[0];
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			try {
+				Date dateObj2 = dateFormat.parse(date);
+				if(dateObj.before(dateObj2)) {
+					fileList.remove(i);
+					i--;//重点
+				}
+			} 
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }
 
 //责任链模式处理日志文件

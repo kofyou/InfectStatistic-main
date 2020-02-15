@@ -33,6 +33,11 @@ import org.junit.jupiter.api.Test;
 public class Lib {
 
     private static final String NATION_NAME = "全国";
+    public static final String OPTION_PROVINCE = "province";
+    public static final String OPTION_DATE = "date";
+    public static final String OPTION_LOG = "log";
+    public static final String OPTION_TYPE = "type";
+
     private CommandArgs commandArgs;
 
     private Map<String, ProvinceStat> provinceStatMap;
@@ -112,10 +117,10 @@ public class Lib {
         this.args = args;
         this.commandArgs = ArgsParser.parse(args);
 
-        String logDir = commandArgs.getOptionValues("log").get(0);
+        String logDir = commandArgs.getOptionValues(OPTION_LOG).get(0);
         String logDeadline = "9999-99-99";
-        if (commandArgs.containsOption("date")) {
-            logDeadline = commandArgs.getOptionValues("date").get(0);
+        if (commandArgs.containsOption(OPTION_DATE)) {
+            logDeadline = commandArgs.getOptionValues(OPTION_DATE).get(0);
         }
 
         String[] logFiles = getOlderFiles(logDir, logDeadline);
@@ -147,8 +152,8 @@ public class Lib {
 
     public void outputResult() throws IOException {
         List<String> province2stat;
-        if (commandArgs.containsOption("province")) {
-            province2stat = commandArgs.getOptionValues("province");
+        if (commandArgs.containsOption(OPTION_PROVINCE)) {
+            province2stat = commandArgs.getOptionValues(OPTION_PROVINCE);
         } else {
             province2stat = new ArrayList<>(provinceStatMap.keySet());
             province2stat.add(0, NATION_NAME);
@@ -164,11 +169,7 @@ public class Lib {
         String outFilename = commandArgs.getOptionValues("out").get(0);
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outFilename))) {
-
-//            Set<String> provinces = provinceStatMap.keySet();
-
-            if (commandArgs.containsOption("type")) {
-//                List<String> patientTypes = Arrays.asList("ip", "sp", "cure", "dead");
+            if (commandArgs.containsOption(OPTION_TYPE)) {
                 List<String> patientTypes = commandArgs.getOptionValues("type");
                 for (String province : province2stat) {
                     if (!provinceStatMap.containsKey(province)) {
@@ -201,7 +202,6 @@ public class Lib {
                     if (!provinceStatMap.containsKey(province)) {
                         provinceStatMap.put(province, new ProvinceStat());
                     }
-//                System.out.println(province + " " + provinceStatMap.get(province));
                     bufferedWriter.write(province + " " + provinceStatMap.get(province));
                     bufferedWriter.newLine();
                 }
@@ -273,7 +273,7 @@ class LibTest {
     public void testRegexGroup2() {
         String soap = "湖北 新增 感染患者 15人";
         String[] result = {"湖北", "15"};
-        List<String> tokens = LogParser.regexGroup2(soap, LogParser.regex1);
+        List<String> tokens = LogParser.regexGroup2(soap, LogParser.REGEX1);
         Assert.assertArrayEquals(result, tokens.toArray());
     }
 
@@ -281,7 +281,7 @@ class LibTest {
     public void testRegexGroup3() {
         String soap = "湖北 疑似患者 流入 福建 3人";
         String[] result = {"湖北", "福建", "3"};
-        List<String> tokens = LogParser.regexGroup3(soap, LogParser.regex4);
+        List<String> tokens = LogParser.regexGroup3(soap, LogParser.REGEX4);
         Assert.assertArrayEquals(result, tokens.toArray());
     }
 
@@ -299,7 +299,7 @@ class LibTest {
         Exception exception = assertThrows(OutOfBoundException.class, () -> {
             ProvinceStat provinceStat = new ProvinceStat();
             provinceStat.incrNumIP(3);
-            provinceStat.decrNumSP(6);
+            provinceStat.decrNumIP(6);
         });
 
         assertTrue(exception.getMessage().contains(" out of bound "));
@@ -371,10 +371,11 @@ class LibTest {
 
 class ArgsParser {
 
-    private static final String[] requiredOptions = {"log", "out"};
+    private static final String[] REQUIRED_OPTIONS = {"log", "out"};
+    public static final String PREFIX = "-";
 
     public static boolean isOption(final String token) {
-        return token.startsWith("-");
+        return token.startsWith(PREFIX);
     }
 
     public static CommandArgs parse(final String[] args) {
@@ -409,7 +410,7 @@ class ArgsParser {
             }
         }
 
-        for (String option : requiredOptions) {
+        for (String option : REQUIRED_OPTIONS) {
             if (!commandArgs.containsOption(option)) {
                 throw new IllegalArgumentException("option \"" + option + "\" is required");
             }
@@ -459,14 +460,14 @@ class CommandArgs {
 
 class LogParser {
 
-    final static public String regex1 = "(^\\W+) 新增 感染患者 (\\d+)人";
-    final static public String regex2 = "(^\\W+) 新增 疑似患者 (\\d+)人";
-    final static public String regex3 = "(^\\W+) 感染患者 流入 (\\W+) (\\d+)人";
-    final static public String regex4 = "(^\\W+) 疑似患者 流入 (\\W+) (\\d+)人";
-    final static public String regex5 = "(^\\W+) 死亡 (\\d+)人";
-    final static public String regex6 = "(^\\W+) 治愈 (\\d+)人";
-    final static public String regex7 = "(^\\W+) 疑似患者 确诊感染 (\\d+)人";
-    final static public String regex8 = "(^\\W+) 排除 疑似患者 (\\d+)人";
+    final static public String REGEX1 = "(^\\W+) 新增 感染患者 (\\d+)人";
+    final static public String REGEX2 = "(^\\W+) 新增 疑似患者 (\\d+)人";
+    final static public String REGEX3 = "(^\\W+) 感染患者 流入 (\\W+) (\\d+)人";
+    final static public String REGEX4 = "(^\\W+) 疑似患者 流入 (\\W+) (\\d+)人";
+    final static public String REGEX5 = "(^\\W+) 死亡 (\\d+)人";
+    final static public String REGEX6 = "(^\\W+) 治愈 (\\d+)人";
+    final static public String REGEX7 = "(^\\W+) 疑似患者 确诊感染 (\\d+)人";
+    final static public String REGEX8 = "(^\\W+) 排除 疑似患者 (\\d+)人";
     private Map<String, ProvinceStat> provinceStatMap;
 
     public static List<String> regexGroup2(String soap, String regex) {
@@ -521,36 +522,36 @@ class LogParser {
                 }
 
                 List<String> result;
-                if ((result = regexGroup2(line, regex1)) != null) {
+                if ((result = regexGroup2(line, REGEX1)) != null) {
                     ProvinceStat provinceStat = getProvinceStat(result.get(0));
                     provinceStat.incrNumIP(Integer.parseInt(result.get(1)));
-                } else if ((result = regexGroup2(line, regex2)) != null) {
+                } else if ((result = regexGroup2(line, REGEX2)) != null) {
                     ProvinceStat provinceStat = getProvinceStat(result.get(0));
                     provinceStat.incrNumSP(Integer.parseInt(result.get(1)));
-                } else if ((result = regexGroup3(line, regex3)) != null) {
+                } else if ((result = regexGroup3(line, REGEX3)) != null) {
                     ProvinceStat source = getProvinceStat(result.get(0));
                     ProvinceStat target = getProvinceStat(result.get(1));
                     source.migrateIP(target, Integer.parseInt(result.get(2)));
-                } else if ((result = regexGroup3(line, regex4)) != null) {
+                } else if ((result = regexGroup3(line, REGEX4)) != null) {
                     ProvinceStat source = getProvinceStat(result.get(0));
                     ProvinceStat target = getProvinceStat(result.get(1));
                     source.migrateSP(target, Integer.parseInt(result.get(2)));
-                } else if ((result = regexGroup2(line, regex5)) != null) {
+                } else if ((result = regexGroup2(line, REGEX5)) != null) {
                     ProvinceStat provinceStat = getProvinceStat(result.get(0));
                     int num = Integer.parseInt(result.get(1));
                     provinceStat.incrNumDead(num);
                     provinceStat.decrNumIP(num);
-                } else if ((result = regexGroup2(line, regex6)) != null) {
+                } else if ((result = regexGroup2(line, REGEX6)) != null) {
                     ProvinceStat provinceStat = getProvinceStat(result.get(0));
                     int num = Integer.parseInt(result.get(1));
                     provinceStat.incrNumCure(num);
                     provinceStat.decrNumIP(num);
-                } else if ((result = regexGroup2(line, regex7)) != null) {
+                } else if ((result = regexGroup2(line, REGEX7)) != null) {
                     ProvinceStat provinceStat = getProvinceStat(result.get(0));
                     int num = Integer.parseInt(result.get(1));
                     provinceStat.incrNumIP(num);
                     provinceStat.decrNumSP(num);
-                } else if ((result = regexGroup2(line, regex8)) != null) {
+                } else if ((result = regexGroup2(line, REGEX8)) != null) {
                     ProvinceStat provinceStat = getProvinceStat(result.get(0));
                     provinceStat.decrNumSP(Integer.parseInt(result.get(1)));
                 } else {
@@ -567,13 +568,25 @@ class LogParser {
 
 class ProvinceStat {
 
-    private int numIP; // #infected
+    /**
+     * #infected
+     */
+    private int numIP;
 
-    private int numSP; // #suspected
+    /**
+     * #suspected
+     */
+    private int numSP;
 
-    private int numCure; // #cured
+    /**
+     * #cured
+     */
+    private int numCure;
 
-    private int numDead; // #dead
+    /**
+     * #dead
+     */
+    private int numDead;
 
     public ProvinceStat() {
         this.numIP = 0;
@@ -624,22 +637,9 @@ class ProvinceStat {
         this.numCure += variation;
     }
 
-    public void decrNumCure(int variation) {
-        this.numCure -= variation;
-        if (this.numCure < 0) {
-            throw new OutOfBoundException(String.valueOf(this.numCure), "0");
-        }
-    }
 
     public void incrNumDead(int variation) {
         this.numDead += variation;
-    }
-
-    public void decrNumDead(int variation) {
-        this.numDead -= variation;
-        if (this.numDead < 0) {
-            throw new OutOfBoundException(String.valueOf(this.numDead), "0");
-        }
     }
 
     public void migrateIP(ProvinceStat dest, int num) {

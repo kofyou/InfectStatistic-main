@@ -46,13 +46,13 @@ class InfectStatistic
     public InfectStatistic(String[] args)
     {
         provinceName = new String[]{"安徽","北京","重庆","福建","甘肃","广东",
-            "广西壮族","贵州","海南","河北","河南","黑龙江","湖北","湖南",
-            "江西","吉林","江苏","辽宁","内蒙古","宁夏回族","青海","山西","山东","陕西","上海",
-            "四川","天津","西藏","新疆维吾尔","云南","浙江"};
+            "广西","贵州","海南","河北","河南","黑龙江","湖北","湖南",
+            "江西","吉林","江苏","辽宁","内蒙古","宁夏","青海","山西","山东","陕西","上海",
+            "四川","天津","西藏","新疆","云南","浙江"};
         isRead = true;
         arg = args;
-        logPath = "G:\\example\\log";
-        outputPath = "G:\\example\\result\\output1.txt";
+        logPath = "G:\\example\\log\\";
+        outputPath = "G:\\example\\result\\output3.txt";
         name = new ArrayList<>();       
         map = new HashMap<String,Province>();
         country = new Province("全国");
@@ -64,7 +64,7 @@ class InfectStatistic
         for (int i = 0; i < provinceName.length; i ++ )
         {
             name.add(provinceName[i]);
-            map.put(name.get(i), new Province(name.get(i)));
+            map.put(name.get(i), null);
         }
         for (int i = 0; i < 4; i ++ )
         {
@@ -130,7 +130,7 @@ class InfectStatistic
     }
     
     //处理-province参数
-    private void dealProvince(int index) 
+    public void dealProvince(int index) 
     {
         while (index < arg.length)
         {
@@ -146,7 +146,7 @@ class InfectStatistic
                     return;
                 default:
                     provinces.add(arg[index]);
-                    map.put(arg[index], new Province(arg[index]));
+                    map.put(arg[index], null);
             }   
             index ++ ;
         }               
@@ -209,6 +209,11 @@ class InfectStatistic
         {
             return;
         }
+        //处理的省份未初始化
+        if (map.get(array[0]) == null)
+        {
+            map.put(array[0], new Province(array[0]));  
+        }
                         
         switch (array[1])
         {
@@ -226,6 +231,8 @@ class InfectStatistic
                 //流出省份减少感染患者
                 map.get(array[0]).removeIp(array[4]);
                 //流入省份增加感染患者
+                if (map.get(array[3]) == null)
+                    map.put(array[3], new Province(array[3]));
                 map.get(array[3]).addIp(array[4]);
                 break;
             case "疑似患者":
@@ -234,6 +241,8 @@ class InfectStatistic
                     //流出省份减少疑似患者
                     map.get(array[0]).removeSp(array[4]);
                     //流入省份增加疑似患者
+                    if (map.get(array[3]) == null)
+                        map.put(array[3], new Province(array[3]));
                     map.get(array[3]).addSp(array[4]);
                 }
                 //疑似患者确诊感染
@@ -257,7 +266,6 @@ class InfectStatistic
             default:
                 break;
         }   
-
     }
     
     //统计全国的情况
@@ -265,7 +273,10 @@ class InfectStatistic
     {
         for (int i = 0; i < name.size(); i ++ )
         {
-            country.allAdd(map.get(name.get(i)));
+            if (map.get(name.get(i)) != null)
+            {
+                country.allAdd(map.get(name.get(i)));
+            }            
         }
     }
     
@@ -276,27 +287,36 @@ class InfectStatistic
         {
             return;
         }
-        BufferedWriter bw = new BufferedWriter(new FileWriter(outputPath)) ;
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath), "UTF-8"));
+        //默认情况，没有-province参数
         if (isOutputAll)
         {
             country.output(isOutput,output,bw);
             for (int i = 0; i < name.size(); i ++ )
-            {           
-                map.get(name.get(i)).output(isOutput, output, bw);
+            {   
+                if (map.get(name.get(i)) != null)
+                {
+                    map.get(name.get(i)).output(isOutput, output, bw);
+                }                
             }
         }
+        //有-province参数
         else
         {
-            for (int i = 0; i < provinces.size(); i ++ )
-            {           
-                if (provinces.get(i).equals("全国"))
+            if (provinces.contains("全国"))
+            {
+                country.output(isOutput,output,bw);
+            }
+            for (int i = 0; i < provinceName.length; i ++ )
+            { 
+                if (provinces.contains(provinceName[i]))
                 {
-                    country.output(isOutput, output, bw);
-                }
-                else
-                {
-                    map.get(provinces.get(i)).output(isOutput, output, bw);
-                }
+                    if (map.get(name.get(i)) == null)
+                    {
+                        map.put(provinceName[i], new Province(provinceName[i]));
+                    }
+                    map.get(provinceName[i]).output(isOutput, output, bw);
+                }                
             }
         }
         bw.write("// 该文档并非真实数据，仅供测试使用");
@@ -393,7 +413,7 @@ class Province
                 + "治愈 " + cure + "人 "
                 + "死亡 " + dead + "人");
             bw.newLine();
-        }
+        }        
         //有-type参数情况下的输出
         else
         {

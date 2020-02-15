@@ -33,25 +33,24 @@ class InfectStatistic {
 			 "海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁",
 			 "内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏",
 			 "新疆","云南","浙江",};
-	 
-	 static String [] parameters= {"-log","-out","-date","-type","-province"};
-	 
+	 	 
 	 static String [] types= {"ip","sp","cure","dead"};
 	
-	public static void infectInto(Area source,Area destination, int num)
+	public static void infectInto(Area source,Area destination, int num)//确诊患者从source流入destination
 	{
 		source.decreaseInfect(num);
 		destination.addInfect(num);
 	}
 	
-	public static void suspectInto(Area source,Area destination, int num)
+	public static void suspectInto(Area source,Area destination, int num)//疑似患者从source流入destination
 	{
 		source.decreaseSuspect(num);
 		destination.addSuspect(num);
 	}
 	
 	
-    public static void main(String[] args) {
+    public static void main(String[] args) 
+    {
     	
     	Map<String, Area> map = new HashMap<String,Area>(); 
     	
@@ -59,20 +58,20 @@ class InfectStatistic {
 		String outputPath=null;
 		String dateString=null;
 		
-		boolean setProvince=false;
-		boolean setType=false;
+		boolean setProvince=false;//记录指令是否有-province参数
+		boolean setType=false;//记录指令是否有-type参数
 		
-		File directory=null;
-		File output=null;
+		File directory=null;//日志文件夹
+		File output=null;//输出文件
 		
-		Date date=null;
+		Date date=null;//记录指令是否含有-date参数，若有则date为该参数的日期
 		
-		List<String> type = new ArrayList<>();
+		List<String> type = new ArrayList<>();//指令中若含有-type参数则记录需要统计那些疫情
 
-        int infectSum=0;
-        int suspectSum=0;
-        int cureSum=0;
-        int deathSum=0;
+        int infectSum=0;//全国所有的感染患者
+        int suspectSum=0;//全国所有疑似患者
+        int cureSum=0;//全国所有治愈
+        int deathSum=0;//全国所有死亡
         
         Area country=null;
         
@@ -111,10 +110,10 @@ class InfectStatistic {
         
         for (int i=0;i<args.length;i++)
         {
-        	if (args[i].equals("-log"))
+        	if (args[i].equals("-log"))//-log参数
         	{
         		logPath=args[i+1];
-        		int position=logPath.lastIndexOf('/');
+        		int position=logPath.lastIndexOf('\\');
                 
                 logPath.substring(0, position);
                 directory = new File(logPath);
@@ -125,18 +124,18 @@ class InfectStatistic {
 	            }
         		i++;
         	}
-        	else if (args[i].equals("-out"))
+        	else if (args[i].equals("-out"))//-out参数
         	{
         		outputPath=args[i+1];
         		output= new File(outputPath);
-    		    if(!outputPath.matches("[A-z]:/(.+?/)*.+?.txt"))
+    		    if(!outputPath.matches("[A-z]:\\\\(.+?\\\\)*.+?.txt"))//用正则表达式判断是否合法
     	        {
     				System.out.println("输出文件路径错误");
     				System.exit(1);
     			}
         		i++;
         	}
-        	else if (args[i].equals("-date"))
+        	else if (args[i].equals("-date"))//-date参数
         	{
         		dateString=args[i+1];
         		
@@ -156,7 +155,7 @@ class InfectStatistic {
         		
                 i++;
         	}
-        	else if (args[i].equals("-type"))
+        	else if (args[i].equals("-type"))//-type参数
         	{
         			setType=true;
         	}
@@ -173,7 +172,7 @@ class InfectStatistic {
         		}
         		
         	}
-        	else if (args[i].equals("-province"))
+        	else if (args[i].equals("-province"))//-province参数
         	{
         		setProvince=true;
         	}
@@ -207,7 +206,7 @@ class InfectStatistic {
              Date latestDate=new Date(Integer.parseInt(log.substring(0, 4))-1900, 
              		Integer.parseInt(log.substring(5, 7))-1, 
              		Integer.parseInt(log.substring(8,10)));
-             for (int i=1;i<logs.length;i++)
+             for (int i=1;i<logs.length;i++)//求出日志中最晚的一天
              {
              	log=logs[i].getName();
              	Date temp=new Date(Integer.parseInt(log.substring(0, 4))-1900, 
@@ -218,16 +217,15 @@ class InfectStatistic {
              		 latestDate=temp;
                   }
              }
-             if (date.compareTo(latestDate)>0)
+             if (date.compareTo(latestDate)>0)//如果-date日期比日志中最晚一天还要晚则报错
              {
              	System.out.println("-date超出范围");
              	System.exit(1);
              }
         }
        
-        
-        try {
-        	
+        try 
+        {
         	for (int i=0;i<logs.length;i++)
         	{
         		if (date!=null)
@@ -239,20 +237,20 @@ class InfectStatistic {
                     
                     Date logDate=new Date(logYear-1900, logMonth-1, logDay);
                     
-                    if (logDate.compareTo(date)>0)
+                    if (logDate.compareTo(date)>0)//如果某一日志文件比-date日期晚，则跳过不统计该日志
                     {
                     	continue;
                     }
         		}
         		
-        		
         		InputStreamReader reader=new InputStreamReader(new FileInputStream(logs[i]),"utf-8");
     			BufferedReader bufferedReader = new BufferedReader(reader);
     	        String str;
     	        
-    			while ((str = bufferedReader.readLine()) != null) {
+    			while ((str = bufferedReader.readLine()) != null) 
+    			{
     				
-    				if (str.startsWith("//")||str.equals(""))
+    				if (str.startsWith("//")||str.equals(""))//改行为空或者是注释则跳过
     				{
     					continue;
     				}
@@ -315,41 +313,17 @@ class InfectStatistic {
 		}
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        for (Map.Entry<String, Area> entry : map.entrySet()) 
+        for (Map.Entry<String, Area> entry : map.entrySet()) //统计全国疫情
         {
         		infectSum+=entry.getValue().getInfectNum();
         		suspectSum+=entry.getValue().getSuspectNum();
         		cureSum+=entry.getValue().getCureNum();
         		deathSum+=entry.getValue().getDeathNum();
-        		
         }
         
         country=new Area(infectSum,suspectSum,cureSum,deathSum);
         
-        
-        
-
-      
-        
-        
-        if (!output.exists())
+        if (!output.exists())//如果输出文件不存在则创建它
         {
         	try 
         	{
@@ -367,7 +341,7 @@ class InfectStatistic {
 			
         	OutputStreamWriter bufferedWriter=new OutputStreamWriter(new FileOutputStream(output),"utf-8");
 
-			if (type.size()==0)
+			if (setType==false)//如果指令没有-type参数则输出所有类型疫情
 			{
 				bufferedWriter.write("全国 感染患者"+country.getInfectNum()
 				+"人 疑似患者"+country.getSuspectNum()
@@ -385,7 +359,7 @@ class InfectStatistic {
 					}
 				}
 			}
-			else
+			else//如果指令有-type参数则输出指定类型疫情
 			{				
 				bufferedWriter.write("全国");
 				for (String item : type) 
@@ -405,6 +379,8 @@ class InfectStatistic {
 				}
 			}
 			
+			bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");;
+			
 			bufferedWriter.flush();
 			
 		} catch (IOException e) {
@@ -418,10 +394,10 @@ class InfectStatistic {
 
 
 class Area{
-	private int infectNum=0;
-	private int suspectNum=0;
-	private int cureNum=0;
-	private int deathNum=0;
+	private int infectNum=0;//感染患者
+	private int suspectNum=0;//疑似患者
+	private int cureNum=0;//治愈
+	private int deathNum=0;//死亡
 	private boolean isRelate=false;
 	
 	Area(int infect,int suspect,int cure,int death)
@@ -471,50 +447,50 @@ class Area{
 		isRelate=true;
 	}
 	
-	public void addInfect(int num)
+	public void addInfect(int num)//新增感染患者
 	{
 		infectNum+=num;
 	}
 	
-	public void decreaseInfect(int num)
+	public void decreaseInfect(int num)//减少感染患者
 	{
 		infectNum-=num;
 	}
 	
-	public void addSuspect(int num)
+	public void addSuspect(int num)//新增疑似患者
 	{
 		suspectNum+=num;
 	}
 	
-	public void decreaseSuspect(int num)
+	public void decreaseSuspect(int num)//减少疑似患者
 	{
 		suspectNum-=num;
 	}
 	
-	public void cure(int num)
+	public void cure(int num)//治愈
 	{
 		cureNum+=num;
 		infectNum-=num;
 	}
 	
-	public void death(int num)
+	public void death(int num)//死亡
 	{
 		deathNum+=num;
 		infectNum-=num;
 	}
 	
-	public void suspectToInfect(int num)
+	public void suspectToInfect(int num)//疑似转为确诊感染
 	{
 		suspectNum-=num;
 		infectNum+=num;
 	}
 	
-	public void exclude(int num)
+	public void exclude(int num)//排除疑似
 	{
 		suspectNum-=num;
 	}
 	
-	public String outputType(String type)
+	public String outputType(String type)//输出type类型的疫情
 	{
 		if (type.equals("ip"))
 		{
@@ -532,9 +508,7 @@ class Area{
 		{
 			return " 死亡"+deathNum+"人";
 		}
-			
 	}
-	
 }
 	
 

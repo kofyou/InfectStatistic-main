@@ -1,8 +1,9 @@
+import java.util.Date;
 import java.io.File;
 import java.io.*;
 import java.util.regex.*;
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.io.FileNotFoundException;
 
 /**
  * InfectStatistic
@@ -14,9 +15,9 @@ public class InfectStatistic
 {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     Date currentDate = new Date(System.currentTimeMillis());
-    public String date = dateFormat.format(currentDate);   //设置默认日期
+    public String date = dateFormat.format(currentDate);   //默认日期(当前日期)
 
-    public String journalFileName = date+".log.txt";  //日志文件名
+    public String journalFileName = date+".log.txt";  //默认日志文件名(当前日期log.txt)
 
     public String log;  //日志文件位置
 
@@ -135,9 +136,9 @@ public class InfectStatistic
             String dateStr = strCmd[itemDate];
             if (isDate(dateStr))
             {
-                if (date.compareTo(strCmd[itemDate]) >= 0)
+                if (dateStr.compareTo(date) <= 0)  //查询日期 <= 当前日期，查询有效
                 {
-                    journalFile = strCmd[itemDate]+".log.txt";
+                    journalFileName = dateStr+".log.txt";
                     return itemDate;
                 }
                 else
@@ -223,9 +224,28 @@ public class InfectStatistic
         /*
          * validCmd：解析cmd命令并判断是否有效
          */
+        public String getMinLogName ()
+        {
+            String filepath = log;
+            String minLogName;
+            File logFile = new File(filepath);
+            File[] logFileList = logFile.listFiles();
+            minLogName = logFileList[0].getName();
+            for (File file : logFileList)
+            {
+                if (file.getName().compareTo(minLogName) <= 0)
+                {
+                    minLogName = file.getName();
+
+                }
+            }
+            return minLogName;
+        }
+
         public boolean validCmd()  //validCmd：输入命令有效
         {
             int i;
+            String dateCmd = date;
             if (!strCmd[0].equals("list"))
             {
                 System.out.println("命令应以'list'开始！请重新输入！");
@@ -238,7 +258,7 @@ public class InfectStatistic
                     i = getValidLog(++i);
                     if (i == -1)
                     {
-                        System.out.println("日志文件路径无效！请重新输入！");
+                        System.out.println("日志文件夹路径无效！请重新输入！");
                         return false;
                     }
                 }
@@ -253,12 +273,20 @@ public class InfectStatistic
                 }
                 else if (strCmd[i].equals("-date"))
                 {
+                    dateCmd = strCmd[i+1];
                     i = getValidDate(++i);
                     if (i < 0)
                     {
                         System.out.println("查询日期无效！请重新输入！");
                         return false;
                     }
+                /*    else if (strCmd[m].compareTo(getMinLogName()) < 0)
+                    {
+                        System.out.println("查询日期没有记录！请重新输入！");
+                        return false;
+                    }
+                 */
+
                 }
                 else if (strCmd[i].equals("-type"))
                 {
@@ -284,6 +312,11 @@ public class InfectStatistic
                     return false;
                 }
             }
+            if (dateCmd.compareTo(getMinLogName()) < 0)
+            {
+                System.out.println("该日暂无记录！请重新输入！");
+                return false;
+            }
             return true;
         }
     }
@@ -299,18 +332,35 @@ public class InfectStatistic
          * getLogList：获取指定目录下的所有文件
          * log：-log指定日志文件目录
          */
-        public void getLogList (String log)
+        public void getLogList ()
         {
-
+        //    String filepath = log;
+        //    String minLogName;
+            File logFile = new File(log);
+            File[] logFileList = logFile.listFiles();
+        //    minLogName = logFileList[0].getName();
+            for (File file : logFileList)
+            {
+                if (file.getName().compareTo(journalFileName) <= 0)
+                {
+                    System.out.print(file.getName());
+                    readJournalFile();
+                }
+                if (file.isFile())
+                {
+                    System.out.println( file.getName());
+                }
+            }
         }
+
 
         /*
          * readJournalFile：按行读取所需日志文件
          * journalFileName：所需日志文件名
          */
-        public void readJournalFile (String journalFileName)
+        public void readJournalFile ()
         {
-
+            System.out.println("加入计算列表");
         }
 
         /*
@@ -337,6 +387,8 @@ public class InfectStatistic
         InfectStatistic infectStatistic = new InfectStatistic();
         InfectStatistic.CommondAnalysis commondAnalysis= infectStatistic.new CommondAnalysis(arg);
         commondAnalysis.validCmd();
+        InfectStatistic.FileOpration fileOpration = infectStatistic.new FileOpration();
+        fileOpration.getLogList();
 
 
 

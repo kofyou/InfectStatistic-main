@@ -383,20 +383,133 @@ class InfectStatistic {
 
 
     void allProvinceAllType(Record totalCountryNumber , FileOutputStream outFile){
+        String record = "全国 " + Lib.toChinese(Lib.allType[0])+ totalCountryNumber.getInfectionNumber() + Lib.unit +
+                Lib.toChinese(Lib.allType[1]) + totalCountryNumber.getSuspectedNumber() + Lib.unit +
+                Lib.toChinese(Lib.allType[2]) + totalCountryNumber.getCureNumber() + Lib.unit +
+                Lib.toChinese(Lib.allType[3]) + totalCountryNumber.getDeadNumber() + Lib.unit + "\n";
+        try {
+            outFile.write(record.getBytes());
+            for (Map.Entry<String, Record> m : result.entrySet()) {//写入地方数据
+                record = m.getKey()+" " +
+                        Lib.toChinese(Lib.allType[0]) + m.getValue().getInfectionNumber() + Lib.unit +
+                        Lib.toChinese(Lib.allType[1]) + m.getValue().getSuspectedNumber() + Lib.unit +
+                        Lib.toChinese(Lib.allType[2]) + m.getValue().getCureNumber() + Lib.unit +
+                        Lib.toChinese(Lib.allType[3]) + m.getValue().getDeadNumber() + Lib.unit + "\n";
+                outFile.write(record.getBytes());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
 
     void allProvincePartType(Record totalCountryNumber , FileOutputStream outFile,Vector<String> type){
+        String record = "全国 ";
+        for(String i : Lib.allType){
+            for(String j : type){
+                if(i.equals(j)){
+                    record += Lib.toChinese(i) + totalCountryNumber.getNumber(j) + Lib.unit;
+                }
+            }
+        }
+        record += "\n";
+        try {
+            outFile.write(record.getBytes());//写入全国数据
+            for (Map.Entry<String, Record> m : result.entrySet()) {//写入地方数据
+                record = m.getKey()+" ";
+                for(String i : Lib.allType){
+                    for(String j : type){
+                        if(i.equals(j)){
+                            record += Lib.toChinese(i) + m.getValue().getNumber(j) + Lib.unit;
+                        }
+                    }
+                }
+                record += "\n";
+                outFile.write(record.getBytes());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
 
     void partProvinceAllType(Record totalCountryNumber , Vector<String> province , FileOutputStream outFile){
+        /* String record = "全国 " + Lib.allType[0] + totalCountryNumber.getInfectionNumber() + Lib.unit +
+                Lib.allType[1] + totalCountryNumber.getSuspectedNumber() + Lib.unit +
+                Lib.allType[2] + totalCountryNumber.getCureNumber() + Lib.unit +
+                Lib.allType[3] + totalCountryNumber.getDeadNumber() + Lib.unit + "\n";
+        try {
+            outFile.write(record.getBytes());//写入全国数据
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+        result.put("全国",totalCountryNumber);
+        String record;
+
+        for(String item : province){
+            record = item + " ";
+            if(!result.containsKey(item)){//查询无记录的省份则新建一个记录，数据都为0
+                Record newRecord = new Record();
+                result.put(item,newRecord);
+            }
+
+            record +=  Lib.toChinese(Lib.allType[0])+ result.get(item).getInfectionNumber() +  Lib.unit +
+                    Lib.toChinese(Lib.allType[1]) + result.get(item).getSuspectedNumber() + Lib.unit +
+                    Lib.toChinese(Lib.allType[2]) + result.get(item).getCureNumber() + Lib.unit +
+                    Lib.toChinese(Lib.allType[3]) + result.get(item).getDeadNumber() + Lib.unit + "\n";
+            try {
+                outFile.write(record.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        }
 
     }
 
     void partProvincePartType(Record totalCountryNumber , Vector<String> province , FileOutputStream outFile,Vector<String> type){
+
+         /*String record = "全国 ";
+        for(String i : Lib.allType){
+            for(String j : type){
+                if(i.equals(j)){
+                    record += i + totalCountryNumber.getNumber(j) + Lib.unit;
+                }
+            }
+        }
+        record += "\n";
+        try {
+            outFile.write(record.getBytes());//写入全国数据
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+        result.put("全国",totalCountryNumber);
+        String record;
+        for(String item : province){
+            if(!result.containsKey(item)){//查询无记录的省份则创建一个数据为空的记录
+                Record newRecord = new Record();
+                result.put(item,newRecord);
+            }
+            record = item +" ";
+            for(String i : Lib.allType){
+                for(String j : type){
+                    if(i.equals(j)){
+                        record +=  Lib.toChinese(j) + result.get(item).getNumber(j) + Lib.unit;
+                    }
+                }
+            }
+            record += "\n";
+            try {
+                outFile.write(record.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 

@@ -42,6 +42,20 @@ public class Lib {
 
 
 
+    public static String toChinese(String type){
+        if(type.equals("ip"))
+            return "感染患者";
+        else if(type.equals("sp"))
+            return "疑似患者";
+        else if(type.equals("cure"))
+            return "治愈";
+        else
+            return "死亡";
+
+    }
+
+
+
 
 
 }

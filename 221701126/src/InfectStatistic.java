@@ -15,6 +15,7 @@ import java.util.Vector;
 import javax.annotation.PostConstruct;
 import javax.print.attribute.standard.OutputDeviceAssigned;
 
+
 import sun.nio.cs.ext.IBM037;
 
 
@@ -43,6 +44,10 @@ class InfectStatistic {
 	private static boolean dead = false;
 	private static ArrayList<String> typeItem = new ArrayList<String>();
 	private static ArrayList<String> provinceItem = new ArrayList<String>();
+	private static String[] province = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北",
+			"河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西",
+			"上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"
+	};
 	
 	//将命令行参数转换成对象存储起来
 	private static void solveArgs(String[] args, Vector<Order> orders) {
@@ -72,22 +77,6 @@ class InfectStatistic {
 	    				String param = args[i];
 	    				if(param.indexOf('-') != 0) {//这是参数
 	    					typeItem.add(param);
-//		    				switch (param) {
-//							case "ip":
-//								ip = true;
-//								break;
-//							case "sp":
-//								sp = true;
-//								break;
-//							case "cure":
-//								cure = true;
-//								break;
-//							case "dead":
-//								dead = true;
-//								break;
-//							default:
-//								break;
-//		    				}
 		    			}
 		    			else {
 		    				pos = i;
@@ -140,68 +129,118 @@ class InfectStatistic {
 //		}
 //	}
 	
+	//写入文件
+	private static void writeToFile() {
+		
+		
+		
+	}
+	
 	//打印一个省的信息
 	private static void printTheProvince(String provinceName) {
-		System.out.print(provinceName);
-		if(map.get(provinceName) != null) {
-			Province province = map.get(provinceName);
-			if(typeItem.size() != 0) {
-				for(String item : typeItem) {
-					switch (item) {
-					case "ip":
-						System.out.print(" 感染患者" + province.infect + "人");
-						break;
-					case "sp":
-						System.out.print(" 疑似患者" + province.seeming + "人");
-						break;
-					case "cure":
-						System.out.print(" 治愈" + province.cured + "人");
-						break;
-					case "dead":
-						System.out.print(" 死亡" + province.dead + "人");
-						break;
-					default:
-						break;
+		try {
+			File output = new File(outputPath);
+//			if(!output.exists()){
+//				output.createNewFile();
+//			}
+//			else {
+//				output.cle
+//			}
+			FileWriter fileWriter = new FileWriter(output.getAbsoluteFile(), true);
+			BufferedWriter bw = new BufferedWriter(fileWriter);
+			
+			bw.write(provinceName);
+			System.out.print(provinceName);
+			if(map.get(provinceName) != null) {
+				Province province = map.get(provinceName);
+				if(typeItem.size() != 0) {
+					for(String item : typeItem) {
+						switch (item) {
+						case "ip":
+							System.out.print(" 感染患者" + province.infect + "人");
+							bw.write(" 感染患者" + province.infect + "人");
+							break;
+						case "sp":
+							System.out.print(" 疑似患者" + province.seeming + "人");
+							bw.write(" 疑似患者" + province.infect + "人");
+							break;
+						case "cure":
+							System.out.print(" 治愈" + province.cured + "人");
+							bw.write(" 治愈" + province.infect + "人");
+							break;
+						case "dead":
+							System.out.print(" 死亡" + province.dead + "人");
+							bw.write(" 死亡" + province.infect + "人");
+							break;
+						default:
+							break;
+						}
 					}
+				}
+				else {
+					bw.write(" 感染患者" + province.infect + "人 疑似患者" + province.seeming + "人 治愈" + province.cured + "人 死亡" + province.dead + "人");
+					System.out.print(" 感染患者" + province.infect + "人 疑似患者" + province.seeming + "人 治愈" + province.cured + "人 死亡" + province.dead + "人");
 				}
 			}
 			else {
-				System.out.print(" 感染患者" + province.infect + "人 疑似患者" + province.seeming + "人 治愈" + province.cured + "人 死亡" + province.dead + "人");
-			}
-		}
-		else {
-			if(typeItem.size() != 0) {
-				for(String item : typeItem) {
-					switch (item) {
-					case "ip":
-						System.out.print(" 感染患者0人" );
-						break;
-					case "sp":
-						System.out.print(" 疑似患者0人");
-						break;
-					case "cure":
-						System.out.print(" 治愈0人");
-						break;
-					case "dead":
-						System.out.print(" 死亡0人");
-						break;
-					default:
-						break;
+				if(typeItem.size() != 0) {
+					for(String item : typeItem) {
+						switch (item) {
+						case "ip":
+							System.out.print(" 感染患者0人");
+							bw.write(" 感染患者0人");
+							break;
+						case "sp":
+							System.out.print(" 疑似患者0人");
+							bw.write(" 疑似患者0人");
+							break;
+						case "cure":
+							System.out.print(" 治愈0人");
+							bw.write(" 治愈0人");
+							break;
+						case "dead":
+							System.out.print(" 死亡0人");
+							bw.write(" 死亡0人");
+							break;
+						default:
+							break;
+						}
 					}
 				}
+				else {
+					System.out.print(" 感染患者0人 疑似患者0人 治愈0人 死亡0人");
+					bw.write(" 感染患者0人 疑似患者0人 治愈0人 死亡0人");
+				}
 			}
-			else {
-				System.out.print(" 感染患者0人 疑似患者0人 治愈0人 死亡0人");
-			}
+			System.out.println();
+			bw.write("\n");
+			bw.close();
+			fileWriter.close();
 		}
-		System.out.println();
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	//测试打印结果
 	private static void printResult() {
-		if(provinceItem.contains("全国")) {
-			printTheProvince("全国");
+		for(String provinceName : province) {
+			if(provinceItem.contains(provinceName)) {
+				printTheProvince(provinceName);
+			}
 		}
+//		if(provinceItem.contains("全国")) {
+//			printTheProvince("全国");
+//		}
+//		if(provinceItem.contains("安徽")) {
+//			printTheProvince("安徽");
+//		}
+//		if(provinceItem.contains("北京")) {
+//			printTheProvince("北京");
+//		}
+//		if(provinceItem.contains("重庆")) {
+//			printTheProvince("重庆");
+//		}
 //		if(ip) {
 //			System.out.print(" 感染患者" + country.infect);
 //		}
@@ -215,19 +254,69 @@ class InfectStatistic {
 //			System.out.print(" 死亡" + country.dead);
 //		}
 		//System.out.println("全国" + "感染人数" + country.infect + " 疑似人数" + country.seeming + " 治愈人数" + country.cured + " 死亡人数" + country.dead);
-		if(provinceItem.contains("福建")) {
-			printTheProvince("福建");
-		}
-		if(provinceItem.contains("河北")) {
-			printTheProvince("河北");
-		}
-		if(provinceItem.contains("湖北")) {
-			printTheProvince("湖北");
-		}
-		
-		if(provinceItem.contains("浙江")) {
-			printTheProvince("浙江");
-		}
+//		if(provinceItem.contains("福建")) {
+//			printTheProvince("福建");
+//		}
+//		if(provinceItem.contains("甘肃")) {
+//			printTheProvince("甘肃");
+//		}
+//		if(provinceItem.contains("广东")) {
+//			printTheProvince("广东");
+//		}
+//		if(provinceItem.contains("广西")) {
+//			printTheProvince("广西");
+//		}
+//		if(provinceItem.contains("贵州")) {
+//			printTheProvince("贵州");
+//		}
+//		if(provinceItem.contains("海南")) {
+//			printTheProvince("海南");
+//		}
+//		if(provinceItem.contains("河北")) {
+//			printTheProvince("河北");
+//		}
+//		if(provinceItem.contains("河南")) {
+//			printTheProvince("河南");
+//		}
+//		if(provinceItem.contains("黑龙江")) {
+//			printTheProvince("黑龙江");
+//		}
+//		if(provinceItem.contains("湖北")) {
+//			printTheProvince("湖北");
+//		}
+//		if(provinceItem.contains("湖南")) {
+//			printTheProvince("湖南");
+//		}
+//		if(provinceItem.contains("吉林")) {
+//			printTheProvince("吉林");
+//		}
+//		if(provinceItem.contains("江苏")) {
+//			printTheProvince("江苏");
+//		}
+//		if(provinceItem.contains("江西")) {
+//			printTheProvince("江西");
+//		}
+//		if(provinceItem.contains("辽宁")) {
+//			printTheProvince("辽宁");
+//		}
+//		if(provinceItem.contains("内蒙古")) {
+//			printTheProvince("内蒙古");
+//		}
+//		if(provinceItem.contains("宁夏")) {
+//			printTheProvince("宁夏");
+//		}
+//		if(provinceItem.contains("青海")) {
+//			printTheProvince("青海");
+//		}
+//		if(provinceItem.contains("山东")) {
+//			printTheProvince("山东");
+//		}
+//		if(provinceItem.contains("山西")) {
+//			printTheProvince("山西");
+//		}
+//		if(provinceItem.contains("浙江")) {
+//			printTheProvince("浙江");
+//		}
 		
 
 		
@@ -530,6 +619,7 @@ class InfectStatistic {
     	System.out.println(outputPath);
     	solveDateOrder(targetDate);
     	printResult();
+    	//writeToFile();
     	//setVariable(orders);
     }
 }

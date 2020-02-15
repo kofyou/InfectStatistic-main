@@ -60,6 +60,7 @@ class InfectStatistic {
 		
 		boolean setProvince=false;//记录指令是否有-province参数
 		boolean setType=false;//记录指令是否有-type参数
+		boolean setCountry=false;//记录-province参数是否包含全国
 		
 		File directory=null;//日志文件夹
 		File output=null;//输出文件
@@ -170,7 +171,6 @@ class InfectStatistic {
         			System.out.println("请使用-type参数");
         			System.exit(1);
         		}
-        		
         	}
         	else if (args[i].equals("-province"))//-province参数
         	{
@@ -188,6 +188,18 @@ class InfectStatistic {
         			System.exit(1);
         		}
         	}
+        	else if (args[i].equals("全国"))
+        	{
+        		if (setProvince==true)
+        		{
+        			setCountry=true;
+        		}
+        		else
+        		{
+        			System.out.println("请使用-province参数");
+        			System.exit(1);
+        		}
+        	}
         	else
         	{
         		if (!args[i].equals("list"))
@@ -197,6 +209,12 @@ class InfectStatistic {
         		}
         	}
         }
+        
+        if (setProvince==false)
+		{
+			setCountry=true;
+		}
+        
         
         File[] logs=directory.listFiles();
         
@@ -343,11 +361,14 @@ class InfectStatistic {
 
 			if (setType==false)//如果指令没有-type参数则输出所有类型疫情
 			{
-				bufferedWriter.write("全国 感染患者"+country.getInfectNum()
-				+"人 疑似患者"+country.getSuspectNum()
-				+"人 治愈"+country.getCureNum()
-				+"人 死亡"+country.getDeathNum()+"人\n");
-		
+				if (setCountry==true)
+				{
+					bufferedWriter.write("全国 感染患者"+country.getInfectNum()
+					+"人 疑似患者"+country.getSuspectNum()
+					+"人 治愈"+country.getCureNum()
+					+"人 死亡"+country.getDeathNum()+"人\n");
+				}
+				
 				for (int i=0;i<areas.length;i++)
 				{
 					if (map.get(areas[i]).getIsRelate()==true)
@@ -361,25 +382,31 @@ class InfectStatistic {
 			}
 			else//如果指令有-type参数则输出指定类型疫情
 			{				
-				bufferedWriter.write("全国");
-				for (String item : type) 
+				if (setCountry==true)
 				{
-					bufferedWriter.write(country.outputType(item));
-		        }
+					bufferedWriter.write("全国");
+					for (String item : type) 
+					{
+						bufferedWriter.write(country.outputType(item));
+			        }
+					bufferedWriter.write("\n");
+				}
+				
 				for (int i=0;i<areas.length;i++)
 				{
 					if (map.get(areas[i]).getIsRelate()==true)
 					{
-						bufferedWriter.write("\n"+areas[i]);
+						bufferedWriter.write(areas[i]);
 						for (String item : type) 
 						{
 							bufferedWriter.write(map.get(areas[i]).outputType(item));
 				        }
+						bufferedWriter.write("\n");
 					}
 				}
 			}
 			
-			bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");;
+			bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
 			
 			bufferedWriter.flush();
 			

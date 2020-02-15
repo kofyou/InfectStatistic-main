@@ -9,56 +9,66 @@
  */
 
 import java.io.*;
+
 import java.text.SimpleDateFormat;
 import java.lang.*;
 import com.sun.org.apache.xpath.internal.operations.String;
 import java.util.*;
 import java.util.HashMap;;
 import java.util.Map;
+import java.util.regex.Pattern;
+
 
 class InfectStatistic {
 	
-	string commandDate;
+	String commandDate;
 	
 	//获取当前的系统时间并格式化输出
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     Date date = new Date();
     String currentDate = dateFormat.format(date);
 	
-    //创建哈希表
+	//构造一个双层嵌套的哈希表
+	HashMap<String,HashMap<String,Integer>> ProvinceToNumMap 
+	                               = new HashMap<String,HashMap<String,Integer>>();
 	HashMap<String,Integer> TypeToNumMap = new HashMap<String,Integer>();
-	HashMap<String,TypeToNumMap> ProvinceToNumMap = new HashMap<String,TypeToNumMap>();
 	
-	//初始化
+	//初始化TypeToNum哈希表
 	TypeToNumMap.put("感染患者",0);
-    TypeTnNumMap.put("疑似患者",0);
+    TypeToNumMap.put("疑似患者",0);
     TypeToNumMap.put("治愈",0);
     TypeToNumMap.put("死亡",0);
     
-    ProvinceToNumMap("全国",TypeToNumMap);
+    String provinceList[] = {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南",
+    		"黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
+    		"四川","天津","西藏","新疆","云南","浙江"
+}
     
+    for(int i=0;i<provinceList.length;i++) {
+    	ProvinceToNumMap.put(provinceList[i], TypeToNumMap);
+    }
+    
+    
+    String date,inputAddress,outputAddress;
+    
+	//type和province的类型可能不止一种，故创建其字符串数组
+	List<String> typeList=new List<String>();
+			
+	List<String> commandProvinceList=new List<String>();
+	
     
 	/*
 	 *函数功能：解析命令行
 	 *输入参数：命令行字符串
-	 *输出参数：-data、-type、-province、-log、-out
+	 *输出参数：无
 	 **/
-	public void analyseCommandLine(String args[])throws IOException {
-		//使用BufferedReader从控制台读取字符
-	/*	BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
-		string str;
-		str=br.readLine();
-*/   
-		String date,inputAddress,outputAddress,type,province;
-		//type和province的类型可能不止一种，故创建其字符串数组
-		List<string> typeList=new List<string>();
-		List<string> provinceList=new List<string>();
-		
+	public static void analyseCommandLine(String args[]) {
+		String province,type;
 		
 		if(!args[0].equals("list")) {
 			System.out.println("命令行的格式有误");
 		}
-		else if{
+		
 		for(int commandOrder=1;commandOrder<args.length;commandOrder++) {
 				if(args[commandOrder].equals("-data")) {
 					currentDate = changeToValidDate(args[++commandOrder]);
@@ -89,14 +99,13 @@ class InfectStatistic {
 				if(args[commandOrder].equals("-province")) {
 					province = args[commandOrder++];
 					while(!province.startwith("-")&&commandOrder<args.length-1) {
-						provinceList.add(province);
+						commandProvinceList.add(province);
 						province = args[commandList++];
 					}
 				}
 		}
-		}
-		}	
 	}
+	
 	
 /*
  *函数功能：判断命令行格式是否有错误
@@ -137,11 +146,11 @@ class InfectStatistic {
    
     
 	/*
-	 *函数功能：获取文件
+	 *函数功能：查询路径文件
 	 *输入参数：-log路径
 	 *输出参数：文件名称
 	 **/
-	public void getFile(string inputAddress) {
+	public void searchFile(String inputAddress) {
 	File file = new File(inputAddress);
 	string fileName;
 	
@@ -195,6 +204,7 @@ class InfectStatistic {
 			handleInformation(line);
 		}	
 	}
+	
 	}
 	
 	
@@ -206,33 +216,436 @@ class InfectStatistic {
 	 *输出参数：
 	 **/
 	public void handleInformation(String lineInformation) {
+		
+		
+		String lineTypeOne = "(\\s+) 新增 感染患者 (\\d+)人";
+		String lineTypeTwo = "(\\s+) 新增 疑似患者 (\\d+)人";
+		String lineTypeThree = "(\\s+) 治愈 (\\d+)人";
+		String lineTypeFour = "(\\s+) 死亡 (\\d+)人";
+		String lineTypeFive = "(\\s+) 感染患者 流入 (\\s+) (\\d+)人";
+		String lineTypeSix = "(\\s+) 疑似患者 流入 (\\s+) (\\d+)人";
+		String lineTypeSeven = "(\\s+) 疑似患者 确认感染 (\\d+)人";
+		String lineTypeEight = "(\\s+) 排除 疑似患者 (\\d+)人";
+		
+		if(Pattern.matches(lineTypeOne, lineInformation)) {
+			addInfectionPatients(linePart);
+		}
+		if(Pattern.matches(lineTypeTwo, lineInformation)) {
+			addSuspectedPatients(linePart);
+		}
+		if(Pattern.matches(lineTypeThree, lineInformation)) {
+			addCurePatients(linePart);
+		}
+		if(Pattern.matches(lineTypeFour, lineInformation)) {
+			addDeadPatients(linePart);
+		}
+		if(Pattern.matches(lineTypeFive, lineInformation)) {
+			infectionPatientsMove(linePart);
+		}
+		if(Pattern.matches(lineTypeSix, lineInformation)) {
+			suspectedPatientsMove(linePart);
+		}
+		if(Pattern.matches(lineTypeSeven, lineInformation)) {
+			suspectedToInfection(linePart);
+		}
+		if(Pattern.matches(lineTypeEight, lineInformation)) {
+			suspectedToNormal(linePart);
+		}
+		
+		
+	}
+		
+
+	/*
+	 *函数功能：增加感染患者
+	 *输入参数：
+	 *输出参数：
+	 **/
+	public void addInfectionPatients(String linePart[]) {
+		
 		//先将每一行的字符串分隔成字符串数组
 		String[] linePart = lineInformation.split(" ");
 		String province = linePart[0];
+				
+		//新增感染患者的数量
+		int num;
 		
-		if(lineInformation.contains("新增 感染患者"))
-	
+		//去除数字后面的“人”，取出单独的数字
+		num = Integer.valueOf(linePart[3].replaceAll("人",""));
+		
+		int previousNum;
+		
+		//获取省份对应下的感染患者数量
+		Set<String> thisSet = ProvinceToNumMap.keySet();
+		for(String str:thisSet) {
+			if(str.equals(province)) {
+				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+				Set<String> typeKeys = thisMap.keySet();
+				for(String strTwo:typeKeys) {
+					if(strTwo.equals("感染患者")) {
+						previousNum = thisMap.get(strTwo);
+					}
+				}
+			}
+		}
 		
 		
-			
+		currentNum = num + previousNum;
+		
+	    ProvinceToNumMap.get(province).replace(linePart[2],currentNum);
+		
 	}
+	
+	
+	/*
+	 *函数功能：增加疑似患者
+	 *输入参数：
+	 *输出参数：
+	 **/
+     public void addSuspectedPatients(String linePart[]) {
 		
+		//先将每一行的字符串分隔成字符串数组
+		String[] linePart = lineInformation.split(" ");
+		String province = linePart[0];
+				
+		//新增疑似感染患者的数量
+		int num;
+		
+		//去除数字后面的“人”，取出单独的数字
+		num = Integer.valueOf(linePart[3].replaceAll("人",""));
+		
+		int previousNum;
+		
+		//获取省份对应下的感染患者数量
+		Set<String> thisSet = ProvinceToNumMap.keySet();
+		for(String str:thisSet) {
+			if(str.equals(province)) {
+				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+				Set<String> typeKeys = thisMap.keySet();
+				for(String strTwo:typeKeys) {
+					if(strTwo.equals("疑似患者")) {
+						previousNum = thisMap.get(strTwo);
+					}
+				}
+			}
+		}
+		
+		
+		currentNum = num + previousNum;
+		
+	    ProvinceToNumMap.get(province).replace(linePart[2],currentNum);
+		
+	}
 	
-	
-	
-	
+     /*
+ 	 *函数功能：感染患者流动
+ 	 *输入参数：
+ 	 *输出参数：
+ 	 **/
+      public void infectionPatientsMove(String linePart[]) {
+ 		
+ 		//先将每一行的字符串分隔成字符串数组
+ 		String[] linePart = lineInformation.split(" ");
+ 		String flowOutProvince = linePart[0];
+ 		String flowInProvince = linePart[3];
+ 		
+ 		
+ 		//流动患者数量
+ 		int flowNum;
+ 		
+ 		//去除数字后面的“人”，取出单独的数字
+ 		flowNum = Integer.valueOf(linePart[4].replaceAll("人",""));
+ 		
+ 		int flowOutPreviousNum;
+ 		int flowInPreviousNum;
+ 		
+ 		//获取省份对应下的感染患者数量
+ 		Set<String> thisSet = ProvinceToNumMap.keySet();
+ 		for(String str:thisSet) {
+ 			if(str.equals(flowOutProvince)) {
+ 				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+ 				Set<String> typeKeys = m.keySet();
+ 				for(String strTwo:typeKeys) {
+ 					if(strTwo.equals("感染患者")) {
+ 						flowOutPreviousNum = m.get(strTwo);
+ 					}
+ 				}
+ 			}
+ 			if(str.equals(flowInProvince)) {
+ 				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+ 				Set<String> typeKeys = m.keySet();
+ 				for(String strTwo:typeKeys) {
+ 					if(strTwo.equals("感染患者")) {
+ 						flowInPreviousNum = m.get(strTwo);
+ 					}
+ 				}
+ 			}
+ 		}
+ 		
+ 		
+ 		flowOutCurrentNum = flowOutPreviousNum-flowNum;
+ 		flowInCurrentNum = flowInPreviousNum+flowNum;
+ 		
+ 	    ProvinceToNumMap.get(flowOutProvince).replace(linePart[1],flowOutCurrentNum);
+ 	   ProvinceToNumMap.get(flowInProvince).replace(linePart[1],flowInCurrentNum);
+ 	}
+ 	
+      
+      /*
+   	 *函数功能：疑似患者流动
+   	 *输入参数：
+   	 *输出参数：
+   	 **/
+     public void suspectedPatientsMove(String linePart[]) {
+   		
+   		//先将每一行的字符串分隔成字符串数组
+   		String[] linePart = lineInformation.split(" ");
+   		String flowOutProvince = linePart[0];
+   		String flowInProvince = linePart[3];
+   		
+   		
+   		//流动疑似患者数量
+   		int flowNum;
+   		
+   		//去除数字后面的“人”，取出单独的数字
+   		flowNum = Integer.valueOf(linePart[4].replaceAll("人",""));
+   		
+   		int flowOutPreviousNum;
+   		int flowInPreviousNum;
+   		
+   		//获取省份对应下的疑似患者数量
+   		Set<String> thisSet = ProvinceToNumMap.keySet();
+   		for(String str:thisSet) {
+   			if(str.equals(flowOutProvince)) {
+   				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+   				Set<String> typeKeys = thisMap.keySet();
+   				for(String strTwo:typeKeys) {
+   					if(strTwo.equals("疑似患者")) {
+   						flowOutPreviousNum = thisMap.get(strTwo);
+   					}
+   				}
+   			}
+   			if(str.equals(flowInProvince)) {
+   				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+   				Set<String> typeKeys = thisMap.keySet();
+   				for(String strTwo:typeKeys) {
+   					if(strTwo.equals("疑似患者")) {
+   						flowInPreviousNum = thisMap.get(strTwo);
+   					}
+   				}
+   			}
+   		}
+   		
+   		
+   		flowOutCurrentNum = flowOutPreviousNum-flowNum;
+   		flowInCurrentNum = flowInPreviousNum+flowNum;
+   		
+   	    ProvinceToNumMap.get(flowOutProvince).replace(linePart[1],flowOutCurrentNum);
+   	   ProvinceToNumMap.get(flowInProvince).replace(linePart[1],flowInCurrentNum);
+   	}
+   	
+
+        /*
+        *函数功能：统计死亡人数
+       	 *输入参数：
+       	 *输出参数：
+       	 **/
+     public void addDeadPatients(String linePart[]) {
+       		
+       		//先将每一行的字符串分隔成字符串数组
+       		String[] linePart = lineInformation.split(" ");
+       		String province = linePart[0];
+       		
+       		
+       		
+       		//死亡患者数量
+       		int num;
+       		
+       		//去除数字后面的“人”，取出单独的数字
+       		num = Integer.valueOf(linePart[2].replaceAll("人",""));
+       		
+       		int previousNum;
+       		
+       		//获取省份对应下的死亡患者数量
+       		Set<String> thisSet = ProvinceToNumMap.keySet();
+       		for(String str:thisSet) {
+       			if(str.equals(province)) {
+       				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+       				Set<String> typeKeys = thisMap.keySet();
+       				for(String strTwo:typeKeys) {
+       					if(strTwo.equals("死亡")) {
+       						previousNum = thisMap.get(strTwo);
+       					}
+       				}
+       			}
+       		}	
+       		currentNum = previousNum+num;
+       	    ProvinceToNumMap.get(province).replace(linePart[1],currentNum);  
+       	}
+       	
+     /*函数功能：统计治愈人数
+          *输入参数：
+         *输出参数：
+          **/
+     public void addCurePatients(String linePart[]) {
+           		
+           		//先将每一行的字符串分隔成字符串数组
+           		String[] linePart = lineInformation.split(" ");
+           		String province = linePart[0];
+           		
+           		
+           		
+           		//治愈患者数量
+           		int num;
+           		
+           		//去除数字后面的“人”，取出单独的数字
+           		num = Integer.valueOf(linePart[2].replaceAll("人",""));
+           		int previousNum;
+           		
+           		//获取省份对应下的治愈患者数量
+           		Set<String> thisSet = ProvinceToNumMap.keySet();
+           		for(String str:thisSet) {
+           			if(str.equals(province)) {
+           				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+           				Set<String> typeKeys = thisMap.keySet();
+           				for(String strTwo:typeKeys) {
+           					if(strTwo.equals("治愈")) {
+           						previousNum = thisMap.get(strTwo);
+           					}
+           				}
+           			}
+           		}
+           		currentNum = previousNum+num;
+           	    ProvinceToNumMap.get(province).replace(linePart[1],currentNum);
+           	}
+           	
+                
+     /*函数功能：疑似患者确认感染
+               	 *输入参数：
+               	 *输出参数：
+               	 **/
+      public void suspectedToInfection(String linePart[]) {
+               		
+               		//先将每一行的字符串分隔成字符串数组
+               		String[] linePart = lineInformation.split(" ");
+               		String province = linePart[0];
+               		
+               		
+               		
+               		//疑似患者确认感染数量
+               		int num;
+               		
+               		//去除数字后面的“人”，取出单独的数字
+               		num = Integer.valueOf(linePart[3].replaceAll("人",""));
+               		int previousNum;
+               		
+               		//获取省份对应下的感染患者数量
+               		Set<String> thisSet = ProvinceToNumMap.keySet();
+               		for(String str:thisSet) {
+               			if(str.equals(province)) {
+               				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+               				Set<String> typeKeys = thisMap.keySet();
+               				for(String strTwo:typeKeys) {
+               					if(strTwo.equals("感染患者")) {
+               						previousNum = thisMap.get(strTwo);
+               					}
+               				}
+               			}
+               		}
+               		currentNum = previousNum+num;
+               	    ProvinceToNumMap.get(province).replace("感染患者",currentNum);
+               	}
+                    
+     
+      /*函数功能：排除疑似感染患者
+    	 *输入参数：
+    	 *输出参数：
+    	 **/
+         public void suspectedToNormal(String linePart[]) {
+    		
+    		//先将每一行的字符串分隔成字符串数组
+    		String[] linePart = lineInformation.split(" ");
+    		String province = linePart[0];
+    		
+    		
+    		
+    		//排除疑似患者数量
+    		int num;
+    		
+    		//去除数字后面的“人”，取出单独的数字
+    		num = Integer.valueOf(linePart[3].replaceAll("人",""));
+    		int previousNum;
+    		
+    		//获取省份对应下的疑似患者数量
+    		Set<String> thisSet = ProvinceToNumMap.keySet();
+    		for(String str:thisSet) {
+    			if(str.equals(province)) {
+    				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+    				Set<String> typeKeys = thisMap.keySet();
+    				for(String strTwo:typeKeys) {
+    					if(strTwo.equals("疑似患者")) {
+    						previousNum = thisMap.get(strTwo);
+    					}
+    				}
+    			}
+    		}
+    		currentNum = previousNum+num;
+    	    ProvinceToNumMap.get(province).replace("疑似患者",currentNum);
+    	}
+
+                   		
+                  	 
+                        
+                    
 	/*
 	 *函数功能：输出统计结果到文件中
 	 *输入参数：
 	 *输出参数：
 	 **/
-	public void outputData() {
+	public void outputData(String path) {
+		FileWriter fileWriter = null;
 		
+		
+	
+		File file = new File(path);
+		try {
+			if(!file.exists()) {
+				file.createNewFile(path);
+			}
+			fileWriter = new FileWriter(file);
+			BufferedWriter out = new BufferedWriter(fileWriter);
+			
+			if(commandProvinceList.contains("全国")) {
+				
+			
+				Set<String> thisSet = ProvinceToNumMap.keySet();
+				for(String strKey:thisSet) {
+					
+					HashMap<String,Integer> TypeToNumValue = ProvinceToNumMap.get(strKey);
+					Set<String> set = TypeToNumValue.keySet();
+					for(String integerKey:set) {
+						Integer value = TypeToNumValue.get(integerKey);
+					}
+					out.write(strKey+integerKey+value);
+				}
+				
+			
+			}
+			
+			
+		
+			
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
 	
     public static void main(String[] args) {
-        System.out.println("helloworld");
+       InfectStatistic infectStatistic = new InfectStatistic();
+       infectStatistic.analyseCommandLine(args);
+       infectStatistic.searchFile(inputAddress);
+       infectStatistic.outputData(outPutAddesss);
     }
 }

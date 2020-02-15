@@ -29,8 +29,22 @@ public class Lib {
 
 
 class DateOutOfBoundsException extends Exception{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public DateOutOfBoundsException(String s){
         super(s);
+	}
+}
+
+
+class DataManager{
+	public static List<String[]> solveData(List<String>data){
+		List<String[]> result = new LinkedList<String[]>();
+		
+		return result;
 	}
 }
 
@@ -124,7 +138,50 @@ class CmdArgs {
     }
 }
 
+enum ProvinceValue{
+	China(0,"全国"), Beijing(1,"北京"), Tianjin(2,"天津"), Hebei(3,"河北"),
+	Liaoning(4,"辽宁"), Jilin(5,"吉林"), Heilongjiang(6,"黑龙江"), Shandong(7,"山东"),
+	Jiangsu(8,"江苏"), Shanghai(9,"上海"), Zhejiang(10,"浙江"), Anhui(11,"安徽"),
+	Fujian(12,"福建"), Jiangxi(13,"江西"), Guangdong(14,"广东"), Guangxi(15,"广西"),
+	Hainan(16,"海南"), Henan(17,"河南"), Hunan(18,"湖南"), Hubei(19,"湖北"),
+	Shanxi(20,"山西"), Neimenggu(21,"内蒙古"), Ningxia(22,"宁夏"), Qinghai(23,"青海"),
+	ShanXi(24,"陕西"), Gansu(25,"甘肃"), Xinjiang(26,"新疆"), Sichuan(27,"四川"),
+	Guizhou(28,"贵州"), Yunnan(29,"云南"), Chongqin(30,"重庆"), Xizang(31,"西藏"),
+	Xianggang(32,"香港"), Aomen(33,"澳门"), Taiwan(34,"台湾");
+	private int key;
+	private String text;
+	private ProvinceValue(int key,String text){
+		this.key = key;
+		this.text = text;
+	}
+	
+	String getText() {
+		return text;
+	}
+	
+	int getKey() {
+		return key;
+	}
+}
 
+enum TypeValue{
+	IP(0,"感染患者"), SP(1,"疑似患者"), CURE(2,"治愈"), DEAD(3,"死亡");
+	private int key;
+	private String text;
+	private TypeValue(int key,String text){
+		this.key = key;
+		this.text = text;
+	}
+	
+	String getText() {
+		return text;
+	}
+	
+	int getKey() {
+		return key;
+	}
+	
+}
 
 enum ListKey{
 	LOG(0,"读取路径"), DATE(1,"限定日期"), PROVINCE(2,"限定省份"), 
@@ -174,6 +231,7 @@ class ListCommand implements Command{
 			switch(listKey) {
 				case DATE:
 					dateKey(map);
+					DataManager dateManager = new DataManager();
 					break;
 				case LOG:
 					logKey(map);
@@ -202,31 +260,61 @@ class ListCommand implements Command{
 	
 	private void provinceKey(Map<String, List<String>> map) {
 		//System.out.println("now is in ProvinceKey Handler");
-		List<String> provinceList = map.get("province");
-		for(int i = 0; i < logLine.size();i++) {
-			boolean flag = false;
-			for(int j = 0; j < provinceList.size(); j++) {
-				if(logLine.get(i).matches(".*" + provinceList.get(j) + ".*")) {
-					flag = true;
-					break;
-				}
-			}
-			if(flag == false) {
-				logLine.remove(i);
-			}
-		}
-		for(int i = 0;i < logLine.size();i++) {
-			System.out.println(logLine.get(i));
-		}
+//		List<String> provinceList = map.get("province");
+//		for(int i = 0; i < logLine.size();i++) {
+//			boolean flag = false;
+//			for(int j = 0; j < provinceList.size(); j++) {
+//				if(logLine.get(i).matches(".*" + provinceList.get(j) + ".*")) {
+//					flag = true;
+//					break;
+//				}
+//			}
+//			if(flag == false) {
+//				logLine.remove(i);
+//			}
+//		}
+//		for(int i = 0;i < logLine.size();i++) {
+//			System.out.println(logLine.get(i));
+//		}
 	}
 
 	private void typeKey(Map<String, List<String>> map) {
-		//System.out.println("nowType");
-		
+//		//System.out.println("now is in TypeKey Handler");
+//		List<String> typeList = map.get("type");
+//		for(int i = 0; i < logLine.size();i++) {
+//			boolean flag = false;
+//			for(int j = 0; j < typeList.size(); j++) {
+//				String matchStr = new String();
+//				switch(typeList.get(j).toLowerCase().trim()) {
+//					case "ip":
+//						matchStr = TypeValue.IP.getText();
+//						break;
+//					case "sp":
+//						matchStr = TypeValue.SP.getText();
+//						break;
+//					case "cure":
+//						matchStr = TypeValue.CURE.getText();
+//						break;
+//					case "dead":
+//						matchStr = TypeValue.DEAD.getText();
+//						break;
+//				}
+//				if(logLine.get(i).matches(".*" + matchStr + ".*")) {
+//					flag = true;
+//					break;
+//				}
+//			}
+//			if(flag == false) {
+//				logLine.remove(i);
+//			}
+//		}
+//		for(int i = 0;i < logLine.size();i++) {
+//			System.out.println(logLine.get(i));
+//		}
 	}
 
 	private void outKey(Map<String, List<String>> map) {
-		//System.out.println("nowOut");
+		//System.out.println("now is in OutKey Handler");
 		
 	}
 
@@ -241,6 +329,22 @@ class ListCommand implements Command{
 		//System.out.println("now is in DateKey Handler");
 		List<String> logList = map.get("log");
 		List<String> dateList = map.get("date");
+		
+		if(dateList == null || dateList.get(0) == "default") {
+			List<File> fileList = TxtTool.getFileList(logList.get(0));
+			String result = new String();
+			for(int i = 0; i < fileList.size(); i++) {
+				result += TxtTool.txt2String(fileList.get(i));
+			}
+			String[] line = result.split("\\n");
+			for(int i = 0;i < line.length;i++) {
+				if(!line[i].matches("^\\s$")) {
+					logLine.add(line[i].trim());
+				}
+			}
+			return;
+		}
+		
 		//System.out.println("date deadline is " + dateList.get(0));
 		String date = dateList.get(0);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -266,7 +370,7 @@ class ListCommand implements Command{
 			//System.out.println("处理前的文件列表  " + fileList);
 			TxtTool.dateScreen(fileList,dateObj);
 			//System.out.println("处理后的文件列表  " + fileList);
-			String result = "";
+			String result = new String();
 			for(int i = 0; i < fileList.size(); i++) {
 				result += TxtTool.txt2String(fileList.get(i));
 			}
@@ -308,6 +412,7 @@ class TxtTool {
         }
         return result.toString();
     }
+
 
 	public static void string2Txt(File file) {
         try {
@@ -362,6 +467,7 @@ class TxtTool {
 			}
 		}
 	}
+    
 }
 
 //责任链模式处理日志文件

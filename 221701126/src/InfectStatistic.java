@@ -2,10 +2,12 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,7 +52,7 @@ class InfectStatistic {
 	};
 	
 	//将命令行参数转换成对象存储起来
-	private static void solveArgs(String[] args, Vector<Order> orders) {
+	private static void solveArgs(String[] args) {
 		int i = 0;
 		int pos = 1;
 		while(pos < args.length) {
@@ -58,8 +60,6 @@ class InfectStatistic {
 		//	System.out.println(pos + "-" + arg);
 			if(arg.indexOf('-') == 0) {//这是命令
 				
-	    		Order oneOrder = new Order();
-	    		oneOrder.orderName = arg;
 	    		if(arg.equals("-log")) {//处理输入路径
 	    			inputPath = args[pos + 1] + "\\";
 	    			pos+=2;
@@ -108,7 +108,7 @@ class InfectStatistic {
 //	    				break;
 //	    			}
 //	    		}
-	    		orders.add(oneOrder);
+//	    		orders.add(oneOrder);
 	    		if(i == args.length) {
 	    			break;
 	    		}
@@ -126,16 +126,10 @@ class InfectStatistic {
 	}
 	
 	//打印一个省的信息
-	private static void printTheProvince(String provinceName) {
+	private static void printTheProvince(String provinceName, OutputStreamWriter osw) {
 		try {
-			File output = new File(outputPath);
-//			if(!output.exists()){
-//				output.createNewFile();
-//			}
-			FileWriter fileWriter = new FileWriter(output.getAbsoluteFile(), true);
-			BufferedWriter bw = new BufferedWriter(fileWriter);
 			
-			bw.write(provinceName);
+			osw.write(provinceName);
 			System.out.print(provinceName);
 			if(map.get(provinceName) != null) {
 				Province province = map.get(provinceName);
@@ -144,19 +138,19 @@ class InfectStatistic {
 						switch (item) {
 						case "ip":
 							System.out.print(" 感染患者" + province.infect + "人");
-							bw.write(" 感染患者" + province.infect + "人");
+							osw.write(" 感染患者" + province.infect + "人");
 							break;
 						case "sp":
 							System.out.print(" 疑似患者" + province.seeming + "人");
-							bw.write(" 疑似患者" + province.infect + "人");
+							osw.write(" 疑似患者" + province.seeming + "人");
 							break;
 						case "cure":
 							System.out.print(" 治愈" + province.cured + "人");
-							bw.write(" 治愈" + province.infect + "人");
+							osw.write(" 治愈" + province.cured + "人");
 							break;
 						case "dead":
 							System.out.print(" 死亡" + province.dead + "人");
-							bw.write(" 死亡" + province.infect + "人");
+							osw.write(" 死亡" + province.dead + "人");
 							break;
 						default:
 							break;
@@ -164,7 +158,7 @@ class InfectStatistic {
 					}
 				}
 				else {
-					bw.write(" 感染患者" + province.infect + "人 疑似患者" + province.seeming + "人 治愈" + province.cured + "人 死亡" + province.dead + "人");
+					osw.write(" 感染患者" + province.infect + "人 疑似患者" + province.seeming + "人 治愈" + province.cured + "人 死亡" + province.dead + "人");
 					System.out.print(" 感染患者" + province.infect + "人 疑似患者" + province.seeming + "人 治愈" + province.cured + "人 死亡" + province.dead + "人");
 				}
 			}
@@ -174,19 +168,19 @@ class InfectStatistic {
 						switch (item) {
 						case "ip":
 							System.out.print(" 感染患者0人");
-							bw.write(" 感染患者0人");
+							osw.write(" 感染患者0人");
 							break;
 						case "sp":
 							System.out.print(" 疑似患者0人");
-							bw.write(" 疑似患者0人");
+							osw.write(" 疑似患者0人");
 							break;
 						case "cure":
 							System.out.print(" 治愈0人");
-							bw.write(" 治愈0人");
+							osw.write(" 治愈0人");
 							break;
 						case "dead":
 							System.out.print(" 死亡0人");
-							bw.write(" 死亡0人");
+							osw.write(" 死亡0人");
 							break;
 						default:
 							break;
@@ -195,13 +189,12 @@ class InfectStatistic {
 				}
 				else {
 					System.out.print(" 感染患者0人 疑似患者0人 治愈0人 死亡0人");
-					bw.write(" 感染患者0人 疑似患者0人 治愈0人 死亡0人");
+					osw.write(" 感染患者0人 疑似患者0人 治愈0人 死亡0人");
 				}
 			}
 			System.out.println();
-			bw.write("\n");
-			bw.close();
-			fileWriter.close();
+			osw.write("\n");
+//			fileWriter.close();
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -210,10 +203,19 @@ class InfectStatistic {
 	
 	//测试打印结果
 	private static void printResult() {
-		for(String provinceName : province) {
-			if(provinceItem.contains(provinceName)) {
-				printTheProvince(provinceName);
+		try {
+			File output = new File(outputPath);
+			OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(output));
+			for(String provinceName : province) {
+				if(provinceItem.contains(provinceName)) {
+					printTheProvince(provinceName, osw);
+				}
 			}
+			osw.flush();
+			osw.close();
+		} catch (IOException e) {
+			// TODO: handle exception
+			e.printStackTrace();
 		}
 	}
 	
@@ -425,10 +427,9 @@ class InfectStatistic {
 	
 	public static void main(String[] args) {
 	
-    	Vector<Order> orders = new Vector<Order>();
     	country.name = "全国";
   
-    	solveArgs(args, orders);
+    	solveArgs(args);
 
     	System.out.println(inputPath);
     	System.out.println(outputPath);

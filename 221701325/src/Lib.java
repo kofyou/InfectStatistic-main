@@ -28,6 +28,12 @@ public class Lib {
 }
 
 
+class DateOutOfBoundsException extends Exception{
+	public DateOutOfBoundsException(String s){
+        super(s);
+	}
+}
+
 /**
  *存储命令行参数
  *将命令行通过键值对的方式储存至map中
@@ -152,8 +158,8 @@ interface Command{
 
 class ListCommand implements Command{
 	private ListKey listKey;
-	private List<String[]> result;
-	private String logLine = "";
+	private List<String[]> result = new LinkedList<String[]>();
+	private List<String> logLine = new LinkedList<String>();
 	
 	/**
      * 传入参数和值的map并进行处理
@@ -193,10 +199,25 @@ class ListCommand implements Command{
 //			}
 //		}
 
-
+	
 	private void provinceKey(Map<String, List<String>> map) {
-		//System.out.println("nowProvince");
-		
+		//System.out.println("now is in ProvinceKey Handler");
+		List<String> provinceList = map.get("province");
+		for(int i = 0; i < logLine.size();i++) {
+			boolean flag = false;
+			for(int j = 0; j < provinceList.size(); j++) {
+				if(logLine.get(i).matches(".*" + provinceList.get(j) + ".*")) {
+					flag = true;
+					break;
+				}
+			}
+			if(flag == false) {
+				logLine.remove(i);
+			}
+		}
+		for(int i = 0;i < logLine.size();i++) {
+			System.out.println(logLine.get(i));
+		}
 	}
 
 	private void typeKey(Map<String, List<String>> map) {
@@ -211,7 +232,7 @@ class ListCommand implements Command{
 
 	private void logKey(Map<String, List<String>> map) {
 		//System.out.println("now is in LogKey Handler");
-		List<String> logList = map.get("log");
+		//List<String> logList = map.get("log");
 		//System.out.println("log is " + logList.get(0));
 	}
 
@@ -226,14 +247,36 @@ class ListCommand implements Command{
 		try {
 			Date dateObj = dateFormat.parse(date);
 			List<File> fileList = TxtTool.getFileList(logList.get(0));
+			
+			//获取文件列表的最后一个文件判断参数值是否超过当前最大日期
+			String pathStr = fileList.get(fileList.size() - 1).toString();
+			String[] fileStr = pathStr.split("\\\\");
+			String[] dateStr = fileStr[fileStr.length - 1].split("\\.");
+			date = dateStr[0];
+			try {
+				Date dateObj2 = dateFormat.parse(date);
+				if(dateObj2.before(dateObj)) {
+					throw new DateOutOfBoundsException("date out of bounds.");
+				}
+			}
+			catch(DateOutOfBoundsException e){
+				e.printStackTrace();
+			}
+			
 			//System.out.println("处理前的文件列表  " + fileList);
 			TxtTool.dateScreen(fileList,dateObj);
 			//System.out.println("处理后的文件列表  " + fileList);
-
+			String result = "";
 			for(int i = 0; i < fileList.size(); i++) {
-				logLine += TxtTool.txt2String(fileList.get(i));
+				result += TxtTool.txt2String(fileList.get(i));
 			}
-			System.out.println(logLine);
+			String[] line = result.split("\\n");
+			for(int i = 0;i < line.length;i++) {
+				if(!line[i].matches("^\\s$")) {
+					logLine.add(line[i].trim());
+				}
+			}
+			
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -291,7 +334,6 @@ class TxtTool {
                     getFileList(files[i].getAbsolutePath()); // 获取文件绝对路径
                 } 
                 else { 
-                    String strFileName = files[i].getAbsolutePath();
                     //System.out.println("-" + strFileName);
                     filelist.add(files[i]);
                 }
@@ -301,7 +343,7 @@ class TxtTool {
         return filelist;
     }
     
-    public static void dateScreen(List<File> fileList, Date dateObj) {
+    public static void dateScreen(List<File> fileList, Date dateObj) {			
 		for(int i = 0; i < fileList.size(); i++) {
 			String pathStr = fileList.get(i).toString();
 			String[] fileStr = pathStr.split("\\\\");

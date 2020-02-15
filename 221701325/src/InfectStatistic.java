@@ -17,6 +17,7 @@ class InfectStatistic {
     public static void main(String[] args) {
     	String[] test = {"list","-date","2020-01-23","-log",
     			"C:/Users/jhuy/Documents/GitHub/InfectStatistic-main/221701325/log",
+    			"-province","福建","新疆",
     			"-out","D:/output.txt"};
     	CmdArgs cmdArgs = new CmdArgs(test,"benjamin");
     	Map<String,List<String>> map = new HashMap<String,List<String>>();

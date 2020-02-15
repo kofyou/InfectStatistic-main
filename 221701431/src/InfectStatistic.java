@@ -305,10 +305,18 @@ class CommandJudge{
                                 System.out.println("It should be a file");
                                 return 0;
                             }
+                            if (!f.exists()){
+                                System.out.println("Wrong file");
+                                return 0;
+                            }
                         } else {
                             File f = new File(args[integers.get(i) + 1]);
                             if (f.isDirectory()){
                                 System.out.println("It should be a file");
+                                return 0;
+                            }
+                            if (!f.exists()){
+                                System.out.println("Wrong file");
                                 return 0;
                             }
                             if ((integers.get(i+1) - integers.get(i)) != 2){
@@ -438,6 +446,10 @@ class CommandJudge{
                 File f = new File(args[2]);
                 if (f.isDirectory()){
                     System.out.println("It should be a file");
+                    return 0;
+                }
+                if (!f.exists()){
+                    System.out.println("Wrong file");
                     return 0;
                 }
                 return 3;

@@ -159,6 +159,7 @@ public class InfectStatistic {
 		}
 		if (date != null) {
 			int len=0;//统计是截止到哪一个日志文件
+			//System.out.println(ss[0]);
 			String str1=date + ".log.txt";
 			String[] line = new String[2000];
 			if(str1.compareTo(ss[0])>0||str1.compareTo(ss[ss.length-1])<0) {
@@ -172,8 +173,8 @@ public class InfectStatistic {
 						break;
 					}
 				}
-				for (int i = 0; i < len; i++) {
-					FileInputStream f1 = new FileInputStream(path + ss[len - 1 - i]);
+				for (int i = len,ki=0; i < ss.length; i++,ki++) {
+					FileInputStream f1 = new FileInputStream(path + ss[ss.length - 1 - ki]);
 					InputStreamReader reader = new InputStreamReader(f1, "UTF-8");
 					BufferedReader bf = new BufferedReader(reader);
 					BufferedReader bf2 = new BufferedReader(reader);
@@ -299,7 +300,7 @@ public class InfectStatistic {
 							}
 						}
 					}
-					System.out.println(line[k]);
+					//System.out.println(line[k]);
 				}
 				
 				/*for (int j = 0; j < 34; j++)
@@ -439,7 +440,7 @@ public class InfectStatistic {
 						}
 					}
 				}
-				System.out.println(line[k]);
+				//System.out.println(line[k]);
 			}
 			/*for (int j = 0; j < 34; j++)
 				System.out.println(provinces[j].name + " 感染患者" + provinces[j].ip + "人 " + " 疑似患者" + provinces[j].sp

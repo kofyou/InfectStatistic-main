@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  * Lib
  *
  * @author xjliang
- * @version 1.0.0
+ * @version 1.0.1
  * @since 2020-01-11
  */
 public class Lib {

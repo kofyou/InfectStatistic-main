@@ -1,28 +1,24 @@
-/**
- * InfectStatistic
- * TODO
- *
- * @author 陈朝帏
- * @version 1.0
- * @since 2020.2.14
- */
-
+package hw2;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
-
-class InfectStatistic
+public class Homework2 
 {
 	
 	public String[] allType = {"感染患者","疑似患者","治愈","死亡患者"};
-	
 	public String[] allProvinces = {"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北"
 									,"河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏"
 									,"青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
+	public int[][] people = new int[31][4];//三十一个省份，四种类型
+	ArrayList<String> allLog = new ArrayList<String>();//存储所有的日志文件
+	
+	
+	
 	/*
 	 * 命令行处理
 	 */
@@ -33,11 +29,15 @@ class InfectStatistic
 			System.out.println("命令行仅支持list");
 			return ;
 		}
-		for(int i=1;i<inputOrder.length;i++)
+		for(int i = 1;i < inputOrder.length;i++)
 		{
 			if(inputOrder[i].equals("-log"))//指定日志目录位置
 			{
-				readLog(inputOrder[i+1]);
+				allLog = queryFileNames(inputOrder[i+1]);
+				for(int j = 0;j < allLog.size();j++)
+				{
+					readLog(allLog.get(j));
+				}
 			}
 			else if(inputOrder[i].equals("-out"))//指定输出文件路径和文件名
 			{
@@ -56,6 +56,29 @@ class InfectStatistic
 				
 			}
 		}
+		for(int i = 0;i<allLog.size();i++)
+		{
+			readLog(allLog.get(i));
+		}
+	}
+	
+	/*
+	 * 获得指定目录的所有文件
+	 */
+	public static ArrayList<String> queryFileNames(String filePath)
+	{
+		ArrayList<String> es = new ArrayList<String>();
+		File f = new File(filePath);
+		File[] ts = f.listFiles();
+		File[] fs = f.listFiles();
+		for(int i = 0;i < fs.length;i++)
+		{
+			if(ts[i].isFile())
+			{
+				es.add(ts[i].toString());
+			}
+		}
+		return es;
 	}
 	
 	/*
@@ -66,7 +89,7 @@ class InfectStatistic
 	public void readLog(String filePath) throws IOException
 	{
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-        		new FileInputStream(new File(filePath)), "UTF-8"));
+        		new FileInputStream(new File(filePath)),"UTF-8"));
 		String line = null;
 		while((line = bufferedReader.readLine()) != null)
 		{
@@ -98,15 +121,15 @@ class InfectStatistic
 			"(\\W+) 排除 疑似患者 (\\d+)人"
 		};
 		boolean[] matchPattern = new boolean[8];		
-		for(int i = 0; i < 8; i++)
+		for(int i = 0;i < 8;i++)
 		{
 			matchPattern[i] = false;
 		}
-		for(int i = 0; i < 8; i++)
+		for(int i = 0;i < 8;i++)
 		{
 			matchPattern[i] = Pattern.matches(patterns[i], inputLine);
 		}
-		for(int i = 0; i < 8; i++)
+		for(int i = 0;i < 8;i++)
 		{
 			if(matchPattern[i])
 			{
@@ -117,34 +140,228 @@ class InfectStatistic
 		switch(patternNum)
 		{
 			case '0' :
-				
+				addIp(inputLine);//新增感染患者
 				break;
 			case '1' :
-				
+				addSp(inputLine);//新增疑似患者
 				break;
 			case '2' :
-				
+				inflowIp(inputLine);//确诊患者流入
 				break;
 			case '3' :
-	
+				inflowSp(inputLine);//疑似患者流入
 				break;
 			case '4' :
-	
+				deadIp(inputLine);//患者死亡
 				break;
 			case '5' :
-	
+				cureIp(inputLine);//患者治愈
 				break;
 			case '6' :
-	
+				diagnoseSp(inputLine);//疑似患者确诊
 				break;
 			case '7' :
-				
+				removeSp(inputLine);//排除疑似患者
 				break;
 			default :
 				System.out.println("日志语句出错");
 		}
 	}
 	
+	/*
+	 * 新增感染患者
+	 */
+	public void addIp(String line)
+	{
+		String[] words = line.split(" ");
+		String addNum = "";
+		for(int i = 0;i < words[3].length();i++)
+		{
+			if(words[3].charAt(i) >= 48 && words[3].charAt(i) <= 57)
+			{
+				addNum += words[3].charAt(i);
+			}
+		}
+		int ipNum = Integer.valueOf(addNum).intValue();
+		for(int j = 0;j < allProvinces.length;j++)
+		{
+			if(allProvinces[j].equals(words[0]))
+			{
+				people[j][0] += ipNum;
+			}
+		}
+	}
+	
+	/*
+	 * 新增疑似患者
+	 */
+	public void addSp(String line)
+	{
+		String[] words = line.split(" ");
+		String addNum = "";
+		for(int i = 0;i < words[3].length();i++)
+		{
+			if(words[3].charAt(i) >= 48 && words[3].charAt(i) <= 57)
+			{
+				addNum += words[3].charAt(i);
+			}
+		}
+		int spNum = Integer.valueOf(addNum).intValue();
+		for(int j = 0;j < allProvinces.length;j++)
+		{
+			if(allProvinces[j].equals(words[0]))
+			{
+				people[j][1] += spNum;
+			}
+		}
+	}
+	
+	/*
+	 * 感染患者流入
+	 */
+	public void inflowIp(String line)
+	{
+		String[] words = line.split(" ");
+		String addNum = "";
+		for(int i = 0;i < words[4].length();i++)
+		{
+			if(words[4].charAt(i) >= 48 && words[4].charAt(i) <= 57)
+			{
+				addNum += words[4].charAt(i);
+			}
+		}
+		int ipNum = Integer.valueOf(addNum).intValue();
+		for(int j = 0;j < allProvinces.length;j++)
+		{
+			if(allProvinces[j].equals(words[0]))
+			{
+				people[j][0] -= ipNum;
+			}
+			if(allProvinces[j].equals(words[3]))
+			{
+				people[j][0] += ipNum;
+			}
+		}
+	}
+	/*
+	 * 疑似患者流入
+	 */
+	public void inflowSp(String line)
+	{
+		String[] words = line.split(" ");
+		String addNum = "";
+		for(int i = 0;i < words[4].length();i++)
+		{
+			if(words[4].charAt(i) >= 48 && words[4].charAt(i) <= 57)
+			{
+				addNum += words[4].charAt(i);
+			}
+		}
+		int spNum = Integer.valueOf(addNum).intValue();
+		for(int j = 0;j < allProvinces.length;j++)
+		{
+			if(allProvinces[j].equals(words[0]))
+			{
+				people[j][1] -= spNum;
+			}
+			if(allProvinces[j].equals(words[3]))
+			{
+				people[j][1] += spNum;
+			}
+		}
+	}
+	/*
+	 * 患者治愈
+	 */
+	public void cureIp(String line)
+	{
+		String[] words = line.split(" ");
+		String addNum = "";
+		for(int i = 0;i < words[2].length();i++)
+		{
+			if(words[2].charAt(i) >= 48 && words[2].charAt(i) <= 57)
+			{
+				addNum += words[2].charAt(i);
+			}
+		}
+		int cureNum = Integer.valueOf(addNum).intValue();
+		for(int j = 0;j < allProvinces.length;j++)
+		{
+			if(allProvinces[j].equals(words[0]))
+			{
+				people[j][2] += cureNum;
+			}
+		}
+	}
+	/*
+	 * 患者死亡
+	 */
+	public void deadIp(String line)
+	{
+		String[] words = line.split(" ");
+		String addNum = "";
+		for(int i = 0;i < words[2].length();i++)
+		{
+			if(words[2].charAt(i) >= 48 && words[2].charAt(i) <= 57)
+			{
+				addNum += words[2].charAt(i);
+			}
+		}
+		int deadNum = Integer.valueOf(addNum).intValue();
+		for(int j = 0;j < allProvinces.length;j++)
+		{
+			if(allProvinces[j].equals(words[0]))
+			{
+				people[j][3] += deadNum;
+			}
+		}
+	}
+	/*
+	 * 疑似患者确诊
+	 */
+	public void diagnoseSp(String line)
+	{
+		String[] words = line.split(" ");
+		String addNum = "";
+		for(int i = 0;i < words[3].length();i++)
+		{
+			if(words[3].charAt(i) >= 48 && words[3].charAt(i) <= 57)
+			{
+				addNum += words[3].charAt(i);
+			}
+		}
+		int ipNum = Integer.valueOf(addNum).intValue();
+		for(int j = 0;j < allProvinces.length;j++)
+		{
+			if(allProvinces[j].equals(words[0]))
+			{
+				people[j][0] += ipNum;
+			}
+		}
+	}
+	/*
+	 * 排除疑似患者
+	 */
+	public void removeSp(String line)
+	{
+		String[] words = line.split(" ");
+		String subNum = "";
+		for(int i = 0;i < words[3].length();i++)
+		{
+			if(words[3].charAt(i) >= 48 && words[3].charAt(i) <= 57)
+			{
+				subNum += words[3].charAt(i);
+			}
+		}
+		int spNum = Integer.valueOf(subNum).intValue();
+		for(int j = 0;j < allProvinces.length;j++)
+		{
+			if(allProvinces[j].equals(words[0]))
+			{
+				people[j][1] -= spNum;
+			}
+		}
+	}
 	/*
 	 * 输出文件
 	 * 输入参数：文件路径
@@ -176,7 +393,7 @@ class InfectStatistic
 	            writer.close();
 	    }
 	}
-	public static void main(String args[]) throws IOException
+	public static void main(String args[])
 	{
 		
 	}

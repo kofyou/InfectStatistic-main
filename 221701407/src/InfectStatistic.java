@@ -112,7 +112,7 @@ class InfectStatistic {
     }
     public static class LogControl {
     	
-    	public static ArrayList<String> SortLog(String date,String log) throws IOException, ParseException {
+    	public static ArrayList<String> SortLog(String date,String log,ArrayList<String> provin) throws IOException, ParseException {
     		File file=new File(log);
     		File[] tempList=file.listFiles();
     		
@@ -253,6 +253,24 @@ class InfectStatistic {
     		
     		OutputText.add(0,"全国 感染患者"+total_ip.toString()+"人 疑似患者"+total_sp.toString()+"人 治愈"+total_cure.toString()+"人 死亡"+total_dead.toString()+"人");
     		
+    		if(provin.size()>0) {
+    			boolean isExist=true;
+    			for(int i=0;i<provin.size();i++) {
+    				for(int j=0;j<OutputText.size();j++) {
+    					if(provin.get(i).equals(OutputText.get(j).split(" ")[0])) {
+    						isExist=true;
+    						break;
+    					}else {
+    						isExist=false;
+    					}
+    				}
+    				if(!isExist) {
+        				OutputText.add(provin.get(i).toString()+" 感染患者0人 疑似患者0人 治愈0人 死亡0人");
+        			}
+    			}
+    			
+    		}
+    		
     		return OutputText;
 	
     	}
@@ -261,6 +279,7 @@ class InfectStatistic {
     		String OutputContent="";
     		
     		for(int i=0;i<OutputText.size();i++) {
+    			//System.out.println(OutputText.get(i));
     			if(province.size()<=0&&type.size()<=0) {
     				OutputContent+=OutputText.get(i).toString()+"\n";
     			}else if(type.size()<=0) {
@@ -304,10 +323,8 @@ class InfectStatistic {
     					}
     				}
     			}
-    			
-    			
     		}
-    			
+    		
     			
     		OutputContent+="// 该文档并非真实数据，仅供测试使用";
     		
@@ -327,7 +344,6 @@ class InfectStatistic {
     public static class CommandAnalysis {
     	
     	public void CommandRun(ArrayList<String> list) throws IOException, ParseException{
-    		//System.out.println("list="+list);
     		//规格化command
     		Command command=new Command();
     		command=SetCommand(list);
@@ -338,14 +354,9 @@ class InfectStatistic {
     		String date=command.date_argument;
     		ArrayList<String> province=command.province_argument;
     		ArrayList<String> type=command.type_argument;
-    		/*
-    		if(listnum||out.equals("null")||log.equals("null")) {
-    			System.out.println("Error!list,-out,-log is must!");
-    		}*/
     		
     		LogControl logcontrol=new LogControl();
-    		//logcontrol.SortLog(date, log);
-    		ArrayList<String> OutputText=logcontrol.SortLog(date,log);
+    		ArrayList<String> OutputText=logcontrol.SortLog(date,log,province);
     		logcontrol.OutLog(log, out, date, province, type,OutputText);
     		
     		
@@ -369,8 +380,10 @@ class InfectStatistic {
 					ArrayList<String> typ=new ArrayList<String>();
 					for(int j=i+1;j<list.size();j++) {
 						String type=list.get(j);
-						if(!type.substring(0,1).equals('-')) {
+						if(!type.substring(0,1).equals("-")) {
 							typ.add(type);//直到搜索到后一个参数截止
+						}else {
+							break;
 						}
 					}
 					command.setTypeArgument(typ);					
@@ -380,8 +393,10 @@ class InfectStatistic {
 					ArrayList<String> prov=new ArrayList<String>();
 					for(int j=i+1;j<list.size();j++) {
 						String province=list.get(j);
-						if(!province.substring(0,1).equals('-')) {
+						if(!province.substring(0,1).equals("-")) {
 							prov.add(province);
+						}else {
+							break;
 						}
 					}
 					command.setProvinceArgument(prov);

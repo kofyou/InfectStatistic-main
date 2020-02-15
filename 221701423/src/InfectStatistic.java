@@ -21,12 +21,16 @@ class InfectStatistic {
         put("cure", "治愈");
         put("dead", "死亡");
     }};
-    private static final String[] provinces = {"全国", "安徽", "澳门", "北京", "重庆", "福建", "甘肃", "广东", "广西",
+    private static final List<String> provinceList = Arrays.asList("全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西",
             "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏",
-            "青海", "山东", "山西", "陕西", "上海", "四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
+            "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江");
 
     public static void main(String[] args) {
         Command command = readArgs(args);
+        if (command == null) {
+            System.out.println("参数解析错误");
+            return;
+        }
         Map<String, Statistics> statisticsMap = new HashMap<>();
         List<String> files = Lib.getFiles(command.getLogDir());
         if (command.getDate() != null) {
@@ -36,6 +40,9 @@ class InfectStatistic {
             }
         }
         for (String file : files) {
+            if (command.getDate() != null && file.compareTo(command.getDate() + ".log.txt") > 0) {
+                break;
+            }
             List<Log> logList = readLog(new File(command.getLogDir(), file));
             logList.forEach(log -> {
                 if (!statisticsMap.containsKey(log.getProvince())) {
@@ -43,9 +50,6 @@ class InfectStatistic {
                 }
                 statisticsMap.get(log.getProvince()).setInfo(log.getType(), log.getCount());
             });
-            if (command.getDate() != null && file.compareTo(command.getDate()) >= 0) {
-                break;
-            }
         }
         if (command.getPrintProvinces().isEmpty()) {
             command.getPrintProvinces().add("全国");
@@ -64,37 +68,17 @@ class InfectStatistic {
             });
             statisticsMap.put("全国", countryStatistics);
         }
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(command.getOutFile()))) {
-            for (String province : provinces) {
-                if (command.getPrintProvinces().contains(province)) {
-                    try {
-                        bufferedWriter.write(province);
-                        Map<String, Integer> infos = statisticsMap.get(province).getInfos();
-                        command.getPrintTypes().forEach(s1 -> {
-                            try {
-                                bufferedWriter.write(" " + s1 + infos.get(s1) + "人");
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                        bufferedWriter.newLine();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
-            bufferedWriter.newLine();
-            bufferedWriter.write("// 命令 java InfectStatistic " + String.join(" ", args));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        writeResult(command, statisticsMap, "java InfectStatistic " + String.join(" ", args));
     }
 
     public static Command readArgs(String[] args) {
+        if (args.length == 0 || !args[0].equals("list")) {
+            return null;
+        }
         String argType = "";
         Command.Builder builder = new Command.Builder();
-        for (String arg : args) {
+        for (int i = 1; i < args.length; i++) {
+            String arg = args[i];
             if (arg.startsWith("-")) {
                 argType = arg;
             } else {
@@ -109,11 +93,15 @@ class InfectStatistic {
                         builder.setDate(arg);
                         break;
                     case "-type":
+                        if (!typeMap.containsKey(arg)) return null;
                         builder.addPrintType(arg);
                         break;
                     case "-province":
+                        if (!provinceList.contains(arg)) return null;
                         builder.addPrintProvince(arg);
                         break;
+                    default:
+                        return null;
                 }
             }
         }
@@ -184,6 +172,32 @@ class InfectStatistic {
             e.printStackTrace();
         }
         return logList;
+    }
+
+    public static boolean writeResult(Command command, Map<String, Statistics> statisticsMap, String arg) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(command.getOutFile()))) {
+            for (String province : provinceList) {
+                if (command.getPrintProvinces().contains(province)) {
+                    bufferedWriter.write(province);
+                    Map<String, Integer> infos = statisticsMap.get(province).getInfos();
+                    command.getPrintTypes().forEach(s1 -> {
+                        try {
+                            bufferedWriter.write(" " + s1 + infos.get(s1) + "人");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    bufferedWriter.newLine();
+                }
+            }
+            bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
+            bufferedWriter.newLine();
+            bufferedWriter.write("// 命令 " + arg);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static class Command {
@@ -275,6 +289,7 @@ class InfectStatistic {
 
             public Command build() {
                 if (printTypes.isEmpty()) printTypes.addAll(typeList);
+                if (logDir.isEmpty() || outFile.isEmpty()) return null;
                 return new Command(logDir, outFile, date, printTypes, printProvinces);
             }
         }

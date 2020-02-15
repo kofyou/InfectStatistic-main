@@ -30,8 +30,6 @@ class InfectStatistic {
     	
     	System.out.println(map);
     	
-    	TxtTool txtTool = new TxtTool();
-    	
     	File file = new File("C:\\Users\\jhuy\\Documents\\GitHub\\InfectStatistic-main\\example\\log\\2020-01-22.log.txt");
     	String test1 = TxtTool.txt2String(file);
     	System.out.println(test1);

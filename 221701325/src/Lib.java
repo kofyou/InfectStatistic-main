@@ -1,11 +1,15 @@
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
@@ -118,7 +122,28 @@ class CmdArgs {
 
 
 enum ListKey{
-	LOG, OUT, DATE, TYPE, PROVINCE
+	LOG(0,"读取路径"), DATE(1,"限定日期"), PROVINCE(2,"限定省份"), 
+	TYPE(3,"限定类型"), OUT(4,"输出路径");
+	private int key;
+	private String text;
+	private ListKey(int key,String text){
+		this.key = key;
+		this.text = text;
+	}
+	
+	private static HashMap<Integer,String> map = new HashMap<Integer,String>();
+	static {
+        for(ListKey d : ListKey.values()){
+            map.put(d.key,d.text);
+        }
+    }
+
+	public static ListKey valueOf(int ordinal) {
+		if (ordinal < 0 || ordinal >= values().length) {
+			throw new IndexOutOfBoundsException("Invalid ordinal");
+		} 
+		return values()[ordinal];
+	}
 }
 
 //命令模式的command类
@@ -128,85 +153,76 @@ interface Command{
 
 class ListCommand implements Command{
 	private ListKey listKey;
+	private List<String[]> result;
 	
-	public ListCommand() {	
-	}
-	
+	/**
+     * 传入参数和值的map并进行处理
+     * 当前处理顺序：log->date->province->type->out
+     * 若要新增功能请确认处理顺序符合逻辑并将功能添加在ListKey枚举类中
+     * @param map
+     */
 	@Override
 	public void execute(Map<String, List<String>> map) {
-		
-		Set<String> keySet = map.keySet();
-		Iterator<String> it =keySet.iterator();
-		
-		while(it.hasNext()) {
-			String key = it.next();
-			List<String> value = map.get(key);
-			switch (key) {
-				case "date":
-					listKey = ListKey.DATE;
-					break;
-				case "log":
-					listKey = ListKey.LOG;
-					break;
-				case "out":
-					listKey = ListKey.OUT;
-					break;
-				case "type":
-					listKey = ListKey.TYPE;
-					break;
-				case "province":
-					listKey = ListKey.PROVINCE;
-					break;
-			}
-			
+		for(int i = 0; i < ListKey.values().length ;i++) {
+			listKey = ListKey.valueOf(i);
 			switch(listKey) {
 				case DATE:
-					dateKey(value);
+					dateKey(map);
 					break;
 				case LOG:
-					logKey(value);
+					logKey(map);
 					break;
 				case OUT:
-					outKey(value);
+					outKey(map);
 					break;
 				case TYPE:
-					typeKey(value);
+					typeKey(map);
 					break;
 				case PROVINCE:
-					provinceKey(value);
+					provinceKey(map);
 					break;
+				}
 			}
 		}
-	}
+//		Set<String> keySet = map.keySet();
+//		Iterator<String> it =keySet.iterator();
+//		while(it.hasNext()) {
+//			String key = it.next();
+//			if(key.matches("date")) {
+//				
+//			}
+//		}
 
-	private void provinceKey(List<String> value) {
-		// TODO Auto-generated method stub
+
+	private void provinceKey(Map<String, List<String>> map) {
+		System.out.println("nowProvince");
 		
 	}
 
-	private void typeKey(List<String> value) {
-		// TODO Auto-generated method stub
+	private void typeKey(Map<String, List<String>> map) {
+		System.out.println("nowType");
 		
 	}
 
-	private void outKey(List<String> value) {
-		// TODO Auto-generated method stub
+	private void outKey(Map<String, List<String>> map) {
+		System.out.println("nowOut");
 		
 	}
 
-	private void logKey(List<String> value) {
-		// TODO Auto-generated method stub
-		
+	private void logKey(Map<String, List<String>> map) {
+		System.out.println("now is in LogKey Handler");
+		List<String> logList = map.get("log");
+		System.out.println("log is " + logList.get(0));
 	}
 
-	private void dateKey(List<String> value) {
-		// TODO Auto-generated method stub
-		
+	private void dateKey(Map<String, List<String>> map) {
 	}
 
 }
 
 class TxtTool {
+	static List<File> filelist = new ArrayList<File>(); 
+	
     public static String txt2String(File file){
         StringBuilder result = new StringBuilder();
         
@@ -241,6 +257,24 @@ class TxtTool {
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    public static List<File> getFileList(String strPath) {
+        File dir = new File(strPath);
+        File[] files = dir.listFiles(); // 该文件目录下文件全部放入数组
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) { // 判断是文件还是文件夹
+                    getFileList(files[i].getAbsolutePath()); // 获取文件绝对路径
+                } 
+                else { 
+                    String strFileName = files[i].getAbsolutePath();
+                    System.out.println("---" + strFileName);
+                    filelist.add(files[i]);
+                }
+            }
+        }
+        return filelist;
     }
 }
 

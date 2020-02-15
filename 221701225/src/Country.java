@@ -23,7 +23,7 @@ public class Country {
             Province province=new Province(provinceName);
             provincesMap.put(provinceName,province);
         }
-        System.out.println("Country单例对象已创建");
+        //System.out.println("Country单例对象已创建");
     }
 
     /**

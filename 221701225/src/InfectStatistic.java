@@ -1,5 +1,8 @@
+import java.text.Collator;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 /**
@@ -26,7 +29,7 @@ class InfectStatistic {
     }
     public static void main(String[] args) {
         String[] debugArgs=("-log C:\\Users\\62706\\Documents\\GitHub\\InfectStatistic-main\\221701225\\log -out ../result " +
-                "-date 2020-01-23 -province 全国 浙江 福建 -type cure dead ip").split(" ");
+                "-date 2020-01-22 -province 福建 河北").split(" ");
         InfectStatistic infectInfoOperator=new InfectStatistic();
         //从命令行读取参数到该类
         infectInfoOperator.readParameter(debugArgs);
@@ -92,7 +95,7 @@ class InfectStatistic {
             }
         }
 
-        System.out.println(this.toString());
+        //System.out.println(this.toString());
 
     }
 
@@ -125,9 +128,8 @@ class InfectStatistic {
         else
             outputTypes=types.toArray(new String[types.size()]);
 
-        //获取全国统计信息
+        //获取全国统计信息及各省统计信息
         countryTotalInfo=country.getCountryTotalInfo(beginDate,endDate);
-        //获取各省统计信息
         provinceDailyInfos=country.getAllProvincesInfo(beginDate,endDate);
 
         if(provinces==null) {
@@ -148,6 +150,10 @@ class InfectStatistic {
                 System.out.println("全国 " + countryTotalInfo.toString(outputTypes));
                 provinces.remove("全国");
             }
+
+            Comparator<Object> CHINA_COMPARE = Collator.getInstance(java.util.Locale.CHINA);
+            Collections.sort(provinces, CHINA_COMPARE);
+
             //遍历指定的省份
             for(String provinceName:provinces){
                 Province province = country.getProvince(provinceName);

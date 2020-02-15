@@ -1,5 +1,22 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Template;
+
+import javafx.beans.binding.When;
+
+
+
 
 /**
  * InfectStatistic
@@ -155,6 +172,81 @@ class InfectStatistic {
 		}
 	}
 	
+	//命令行运行类,使用此类进行命令行的运行,可以考虑加一个省类分别有省名以及其他数据
+	static class CommandLineRun{
+		public CommandLine commandline;
+		public File file_test;
+		public int ip;
+		public int sp;
+		public int cure;
+		public int dead;
+		
+		public CommandLineRun(CommandLine cmdline) throws IOException {
+			commandline = new CommandLine();
+			commandline = cmdline;
+			//这里记得要改成参数值！！！！！！！！！！
+			file_test = new File("D:\\InfectStatistic-main\\221701430\\log\\2020-01-22.log.txt");
+			get_data(file_test);
+		}
+		public void get_data(File f) throws IOException {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f),"UTF-8"));
+			String temp;
+			
+			//用于正则表达式匹配
+			String type_1 = "(\\W+) (新增 感染患者) (\\d+)(人)";
+	        String type_2 = "(\\W+) (新增 疑似患者) (\\d+)(人)";
+	        String type_3 = "(\\W+) (感染患者 流入) (\\W+) (\\d+)(人)";
+	        String type_4 = "(\\W+) (疑似患者 流入) (\\W+) (\\d+)(人)";
+	        String type_5 = "(\\W+) (死亡) (\\d+)(人)";
+	        String type_6 = "(\\W+) (治愈) (\\d+)(人)";
+	        String type_7 = "(\\W+) (疑似患者 确诊感染) (\\d+)(人)";
+	        String type_8 = "(\\W+) (排除 疑似患者) (\\d+)(人)";
+	        
+	        ArrayList<String> type_list = new ArrayList<String>();
+	        type_list.add(type_1);
+	        type_list.add(type_2);
+	        type_list.add(type_3);
+	        type_list.add(type_4);
+	        type_list.add(type_5);
+	        type_list.add(type_6);
+	        type_list.add(type_7);
+	        type_list.add(type_8);
+	        
+	        
+	        while((temp = reader.readLine()) != null) {
+	        	if(temp.charAt(0) == '/') {
+	        		continue;
+	        	}
+	        	
+	        	char flag = '0';
+	        	Pattern pattern;
+		        Matcher matcher;
+	        	for(int i = 0;i < 8;i++) {
+	        		pattern = Pattern.compile(type_list.get(i));
+	        		matcher = pattern.matcher(temp);
+	        		if(matcher.find()) {
+	        			flag = (char) (48 + (i + 1));
+	        			break;
+	        		}else {
+						continue;
+					}
+	        	}
+	        	System.out.println(temp);
+	        	System.out.println("this is p" + flag);
+	        	
+	        }
+	        
+	        /*
+	        if (m1.find( )) {
+	            System.out.println("Found value: " + m1.group(0) );
+	            System.out.println("Found value: " + m1.group(1) );
+	            System.out.println("Found value: " + m1.group(2) );
+	            System.out.println("Found value: " + m1.group(3) ); 
+	         } else {
+	            System.out.println("NO MATCH");
+	         }*/
+		}
+	}
 	
 	
 	
@@ -164,21 +256,24 @@ class InfectStatistic {
 	
 	
 	
-	
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
     	String command = "";   	
     	//提取命令行
         for(int i=3;i<args.length;i++){
             command += args[i] + " ";
         }
         //以上也许没用，先写着
-
+        
+        //测试用
+        CommandLine commandline = new CommandLine();
+         
         //将命令行连成一个List方便之后进行命令行分析生成命令行实例
-        ArrayList<String> commandline = new ArrayList<String>();
+        ArrayList<String> cmd_line = new ArrayList<String>();
         for (String temp : args) {
-            commandline.add(temp);
+        	cmd_line.add(temp);
         }
-        /*用于测试用的自组命令行
+        //用于测试用的自组命令行，记得注释掉再把commandline_analysis.analysis(commandline_test);
+        //改成commandline_analysis.analysis(cmdline);
         ArrayList<String> commandline_test = new ArrayList<String>();
         commandline_test.add("list");
         commandline_test.add("-log");
@@ -190,8 +285,11 @@ class InfectStatistic {
         commandline_test.add("-province");
         commandline_test.add("7");
         commandline_test.add("8");
-        */
+        
         CommandLineAnalysis commandline_analysis = new CommandLineAnalysis();
-        commandline_analysis.analysis(commandline);
+        commandline = commandline_analysis.analysis(commandline_test);
+        
+        //测试用
+        CommandLineRun cmd_run = new CommandLineRun(commandline);
     }
 }

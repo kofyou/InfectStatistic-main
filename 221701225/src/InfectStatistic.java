@@ -25,7 +25,8 @@ class InfectStatistic {
         country=Country.getInstance();
     }
     public static void main(String[] args) {
-        String[] debugArgs="-log C:\\Users\\62706\\Documents\\GitHub\\InfectStatistic-main\\221701225\\log -out ../result -date 2020-01-22".split(" ");
+        String[] debugArgs=("-log C:\\Users\\62706\\Documents\\GitHub\\InfectStatistic-main\\221701225\\log -out ../result " +
+                "-date 2020-01-23 -province 全国 浙江 福建 -type cure dead ip").split(" ");
         InfectStatistic infectInfoOperator=new InfectStatistic();
         //从命令行读取参数到该类
         infectInfoOperator.readParameter(debugArgs);
@@ -108,6 +109,7 @@ class InfectStatistic {
     public void output(){
         LocalDate beginDate;
         LocalDate endDate;
+        String[] outputTypes=null;
         HashMap<String,DailyInfo> provinceDailyInfos;
         DailyInfo countryTotalInfo;
 
@@ -118,22 +120,49 @@ class InfectStatistic {
         else
             endDate=date;
 
+        if(types==null)
+            outputTypes=DailyInfo.ALL_TYPES;
+        else
+            outputTypes=types.toArray(new String[types.size()]);
+
         //获取全国统计信息
         countryTotalInfo=country.getCountryTotalInfo(beginDate,endDate);
         //获取各省统计信息
         provinceDailyInfos=country.getAllProvincesInfo(beginDate,endDate);
 
-        System.out.println("全国 "+countryTotalInfo.toString());
-        for(String provinceName:Country.PROVINCES){
-            Province province=country.getProvince(provinceName);
+        if(provinces==null) {
+            //未指定省份时只打印全国和在日志中出现过的省份
+            System.out.println("全国 " + countryTotalInfo.toString(outputTypes));
 
-            //未指定省份时只打印在日志中出现过的省份
-            if(province.hasOccured==true){
-                DailyInfo provinceInfo=provinceDailyInfos.get(provinceName);
-                System.out.println(provinceName+" " +provinceInfo.toString());
+            for (String provinceName : Country.PROVINCES) {
+                Province province = country.getProvince(provinceName);
+
+                if (province.hasOccured == true) {
+                    DailyInfo provinceInfo = provinceDailyInfos.get(provinceName);
+                    System.out.println(provinceName + " " + provinceInfo.toString(outputTypes));
+                }
             }
         }
+        else{
+            if(provinces.contains("全国")){
+                System.out.println("全国 " + countryTotalInfo.toString(outputTypes));
+                provinces.remove("全国");
+            }
+            //遍历指定的省份
+            for(String provinceName:provinces){
+                Province province = country.getProvince(provinceName);
 
+                //省份在日志出现过，就打印统计得到的数据，否则直接全输出0
+                if (province.hasOccured == true) {
+                    DailyInfo provinceInfo = provinceDailyInfos.get(provinceName);
+                    System.out.println(provinceName + " " + provinceInfo.toString(outputTypes));
+                }
+                else{
+                    DailyInfo emptyInfo=new DailyInfo(endDate);
+                    System.out.println(provinceName+" "+emptyInfo.toString(outputTypes));
+                }
+            }
+        }
 
 
 

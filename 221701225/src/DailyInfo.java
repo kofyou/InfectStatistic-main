@@ -3,6 +3,7 @@ import java.time.LocalDate;
 //记录每日各项人数的变化
 public class DailyInfo {
     LocalDate date;
+    public static String[] ALL_TYPES={"ip","sp","cure","dead"};
     int infected;
     int suspected;
     int dead;
@@ -49,8 +50,23 @@ public class DailyInfo {
     public LocalDate getDate(){
         return this.date;
     }
-    @Override
-    public String toString() {
-        return "感染患者" + infected + "人 疑似患者" + suspected + "人 治愈" + cured + "人 死亡" + dead + "人";
+//    @Override
+//    public String toString() {
+//        return "感染患者" + infected + "人 疑似患者" + suspected + "人 治愈" + cured + "人 死亡" + dead + "人";
+//    }
+
+    public String toString(String[] types){
+        StringBuilder stringBuilder=new StringBuilder();
+
+        for(String type:types){
+            switch(type){
+                case "ip":stringBuilder.append("感染患者"+infected+"人 ");  break;
+                case "sp":stringBuilder.append("疑似患者"+suspected+"人 ");  break;
+                case "cure":stringBuilder.append("治愈"+cured+"人 ");  break;
+                case "dead":stringBuilder.append("死亡"+dead+"人 ");  break;
+                default:System.out.println("\n输出时出现错误，类型参数只能指定为ip/sp/cure/dead");
+            }
+        }
+        return stringBuilder.toString();
     }
 }

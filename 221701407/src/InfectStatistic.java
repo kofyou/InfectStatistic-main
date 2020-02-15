@@ -121,8 +121,6 @@ class InfectStatistic {
     		ArrayList<String> AllFiles=new ArrayList<String>();//在date前所有log内容
     		ArrayList<String> Provinces=new ArrayList<String>();//log中每一行的省份
     		ArrayList<String> OutputText=new ArrayList<String>();//最终所有省份（包含全国）统计结果
-    		Integer ip=0,sp=0,cure=0,dead=0;//ip:感染，sp:疑似，cure:治愈，dead:死亡
-    		Integer total_ip=0,total_sp=0,total_cure=0,total_dead=0;
     		String province="";
     		for(int i=0;i<tempList.length;i++) {
     			if(tempList[i].isFile()) {
@@ -181,8 +179,10 @@ class InfectStatistic {
     				Provinces.add(AllFiles.get(i).split(" ")[0]);
 				}
     		}
-    		System.out.println(Provinces);
+    		//System.out.println(Provinces);
+    		Integer total_ip=0,total_sp=0,total_cure=0,total_dead=0;//ip:感染，sp:疑似，cure:治愈，dead:死亡
     		for(int i=0;i<Provinces.size();i++) {
+    			Integer ip=0,sp=0,cure=0,dead=0;
     			province=Provinces.get(i);//获得省份
     			for(int j=0;j<AllFiles.size();j++) {
     				String[] info=AllFiles.get(j).split(" ");
@@ -192,11 +192,13 @@ class InfectStatistic {
     						//情况1.<省> 死亡 n人  
     						//情况2.<省> 治愈 n人
     						String people=info[2];//people=n人
-    						int n=Integer.parseInt(people.substring(0,people.length()-1));//获得人数
+    						Integer n=Integer.parseInt(people.substring(0,people.length()-1));//获得人数
     						if(info[1].equals("死亡")) {
     							dead+=n;
+    							ip-=n;
     						}else {
     							cure+=n;
+    							ip-=n;
     						}
     					}else if(info.length==4) {
     						//情况1.<省> 新增     感染患者 n人
@@ -207,35 +209,44 @@ class InfectStatistic {
     						Integer n=Integer.parseInt(people.substring(0,people.length()-1));
     						if(info[1].equals("新增")&&info[2].equals("感染患者")) {
     							ip+=n;
+    							//System.out.println("ip1"+province+" "+ip);
     						}else if(info[1].equals("新增")&&info[2].equals("疑似患者")) {
     							sp+=n;
+    							//System.out.println("sp2"+province+" "+sp);
     						}else if(info[1].equals("疑似患者")) {
     							ip+=n;
     							sp-=n;
+    							//System.out.println("ip3"+province+" "+ip);
+    							//System.out.println("sp4"+province+" "+sp);
     						}else {
     							sp-=n;
+    							//System.out.println("sp5"+province+" "+sp);
     						}
     					}else {
     						//情况1.<省1> 感染患者 流入 <省2> n人
     						//情况2.<省1> 疑似患者 流入 <省2> n人
     						String people=info[4];
-    						int n=Integer.parseInt(people.substring(0,people.length()-1));
+    						Integer n=Integer.parseInt(people.substring(0,people.length()-1));
     						if(info[1].equals("感染患者")) {
     							ip-=n;
+    							//System.out.println("ip6"+province+" "+ip);
     						}else {
     							sp-=n;
+    							//System.out.println("sp7"+province+" "+sp);
     						}
     						
     					}
     				}else if(info.length==5) {
     					//外省流入本省的情况
     					String people=info[4];
-						int n=Integer.parseInt(people.substring(0,people.length()-1));
+    					Integer n=Integer.parseInt(people.substring(0,people.length()-1));
     					if(province.equals(info[3])) {
     						if(info[1].equals("感染患者")) {
     							ip+=n;
+    							//System.out.println("ip8"+province+" "+ip);
     						}else {
-    							sp-=n;
+    							sp+=n;
+    							//System.out.println("sp9"+province+" "+sp);
     						}
     						
     					}

@@ -12,12 +12,16 @@ import java.util.regex.Pattern;
  * @since xxx
  */
 class InfectStatistic {
+    private String[] provinceString = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南",
+            "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东",
+            "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
+    private String[] patientType = {"感染患者", "疑似患者", "治愈", "死亡"};
+
     public static void main(String[] args) {
         InfectStatistic infectStatistic = new InfectStatistic();
         CommandHandle commandHandle = infectStatistic.new CommandHandle();
         commandHandle.commandProcess(args);
         LogHandle logHandle = infectStatistic.new LogHandle();
-        //System.out.println(commandHandle.getEndDate());
         if (!logHandle.readLogs(commandHandle.getEndDate(), commandHandle.getLogPath())) {
             System.out.println("日期超出范围");
         }
@@ -35,9 +39,6 @@ class InfectStatistic {
         private int[] patientTypeSign;
         private boolean provinceSign;
         private int[] provinceList;
-        private String[] provinceString = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南",
-                "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东",
-                "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
 
         public CommandHandle() {
             this.logPath = "";
@@ -87,14 +88,6 @@ class InfectStatistic {
 
         public void setEndDate(String endDate) {
             this.endDate = endDate;
-        }
-
-        public void setPatientTypeSign(int[] patientTypeSign) {
-            this.patientTypeSign = patientTypeSign;
-        }
-
-        public void provinceList(int[] provinceList) {
-            this.provinceList = provinceList;
         }
 
         public boolean commandProcess(String[] args) {
@@ -200,12 +193,16 @@ class InfectStatistic {
     }
 
     class DataHandle {
-        private String[] provinceString = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南",
-                "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东",
-                "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
-        private String[] patientType = {"感染患者", "疑似患者", "治愈", "死亡"};
         private int[][] patient = new int[32][4];
         private int[] influencedProvince = new int[32];
+
+        public int[][] getPatient() {
+            return patient;
+        }
+
+        public void setPatient(int[][] patient) {
+            this.patient = patient;
+        }
 
         public void dataProcess(ArrayList<String> stringList) {
             String pattern1 = "\\W+ 新增 感染患者 \\d+人";

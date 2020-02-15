@@ -7,6 +7,7 @@
 public class Lib {
 	public  String[] commands= {"-log","-out","-date","-type","-province"};
 	public  String[] types= {"ip","sp","cure","dead"};
+	public  String[] outTypes = {"感染患者","疑似患者","治愈","死亡"};
 	public  String[] provinces= {
 			"全国",
 			"北京","天津","河北", "山西", "内蒙古",

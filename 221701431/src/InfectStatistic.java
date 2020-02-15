@@ -72,14 +72,6 @@ class Province{
     }
 }
 
-
-/*
-*
-* 用于正则表达式
-* @parameter  参数名
-* @date 日期样式
-*
-* */
 class InfectStatisticApplication{
 
   public void log(String[] args) throws IOException {
@@ -96,9 +88,7 @@ class InfectStatisticApplication{
 
       }
   }
-
 }
-
 
 class REUtil{
     public boolean checkParameter(String a){
@@ -169,7 +159,6 @@ class REUtil{
     }
 
 }
-
 
 //还差判断-out的路径是否能存在
 class CommandJudge{
@@ -620,13 +609,28 @@ class ListCommand{
                     if (types.get(p).equals("dead"))
                         putIn += (" 死亡" + provinceList.get(infectProvinces.get(k)).getDead() + "人");
                 }
-                bw.write(putIn + "\n");
+                String osName = System.getProperty("os.name");
+                if (osName.startsWith("Mac os")) {
+                    bw.write(putIn + "\n");
+                }else if(osName.startsWith("Windows")){
+                    bw.write(putIn + "\r\n");
+                }else {
+                    bw.write(putIn + "\r");
+                }
             }
         }else{
             for (int k = 0 ; k < infectProvinces.size() ; k++){
                 String putIn = provinceList.get(infectProvinces.get(k)).getName() + " 感染患者" + provinceList.get(infectProvinces.get(k)).getSp() + "人 疑似患者" + provinceList.get(infectProvinces.get(k)).getIp() + "人 治愈" +
                         provinceList.get(infectProvinces.get(k)).getCure() + "人 死亡" + provinceList.get(infectProvinces.get(k)).getDead() + "人";
-                bw.write(putIn + "\n");
+
+                String osName = System.getProperty("os.name");
+                if (osName.startsWith("Mac os")) {
+                    bw.write(putIn + "\n");
+                }else if(osName.startsWith("Windows")){
+                    bw.write(putIn + "\r\n");
+                }else {
+                    bw.write(putIn + "\r");
+                }
             }
         }
 

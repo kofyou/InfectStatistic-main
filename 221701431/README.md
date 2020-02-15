@@ -1,15 +1,15 @@
 # InfectStatistic-221701431
 
-###1.项目简介
+### 1.项目简介
 &nbsp;&nbsp;该项目读取用户所输入的文件路径，获得日志，根据其他的-type,-province,-date来做筛选，最后输出到用户指定的文件中
 
-###2.运行
+### 2.运行
 &nbsp;&nbsp;用户到src文件中，输入命令:
 
 > 一个命令实例：java InfectStatistic -log /Users/a/... -out /Users/... -date ...  
 > 当然使用前需要编译文件 javac InfectStatistic.java
 
-###3.功能简介
+### 3.功能简介
 - list命令  
 &nbsp;&nbsp;参数:-log , -out , -date , -province , -type  
     * -log 指定日志目录的位置，该项必会附带，请直接使用传入的路径，而不是自己设置路径

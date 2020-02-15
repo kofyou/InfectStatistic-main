@@ -251,7 +251,230 @@ class InfectStatistic {
     		return result;
     	}
     }
-
+    /*
+     *  文件处理
+     */
+    class FileProcess {
+    	/*
+    	 * 获取符合标准的日志文件路径
+    	 */
+    	public void ReadLogFile () {
+    		File file=new File(originPath);
+    		File[] tempList = file.listFiles();
+    		int n=0,i=0;
+    		for (i=0;i<tempList.length;i++) {
+    			if (tempList[i].isFile()) { 
+    				String fileName = tempList[i].getName();
+    				String[] names = fileName.split("\\.");
+    				if (acqTime.compareTo(names[0])>=0) {
+    					System.out.println("文     件："+fileName);
+    					LogFile(fileName);
+    				}
+    			} 
+    		} 
+    	}
+    	/*
+    	 * 读取日志文件中的内容
+    	 */
+    	public void LogFile (String fileName) {
+    		String filePath = originPath + fileName;
+    		System.out.println("文     件："+filePath);
+    		try {
+    			File tempFile = new File(filePath);
+    			InputStreamReader reader = new InputStreamReader(  
+    					new FileInputStream(tempFile),"UTF-8"); // 建立一个输入流对象reader  
+    			BufferedReader br = new BufferedReader(reader); // 建立一个对象，它把文件内容转成计算机能读懂的语言  
+            	String line = "";  
+            	while ((line = br.readLine()) != null) {  
+            		if(!line.startsWith("//")) 
+            			LogProcess(line);      			
+            	} 
+    		}
+    		catch (Exception e) {  
+                e.printStackTrace();  
+            }  
+    	}
+    	/*
+    	 *对于获取的日志文件内容处理 
+    	 */
+    	public void LogProcess (String line) {
+    		System.out.println(line);
+    		String [] lineSplit = line.split(" ");
+    		int n=0;
+    		for (n=0;n<lineSplit.length;n++) {
+    			if (n==lineSplit.length-1) {
+    				lineSplit[n]=lineSplit[n].replace("人", "");
+    			}
+    			System.out.println(lineSplit[n]);
+    		}
+    		
+    		if (lineSplit[1].equals("新增")) 
+    			NewPeople(lineSplit);
+    		if (lineSplit[1].equals("死亡")) 
+    			DeadPeople(lineSplit);
+    		if (lineSplit[1].equals("治愈")) 
+    			CurePeople(lineSplit);
+    		if (lineSplit[1].equals("排除")) 
+    			ExcPeople(lineSplit);
+    		if (lineSplit[2].equals("流入")) 
+    			InfPeople(lineSplit);
+    		if (lineSplit[2].equals("确诊感染")) 
+    			ConPeople(lineSplit);
+    	}
+    	/*
+    	 * 新增
+    	 */
+    	public void NewPeople (String [] people) {
+    		int n=0,m=0;
+    		for (n=0;n<32;n++) {
+    			if (areaStr[n].equals(people[0])) {
+    				if (preMark==0) {
+    					area[n]=1;
+    				}
+    				System.out.println(".................");
+    				for (m=0;m<4;m++) {
+    					if (patientsStr[m].equals(people[2])) {
+    						int peopleNum = Integer.parseInt(people[3]);
+    						totalNumber[n][m]+=peopleNum;
+    						totalNumber[0][m]+=peopleNum;
+    					}
+    				}
+    			}
+    		}
+    	}
+    	/*
+    	 * 死亡
+    	 */
+    	public void DeadPeople (String [] people) {
+    		int n=0;
+    		for (n=0;n<32;n++) {
+    			if (areaStr[n].equals(people[0])) {
+    				if (preMark==0) {
+    					area[n]=1;
+    				}
+    				int peopleNum = Integer.parseInt(people[2]);
+					totalNumber[n][3]+=peopleNum;
+					totalNumber[n][0]-=peopleNum;
+					totalNumber[0][3]+=peopleNum;
+					totalNumber[0][0]-=peopleNum;
+    			}
+    		}
+    	}
+    	/*
+    	 * 治愈
+    	 */
+    	public void CurePeople (String [] people) {
+    		int n=0;
+    		for (n=0;n<32;n++) {
+    			if (areaStr[n].equals(people[0])) {
+    				if (preMark==0) {
+    					area[n]=1;
+    				}
+    				int peopleNum = Integer.parseInt(people[2]);
+					totalNumber[n][2]+=peopleNum;
+					totalNumber[n][0]-=peopleNum;
+					totalNumber[0][2]+=peopleNum;
+					totalNumber[0][0]-=peopleNum;
+    			}
+    		}
+    	}
+    	/*
+    	 * 排除
+    	 */
+    	public void ExcPeople (String [] people) {
+    		int n=0,m=0;
+    		for (n=0;n<32;n++) {
+    			if (areaStr[n].equals(people[0])) {
+    				if (preMark==0) {
+    					area[n]=1;
+    				}
+    				for (m=0;m<4;m++) {
+    					if (patientsStr[m].equals(people[2])) {
+    						int peopleNum = Integer.parseInt(people[3]);
+    						totalNumber[n][m]-=peopleNum;
+    						totalNumber[0][m]-=peopleNum;
+    					}
+    				}
+    			}
+    		}
+    	}
+    	/*
+    	 * 流入
+    	 */
+    	public void InfPeople (String [] people) {
+    		int n=0,m=0;
+    		for (n=0;n<32;n++) {
+    			if (areaStr[n].equals(people[0])) {
+    				if (preMark==0) {
+    					area[n]=1;
+    				}
+    				for (m=0;m<4;m++) {
+    					if (patientsStr[m].equals(people[1])) {
+    						int peopleNum = Integer.parseInt(people[4]);
+    						totalNumber[n][m]-=peopleNum;
+    					}
+    				}
+    			}
+    			if (areaStr[n].equals(people[3])) {
+    				if (preMark==0) {
+    					area[n]=1;
+    				}
+    				for (m=0;m<4;m++) {
+    					if (patientsStr[m].equals(people[1])) {
+    						int peopleNum = Integer.parseInt(people[4]);
+    						totalNumber[n][m]+=peopleNum;
+    					}
+    				}
+    			}
+    		}
+    	}
+    	/*
+    	 * 确认感染
+    	 */
+    	public void ConPeople (String [] people) {
+    		int n=0,m=0;
+    		for (n=0;n<32;n++) {
+    			if (areaStr[n].equals(people[0])) {
+    				if (preMark==0) {
+    					area[n]=1;
+    				}
+    				int peopleNum = Integer.parseInt(people[3]);
+					totalNumber[n][1]-=peopleNum;
+					totalNumber[0][1]-=peopleNum;
+					totalNumber[n][0]+=peopleNum;
+					totalNumber[0][0]+=peopleNum;
+    			}
+    		}
+    	}
+    	/*
+    	 * 将数据写入txt文件
+    	 */
+    	public void OutFile () {
+    		try {
+    			File writeName = new File(targetPath); // 相对路径，如果没有则要建立一个新的output.txt文件  
+                writeName.createNewFile(); // 创建新文件  
+                BufferedWriter out = new BufferedWriter(new FileWriter(writeName));  
+                int n=0,m=0;
+                String outData=" ";
+                for (n=0;n<32;n++) {
+                	if (area[n]==1) {
+                		outData = areaStr[n]+" ";
+                		for (m=0;m<4;m++) {
+                			if (patients[m]!=0)
+                				outData += patientsStr[m]+totalNumber[n][m]+"人"+" ";
+                		}
+                		out.write(outData+"\r\n");
+                	}
+                }
+                out.write("// 该文档并非真实数据，仅供测试使用\r\n");
+                out.flush(); // 把缓存区内容压入文件  
+                out.close(); // 最后记得关闭文件  
+    		}
+    		catch (Exception e) {  
+                e.printStackTrace();  
+            }  
+    	}
+    }
     
     public static void main(String[] args) {
         System.out.println("helloworld");
@@ -268,6 +491,8 @@ class InfectStatistic {
             System.out.println( acqTime);
         }
         System.out.println( acqTime);
-
+        InfectStatistic.FileProcess fp = infectstatistic.new FileProcess();
+        fp.ReadLogFile();
+        fp.OutFile();
     }
 }

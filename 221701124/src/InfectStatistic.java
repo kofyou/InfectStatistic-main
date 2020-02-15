@@ -1,4 +1,5 @@
 import java.util.Date;
+import java.io.File;
 import java.text.SimpleDateFormat;
 
 /**
@@ -244,9 +245,20 @@ class InfectStatistic {
     	}
     }
     
-    
-    
-    
+    class FileProcess {
+    	
+    	public void ReadLogFile () {
+    		File file=new File(OriginPath);
+    		File[] tempList = file.listFiles();
+    		for (int i = 0; i < tempList.length; i++) {
+    			if (tempList[i].isFile()) { 
+    				String fileName = tempList[i].getName();
+    				String[] names = fileName.split("\\.");
+    				System.out.println("文     件："+names[0]);
+    			} 
+    		} 
+    	}
+    }
     
     public static void main(String[] args) {
         System.out.println("helloworld");
@@ -263,5 +275,7 @@ class InfectStatistic {
             System.out.println( AcqTime);
         }
         System.out.println( AcqTime);
+        InfectStatistic.FileProcess fp = infectstatistic.new FileProcess();
+        fp.ReadLogFile();
     }
 }

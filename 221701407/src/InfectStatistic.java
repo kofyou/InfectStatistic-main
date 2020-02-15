@@ -209,18 +209,13 @@ class InfectStatistic {
     						Integer n=Integer.parseInt(people.substring(0,people.length()-1));
     						if(info[1].equals("新增")&&info[2].equals("感染患者")) {
     							ip+=n;
-    							//System.out.println("ip1"+province+" "+ip);
     						}else if(info[1].equals("新增")&&info[2].equals("疑似患者")) {
     							sp+=n;
-    							//System.out.println("sp2"+province+" "+sp);
     						}else if(info[1].equals("疑似患者")) {
     							ip+=n;
     							sp-=n;
-    							//System.out.println("ip3"+province+" "+ip);
-    							//System.out.println("sp4"+province+" "+sp);
     						}else {
     							sp-=n;
-    							//System.out.println("sp5"+province+" "+sp);
     						}
     					}else {
     						//情况1.<省1> 感染患者 流入 <省2> n人
@@ -229,10 +224,8 @@ class InfectStatistic {
     						Integer n=Integer.parseInt(people.substring(0,people.length()-1));
     						if(info[1].equals("感染患者")) {
     							ip-=n;
-    							//System.out.println("ip6"+province+" "+ip);
     						}else {
     							sp-=n;
-    							//System.out.println("sp7"+province+" "+sp);
     						}
     						
     					}
@@ -243,10 +236,8 @@ class InfectStatistic {
     					if(province.equals(info[3])) {
     						if(info[1].equals("感染患者")) {
     							ip+=n;
-    							//System.out.println("ip8"+province+" "+ip);
     						}else {
     							sp+=n;
-    							//System.out.println("sp9"+province+" "+sp);
     						}
     						
     					}
@@ -268,17 +259,56 @@ class InfectStatistic {
     	
     	public void OutLog(String log,String out,String date,ArrayList<String> province,ArrayList<String> type,ArrayList<String> OutputText) throws IOException {
     		String OutputContent="";
+    		
     		for(int i=0;i<OutputText.size();i++) {
-    			if(province.size()<=0) {
+    			if(province.size()<=0&&type.size()<=0) {
     				OutputContent+=OutputText.get(i).toString()+"\n";
-    			}else {
+    			}else if(type.size()<=0) {
     				for(int j=0;j<province.size();j++) {
     					if(OutputText.get(i).toString().split(" ")[0].equals(province.get(j).toString())) {
     						OutputContent+=OutputText.get(i).toString()+"\n";
     					}
     				}
+    			}else if(province.size()<=0) {
+    				OutputContent+=OutputText.get(i).split(" ")[0];
+    				for(int j=0;j<type.size();j++) {
+    					OutputContent+=" ";
+    					if(type.get(j).equals("ip")) {
+    						OutputContent+=OutputText.get(i).split(" ")[1];
+    					}else if(type.get(j).equals("sp")) {
+    						OutputContent+=OutputText.get(i).split(" ")[2];
+    					}else if(type.get(j).equals("cure")) {
+    						OutputContent+=OutputText.get(i).split(" ")[3];
+    					}else {
+    						OutputContent+=OutputText.get(i).split(" ")[4];
+    					}
+    				}
+    				OutputContent+="\n";
+    			}else {
+    				for(int j=0;j<province.size();j++) {
+    					if(OutputText.get(i).toString().split(" ")[0].equals(province.get(j).toString())) {
+    						OutputContent+=OutputText.get(i).split(" ")[0];
+    	    				for(int k=0;k<type.size();k++) {
+    	    					OutputContent+=" ";
+    	    					if(type.get(k).equals("ip")) {
+    	    						OutputContent+=OutputText.get(i).split(" ")[1];
+    	    					}else if(type.get(k).equals("sp")) {
+    	    						OutputContent+=OutputText.get(i).split(" ")[2];
+    	    					}else if(type.get(k).equals("cure")) {
+    	    						OutputContent+=OutputText.get(i).split(" ")[3];
+    	    					}else {
+    	    						OutputContent+=OutputText.get(i).split(" ")[4];
+    	    					}
+    	    				}
+    	    				OutputContent+="\n";
+    					}
+    				}
     			}
+    			
+    			
     		}
+    			
+    			
     		OutputContent+="// 该文档并非真实数据，仅供测试使用";
     		
     		File file=new File(out);

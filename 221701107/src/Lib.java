@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -97,6 +98,20 @@ public class Lib {
             logDeadline = commandArgs.getOptionValues("date").get(0);
         }
 
+        String[] logFiles = getOlderFiles(logDir, logDeadline);
+
+        for (int i = 0; i < logFiles.length; i++) {
+            logFiles[i] = logDir + '\\' + logFiles[i];
+        }
+
+        LogParser logParser = new LogParser();
+        this.provinceStatMap = logParser.parse(logFiles);
+
+        outputResult();
+    }
+
+    public static String[] getOlderFiles(String logDir, String logDeadline)
+        throws NotDirectoryException, FileNotFoundException {
         File path = new File(logDir);
         if (!path.isDirectory()) {
             throw new NotDirectoryException("log path must be a directory");
@@ -111,15 +126,7 @@ public class Lib {
         if (logFiles == null || logFiles.length == 0) {
             throw new FileNotFoundException("no log file older than deadline");
         }
-
-        for (int i = 0; i < logFiles.length; i++) {
-            logFiles[i] = logDir + '\\' + logFiles[i];
-        }
-
-        LogParser logParser = new LogParser();
-        this.provinceStatMap = logParser.parse(logFiles);
-
-        outputResult();
+        return logFiles;
     }
 
     private void statAll() {
@@ -211,126 +218,104 @@ public class Lib {
 class LibTest {
 
     @Test
-    public void test01() {
+    public void testArgsParseLog() {
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut1.mine.txt -date 2020-01-22"
+            .split(" ");
+
+        CommandArgs commandArgs = ArgsParser.parse(args);
+        Assert.assertEquals(".\\log\\", commandArgs.getOptionValues("log").get(0));
+    }
+
+    @Test
+    public void testArgsParseOut() {
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut1.mine.txt -date 2020-01-22"
+            .split(" ");
+
+        CommandArgs commandArgs = ArgsParser.parse(args);
+        Assert.assertEquals(".\\result\\ListOut1.mine.txt", commandArgs.getOptionValues("out").get(0));
+    }
+
+    @Test
+    public void testArgsParseProvince() {
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut1.mine.txt -date 2020-01-22 -province 全国 福建"
+            .split(" ");
+        CommandArgs commandArgs = ArgsParser.parse(args);
+
+        String[] expectedProvinces = {"全国", "福建"};
+        Assert.assertArrayEquals(expectedProvinces, commandArgs.getOptionValues("province").toArray());
+    }
+
+    @Test
+    public void testArgsParseType() {
+        String[] args = "list -log .\\log\\ -out .\\result\\ListOut1.mine.txt -date 2020-01-22 -type ip cure dead"
+            .split(" ");
+        CommandArgs commandArgs = ArgsParser.parse(args);
+
+        String[] expectedTypes = {"ip", "cure", "dead"};
+        Assert.assertArrayEquals(expectedTypes, commandArgs.getOptionValues("type").toArray());
+    }
+
+    @Test
+    public void testGetOlderLogFiles() {
+        try {
+            String[] actualFiles = Lib.getOlderFiles("./log", "2020-01-23");
+            String[] expectedFiles = {"2020-01-22.log.txt", "2020-01-23.log.txt"};
+            Assert.assertArrayEquals(expectedFiles, actualFiles);
+        } catch (NotDirectoryException | FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testRegexGroup2() {
+        String soap = "湖北 新增 感染患者 15人";
+        String[] result = {"湖北", "15"};
+        List<String> tokens = LogParser.regexGroup2(soap, LogParser.regex1);
+        Assert.assertArrayEquals(result, tokens.toArray());
+    }
+
+    @Test
+    public void testRegexGroup3() {
+        String soap = "湖北 疑似患者 流入 福建 3人";
+        String[] result = {"湖北", "福建", "3"};
+        List<String> tokens = LogParser.regexGroup3(soap, LogParser.regex4);
+        Assert.assertArrayEquals(result, tokens.toArray());
+    }
+
+    @Test
+    public void testListOut1() {
         String[] args = "list -log .\\log\\ -out .\\result\\ListOut1.mine.txt -date 2020-01-22"
             .split(" ");
         try {
             String outFile = Lib.run(args);
             assertTrue(Lib.fileEquals(outFile, "./result/ListOut1.txt"));
+            System.out.println("test passed");
         } catch (IOException | DataFormatException e) {
             fail(e.getMessage());
         }
     }
 
     @Test
-    public void test02() {
+    public void testListOut2() {
         String[] args = "list -log .\\log\\ -out .\\result\\ListOut2.mine.txt -date 2020-01-22 -province 福建 河北"
             .split(" ");
         try {
             String outFile = Lib.run(args);
             assertTrue(Lib.fileEquals(outFile, "./result/ListOut2.txt"));
+            System.out.println("test passed");
         } catch (IOException | DataFormatException e) {
             fail(e.getMessage());
         }
     }
 
     @Test
-    public void test03() {
+    public void testListOut3() {
         String[] args = "list -log .\\log\\ -out .\\result\\ListOut3.mine.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建"
             .split(" ");
         try {
             String outFile = Lib.run(args);
             assertTrue(Lib.fileEquals(outFile, "./result/ListOut3.txt"));
-        } catch (IOException | DataFormatException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void test04() {
-        String[] args = "list -log .\\log\\ -out .\\result\\ListOut4.mine.txt -date 2020-01-23 -type cure dead ip"
-            .split(" ");
-        try {
-            String outFile = Lib.run(args);
-            assertTrue(Lib.fileEquals(outFile, "./result/ListOut4.txt"));
-        } catch (IOException | DataFormatException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void test05() {
-        // java.lang.IllegalArgumentException: option "log" is required
-        String[] args = "list -out .\\result\\ListOut5.mine.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建"
-            .split(" ");
-        try {
-            String outFile = Lib.run(args);
-            assertTrue(Lib.fileEquals(outFile, "./result/ListOut5.txt"));
-        } catch (IOException | DataFormatException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void test06() {
-        // java.lang.IllegalArgumentException: option "out" is required
-        String[] args = "list -log .\\log\\ -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建"
-            .split(" ");
-        try {
-            String outFile = Lib.run(args);
-            assertTrue(Lib.fileEquals(outFile, "./result/ListOut6.txt"));
-        } catch (IOException | DataFormatException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void test07() {
-        // java.nio.file.NotDirectoryException: log path must be a directory
-        String[] args = "list -log .\\loggg\\ -out .\\result\\ListOut7.mine.txt"
-            .split(" ");
-        try {
-            String outFile = Lib.run(args);
-            assertTrue(Lib.fileEquals(outFile, "./result/ListOut7.txt"));
-        } catch (IOException | DataFormatException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void test08() {
-        // java.io.FileNotFoundException: no log file older than deadline
-        String[] args = "list -log .\\log\\ -out .\\result\\ListOut8.mine.txt -date 2019-01-23"
-            .split(" ");
-        try {
-            String outFile = Lib.run(args);
-            assertTrue(Lib.fileEquals(outFile, "./result/ListOut8.txt"));
-        } catch (IOException | DataFormatException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void test09() {
-        // java.io.FileNotFoundException: no log file older than deadline
-        String[] args = "list -log .\\log\\ -out .\\result\\ListOut9.mine.txt -date 2020-02-23"
-            .split(" ");
-        try {
-            String outFile = Lib.run(args);
-            assertTrue(Lib.fileEquals(outFile, "./result/ListOut9.txt"));
-        } catch (IOException | DataFormatException e) {
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void test10() {
-        // java.io.FileNotFoundException: no log file older than deadline
-        String[] args = "list -log .\\log\\ -out .\\result\\ListOut10.mine.txt -date 2020-02-02"
-            .split(" ");
-        try {
-            String outFile = Lib.run(args);
-            assertTrue(Lib.fileEquals(outFile, "./result/ListOut10.txt"));
+            System.out.println("test passed");
         } catch (IOException | DataFormatException e) {
             fail(e.getMessage());
         }
@@ -427,14 +412,14 @@ class CommandArgs {
 
 class LogParser {
 
-    final static private String regex1 = "(^\\W+) 新增 感染患者 (\\d+)人";
-    final static private String regex2 = "(^\\W+) 新增 疑似患者 (\\d+)人";
-    final static private String regex3 = "(^\\W+) 感染患者 流入 (\\W+) (\\d+)人";
-    final static private String regex4 = "(^\\W+) 疑似患者 流入 (\\W+) (\\d+)人";
-    final static private String regex5 = "(^\\W+) 死亡 (\\d+)人";
-    final static private String regex6 = "(^\\W+) 治愈 (\\d+)人";
-    final static private String regex7 = "(^\\W+) 疑似患者 确诊感染 (\\d+)人";
-    final static private String regex8 = "(^\\W+) 排除 疑似患者 (\\d+)人";
+    final static public String regex1 = "(^\\W+) 新增 感染患者 (\\d+)人";
+    final static public String regex2 = "(^\\W+) 新增 疑似患者 (\\d+)人";
+    final static public String regex3 = "(^\\W+) 感染患者 流入 (\\W+) (\\d+)人";
+    final static public String regex4 = "(^\\W+) 疑似患者 流入 (\\W+) (\\d+)人";
+    final static public String regex5 = "(^\\W+) 死亡 (\\d+)人";
+    final static public String regex6 = "(^\\W+) 治愈 (\\d+)人";
+    final static public String regex7 = "(^\\W+) 疑似患者 确诊感染 (\\d+)人";
+    final static public String regex8 = "(^\\W+) 排除 疑似患者 (\\d+)人";
     private Map<String, ProvinceStat> provinceStatMap;
 
     public static List<String> regexGroup2(String soap, String regex) {

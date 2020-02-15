@@ -267,7 +267,6 @@ class InfectStatistic {
     				String fileName = tempList[i].getName();
     				String[] names = fileName.split("\\.");
     				if (acqTime.compareTo(names[0])>=0) {
-    					System.out.println("文     件："+fileName);
     					LogFile(fileName);
     				}
     			} 
@@ -278,7 +277,6 @@ class InfectStatistic {
     	 */
     	public void LogFile (String fileName) {
     		String filePath = originPath + fileName;
-    		System.out.println("文     件："+filePath);
     		try {
     			File tempFile = new File(filePath);
     			InputStreamReader reader = new InputStreamReader(  
@@ -298,14 +296,12 @@ class InfectStatistic {
     	 *对于获取的日志文件内容处理 
     	 */
     	public void LogProcess (String line) {
-    		System.out.println(line);
     		String [] lineSplit = line.split(" ");
     		int n=0;
     		for (n=0;n<lineSplit.length;n++) {
     			if (n==lineSplit.length-1) {
     				lineSplit[n]=lineSplit[n].replace("人", "");
     			}
-    			System.out.println(lineSplit[n]);
     		}
     		
     		if (lineSplit[1].equals("新增")) 
@@ -331,7 +327,6 @@ class InfectStatistic {
     				if (preMark==0) {
     					area[n]=1;
     				}
-    				System.out.println(".................");
     				for (m=0;m<4;m++) {
     					if (patientsStr[m].equals(people[2])) {
     						int peopleNum = Integer.parseInt(people[3]);
@@ -477,20 +472,12 @@ class InfectStatistic {
     }
     
     public static void main(String[] args) {
-        System.out.println("helloworld");
-        System.out.println( acqTime);
-        int a=0;
-        int d=a++;
-        int c=++a;
-        System.out.println(c);
         InfectStatistic infectstatistic = new InfectStatistic();
         InfectStatistic.CLA cla = infectstatistic.new CLA(args); 
         boolean b=cla.JudgCLA();
         if (b==false) {
-        	System.out.println("helloworld");
-            System.out.println( acqTime);
+        	System.out.println("命令行参数存在问题！");
         }
-        System.out.println( acqTime);
         InfectStatistic.FileProcess fp = infectstatistic.new FileProcess();
         fp.ReadLogFile();
         fp.OutFile();

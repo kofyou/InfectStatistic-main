@@ -1,0 +1,5 @@
+全国 治愈4人 死亡3人 感染患者42人
+福建 治愈1人 死亡0人 感染患者9人
+浙江 治愈0人 死亡0人 感染患者0人
+// 该文档并非真实数据，仅供测试使用
+// 命令：list -log D:\log\ -out D:\ListOut7.txt -date 2020-01-23 -type cure dead ip -province 全国 浙江 福建

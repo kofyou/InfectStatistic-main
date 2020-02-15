@@ -9,3 +9,10 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+
+/node_modules/              
+#过滤整个mtk文件夹
+*.json               
+#过滤所有.zip文件
+/CHANGELOG.md       
+#过滤/mtk/do.c文件

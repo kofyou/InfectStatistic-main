@@ -1,16 +1,13 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
  * InfectStatistic
  * TODO
  *
- * @author hujh4779
- * @version v1.0.0
- * @since 2020.2.15
+ * @author xxx
+ * @version xxx
+ * @since xxx
  */
 class InfectStatistic {
     private int[][] patient;
@@ -23,6 +20,10 @@ class InfectStatistic {
         InfectStatistic infectStatistic = new InfectStatistic();
         CommandHandle commandHandle = infectStatistic.new CommandHandle();
         commandHandle.commandProcess(args);
+        LogHandle logHandle = infectStatistic.new LogHandle();
+        if (!logHandle.readLogs(commandHandle.getEndDate(), commandHandle.getLogPath())) {
+            System.out.println("日期超出范围");
+        }
     }
 
     class CommandHandle {
@@ -121,6 +122,46 @@ class InfectStatistic {
             }
             else {
                 return false;
+            }
+            return true;
+        }
+    }
+
+    class LogHandle {
+        ArrayList<String> stringList;
+
+        public LogHandle() {
+            this.stringList = new ArrayList<>();
+        }
+
+        public ArrayList<String> getStringList() {
+            return stringList;
+        }
+
+        public boolean readLogs(String endDate, String logPath) {
+            File file = new File(logPath);
+            File fileList[] = file.listFiles();
+            for (int i = 0; i < fileList.length; i++) {
+                String fileName = fileList[i].getName();
+                if (fileName.substring(1, 10).compareTo(endDate) <= 0) {
+                    try {
+                        FileReader fr = new FileReader(fileName);
+                        BufferedReader bf = new BufferedReader(fr);
+                        String str;
+                        while ((str = bf.readLine()) != null) {
+                            if(!str.startsWith("//")) {
+                                this.stringList.add(str);
+                            }
+                        }
+                        bf.close();
+                        fr.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    return false;
+                }
             }
             return true;
         }

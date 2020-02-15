@@ -63,6 +63,7 @@ class InfectStatistic {
 		boolean setType=false;
 		
 		File directory=null;
+		File output=null;
 		
 		Date date=null;
 		
@@ -127,6 +128,12 @@ class InfectStatistic {
         	else if (args[i].equals("-out"))
         	{
         		outputPath=args[i+1];
+        		output= new File(outputPath);
+    		    if(!outputPath.matches("[A-z]:/(.+?/)*.+?.txt"))
+    	        {
+    				System.out.println("输出文件路径错误");
+    				System.exit(1);
+    			}
         		i++;
         	}
         	else if (args[i].equals("-date"))
@@ -331,7 +338,11 @@ class InfectStatistic {
         
         country=new Area(infectSum,suspectSum,cureSum,deathSum);
         
-        File output = new File(outputPath);
+        
+        
+
+      
+        
         
         if (!output.exists())
         {

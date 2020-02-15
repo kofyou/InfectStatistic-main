@@ -1,5 +1,6 @@
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -88,6 +89,25 @@ public class Lib {
         return equals;
     }
 
+    public static String[] getOlderFiles(String logDir, String logDeadline)
+        throws NotDirectoryException, FileNotFoundException {
+        File path = new File(logDir);
+        if (!path.isDirectory()) {
+            throw new NotDirectoryException("log path must be a directory");
+        }
+
+        final String finalLogDeadline = logDeadline;
+        String[] logFiles = path.list((dir, name) -> {
+            String logDate = name.substring(0, 10);
+            return logDate.compareTo(finalLogDeadline) <= 0;
+        });
+
+        if (logFiles == null || logFiles.length == 0) {
+            throw new FileNotFoundException("no log file older than deadline");
+        }
+        return logFiles;
+    }
+
     public void parse(String[] args) throws IOException, DataFormatException {
         this.args = args;
         this.commandArgs = ArgsParser.parse(args);
@@ -108,25 +128,6 @@ public class Lib {
         this.provinceStatMap = logParser.parse(logFiles);
 
         outputResult();
-    }
-
-    public static String[] getOlderFiles(String logDir, String logDeadline)
-        throws NotDirectoryException, FileNotFoundException {
-        File path = new File(logDir);
-        if (!path.isDirectory()) {
-            throw new NotDirectoryException("log path must be a directory");
-        }
-
-        final String finalLogDeadline = logDeadline;
-        String[] logFiles = path.list((dir, name) -> {
-            String logDate = name.substring(0, 10);
-            return logDate.compareTo(finalLogDeadline) <= 0;
-        });
-
-        if (logFiles == null || logFiles.length == 0) {
-            throw new FileNotFoundException("no log file older than deadline");
-        }
-        return logFiles;
     }
 
     private void statAll() {
@@ -232,7 +233,8 @@ class LibTest {
             .split(" ");
 
         CommandArgs commandArgs = ArgsParser.parse(args);
-        Assert.assertEquals(".\\result\\ListOut1.mine.txt", commandArgs.getOptionValues("out").get(0));
+        Assert.assertEquals(".\\result\\ListOut1.mine.txt",
+            commandArgs.getOptionValues("out").get(0));
     }
 
     @Test
@@ -242,7 +244,8 @@ class LibTest {
         CommandArgs commandArgs = ArgsParser.parse(args);
 
         String[] expectedProvinces = {"全国", "福建"};
-        Assert.assertArrayEquals(expectedProvinces, commandArgs.getOptionValues("province").toArray());
+        Assert.assertArrayEquals(expectedProvinces,
+            commandArgs.getOptionValues("province").toArray());
     }
 
     @Test
@@ -280,6 +283,50 @@ class LibTest {
         String[] result = {"湖北", "福建", "3"};
         List<String> tokens = LogParser.regexGroup3(soap, LogParser.regex4);
         Assert.assertArrayEquals(result, tokens.toArray());
+    }
+
+    @Test
+    public void testProvinceIncIP() {
+        ProvinceStat provinceStat = new ProvinceStat();
+
+        provinceStat.incrNumIP(3);
+        provinceStat.incrNumIP(2);
+        Assert.assertEquals(5, provinceStat.getNumIP());
+    }
+
+    @Test
+    public void testProvinceDecIPException() {
+        Exception exception = assertThrows(OutOfBoundException.class, () -> {
+            ProvinceStat provinceStat = new ProvinceStat();
+            provinceStat.incrNumIP(3);
+            provinceStat.decrNumSP(6);
+        });
+
+        assertTrue(exception.getMessage().contains(" out of bound "));
+    }
+
+    @Test
+    public void testProvinceMigrateIP() {
+        ProvinceStat source = new ProvinceStat();
+        ProvinceStat target = new ProvinceStat();
+
+        source.incrNumIP(3);
+        target.incrNumIP(2);
+        source.migrateIP(target, 2);
+        Assert.assertEquals(1, source.getNumIP());
+        Assert.assertEquals(4, target.getNumIP());
+    }
+
+    @Test
+    public void testProvinceMigrateSP() {
+        ProvinceStat source = new ProvinceStat();
+        ProvinceStat target = new ProvinceStat();
+
+        source.incrNumSP(3);
+        target.incrNumSP(2);
+        source.migrateSP(target, 2);
+        Assert.assertEquals(1, source.getNumSP());
+        Assert.assertEquals(4, target.getNumSP());
     }
 
     @Test
@@ -446,27 +493,6 @@ class LogParser {
             return result;
         }
         return null;
-    }
-
-    public static void testRegex() {
-        String soap = "福建 新增 感染患者 23人\n"
-            + "浙江 新增 感染患者 22人\n"
-            + "福建 新增 疑似患者 2人\n"
-            + "浙江 感染患者 流入 福建 12人\n"
-            + "湖北 疑似患者 流入 福建 2人\n"
-            + "安徽 死亡 2人\n"
-            + "新疆 治愈 3人\n"
-            + "福建 疑似患者 确诊感染 2人\n"
-            + "新疆 排除 疑似患者 5人";
-
-        System.out.println(regexGroup2(soap, regex1));
-        System.out.println(regexGroup2(soap, regex2));
-        System.out.println(regexGroup3(soap, regex3));
-        System.out.println(regexGroup3(soap, regex4));
-        System.out.println(regexGroup2(soap, regex5));
-        System.out.println(regexGroup2(soap, regex6));
-        System.out.println(regexGroup2(soap, regex7));
-        System.out.println(regexGroup2(soap, regex8));
     }
 
     private ProvinceStat getProvinceStat(String provinceName) {

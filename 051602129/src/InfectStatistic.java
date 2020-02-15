@@ -408,10 +408,15 @@ class InfectStatistic {
     public ArrayList sortByProvinceName(ArrayList<String> list) {
         ArrayList<String> provinceName = new ArrayList<>();
         for (String s :list){
-            provinceName.add(s);
+            if (s.equals("重庆")){
+                provinceName.add("冲庆");
+            }else {
+                provinceName.add(s);
+            }
         }
         Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
         Collections.sort(provinceName,com);
+        System.out.println(provinceName);
         return provinceName;
     }
 
@@ -433,6 +438,9 @@ class InfectStatistic {
             Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
             ArrayList<String> sortNames = this.sortByProvinceName(provinceNames);
             for(String provinceName : sortNames){
+                if (provinceName.equals("冲庆")){
+                    provinceName = "重庆";
+                }
                 String result = provinceName;
                 if(data.containsKey(provinceName)) {
                     HashMap<String, Integer> temp = data.get(provinceName);
@@ -561,9 +569,9 @@ class InfectStatistic {
             Matcher matcher = pattern.matcher(content);
             if (matcher.find()){
                 ArrayList<String> datas = new ArrayList<>(){{
-                    add(matcher.group(1) + " 新增 感染患者 " + matcher.group(3));
-                    add(matcher.group(1) + " 治愈 " + matcher.group(5));
-                    add(matcher.group(1) + " 死亡 " + matcher.group(6));
+                    add(matcher.group(1) + " 新增 感染患者 " + matcher.group(3) + "人");
+                    add(matcher.group(1) + " 治愈 " + matcher.group(5) + "人");
+                    add(matcher.group(1) + " 死亡 " + matcher.group(6) + "人");
                 }};
                 this.writerWebDataToFile(datas);
             }

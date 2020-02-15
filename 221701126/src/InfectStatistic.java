@@ -118,17 +118,6 @@ class InfectStatistic {
 		
 	}
 	
-	//打印命令对象数组
-//	private static void printOrders(Vector<Order> orders) {
-//		for(Order order : orders) {
-//			System.out.println("命令名为" + order.orderName);
-//			System.out.println("命令参数为");
-//			for(String param : order.orderParams) {
-//				System.out.println(param + " ");
-//			}
-//		}
-//	}
-	
 	//写入文件
 	private static void writeToFile() {
 		
@@ -142,9 +131,6 @@ class InfectStatistic {
 			File output = new File(outputPath);
 //			if(!output.exists()){
 //				output.createNewFile();
-//			}
-//			else {
-//				output.cle
 //			}
 			FileWriter fileWriter = new FileWriter(output.getAbsoluteFile(), true);
 			BufferedWriter bw = new BufferedWriter(fileWriter);
@@ -229,111 +215,6 @@ class InfectStatistic {
 				printTheProvince(provinceName);
 			}
 		}
-//		if(provinceItem.contains("全国")) {
-//			printTheProvince("全国");
-//		}
-//		if(provinceItem.contains("安徽")) {
-//			printTheProvince("安徽");
-//		}
-//		if(provinceItem.contains("北京")) {
-//			printTheProvince("北京");
-//		}
-//		if(provinceItem.contains("重庆")) {
-//			printTheProvince("重庆");
-//		}
-//		if(ip) {
-//			System.out.print(" 感染患者" + country.infect);
-//		}
-//		if(sp) {
-//			System.out.print(" 疑似患者" + country.seeming);
-//		}
-//		if(cure) {
-//			System.out.print(" 治愈" + country.cured);
-//		}
-//		if(dead) {
-//			System.out.print(" 死亡" + country.dead);
-//		}
-		//System.out.println("全国" + "感染人数" + country.infect + " 疑似人数" + country.seeming + " 治愈人数" + country.cured + " 死亡人数" + country.dead);
-//		if(provinceItem.contains("福建")) {
-//			printTheProvince("福建");
-//		}
-//		if(provinceItem.contains("甘肃")) {
-//			printTheProvince("甘肃");
-//		}
-//		if(provinceItem.contains("广东")) {
-//			printTheProvince("广东");
-//		}
-//		if(provinceItem.contains("广西")) {
-//			printTheProvince("广西");
-//		}
-//		if(provinceItem.contains("贵州")) {
-//			printTheProvince("贵州");
-//		}
-//		if(provinceItem.contains("海南")) {
-//			printTheProvince("海南");
-//		}
-//		if(provinceItem.contains("河北")) {
-//			printTheProvince("河北");
-//		}
-//		if(provinceItem.contains("河南")) {
-//			printTheProvince("河南");
-//		}
-//		if(provinceItem.contains("黑龙江")) {
-//			printTheProvince("黑龙江");
-//		}
-//		if(provinceItem.contains("湖北")) {
-//			printTheProvince("湖北");
-//		}
-//		if(provinceItem.contains("湖南")) {
-//			printTheProvince("湖南");
-//		}
-//		if(provinceItem.contains("吉林")) {
-//			printTheProvince("吉林");
-//		}
-//		if(provinceItem.contains("江苏")) {
-//			printTheProvince("江苏");
-//		}
-//		if(provinceItem.contains("江西")) {
-//			printTheProvince("江西");
-//		}
-//		if(provinceItem.contains("辽宁")) {
-//			printTheProvince("辽宁");
-//		}
-//		if(provinceItem.contains("内蒙古")) {
-//			printTheProvince("内蒙古");
-//		}
-//		if(provinceItem.contains("宁夏")) {
-//			printTheProvince("宁夏");
-//		}
-//		if(provinceItem.contains("青海")) {
-//			printTheProvince("青海");
-//		}
-//		if(provinceItem.contains("山东")) {
-//			printTheProvince("山东");
-//		}
-//		if(provinceItem.contains("山西")) {
-//			printTheProvince("山西");
-//		}
-//		if(provinceItem.contains("浙江")) {
-//			printTheProvince("浙江");
-//		}
-		
-
-		
-//		if(map.get("福建") != null) {
-//			Province province  = map.get("福建");
-//			System.out.println("福建感染人数" + province.infect);
-//			System.out.println("福建疑似人数" + province.seeming);
-//			System.out.println("福建治愈人数" + province.cured);
-//			System.out.println("福建死亡人数" + province.dead);
-//		}
-//		if(map.get("湖北") != null) {
-//			Province province  = map.get("湖北");
-//			System.out.println("湖北感染人数" + province.infect);
-//			System.out.println("湖北疑似人数" + province.seeming);
-//			System.out.println("湖北治愈人数" + province.cured);
-//			System.out.println("湖北死亡人数" + province.dead);
-//		}
 	}
 	
 	//获取各行的人数
@@ -358,12 +239,6 @@ class InfectStatistic {
 	    		InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
 	    		BufferedReader bf = new BufferedReader(inputReader);
 	    		
-//	    		File output = new File(outputPath + ".output.txt");
-//	    		if(!output.exists()){
-//	    			output.createNewFile();
-//	    		}
-//	    		FileWriter fileWriter = new FileWriter(output.getAbsoluteFile());
-//	    		BufferedWriter bw = new BufferedWriter(fileWriter);
 	    		
 	    		
 	    		String str;
@@ -494,8 +369,6 @@ class InfectStatistic {
 						}
 	    				map.put(province, p);
 	    			}
-	    			//System.out.println(str);
-	    			//bw.write(str);
 	    		}			
 	    		bf.close();		
 	    	//	bw.close();
@@ -541,9 +414,7 @@ class InfectStatistic {
 			else {
 				flag = false;
 			}
-//			for(String aString : toHandleDate) {
-//				System.out.println(aString);
-//			}
+
 			if(toHandleDate.size() > 0) {
 				solveEveryFile(toHandleDate);
 			}
@@ -556,80 +427,17 @@ class InfectStatistic {
 	
     	Vector<Order> orders = new Vector<Order>();
     	country.name = "全国";
-//    	try {
-//    		if(args.length != 0 && !args[0].equals("list")) {
-//        		System.out.println("请输入正确的命令(list)");
-//        		return;
-//        	}
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//		}
-    	
+  
     	solveArgs(args, orders);
-//    	try {
-//    		File file = new File("../log/2020-01-22.log.txt");
-//
-//    		InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file));
-//    		BufferedReader bf = new BufferedReader(inputReader);
-//    		
-//    		String str;
-//    		while ((str = bf.readLine()) != null) {
-//    			System.out.println(str);	
-//    		}			
-//    		bf.close();			
-//    		inputReader.close();
-//    	
-//		} 
-//    	catch (IOException  e) {
-//			// TODO: handle exception
-//    		e.printStackTrace();
-//		}
 
-//		try {
-//
-//				String content = "a dog will be write in file";
-//
-//				File file = new File("test_appendfile2.txt");
-//
-//				if(!file.exists()){
-//
-//					file.createNewFile();
-//
-//				}
-//
-//				FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
-//
-//				BufferedWriter bw = new BufferedWriter(fileWriter);
-//
-//				bw.write(content);
-//
-//				bw.close();
-//
-//				System.out.println("finish");
-//
-//		    } catch (IOException e) {
-//
-//		        e.printStackTrace();
-//
-//		    }
-
-
-    	//printOrders(orders);
     	System.out.println(inputPath);
     	System.out.println(outputPath);
     	solveDateOrder(targetDate);
     	printResult();
-    	//writeToFile();
-    	//setVariable(orders);
+
     }
 }
-class Order{
-	String orderName;//命令名
-	Vector<String> orderParams;//该命令的参数
-	 Order() {
-		 orderParams =  new Vector<String>();
-	}
-}
+
 
 class Province{
 	String name;//省名

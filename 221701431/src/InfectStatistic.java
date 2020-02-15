@@ -2,7 +2,12 @@ import org.omg.PortableInterceptor.Interceptor;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -85,7 +90,7 @@ class InfectStatisticApplication{
       }
 
       if (judgeNum == 3){
-
+          new Present().present(args);
       }
   }
 }
@@ -418,16 +423,24 @@ class CommandJudge{
                 return 2;
             }
 
-            /*
-             * -log
-             * -out
-             * -type
-             * -province
-             *
-             * */
-
             if (args[0].equals("present")){
 
+                if (args.length != 3){
+                    System.out.println("Error Command");
+                    return 0;
+                }
+
+                if (!args[1].equals("-out")){
+                    System.out.println("Please input parameter");
+                    return 0;
+                }
+
+                File f = new File(args[2]);
+                if (f.isDirectory()){
+                    System.out.println("It should be a file");
+                    return 0;
+                }
+                return 3;
             }
         }
 
@@ -591,9 +604,9 @@ class ListCommand{
             }
         }
 
-        FileOutputStream fos=new FileOutputStream(args[new CommandJudge().foundSpecialIndex(args , "-out")+1]);
-        OutputStreamWriter osw=new OutputStreamWriter(fos, "UTF-8");
-        BufferedWriter  bw=new BufferedWriter(osw);
+        FileOutputStream fos = new FileOutputStream(args[new CommandJudge().foundSpecialIndex(args , "-out")+1]);
+        OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+        BufferedWriter  bw = new BufferedWriter(osw);
 
         if (new CommandJudge().foundSpecial(args , "-type")){
             LinkedList<String> types = new CommandJudge().foundType(args);
@@ -757,4 +770,53 @@ class Help{
 * 增加功能，得到现在实时的人数
 * */
 class Present{
+    public void present(String[] args) throws IOException {
+        String strurl = "https://ncov.dxy.cn/ncovh5/view/pneumonia?from=singlemessage&isappinstalled=0";
+        URL url = new URL(strurl);
+        URLConnection conn = url.openConnection();
+        InputStream is = conn.getInputStream();
+        BufferedReader br = new BufferedReader(new InputStreamReader(is , "utf-8"));
+
+        String line = null;
+
+        FileOutputStream fos = new FileOutputStream(args[2]);
+        OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+        BufferedWriter  bw = new BufferedWriter(osw);
+
+        while ((line=br.readLine()) != null){
+            String regex = "\\\"provinceShortName\\\"\\:\\\"([\\S]{2,4})\\\"\\,\\\"currentConfirmedCount\\\"\\:\\d+\\," +
+                    "\\\"confirmedCount\\\":\\d+\\,\\\"suspectedCount\\\"\\:\\d+\\,\\\"curedCount\\\"\\:\\d+\\," +
+                    "\\\"deadCount\\\"\\:\\d+\\,\\\"";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher ma = pattern.matcher(line);
+
+            while(ma.find()){
+                String[] gots = ma.group().split(",");
+                String[] province = gots[0].split(":");
+                String[] currentConfirm = gots[1].split(":");
+                String[] confirm = gots[2].split(":");
+                String[] cure = gots[4].split(":");
+                String[] dead = gots[5].split(":");
+
+                String osName = System.getProperty("os.name");
+                if (osName.startsWith("Mac os")) {
+                    bw.write("省份:" + province[1] + "  现存确诊数:" + currentConfirm[1] + "  累计确诊数:" + confirm[1] +
+                            "  治愈人数:" + cure[1] + "  死亡人数:" + dead[1] + "\n");
+                }else if(osName.startsWith("Windows")){
+                    bw.write("省份:" + province[1] + "  现存确诊数:" + currentConfirm[1] + "  累计确诊数:" + confirm[1] +
+                            "  治愈人数:" + cure[1] + "  死亡人数:" + dead[1] + "\r\n");
+                }else {
+                    bw.write("省份:" + province[1] + "  现存确诊数:" + currentConfirm[1] + "  累计确诊数:" + confirm[1] +
+                            "  治愈人数:" + cure[1] + "  死亡人数:" + dead[1] + "\r");
+                }
+            }
+        }
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String time = df.format(new Date());
+        bw.write("//该报告截止于: " + time);
+        br.close();
+        bw.close();
+        osw.close();
+        fos.close();
+    }
 }

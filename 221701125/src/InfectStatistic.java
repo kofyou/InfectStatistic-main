@@ -84,35 +84,7 @@ class InfectStatistic {
 //    		System.out.println("没有参数");
 //    	}
         
-        for (int i=0;i<args.length;i++)
-        {
-        	if (args[i].equals("-log"))
-        	{
-        		logPath=args[i+1];
-        	}
-        	
-        	if (args[i].equals("-out"))
-        	{
-        		outputPath=args[i+1];
-        	}
-        	
-        	if (args[i].equals("-date"))
-        	{
-        		dateString=args[i+1];
-        		int year=Integer.parseInt(dateString.substring(0, 4));
-                int month=Integer.parseInt(dateString.substring(5, 7));
-                int day=Integer.parseInt(dateString.substring(8,10));
-                
-                date=new Date(year-1900, month-1, day);
-        	}
-        	
-        	if (Arrays.asList(types).contains(args[i]))
-        	{
-        		type.add(args[i]);
-        	}
-        	
-        	
-        }
+        
         
         
         
@@ -166,6 +138,44 @@ class InfectStatistic {
         map.put("新疆", new Area());
         map.put("云南", new Area());
         map.put("浙江", new Area());
+        
+        
+        for (int i=0;i<args.length;i++)
+        {
+        	if (args[i].equals("-log"))
+        	{
+        		logPath=args[i+1];
+        	}
+        	
+        	if (args[i].equals("-out"))
+        	{
+        		outputPath=args[i+1];
+        	}
+        	
+        	if (args[i].equals("-date"))
+        	{
+        		dateString=args[i+1];
+        		int year=Integer.parseInt(dateString.substring(0, 4));
+                int month=Integer.parseInt(dateString.substring(5, 7));
+                int day=Integer.parseInt(dateString.substring(8,10));
+                
+                date=new Date(year-1900, month-1, day);
+        	}
+        	
+        	if (Arrays.asList(types).contains(args[i]))
+        	{
+        		type.add(args[i]);
+        	}
+        	
+        	if (Arrays.asList(areas).contains(args[i]))
+        	{
+        		map.get(args[i]).setIsRelate();
+        		System.out.println("参数："+args[i]);
+        	}
+        	
+        	
+        	
+        }
         
         
         

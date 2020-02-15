@@ -8,8 +8,8 @@
 
 简单变量可允许使用单个字母，大小写均可，其他变量的命名需有实际意义，采用小驼峰格式，必须以字母开头。
 
-> 正例：int a=1 / int B=0 / int leftedMoney=1000;  
-> 反例：int lefted_money=1000 / int SpentMoney=500;  
+> 正例：int a = 1 / int B = 0 / int leftedMoney = 1000;  
+> 反例：int lefted_money = 1000 / int SpentMoney = 500;  
 
 ### 函数、类命名
 
@@ -43,14 +43,14 @@
 
 ```
 int getLength(int a)
-{return 4*a;}
+{return 4 * a;}
 ```
 >示例2：
 
 ```
 int getLength(int a)
 {
-int result=4*a;
+int result = 4 * a;
 return result;
 }
 ```
@@ -71,7 +71,7 @@ int getArea()
 >示例1：
 
 ```
-int a=0; //a为索引
+int a = 0; //a为索引
 ```
 >示例2：
 

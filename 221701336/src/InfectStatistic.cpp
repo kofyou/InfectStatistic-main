@@ -11,6 +11,9 @@
 #include<fstream>
 #include<cstring>
 #include<io.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -27,6 +30,94 @@ struct pNode
 void input(string path,pNode p);
 void output(string path,pNode p);
 void readDir(string date,string path);
+
+string getDate(int argc, char *argv[])//获得命令行参数中的日期 
+{
+	string s1,s2;
+	s2="9999-12-31";
+	cout << "argc: " << argc << endl;
+	for (int i = 0; i < argc; i++)
+    {
+		s1=argv[i]; 
+        if(s1=="-date")
+        {       
+			s2=argv[i+1]; 	
+		}
+    } 
+    return s2;
+}
+
+string getLog(int argc, char *argv[])//获得命令行参数中的目录 
+{
+	string s1;
+    string s2="NULL";
+	for (int i = 0; i < argc; i++)
+    {
+		s1=argv[i]; 
+        if(s1=="-log")
+        {        	
+        	s2=argv[i+1];
+		}
+    }
+	return s2; 
+}
+
+string getOutPath(int argc, char *argv[])
+{
+	string s1;
+    string s2="NULL";
+	for (int i = 0; i < argc; i++)
+    {
+		s1=argv[i]; 
+        if(s1=="-out")
+        {        	
+        	s2=argv[i+1];
+		}
+    }
+	return s2; 
+}
+
+void getType(int argc, char *argv[],string type[])
+{
+	string s1;
+	string s2;
+	for (int i = 0; i < argc; i++)
+    {
+		s1=argv[i]; 
+        if (s1=="-type")
+        {	
+			for(int j=i+1;j<argc;j++)
+			{
+				s2=argv[j];
+				if(s2=="ip"||s2=="sp"||s2=="cure"||s2=="dead")
+				{
+					type[j-i-1]=s2;
+				}
+			}	        	
+		}
+    }
+}
+
+void getProvince(int argc,char *argv[],string province[])
+{
+	string s1;
+	string s2;
+	for(int i=0;i<argc;i++)
+	{
+		s1=argv[i];
+		if(s1=="-province")
+		{
+			for(int j=i+1;j<argc;j++)
+			{
+				s2=argv[j];
+				if(s2!="-log"&&s2!="-out"&&s2!="-date"&&s2!="-type"&&s2!="province")
+				{
+					province[j-i-1]=s2;
+				}
+			}
+		}
+	}
+}
 
 void readDir(string date,string path)
 {
@@ -95,20 +186,39 @@ void output(string path,pNode p)
 	outFile.close(); //关闭文本文件
 }
 
-int main()
+int main(int argc,char *argv[])
 {
-	string date="2020-01-25"; //所要求的的日期 
-	char inPath[100]="F:/新建文件夹/InfectStatistic-main/example/log/";//输入地址 
-	string dirPath;//目录地址 
-	dirPath=inPath; 
-	readDir(date,dirPath);
+		
+	string date="9999-12-31";//所要求的的日期 
+	string type[4]={"0","0","0","0"};
+	string outPath;
+	string log;
+	string province[35];
+	
+	for(int i=0;i<35;i++)
+	{
+		province[0]="0";
+	}
+	
+	date=getDate(argc,argv);	
+	cout<<"要求日期:"<<date<<endl; 	
+	
+	log=getLog(argc,argv);
+	cout<<"要求打开目录:"<<log<<endl; 
+	
+	outPath=getOutPath(argc,argv);
+	cout<<"要求输出地址:"<<outPath<<endl;
+	
+	getType(argc,argv,type);	
+	
+	getProvince(argc,argv,province);
 	
 	
-	char outPath[100]="C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/out.txt";//输出地址 
-	string path;
-	path=outPath;
+	//readDir(date,log);//读取目录 
+	
+
 	pNode p={"福建",6,3,15,20};
-	//output(path,p);
+	//output(outPath,p);//输出 
 	system("pause");
 }
 

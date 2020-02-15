@@ -53,7 +53,7 @@ public class InfectStatistic
     	for(String temp : args)vector.add(temp);
     	//测试函数dealParameter
     	
-    	{
+    	
     		vector.add("list");
     		vector.add("-log");
     		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\infectstatistic_yjchen\\");
@@ -78,7 +78,7 @@ public class InfectStatistic
     		vector.add("广东");
     		vector.add("安徽"); 
     		*/
-    	}
+    	
     	
     	//保存全国的感染情况
     	allCountry.setName("全国");
@@ -501,8 +501,8 @@ public class InfectStatistic
 		if(isOutCountry || IsOutputDefautProvince) 
 		{
 			J_Province s = allCountry;
-			out.write(s.getName() + "\t" );
-			System.out.print(s.getName() + "\t" );
+			out.write(s.getName() + " " );
+			System.out.print(s.getName() + " " );
 			for(int j = 1;j < countList + 1;j ++ )
 			{
 				for(int i = 0;i < 4;i ++ )
@@ -515,23 +515,23 @@ public class InfectStatistic
 					{
 						if(i == 0)
 						{
-							out.write("感染患者" + s.Infected() + "人" + "\t");
-							System.out.print("感染患者" + s.Infected() + "人" + "\t");
+							out.write("感染患者" + s.Infected() + "人" + " ");
+							System.out.print("感染患者" + s.Infected() + "人" + " ");
 						}
 						if(i == 1)
 						{
-							out.write("疑似患者" +  s.Suspected() + "人" + "\t" );
-							System.out.print("疑似患者" +  s.Suspected() + "人" + "\t" );
+							out.write("疑似患者" +  s.Suspected() + "人" + " " );
+							System.out.print("疑似患者" +  s.Suspected() + "人" + " " );
 						}
 						if(i == 2)
 						{
-							out.write("治愈" + s.Cured() + "人" + "\t");
-							System.out.print("治愈" + s.Cured() + "人" + "\t");
+							out.write("治愈" + s.Cured() + "人" + " ");
+							System.out.print("治愈" + s.Cured() + "人" + " ");
 						}
 						if(i == 3)
 						{
-							out.write("死亡" + s.Died() + "人" + "\t");
-							System.out.print( "死亡" + s.Died() + "人" + "\t");
+							out.write("死亡" + s.Died() + "人" + " ");
+							System.out.print( "死亡" + s.Died() + "人" + " ");
 						}
 					}
 				}
@@ -541,8 +541,8 @@ public class InfectStatistic
 		}
 		for(J_Province s:limitProvince) 
 		{
-			out.write(s.getName() + "\t" );
-			System.out.print(s.getName() + "\t" );
+			out.write(s.getName() + " " );
+			System.out.print(s.getName() + " " );
 			for(int j = 1;j < countList + 1;j ++ )
 			{
 				for(int i = 0;i < 4;i ++ )
@@ -555,23 +555,23 @@ public class InfectStatistic
 					{
 						if(i == 0)
 						{
-							out.write("感染患者" + s.Infected() + "人" + "\t");
-							System.out.print("感染患者" + s.Infected() + "人" + "\t");
+							out.write("感染患者" + s.Infected() + "人" + " ");
+							System.out.print("感染患者" + s.Infected() + "人" + " ");
 						}
 						if(i == 1)
 						{
-							out.write("疑似患者" +  s.Suspected() + "人" + "\t" );
-							System.out.print("疑似患者" +  s.Suspected() + "人" + "\t" );
+							out.write("疑似患者" +  s.Suspected() + "人" + " " );
+							System.out.print("疑似患者" +  s.Suspected() + "人" + " " );
 						}
 						if(i == 2)
 						{
-							out.write("治愈" + s.Cured() + "人" + "\t");
-							System.out.print("治愈" + s.Cured() + "人" + "\t");
+							out.write("治愈" + s.Cured() + "人" + " ");
+							System.out.print("治愈" + s.Cured() + "人" + " ");
 						}
 						if(i == 3)
 						{
-							out.write("死亡" + s.Died() + "人" + "\t");
-							System.out.print( "死亡" + s.Died() + "人" + "\t");
+							out.write("死亡" + s.Died() + "人" + " ");
+							System.out.print( "死亡" + s.Died() + "人" + " ");
 						}
 					}
 				}
@@ -594,7 +594,7 @@ public class InfectStatistic
     	ArrayList<String> arrayList = new ArrayList<>();
 		try {
 			File file = new File(name);
-			InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file));
+			InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file),"utf-8");
 			BufferedReader bf = new BufferedReader(inputReader);
 			// 按行读取字符串
 			String str;

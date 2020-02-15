@@ -251,6 +251,11 @@ class InfectStatistic {
     	        String str;
     	        
     			while ((str = bufferedReader.readLine()) != null) {
+    				
+    				if (str.startsWith("//")||str.equals(""))
+    				{
+    					continue;
+    				}
     				    				
     				String[] splitLine=str.split(" "); 
     				

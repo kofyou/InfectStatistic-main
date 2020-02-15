@@ -15,17 +15,17 @@
 
 函数的命名必须有实际意义，采用小驼峰格式。
 > 正例：addNumbers()
-反例：AddNumbers() / add_numbers()
+> 反例：AddNumbers() / add_numbers()
 
 类的命名必须有实际意义，采用大驼峰格式。
->正例：MathTeacher / Lesson
-反例：math_teacher / lesson
+> 正例：MathTeacher / Lesson
+> 反例：math_teacher / lesson
 
 ### 常量
 
 常量的命名全部大写，单词间用下划线隔开。
->正例：MAX_NUMBER / PI
-反例：MaxNumber / Pi
+> 正例：MAX_NUMBER / PI
+> 反例：MaxNumber / Pi
 
 ### 每行最多字符数
 

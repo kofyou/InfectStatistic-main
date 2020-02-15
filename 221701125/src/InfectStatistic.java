@@ -62,6 +62,8 @@ class InfectStatistic {
 		boolean setProvince=false;
 		boolean setType=false;
 		
+		File directory=null;
+		
 		Date date=null;
 		
 		List<String> type = new ArrayList<>();
@@ -111,19 +113,41 @@ class InfectStatistic {
         	if (args[i].equals("-log"))
         	{
         		logPath=args[i+1];
+        		int position=logPath.lastIndexOf('/');
+                
+                logPath.substring(0, position);
+                directory = new File(logPath);
+	            if (!directory.isDirectory())
+	            {
+	                System.out.println("日志文件错误或不存在日志文件");
+	                System.exit(1);
+	            }
+        		i++;
         	}
         	else if (args[i].equals("-out"))
         	{
         		outputPath=args[i+1];
+        		i++;
         	}
         	else if (args[i].equals("-date"))
         	{
         		dateString=args[i+1];
-        		int year=Integer.parseInt(dateString.substring(0, 4));
-                int month=Integer.parseInt(dateString.substring(5, 7));
-                int day=Integer.parseInt(dateString.substring(8,10));
-                
-                date=new Date(year-1900, month-1, day);
+        		
+        		try
+        		{
+        			int year=Integer.parseInt(dateString.substring(0, 4));
+                    int month=Integer.parseInt(dateString.substring(5, 7));
+                    int day=Integer.parseInt(dateString.substring(8,10));
+                    
+                    date=new Date(year-1900, month-1, day);
+        		}
+        		catch(StringIndexOutOfBoundsException e)
+        		{
+        			System.out.println("-date参数错误");
+        			System.exit(1);
+        		}
+        		
+                i++;
         	}
         	else if (args[i].equals("-type"))
         	{
@@ -158,26 +182,17 @@ class InfectStatistic {
         			System.exit(1);
         		}
         	}
-        	
+        	else
+        	{
+        		if (!args[i].equals("list"))
+        		{
+        			System.out.println("无法识别参数："+args[i]);
+        			System.exit(1);
+        		}
+        	}
         }
         
-        int position=logPath.lastIndexOf('/');
-        
-       
-        logPath.substring(0, position);
-        File dir = new File(logPath);
-        
-        
-//        if (dir.isDirectory())
-//        {
-//            System.out.println("是目录");
-//        }
-//        else
-//        {
-//            System.out.println("不是目录");
-//        }
-        
-        File[] logs=dir.listFiles();
+        File[] logs=directory.listFiles();
         
         if (date!=null)
         {
@@ -323,7 +338,6 @@ class InfectStatistic {
         	try 
         	{
 				output.createNewFile();
-				
 			} 
         	catch (IOException e) 
         	{

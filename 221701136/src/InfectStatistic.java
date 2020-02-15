@@ -604,9 +604,6 @@ class InfectStatistic {
 	 **/
 	public void outputData(String path) {
 		FileWriter fileWriter = null;
-		
-		
-	
 		File file = new File(path);
 		try {
 			if(!file.exists()) {
@@ -615,30 +612,65 @@ class InfectStatistic {
 			fileWriter = new FileWriter(file);
 			BufferedWriter out = new BufferedWriter(fileWriter);
 			
-			if(commandProvinceList.contains("全国")) {
-				
-			
+			//若-province包含全国或者命令行不包含-province
+			if(commandProvinceList.contains("全国")||commandProvinceList.isEmpty()) {
 				Set<String> thisSet = ProvinceToNumMap.keySet();
-				for(String strKey:thisSet) {
-					
+				for(String strKey:thisSet) {		
 					HashMap<String,Integer> TypeToNumValue = ProvinceToNumMap.get(strKey);
 					Set<String> set = TypeToNumValue.keySet();
 					for(String integerKey:set) {
+						for(int j=0;j<typeList.size();i++) {
+							switch(typeList[i]) {
+							case "ip":Integer value = TypeToNumValue.get("感染患者");
+							out.write(strKey+" "+"感染患者"+" "+value+"\n");
+							case "sp":Integer value = TypeToNumValue.get("疑似患者");
+							out.write(strKey+" "+"疑似患者"+" "+value+"\n");
+							case "cure":Integer value = TypeToNumValue.get("治愈");
+							out.write(strKey+" "+"治愈"+" "+value+"\n");
+							case "dead":Integer value = TypeToNumValue.get("死亡");
+							out.write(strKey+" "+"死亡"+" "+value+"\n");
+							}
+						}
+						
 						Integer value = TypeToNumValue.get(integerKey);
 					}
 					out.write(strKey+integerKey+value);
 				}
-				
-			
 			}
+			else {
+				Set<String> thisSet = ProvinceToNumMap.keySet();
+				for(String strKey:thisSet) {		
+					for(int i=0;i<commandProvinceList.size();i++) {
+						if(strKey.equals(commandProvinceList[i])) {
+							
+							HashMap<String,Integer> TypeToNumValue = ProvinceToNumMap.get(strKey);
+						Set<String> set = TypeToNumValue.keySet();
+						for(String integerKey:set) {
+							for(int j=0;j<typeList.size();i++) {
+							switch(typeList[i]) {
+							case "ip":Integer value = TypeToNumValue.get("感染患者");
+							out.write(strKey+" "+"感染患者"+" "+value+"\n");
+							case "sp":Integer value = TypeToNumValue.get("疑似患者");
+							out.write(strKey+" "+"疑似患者"+" "+value+"\n");
+							case "cure":Integer value = TypeToNumValue.get("治愈");
+							out.write(strKey+" "+"治愈"+" "+value+"\n");
+							case "dead":Integer value = TypeToNumValue.get("死亡");
+							out.write(strKey+" "+"死亡"+" "+value+"\n");
+							}
+						}
+							}
+						
+						}
+					}
+					
+				}
+				
+			} 
 			
-			
-		
-			
+			out.write("// 该文档并非真实数据，仅供测试使用");
 		}catch(IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	

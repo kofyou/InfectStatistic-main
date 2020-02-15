@@ -17,7 +17,7 @@ public class InfectStatistic
     Date currentDate = new Date(System.currentTimeMillis());
     public String date = dateFormat.format(currentDate);   //默认日期(当前日期)
 
-    public String journalFileName = date+".log.txt";  //默认日志文件名(当前日期log.txt)
+    public String logFileName = date+".log.txt";  //默认日志文件名(当前日期log.txt)
 
     public String log;  //日志文件位置
 
@@ -138,7 +138,7 @@ public class InfectStatistic
             {
                 if (dateStr.compareTo(date) <= 0)  //查询日期 <= 当前日期，查询有效
                 {
-                    journalFileName = dateStr+".log.txt";
+                    logFileName = dateStr+".log.txt";
                     return itemDate;
                 }
                 else
@@ -273,7 +273,7 @@ public class InfectStatistic
                 }
                 else if (strCmd[i].equals("-date"))
                 {
-                    dateCmd = strCmd[i+1];
+                    dateCmd = strCmd[i+1]+".log.txt";
                     i = getValidDate(++i);
                     if (i < 0)
                     {
@@ -329,48 +329,194 @@ public class InfectStatistic
         }
 
         /*
-         * getLogList：获取指定目录下的所有文件
+         * getLogList：获取指定目录下需处理文件
          * log：-log指定日志文件目录
          */
         public void getLogList ()
         {
         //    String filepath = log;
-        //    String minLogName;
+            String filePath;
             File logFile = new File(log);
             File[] logFileList = logFile.listFiles();
         //    minLogName = logFileList[0].getName();
             for (File file : logFileList)
             {
-                if (file.getName().compareTo(journalFileName) <= 0)
+                if (file.getName().compareTo(logFileName) <= 0)
                 {
-                    System.out.print(file.getName());
-                    readJournalFile();
-                }
-                if (file.isFile())
-                {
-                    System.out.println( file.getName());
+                    System.out.println(file.getName());
+                    filePath = log + file.getName();
+                    readLogFile(filePath);
                 }
             }
         }
 
+        public int getItemProvince(String provinceName)
+        {
+            int itemProvince = 1;
+            for(; itemProvince < province.length; itemProvince++)
+            {
+                if (provinceName.equals(province[itemProvince]))
+                    return itemProvince;
+            }
+            return 0;
+        }
 
         /*
          * readJournalFile：按行读取所需日志文件
          * journalFileName：所需日志文件名
          */
-        public void readJournalFile ()
+        public void readLogFile (String logFileName)
         {
-            System.out.println("加入计算列表");
+       //     try (FileReader reader = new FileReader(logFileName);
+       //          BufferedReader br = new BufferedReader(reader) )
+            try
+            {
+                InputStreamReader inputSR =
+                        new InputStreamReader(new FileInputStream(logFileName),"UTF-8");
+                BufferedReader br=new BufferedReader(inputSR);
+                String line = null;
+                while ((line = br.readLine()) != null)
+                {
+                    if(!line.startsWith("//"))
+                        countLogFile(line);
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        /*    System.out.println(province[0]+"感染情况：");
+            for (int i=0; i < 4; i++)
+            {
+                System.out.println("type:"+i+"   人数:"+statistics[0][i]);
+            }
+            System.out.println(province[4]+"感染情况：");
+            for (int i=0; i < 4; i++)
+            {
+                System.out.println("type:"+i+"   人数:"+statistics[4][i]);
+            }
+            System.out.println(province[13]+"感染情况：");
+            for (int i=0; i < 4; i++)
+            {
+                System.out.println("type:"+i+"   人数:"+statistics[13][i]);
+            }
+         */
+        }
+
+        public void statistics(int itemProvince, int itemType, int count)
+        {
+            statistics[0][itemType] += count;
+            statistics[itemProvince][itemType] += count;
+        //    System.out.println("省份:"+province[itemProvince]+"  类型:"+itemType+"  数量:"+statistics[itemProvince][itemType]);
+        }
+
+        public void statistics(int itemProvince1, int itemProvince2, int itemType, int count)
+        {
+            statistics[itemProvince1][itemType] -= count;
+            statistics[itemProvince2][itemType] +=  count;
+         //   System.out.println("省份:"+province[itemProvince2]+"  流入类型:"+itemType+"  数量:"+statistics[itemProvince2][itemType]);
+        }
+
+        public void statistics(int itemProvince1, int itemType1, int itemType2, String count)
+        {
+            int intCount = Integer.valueOf(count);
+            statistics[0][itemType1] -= intCount;
+            statistics[0][itemType2] += intCount;
+            statistics[itemProvince1][itemType1] -= intCount;
+            statistics[itemProvince1][itemType2] += intCount;
         }
 
         /*
-         * infectedCount：统计各省感染情况
-         * journalFileContent：每行日志文件内容
+         * countLogFile：统计各省感染情况
+         * logFileContent：每行日志文件内容
+         * statistics[][5]：0:ip  1:sp  2:cure  3:dead  4:check
          */
-        public void infectedCount (String journalFileContent)
+        public void countLogFile (String logFileContent)
         {
-
+            int itemProvince1;
+            int itemProvince2;
+            int count;
+            Matcher ipIncrease = Pattern.compile("\\W+ 新增 感染患者 \\d+人").matcher(logFileContent);
+            Matcher spIncrease = Pattern.compile("\\W+ 新增 疑似患者 \\d+人").matcher(logFileContent);
+            Matcher ipInflow = Pattern.compile("\\W+ 感染患者 流入 \\W+ \\d+人").matcher(logFileContent);
+            Matcher spInflow = Pattern.compile("\\W+ 疑似患者 流入 \\W+ \\d+人").matcher(logFileContent);
+            Matcher ipDead = Pattern.compile("\\W+ 死亡 \\d+人").matcher(logFileContent);
+            Matcher ipCure = Pattern.compile("\\W+ 治愈 \\d+人").matcher(logFileContent);
+            Matcher spChecked = Pattern.compile("\\W+ 疑似患者 确诊感染 \\d+人").matcher(logFileContent);
+            Matcher spRemove = Pattern.compile("\\W+ 排除 疑似患者 \\d+人").matcher(logFileContent);
+            String[]  logFileContentArray= logFileContent.split(" ");
+            if (ipIncrease.find())
+            {
+                itemProvince1 = getItemProvince(logFileContentArray[0]);
+                count = Integer.valueOf(logFileContentArray[3].replace("人", ""));
+                statistics(itemProvince1,0,count);
+            //    System.out.println(province[itemProvince1]+"新增 感染患者"+count);
+            }
+            else if (spIncrease.find())
+            {
+                itemProvince1 = getItemProvince(logFileContentArray[0]);
+                count = Integer.valueOf(logFileContentArray[3].replace("人", ""));
+                statistics(itemProvince1,1,count);
+            //    System.out.println(province[itemProvince1]+"新增 疑似患者"+count);
+            }
+            else if (ipInflow.find())
+            {
+                itemProvince1 = getItemProvince(logFileContentArray[0]);
+                itemProvince2 = getItemProvince(logFileContentArray[3]);
+                count = Integer.valueOf(logFileContentArray[4].replace("人", ""));
+                statistics(itemProvince1, itemProvince2, 0, count);
+             //   System.out.println(province[itemProvince1]+"感染患者 流入"+ province[itemProvince2] + count);
+            }
+            else if (spInflow.find())
+            {
+                itemProvince1 = getItemProvince(logFileContentArray[0]);
+                itemProvince2 = getItemProvince(logFileContentArray[3]);
+                count = Integer.valueOf(logFileContentArray[4].replace("人", ""));
+                statistics(itemProvince1, itemProvince2, 1, count);
+            //    System.out.println(province[itemProvince1]+"疑似患者 流入"+province[itemProvince2] + count);
+            }
+            else if (ipDead.find())
+            {
+                itemProvince1 = getItemProvince(logFileContentArray[0]);
+            //    count = Integer.valueOf(logFileContentArray[2].replace("人", ""));
+                String scount = logFileContentArray[2].replace("人", "");
+                statistics(itemProvince1, 0, 3, scount);
+            //    System.out.println(province[itemProvince1]+"死亡"+count);
+            }
+            else if (ipCure.find())
+            {
+                itemProvince1 = getItemProvince(logFileContentArray[0]);
+                String scount = logFileContentArray[2].replace("人", "");
+                statistics(itemProvince1, 0, 2, scount);
+            //    System.out.println(province[itemProvince1]+"治愈"+count);
+            }
+            else if (spChecked.find())
+            {
+                itemProvince1 = getItemProvince(logFileContentArray[0]);
+                String scount = logFileContentArray[3].replace("人", "");
+                statistics(itemProvince1, 1, 0, scount);
+            //    System.out.println(province[itemProvince1]+"疑似患者 确诊感染"+count);
+            }
+            else if (spRemove.find())
+            {
+                itemProvince1 = getItemProvince(logFileContentArray[0]);
+                count = Integer.valueOf(logFileContentArray[3].replace("人", ""));
+                count = -count;
+                statistics(itemProvince1,1,count);
+            //    System.out.println(province[itemProvince1]+"排除 疑似患者"+count);
+            }
+        /*    String ipIncrease = "\\W+ 新增 感染患者 \\d+人";
+            String spIncrease = "\\W+ 新增 疑似患者 \\d+人";
+            String ipInflow = "\\W+ 感染患者 流入 \\W+ \\d+人";
+            String spInflow = "\\W+ 疑似患者 流入 \\W+ \\d+人";
+            String ipDead = "\\W+ 死亡 \\d+人";
+            String idCure = "\\W+ 治愈 \\d+人";
+            String spChecked = "\\W+ 疑似患者 确诊感染 \\d+人";
+            String spRemove = "\\W+ 排除 疑似患者 \\d+人";
+         */
         }
+
+
 
         /*
          * writeOutFile：输出统计结果

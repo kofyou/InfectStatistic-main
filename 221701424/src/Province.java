@@ -20,7 +20,6 @@ public class Province {
         this.num_suspect = 0;
     }
     public Province(String name, int num_cure, int num_dead, int num_infect, int num_suspect) {
-
         this.name = name;
         this.num_cure = num_cure;
         this.num_dead = num_dead;

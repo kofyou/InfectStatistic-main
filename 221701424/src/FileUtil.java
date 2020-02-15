@@ -105,7 +105,8 @@ public class FileUtil {
         // }
     }
 
-    public static String[] readLog() throws Exception {
+    public static String[] readLog(Commands cmds) throws Exception {
+        
         File file = new File("C:\\Users\\13067\\Desktop\\test\\test");
         //BufferedReader bReader = new BufferedReader(new FileReader("fileName"))
         FilenameFilter filter = new FilenameFilter(){
@@ -123,15 +124,28 @@ public class FileUtil {
             }
         };
         if (file.exists()) {
-            String[] lists = file.list(filter);
-            for (String name : lists) {
-                System.out.println(name);
-                //BufferedReader bReader = new BufferedReader(new FileReader(name));
-                
+            //ArrayList <String> lists = new ArrayList<>();
+            
+            String[] filter_lists = file.list(filter);
+            int index;
+            if (!cmds.date.equals("")) {
+                for (int i = 0; i < filter_lists.length; i++) {
+                    
+                        if (filter_lists[i].substring(0, 10).equals(cmds.date)) {
+                            index = i;
+                            String[] lists = new String[index + 1];
+                            System.arraycopy(filter_lists, 0, lists, 0, index + 1);
+                            //filter_lists = (String[])lists.toArray(new String[lists.size()]);
+                            return lists;
+                        }
+                }  
+               
             }
-            //return lists;
+            return filter_lists;
+            
         }
-        return file.list();
+        else return null;
+        
     }
 
 

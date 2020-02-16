@@ -1,10 +1,11 @@
-import java.text.DateFormat;
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.text.SimpleDateFormat;
 /**
  * InfectStatistic 
  *
@@ -18,12 +19,17 @@ public class InfectStatistic {
     public static void main(String[] args) {
         String log="C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\log";
         String out="C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\result";
-        Date date=new Date();
+        Calendar cal = GregorianCalendar.getInstance();
+        // System.out.println("请输入年月日：");
+        cal.set(2020, 0, 27);
+        Date date=cal.getTime();//new Date();
         String[] provinces=null;
         String[] types=null;
         List list=new List(log, out, date, provinces, types);
         list.printList();
         Work work=new Work(list);
+        work.Select();
+        work.FileSort();
         work.printout();
 
     }
@@ -122,8 +128,11 @@ class List{
         Types=new TypeList(types);
     }
     public void printList(){
-        System.out.println("log=" + Log + "\nOut=" + Out + "\nDate=" + DateNow.toString()+"\n");
-        Provinces.printout();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");  
+        //String dateString = formatter.format(currentTime); 
+        // DateFormat d1 =java.text.DateFormat.getDateInstance();
+        System.out.println("log=" + Log + "\nOut=" + Out + "\nDate=" +formatter.format(DateNow)+"\n");
+        // Provinces.printout();
         Types.printout();
     }
 }
@@ -132,19 +141,81 @@ class List{
 //日志处理类
 class Work{
     List list;
-    String[] FilelList;
+    String[] FileList;
     ProvinceList PL;
     public Work(List lis){
         list=lis;
         PL=new ProvinceList(null);
-        FilelList=new File(list.Log).list();
+        FileList=new File(list.Log).list();
     }
+
 
     public void printout(){
-        for (String name : FilelList) {
+        for (String name : FileList) {
             System.out.println("文件名："+name);
         }
-        PL.printout();
+        // PL.printout();
     }
 
+    //将string类型转化为Date类型好比较
+    public Date strTodate(String str){
+        Date date;
+        str.trim();
+        String[] strList=str.split("-");
+        String s=strList[2];
+        String[] strList1=s.split(".log");
+        // System.out.println(strList1[0]);
+        Calendar cal = GregorianCalendar.getInstance();
+        cal.set(Integer.parseInt(strList[0]), Integer.parseInt(strList[1])-1, Integer.parseInt(strList1[0]));
+        date = cal.getTime();
+        return date;
+    }
+
+    
+
+    //日志列表排序
+    public void FileSort(){
+        for(int i=0;i<FileList.length;i++){
+            for(int j=i;j<FileList.length;j++){
+                if(strTodate(FileList[i]).compareTo(strTodate(FileList[j]))>0){
+                    String t=FileList[i];
+                    FileList[i]=FileList[j];
+                    FileList[j]=t;
+                }
+            } 
+        }
+    }
+
+
+    //日志名和日期比较
+    public boolean Compare(String str){
+        // System.out.println(list.DateNow.toString()+"\n"+strTodate(str).toString());
+        // System.out.println(strTodate(str).compareTo(list.DateNow));
+        // System.out.println(list.DateNow.toString().equals(strTodate(str).toString()));
+        if(strTodate(str).compareTo(list.DateNow)<0||list.DateNow.toString().equals(strTodate(str).toString()))
+            return true; 
+        else
+            return false;
+
+    }
+
+
+    //处理日志列表,选取符合Date的日志文件名
+
+    public void Select(){
+        int i=0;
+        for (String str : FileList) {
+            if(Compare(str)){
+                i++;
+            }
+        }
+        String[] newlist=new String[i];
+        int n=0;
+        for(int j=0;j<FileList.length;j++){
+            if(Compare(FileList[j])){
+                newlist[n++]=FileList[j];
+            }
+        }
+        FileList=newlist;
+    }
 }

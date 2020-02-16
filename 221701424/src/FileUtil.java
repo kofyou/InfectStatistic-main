@@ -130,6 +130,10 @@ public class FileUtil {
             String[] filter_lists = file.list(filter);
             int index;
             if (!cmds.date.equals("")) {
+                if (!Pattern.matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]", cmds.date)) {
+                    System.out.println("日期格式错误！");
+                    System.exit(-1);
+                }
                 for (int i = 0; i < filter_lists.length; i++) {
                     
                         if (filter_lists[i].substring(0, 10).equals(cmds.date)) {
@@ -139,8 +143,9 @@ public class FileUtil {
                             //filter_lists = (String[])lists.toArray(new String[lists.size()]);
                             return lists;
                         }
-                }  
-               
+                }
+                System.out.println("未找到 " + cmds.date + " 的日志文件！");
+                System.exit(-1);
             }
             return filter_lists;
             

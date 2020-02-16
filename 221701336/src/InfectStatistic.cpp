@@ -17,7 +17,7 @@
 #include<malloc.h>
 
 //cd C:\Users\鸟蛋花机\Desktop\软件工程\寒假第二次作业\InfectStatistic-main\221701336\src
-//InfectStatistic.exe list -date 2020-01-22 -log D:/log/ -out C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt 
+//InfectStatistic.exe list -date 2020-01-22 -type sp ip dead -out C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt 
 
 using namespace std;
 
@@ -32,6 +32,7 @@ typedef struct ListNode
 	int numOfIP;//number of infection patients 感染患者数量 
 	int numOfSP;//number of suspected patients 疑似患者数量 
 	int numOfCured;//number of cured patients  已痊愈患者数量
+	int flag;
 	struct ListNode *next; 
 	
 }Node,*PNode;
@@ -53,6 +54,7 @@ PNode CreatList(void)
 	PHead->numOfDead=0;
 	PHead->numOfIP=0;
 	PHead->numOfSP=0;
+	PHead->flag=0;
 	strcpy(PHead->province,province[31].c_str());
 		 
 	PNode pNew=(PNode)malloc(sizeof(Node));
@@ -64,6 +66,7 @@ PNode CreatList(void)
 	pNew->numOfDead=0;
 	pNew->numOfIP=0;
 	pNew->numOfSP=0;
+	pNew->flag=0;
 	strcpy(pNew->province,province[0].c_str());
 	pNew->next=NULL;
 	
@@ -82,6 +85,7 @@ PNode CreatList(void)
 		p->numOfDead=0;
 		p->numOfIP=0;
 		p->numOfSP=0;
+		p->flag=0;
 		strcpy(p->province,province[i].c_str());
 		PTail->next=p; 
 		p->next=NULL;
@@ -219,11 +223,48 @@ void readDir(string date,string path)
 	
 } */
 
+void outNode(ostream &outFile,PNode p,string type[])
+{
+	outFile<<p->province; 
+	if(type[0]=="0")
+	{
+		outFile<<" 感染患者"<<p->numOfIP <<"人";
+		outFile<<" 疑似患者"<<p->numOfSP <<"人";
+		outFile<<" 治愈"<<p->numOfCured<<"人";
+		outFile<<" 死亡"<<p->numOfDead<<"人"<<endl; 
+	}
+	else
+	{
+		for(int i=0;i<4;i++)
+		{
+			if(type[i]=="ip")
+			{
+				outFile<<" 感染患者"<<p->numOfIP <<"人";
+			}
+			else if(type[i]=="sp")
+			{
+				outFile<<" 疑似患者"<<p->numOfSP <<"人";
+			}
+			else if(type[i]=="cure")
+			{
+				outFile<<" 治愈"<<p->numOfCured<<"人";	
+			}
+			else if(type[i]=="dead")
+			{
+				outFile<<" 死亡"<<p->numOfDead<<"人"<<endl; 	
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+}
 
-
-void output(string path,Node p)
+void output(string path,PNode p,PNode head,string type[],string province[])
 {
 	FILE *fp;
+	int i=0;
 	char fname[100];
 	strcpy(fname,path.c_str());
 	fp=fopen(fname,"a+");
@@ -231,18 +272,42 @@ void output(string path,Node p)
 	{
 		cout<<"打开失败"<<endl; 
 	}
-	fclose(fp);
+	fclose(fp);	
 	ofstream outFile; 
 	outFile.open(fname);
 	if(outFile.is_open()!=1)
 	{
 		cout<<"打开失败!"<<endl; 
-	} 
-	outFile<<p.province; 
-	outFile<<" 感染患者"<<p.numOfIP <<"人";
-	outFile<<" 疑似患者"<<p.numOfSP <<"人";
-	outFile<<" 治愈"<<p.numOfCured<<"人";
-	outFile<<" 死亡"<<p.numOfDead<<"人"<<endl; 
+	}
+	if(province[i]=="0")
+	{
+		outNode(outFile,head,type);
+		p=p->next;
+		while(p!=NULL)
+		{
+			if(p->flag==0)
+			{
+				outNode(outFile,p,type);
+			}
+			p=p->next;
+	    }
+	}
+	else
+	{
+		while(province[i]!="0")
+		{
+			while(p!=NULL)
+			{
+				if(p->flag==0&&p->province==province[i])
+				{
+					outNode(outFile,p,type);
+				}
+				p=p->next;
+		    }
+		    p=head->next;
+			i++;	
+		}
+	}
 	outFile.close(); //关闭文本文件
 }
 
@@ -253,11 +318,11 @@ int main(int argc,char *argv[])
 	string type[4]={"0","0","0","0"};
 	string outPath;
 	string log;
-	string province[35];
+	string province[33];
 	
-	for(int i=0;i<35;i++)
+	for(int i=0;i<33;i++)
 	{
-		province[0]="0";
+		province[i]="0";
 	}
 	
 	date=getDate(argc,argv);	
@@ -274,17 +339,11 @@ int main(int argc,char *argv[])
 	getProvince(argc,argv,province);
 	
 	PNode head=CreatList();	
-	PNode p=head;
-	while(p!=NULL)
-	{
-		cout<<p->province<<endl;
-		p=p->next;
-	}
-	
+	PNode p=head;	
 	//readDir(date,log);//读取目录 
 	
-	Node pp={"福建",6,3,15,20,NULL};
-	output(outPath,pp);//输出 
+	//Node pp={"福建",6,3,15,20,NULL};
+	output(outPath,p,head,type,province);//输出 
 	system("pause");
 }
 

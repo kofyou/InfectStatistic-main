@@ -150,8 +150,11 @@ public class FileUtil {
             return filter_lists;
             
         }
-        else return null;
-        
+        else {
+            System.out.println("-log文件路径不存在！");
+            System.exit(0);
+        }
+        return null;
     }
 
 

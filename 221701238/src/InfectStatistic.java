@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * TODO
  *
  * @author 221701238_周宇靖
- * @version 1.9
+ * @version 2.0
  * @since 2020-02-08
  */
 public class InfectStatistic {
@@ -47,6 +47,17 @@ public class InfectStatistic {
     public int datePosition = -1;
     public int typePosition = -1;
     public int provincePosition = -1;
+
+    //判断需要打印的情况的标志位
+    public int ipNum = 0;
+    public int spNum = 0;
+    public int cureNum = 0;
+    public int deadNum = 0;
+    //判断需要打印的省份，存储对应provinceList的下标
+    public ArrayList<Integer> provinceCountList = new ArrayList<Integer>();
+    //判断是否打印“全国”，含有“全国”则设为1
+    public int nationNum = 0;
+
     /**
      * 初始化各省份信息数组的方法
      * @return ArrayList<StatisticsInformation>    返回一个ArrayList<StatisticsInformation>数组
@@ -391,30 +402,12 @@ public class InfectStatistic {
                 nation.dead += statisticsInformationArrayList.get(i).dead;
                 nation.cure += statisticsInformationArrayList.get(i).cure;
             }
-            //判断需要打印的情况
-            int ipNum = 0;
-            int spNum = 0;
-            int cureNum = 0;
-            int deadNum = 0;
-            //判断需要打印的省份，存储对应provinceList的下标
-            ArrayList<Integer> provinceCountList = new ArrayList<Integer>();
-            //判断是否打印“全国”，含有“全国”则设为1
-            int nationNum = 0;
+
             //存储要写到文件里的一行内容
             String writeContent = "";
             //只有type选项没有province选项的情况
             if (typelist != null && provincelist == null){
-                for (int i = 0;i < typelist.size();i ++ ){
-                    if (typelist.get(i).equals("ip")){
-                        ipNum = 1;
-                    }else if (typelist.get(i).equals("sp")){
-                        spNum = 1;
-                    }else if (typelist.get(i).equals("cure")){
-                        cureNum = 1;
-                    }else{
-                        deadNum = 1;
-                    }
-                }
+                setType();
                 writeContent = nation.name;
                 if (ipNum == 1){
                     writeContent += " 感染患者" + nation.infection +"人";
@@ -456,18 +449,7 @@ public class InfectStatistic {
                 }
             }else if (typelist == null && provincelist != null){
                 //只有province选项没有type选项的情况
-                for (int i = 0;i < provincelist.size();i ++){
-                    if (provincelist.get(i).equals("全国")){
-                        nationNum = 1;
-                    }else{
-                        for (int j = 0;j < PROVINCE_ARRAY.length;j ++){
-                            if (provincelist.get(i).equals(PROVINCE_ARRAY[j])){
-                                provinceCountList.add(j);
-                                break;
-                            }
-                        }
-                    }
-                }
+                setProvince();
                 Collections.sort(provinceCountList);
                 if (nationNum == 1){
                     writer.write(nation.name + " 感染患者" + nation.infection + "人 疑似患者" + nation.suspect
@@ -484,29 +466,8 @@ public class InfectStatistic {
                 }
             }else if (typelist != null && provincelist != null){
                 //type选项和province选项都存在的情况
-                for (int i = 0;i < typelist.size();i ++ ){
-                    if (typelist.get(i).equals("ip")){
-                        ipNum = 1;
-                    }else if (typelist.get(i).equals("sp")){
-                        spNum = 1;
-                    }else if (typelist.get(i).equals("cure")){
-                        cureNum = 1;
-                    }else{
-                        deadNum = 1;
-                    }
-                }
-                for (int i = 0;i < provincelist.size();i ++){
-                    if (provincelist.get(i).equals("全国")){
-                        nationNum = 1;
-                    }else{
-                        for (int j = 0;j < PROVINCE_ARRAY.length;j ++){
-                            if (provincelist.get(i).equals(PROVINCE_ARRAY[j])){
-                                provinceCountList.add(j);
-                                break;
-                            }
-                        }
-                    }
-                }
+                setType();
+                setProvince();
                 Collections.sort(provinceCountList);
                 if (nationNum == 1){
                     writeContent = nation.name;
@@ -566,16 +527,16 @@ public class InfectStatistic {
                         writer.newLine();
                     }
                 }
-                writer.write("// 该文档并非真实数据，仅供测试使用");
-                writer.newLine();
             }
-        } catch (IOException e) {
+            writer.write("// 该文档并非真实数据，仅供测试使用");
+            writer.newLine();
+        }catch (IOException e) {
             e.printStackTrace();
-        } finally {
+        }finally {
             if (writer != null) {
                 try {
                     writer.close();
-                } catch (IOException e1) {
+                }catch (IOException e1) {
                     e1.printStackTrace();
                 }
             }
@@ -779,6 +740,43 @@ public class InfectStatistic {
             }
         }
         return false;
+    }
+
+    /**
+     * 判断type含有的参数值的方法
+     * 将相应的参数值标志位设置为1
+     */
+    public void setType(){
+        for (int i = 0;i < typelist.size();i ++ ){
+            if (typelist.get(i).equals("ip")){
+                ipNum = 1;
+            }else if (typelist.get(i).equals("sp")){
+                spNum = 1;
+            }else if (typelist.get(i).equals("cure")){
+                cureNum = 1;
+            }else{
+                deadNum = 1;
+            }
+        }
+    }
+
+    /**
+     * 判断province含有的参数值的方法
+     * 将省份参数值保存到一个数组，若有“全国”则相应标志位设为1
+     */
+    public void setProvince(){
+        for (int i = 0;i < provincelist.size();i ++){
+            if (provincelist.get(i).equals("全国")){
+                nationNum = 1;
+            }else{
+                for (int j = 0;j < PROVINCE_ARRAY.length;j ++){
+                    if (provincelist.get(i).equals(PROVINCE_ARRAY[j])){
+                        provinceCountList.add(j);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**

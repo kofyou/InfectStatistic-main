@@ -71,8 +71,12 @@ class Record{
 class MapKeyComparator implements Comparator<String> {
     @Override
     public int compare(String str1, String str2) {
-        Collator collator = Collator.getInstance();
-        return collator.getCollationKey(str1).compareTo(collator.getCollationKey(str2));
+        str1=Lib.toPinyin(str1);
+        str2=Lib.toPinyin(str2);
+        return str1.compareTo(str2);
+       // Collator collator = Collator.getInstance();
+        //return collator.getCollationKey(str1).compareTo(collator.getCollationKey(str2));
+
     }
 }
 
@@ -420,8 +424,8 @@ class InfectStatistic {
             outFile.write(record.getBytes());//写入全国数据
             for (Map.Entry<String, Record> m : result.entrySet()) {//写入地方数据
                 record = m.getKey()+" ";
-                for(String i : Lib.allType){
-                    for(String j : type){
+                for(String j : type){
+                    for(String i : Lib.allType){
                         if(i.equals(j)){
                             record += Lib.toChinese(i) + m.getValue().getNumber(j) + Lib.unit;
                         }
@@ -442,23 +446,43 @@ class InfectStatistic {
         String record;
 
         for(String item : province){
-            record = item + " ";
-            if(!result.containsKey(item)){//查询无记录的省份则新建一个记录，数据都为0
+            if(!result.containsKey(item)){//查询无记录的省份则创建一个数据为空的记录
                 Record newRecord = new Record();
                 result.put(item,newRecord);
             }
+        }
 
-            record +=  Lib.toChinese(Lib.allType[0])+ result.get(item).getInfectionNumber() +  Lib.unit +
-                    Lib.toChinese(Lib.allType[1]) + result.get(item).getSuspectedNumber() + Lib.unit +
-                    Lib.toChinese(Lib.allType[2]) + result.get(item).getCureNumber() + Lib.unit +
-                    Lib.toChinese(Lib.allType[3]) + result.get(item).getDeadNumber() + Lib.unit + "\n";
+        if(province.contains("全国")){//如果province里面包含全国则要写在文件的第一行
+            record = "全国" + " ";
+            record +=  Lib.toChinese(Lib.allType[0])+ result.get("全国").getInfectionNumber() +  Lib.unit +
+                    Lib.toChinese(Lib.allType[1]) + result.get("全国").getSuspectedNumber() + Lib.unit +
+                    Lib.toChinese(Lib.allType[2]) + result.get("全国").getCureNumber() + Lib.unit +
+                    Lib.toChinese(Lib.allType[3]) + result.get("全国").getDeadNumber() + Lib.unit + "\n";
             try {
-                outFile.write(record.getBytes());
+                outFile.write(record.getBytes());//将全国数据写入
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
 
 
+
+        for(String key : result.keySet()){
+            for(int k=0;k<province.size();k++){
+                if(province.get(k).equals(key) && !key.equals("全国")){//若不是全国，则写入
+                    record = key +" ";
+                    record +=  Lib.toChinese(Lib.allType[0])+ result.get(key).getInfectionNumber() +  Lib.unit +
+                            Lib.toChinese(Lib.allType[1]) + result.get(key).getSuspectedNumber() + Lib.unit +
+                            Lib.toChinese(Lib.allType[2]) + result.get(key).getCureNumber() + Lib.unit +
+                            Lib.toChinese(Lib.allType[3]) + result.get(key).getDeadNumber() + Lib.unit + "\n";
+                    try {
+                        outFile.write(record.getBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
         }
 
     }
@@ -471,21 +495,50 @@ class InfectStatistic {
                 Record newRecord = new Record();
                 result.put(item,newRecord);
             }
-            record = item +" ";
-            for(String i : Lib.allType){
-                for(String j : type){
+        }
+
+        if(province.contains("全国")){
+            record = "全国" + " ";
+            for(String j : type){
+                for(String i : Lib.allType){
                     if(i.equals(j)){
-                        record +=  Lib.toChinese(j) + result.get(item).getNumber(j) + Lib.unit;
+                        record +=  Lib.toChinese(j) + result.get("全国").getNumber(j) + Lib.unit;
                     }
                 }
             }
             record += "\n";
             try {
-                outFile.write(record.getBytes());
+                outFile.write(record.getBytes());//将全国数据写入
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+
+
+
+        for(String key : result.keySet()){
+           for(int k=0;k<province.size();k++){
+               if(province.get(k).equals(key) && !key.equals("全国")){//若不是全国，则写入
+                   record = key +" ";
+                   for(String j : type){
+                       for(String i : Lib.allType){
+                           if(i.equals(j)){
+                               record +=  Lib.toChinese(j) + result.get(key).getNumber(j) + Lib.unit;
+                           }
+                       }
+                   }
+                   record += "\n";
+                   try {
+                       outFile.write(record.getBytes());
+                   } catch (IOException e) {
+                       e.printStackTrace();
+                   }
+               }
+
+           }
+        }
+
+
 
     }
 
@@ -577,10 +630,6 @@ class InfectStatistic {
         statistic.statisticData(statistic.logLocate,statistic.strDate,fileList,statistic.result);
         //......保存结果..........
         statistic.saveResult(statistic.result,statistic.outLocate,args,statistic.province,statistic.type);
-
-
-
-
 
     }
 

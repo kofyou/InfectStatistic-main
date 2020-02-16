@@ -1,3 +1,5 @@
+import net.sourceforge.pinyin4j.PinyinHelper;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -36,6 +38,23 @@ public class Lib {
         }
     }
 
+
+
+    public static String toPinyin(String str){
+        String tmpStr=null;
+       for(int i=0;i<str.length();i++){
+           String[] pinyin = PinyinHelper.toHanyuPinyinStringArray(str.charAt(i));
+           if(str.equals("重庆") && i==0){//i==0是为了防止在轮到字符"庆"时 庆 不是多音字，没有 pinyin[1]
+               tmpStr += pinyin[1];
+           }
+           else {
+               tmpStr += pinyin[0];
+           }
+
+       }
+
+        return tmpStr;
+    }
 
 
     public static String toChinese(String type){

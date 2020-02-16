@@ -95,6 +95,7 @@ class InfectStatistic {
     				}
     			}
     			else if (args[i] == "-type") {
+    				var = 0;
     				int n = 0;
     				for (n = 0 ; n < 4 ; n++) {
     					patients[n] = 0;
@@ -103,16 +104,23 @@ class InfectStatistic {
     					System.out.println("患者类型参数错误");
     					return false;
     				}
-    				i = var;
+    				System.out.println(var);
+    				System.out.println(i);
+    				if (var > 0) {
+    					i = i + var - 1;
+    				}
     			}
     			else if (args[i] == "-province") {
-    				preMark=1;
+    				var = 0;
+    				preMark = 1;
     				area[0] = 0;
     				if (GetArea(++i) == false) {
     					System.out.println("省份参数错误");
     					return false;
     				}
-    				i = var;
+    				if (var > 0) {
+    					i = i + var - 1;
+    				}
     			}
     			else {
     				System.out.println("无命令参数输入");
@@ -210,16 +218,23 @@ class InfectStatistic {
     			m = n + i;
     			if (m < args.length) {
     				if (args[m] == "ip") {
-    					patients[0] = 1;
+    					patients[var] = 1;
+    					var++;
     				}
     				else if (args[m] == "sp") {
-    					patients[1] = 2;
+    					patients[var] = 2;
+    					var++;
     				}
     				else if (args[m] == "cure") {
-    					patients[2] = 3;
+    					patients[var] = 3;
+    					var++;
     				}
     				else if (args[m] == "dead") {
-    					patients[3] = 4;
+    					patients[var] = 4;
+    					var++;
+    				}
+    				else {
+    					break;
     				}
 	    		}
     			else {
@@ -229,7 +244,7 @@ class InfectStatistic {
     		if (m == i) {
     			result = false;
     		}
-    		var = m;
+    		System.out.println(var);
     		return result;
     	}
     	
@@ -238,7 +253,7 @@ class InfectStatistic {
     	 */
     	public boolean GetArea(int i) {
     		boolean result = true;
-    		int n = 0 , m = 0 , k = 0;
+    		int n = 0 , m = 0 ;
     		for (n = 0 ; n < 32 ; n++) {
     			m = n + i;
     			if (m < args.length) {
@@ -246,7 +261,7 @@ class InfectStatistic {
     				for (j = 0 ; j < 32 ; j++) {
     					if (areaStr[j] == args[m]) {
     						area[j] = 1;
-    						k++;
+    						var++;
     						break;
     					}
     				}
@@ -255,11 +270,10 @@ class InfectStatistic {
     				break;
     			}
 	    	}
-    		m = k+i;
+    		m = var+i;
     		if (m == i) {
     			result = false;
     		}
-    		var = m;
     		return result;
     	}
     }
@@ -275,16 +289,43 @@ class InfectStatistic {
     	public void ReadLogFile () {
     		File file = new File(originPath);
     		File[] tempList = file.listFiles();
-    		int i = 0;
+    		SortLogFile(tempList);
+    	}
+    	
+    	/*
+    	 * 对读取到且时间合理的日志文件按日期（从小到大）排序
+    	 */
+    	public void SortLogFile (File [] tempList) {
+    		int i = 0 , n = 0 , j = 0;
+    		String[] saveFile = new String[tempList.length];
+    		String[] saveName = new String[tempList.length];
+    		String record = "";
     		for (i = 0 ; i < tempList.length ; i++) {
     			if (tempList[i].isFile()) { 
     				String fileName = tempList[i].getName();
     				String[] names = fileName.split("\\.");
     				if (acqTime.compareTo(names[0]) >= 0) {
-    					LogFile(fileName);
+    					saveFile[i] = fileName;
+    					saveName[i] = names[0];
+    					n++;
     				}
     			} 
     		} 
+    		for (i = 0 ; i < n ; i++) {
+    			for (j = 1 ; j < n ; j++) {
+    				if (saveName[i].compareTo(saveName[j]) > 0) {
+    					record = saveName[i];
+    					saveName[i] = saveName[j];
+    					saveName[j] = record;
+    					record = saveFile[i];
+    					saveFile[i] = saveFile[j];
+    					saveFile[j] = record;
+    				}
+    			}
+    		}
+    		for (i = 0 ; i < n ; i++) {
+    			LogFile(saveFile[i]);
+    		}
     	}
     	
     	/*
@@ -317,7 +358,7 @@ class InfectStatistic {
     		int n = 0;
     		for (n = 0 ; n < lineSplit.length ; n++) {
     			if (n == lineSplit.length-1) {
-    				lineSplit[n] = lineSplit[n].replace("人", "");
+    				lineSplit[n] = lineSplit[n].replace("人","");
     			}
     		}
     		
@@ -479,8 +520,14 @@ class InfectStatistic {
                 	if (area[n] == 1) {
                 		outData = areaStr[n]+" ";
                 		for (m = 0 ; m < 4 ; m++) {
-                			if (patients[m] != 0)
-                				outData += patientsStr[m] + totalNumber[n][m] + "人" + " ";
+                			if (patients[m] == 1)
+                				outData += patientsStr[0] + totalNumber[n][m] + "人" + " ";
+                			else if (patients[m] == 2)
+                				outData += patientsStr[1] + totalNumber[n][m] + "人" + " ";
+                			else if (patients[m] == 3)
+                				outData += patientsStr[2] + totalNumber[n][m] + "人" + " ";
+                			else if (patients[m] == 4)
+                				outData += patientsStr[3] + totalNumber[n][m] + "人" + " ";
                 		}
                 		out.write(outData + "\r\n");
                 	}

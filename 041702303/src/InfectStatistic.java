@@ -1,3 +1,4 @@
+
 /**
  * InfectStatistic
  * TODO
@@ -7,11 +8,12 @@
  * @since 2020-02-15
  */
 
-
-
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.TreeMap;
 
 public class infectStatistic {
 	//省份数
@@ -125,32 +127,193 @@ public class infectStatistic {
 		}
 	}
 
+	//判断合法疫情类型参数
+	public boolean isValidParameterType() {
+		int typeExist[]=new int[typeNumber];
+		for(int i=0;i<typeNumber;i++) {
+			typeExist[i]=0;
+		}
+		for(int i=0;i<parameterType.length;i++) {
+			if(getTypeIndex(parameterType[i])==-1) {
+				return false;
+			}
+			else {
+				//检测命令行type参数值重复
+				if(typeExist[getTypeIndex(parameterType[i])]==0) {
+					typeExist[getTypeIndex(parameterType[i])]=1;
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	//判断合法省份参数
+	public boolean isValidParameterProvince() {
+		int provinceExist[]=new int[provinceNumber];
+		int country=0;
+		for(int i=0;i<provinceNumber;i++) {
+			provinceExist[i]=0;
+		}
+		for(int i=0;i<parameterProvince.length;i++) {
+			if(getProvinceIndex(parameterProvince[i])==-1) {
+				return false;
+			}
+			else {
+				if(getProvinceIndex(parameterProvince[i])==-2) {
+					if(country==0) {
+						country=1;
+					}
+					else {
+						return false;
+					}
+					continue;
+				}
+				//检测命令行参数province值重复
+				if(provinceExist[getProvinceIndex(parameterProvince[i])]==0) {
+					provinceExist[getProvinceIndex(parameterProvince[i])]=1;
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	//主函数
 	public static void main(String args[]) throws ParseException{
-		Date date=new Date();
-		String type[]={};
-		String province[]={};
-		String outString="";
-		infectStatistic test=new infectStatistic(date, type, province, outString);
-		System.out.println(test.getProvinceIndex("安徽"));
-		System.out.println(test.getProvinceIndex("福建"));
-		System.out.println(test.getProvinceIndex("北京"));
-		System.out.println(test.getProvinceIndex("全国"));
-		System.out.println(test.getTypeIndex("ip"));
-		System.out.println(test.getTypeIndex("sp"));
-		System.out.println(test.getTypeIndex("cure"));
-		System.out.println(test.getTypeIndex("dead"));
-		System.out.println(test.getTypeIndex("adad"));
-		System.out.println(infectStatistic.isValidDate("2017-08-29"));
-		System.out.println(infectStatistic.isValidDate("2017-08-31"));
-		System.out.println(infectStatistic.isValidDate("2012-02-28"));
-		System.out.println(infectStatistic.isValidDate("2017-08-32"));
-		System.out.println(infectStatistic.isValidDate("2017-00-29"));
-		System.out.println(infectStatistic.isValidDate("2017-00-32"));
-		System.out.println(infectStatistic.isValidDate("2017*08-29"));
-		System.out.println(infectStatistic.isValidDate("2017-08*29"));
-		System.out.println(infectStatistic.isValidDate("2012-02-29"));
-		System.out.println(infectStatistic.isValidDate("2012-aa-29"));
+		//检测命令行头部list
+		if(args.length!=0&&args[0].equals("list")&&args.length!=1) {
+			String dateString="";
+			String logString="";
+			String outString="";
+			ArrayList<String> provinceArrayList=new ArrayList<String>();
+			ArrayList<String> typeArrayList=new ArrayList<String>();
+			//用于存储命令行参数位于数组的下标
+			TreeMap<Integer, String> parameterTreeMap=new TreeMap<Integer, String>();
+			//用于判断命令行参数有且仅有出现一次
+			int parameterExist[]= {0,0,0,0,0};
+			//初始化命令集合，提取参数下标
+			for(int i=1;i<args.length;i++) {
+				if(args[i].equals("-date")) {
+					parameterTreeMap.put(i, "-date");
+					//记录命令行参数出现次数
+					parameterExist[0]++;
+				}
+				else if(args[i].equals("-log")) {
+					parameterTreeMap.put(i, "-log");
+					parameterExist[1]++;
+				}
+				else if(args[i].equals("-out")) {
+					parameterTreeMap.put(i, "-out");
+					parameterExist[2]++;
+				}
+				else if(args[i].equals("-province")) {
+					parameterTreeMap.put(i, "-province");
+					parameterExist[3]++;
+				}
+				else if(args[i].equals("-type")) {
+					parameterTreeMap.put(i, "-type");
+					parameterExist[4]++;
+				}
+			}
+			//命令行参数的首位参数下标
+			int maxParameterIndex=parameterTreeMap.lastKey();
+			int minParameterIndex=parameterTreeMap.firstKey();
+			int invalidCommand=0;
+			//检测list命令头部的合法性
+			if(minParameterIndex==1) {
+				//解析参数，获取参数值
+				for (int i : parameterTreeMap.keySet()) {
+					//检测参数值存在，下标相邻为空，下标越界为空
+					if((!parameterTreeMap.containsKey(i+1))&&i+1!=args.length) {
+						if(parameterTreeMap.get(i).equals("-date")) {
+							dateString=args[i+1];
+						}
+						else if(parameterTreeMap.get(i).equals("-log")) {
+							logString=args[i+1];
+						}
+						else if(parameterTreeMap.get(i).equals("-out")) {
+							outString=args[i+1];
+						}
+						else if(parameterTreeMap.get(i).equals("-province")) {
+							if(i<maxParameterIndex) {
+								for(int j=i+1;j<parameterTreeMap.higherKey(i);j++) {
+									provinceArrayList.add(args[j]);
+								}
+							}
+							else {
+								for(int j=i+1;j<args.length;j++) {
+									provinceArrayList.add(args[j]);
+								}
+							}
+						}
+						else if(parameterTreeMap.get(i).equals("-type")) {
+							if(i<maxParameterIndex) {
+								for(int j=i+1;j<parameterTreeMap.higherKey(i);j++) {
+									typeArrayList.add(args[j]);
+								}
+							}
+							else {
+								for(int j=i+1;j<args.length;j++) {
+									typeArrayList.add(args[j]);
+								}
+							}
+						}
+					}
+					else {
+						invalidCommand=1;
+					}
+				}
+				SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+				String type[]= {};
+				String province[]= {};
+				//检测命令行参数值为空,0--非空 1--空
+				if(invalidCommand==0) {
+					//检测date/log/out参数必须存在且命令行参数唯一性
+					if(parameterExist[1]==1&&parameterExist[2]==1&&
+							parameterExist[0]==1&&parameterExist[3]<2&&parameterExist[4]<2) {
+						type=typeArrayList.toArray(new String[typeArrayList.size()]);
+						province=provinceArrayList.toArray(new String[provinceArrayList.size()]);
+						//检测命令行日期参数的合法性
+						if(infectStatistic.isValidDate(dateString.trim())) {
+							Date date=sdf.parse(dateString.trim());
+							infectStatistic t=new infectStatistic(date,type,province,outString);
+							File folder=new File(logString.trim());
+							//检测命令行type/province参数值的合法性
+							if(t.isValidParameterType()&&t.isValidParameterProvince()) {
+								if(folder.isDirectory()) {
+									System.out.println("get");
+								}
+								else {
+										System.out.println("路径非法，不存在该文件夹");
+								}
+							}
+							else {
+									System.out.println("省份或者类型参数值非法");
+							}
+						}
+						else {
+							System.out.println("命令行日期参数非法");
+						}
+					}
+					else {
+						System.out.println("缺少或重复date/log/out参数");
+					}
+				}
+				else {
+					System.out.println("date/log/out/type/province参数值为空");
+				}
+			}
+			else {
+				System.out.println("list后未紧接参数");
+			}
+		}
+		else {
+			System.out.println("list命令格式错误");
+		}
 	}
 }
-

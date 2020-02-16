@@ -31,7 +31,10 @@ public class InfectStatistic {
                     case "-type":
                         for(int j = i + 1; j < args.length; j++) {
                             if (!args[j].substring(0, 1).equals("-")) {
-                                cmds.type.add(args[j]);
+                                if(args[j].equals("ip") || args[j].equals("sp") || args[j].equals("cure") || args[j].equals("dead"))
+                                    cmds.type.add(args[j]);
+                                else
+                                    System.out.println(args[j] + " 不在查询范围内，将查询剩余的类型。");
                                 i = j;
                             }
                             else {

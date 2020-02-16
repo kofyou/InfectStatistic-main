@@ -44,18 +44,18 @@ class Dates {
 
 @SuppressWarnings("unchecked")
 public class InfectStatistic {
-	//判断一个字符串是不是中文
-	public static boolean isChinese(String string){
-	    int n = 0;
-	    for(int i = 0; i < string.length(); i++) {
-	        n = (int)string.charAt(i);
-	        if(!(19968 <= n && n <40869)) {
-	            return false;
-	        }
-	    }
-	    return true;
+	// 判断一个字符串是不是中文
+	public static boolean isChinese(String string) {
+		int n = 0;
+		for (int i = 0; i < string.length(); i++) {
+			n = (int) string.charAt(i);
+			if (!(19968 <= n && n < 40869)) {
+				return false;
+			}
+		}
+		return true;
 	}
-	
+
 	public static void arraySort(String[] input) {
 		for (int i = 0; i < input.length - 1; i++) {
 			for (int j = 0; j < input.length - i - 1; j++) {
@@ -68,23 +68,25 @@ public class InfectStatistic {
 
 		}
 	}
-    public static Provin getcountry(Provin[] input) {
-        Provin country=new Provin("全国");
-    	for(int i=0;i<input.length;i++) {
-    		country.ip+=input[i].ip;
-    		country.sp+=input[i].sp;
-    		country.cure+=input[i].cure;
-    		country.death+=input[i].death;
-    	}
-    	return country;
-    }
+
+	public static Provin getCountry(Provin[] input) {
+		Provin country = new Provin("全国");
+		for (int i = 0; i < input.length; i++) {
+			country.ip += input[i].ip;
+			country.sp += input[i].sp;
+			country.cure += input[i].cure;
+			country.death += input[i].death;
+		}
+		return country;
+	}
+
 	public static void main(String[] args) throws IOException {
 		// System.out.println(args[0]);
-		String[] message=new String[35];//存放输出数据的数组
-		String path = null, date = null, output = null,allctry=null;
-		String[] prvin= new String[34];
-		String[] types=new String[4];
-		int pnum=0,tnum=0,pcout=0;//参数中省和类型的个数
+		String[] message = new String[35];// 存放输出数据的数组
+		String path = null, date = null, output = null, allctry = null;
+		String[] prvin = new String[34];
+		String[] types = new String[4];
+		int pnum = 0, tnum = 0, pcout = 0;// 参数中省和类型的个数
 		String request = args[0];
 		String[] provins = new String[] { "北京", "上海", "天津", "重庆", "黑龙江", "辽宁", "吉林", "河北", "河南", "湖北", "湖南", "山东", "山西",
 				"陕西", "安徽", "浙江", "江苏", "福建", "广东", "海南", "四川", "云南", "贵州", "青海", "甘肃", "江西", "台湾", "内蒙古", "宁夏", "新疆",
@@ -104,33 +106,33 @@ public class InfectStatistic {
 				else if (args[i].equals("-out"))
 					output = args[i + 1];
 				else if (args[i].equals("-province")) {
-					for(int k=i+1;k<args.length;k++) {
-						if(isChinese(args[k])) {
-							if(args[k].equals("全国")) 
-								allctry=args[k];
+					for (int k = i + 1; k < args.length; k++) {
+						if (isChinese(args[k])) {
+							if (args[k].equals("全国"))
+								allctry = args[k];
 							else {
-								prvin[pnum]=args[k];
+								prvin[pnum] = args[k];
 								pnum++;
 							}
 						}
 					}
-				}
+				} 
 				else if (args[i].equals("-type")) {
-					for(int k=i+1;k<args.length;k++) {
-						if(args[k].equals("ip")){
-							types[tnum]="感染";
+					for (int k = i + 1; k < args.length; k++) {
+						if (args[k].equals("ip")) {
+							types[tnum] = "感染";
 							tnum++;
-						}
-						else if(args[k].equals("sp")){
-							types[tnum]="疑似";
+						} 
+						else if (args[k].equals("sp")) {
+							types[tnum] = "疑似";
 							tnum++;
-						}
-						else if(args[k].equals("cure")){
-							types[tnum]="治愈";
+						} 
+						else if (args[k].equals("cure")) {
+							types[tnum] = "治愈";
 							tnum++;
-						}
-						else if(args[k].equals("death")){
-							types[tnum]="死亡";
+						} 
+						else if (args[k].equals("death")) {
+							types[tnum] = "死亡";
 							tnum++;
 						}
 					}
@@ -158,28 +160,28 @@ public class InfectStatistic {
 			Dates[j] = new Dates(j1, j2);
 		}
 		if (date != null) {
-			num=0;
-			int len=0;//统计是截止到哪一个日志文件
-			//System.out.println(ss[0]);
-			String str1=date + ".log.txt";
+			num = 0;
+			int len = 0;// 统计是截止到哪一个日志文件
+			// System.out.println(ss[0]);
+			String str1 = date + ".log.txt";
 			String[] line = new String[2000];
-			if(str1.compareTo(ss[0])>0||str1.compareTo(ss[ss.length-1])<0) {
+			if (str1.compareTo(ss[0]) > 0 || str1.compareTo(ss[ss.length - 1]) < 0) {
 				System.out.println("dates error!");
 				System.exit(1);
-			}
+			} 
 			else {
-				for(int ji=0;ji<ss.length;ji++) {
-					if(str1.equals(ss[ji])) {
-						len=ji;
-						//System.out.println(len);
+				for (int ji = 0; ji < ss.length; ji++) {
+					if (str1.equals(ss[ji])) {
+						len = ji;
+						// System.out.println(len);
 					}
-					if(str1.compareTo(ss[ji])<0 && str1.compareTo(ss[ji+1])>=0) {
-						len=ji+1;
-						//System.out.println(len);
+					if (str1.compareTo(ss[ji]) < 0 && str1.compareTo(ss[ji + 1]) >= 0) {
+						len = ji + 1;
+						// System.out.println(len);
 						break;
 					}
 				}
-				for (int i = len,ki=0; i < ss.length; i++,ki++) {
+				for (int i = len, ki = 0; i < ss.length; i++, ki++) {
 					FileInputStream f1 = new FileInputStream(path + ss[ss.length - 1 - ki]);
 					InputStreamReader reader = new InputStreamReader(f1, "UTF-8");
 					BufferedReader bf = new BufferedReader(reader);
@@ -189,11 +191,11 @@ public class InfectStatistic {
 					// num = 0;
 					while ((str = bf.readLine()) != null) {
 						line[num] = str;
-						//System.out.println(str);
+						// System.out.println(str);
 						num++;
 					}
 				}
-				
+
 				for (int k = 0; k < num; k++) {
 					String[] as = line[k].split(" ");
 					// String mes=as[0];
@@ -209,7 +211,8 @@ public class InfectStatistic {
 									break;
 								}
 							}
-						} else if (as[2].equals("疑似患者")) {
+						} 
+						else if (as[2].equals("疑似患者")) {
 							int ki = 0;
 							String coun = as[3].substring(0, as[3].length() - 1);
 							int count = Integer.parseInt(coun);
@@ -220,7 +223,8 @@ public class InfectStatistic {
 								}
 							}
 						}
-					} else if (as[1].equals("死亡")) {
+					} 
+					else if (as[1].equals("死亡")) {
 						String mes = as[0];
 						int ki = 0;
 						String coun = as[2].substring(0, as[2].length() - 1);
@@ -228,11 +232,12 @@ public class InfectStatistic {
 						for (ki = 0; ki < 34; ki++) {
 							if (provinces[ki].name.equals(mes)) {
 								provinces[ki].death += count;
-								provinces[ki].ip -=count;
+								provinces[ki].ip -= count;
 								break;
 							}
 						}
-					} else if (as[1].equals("治愈")) {
+					} 
+					else if (as[1].equals("治愈")) {
 						String mes = as[0];
 						int ki = 0;
 						String coun = as[2].substring(0, as[2].length() - 1);
@@ -240,11 +245,12 @@ public class InfectStatistic {
 						for (ki = 0; ki < 34; ki++) {
 							if (provinces[ki].name.equals(mes)) {
 								provinces[ki].cure += count;
-								provinces[ki].ip -=count;
+								provinces[ki].ip -= count;
 								break;
 							}
 						}
-					} else if (as[1].equals("排除")) {
+					} 
+					else if (as[1].equals("排除")) {
 						String mes = as[0];
 						int ki = 0;
 						String coun = as[3].substring(0, as[3].length() - 1);
@@ -255,7 +261,8 @@ public class InfectStatistic {
 								break;
 							}
 						}
-					} else if (as[1].equals("感染患者")) {
+					} 
+					else if (as[1].equals("感染患者")) {
 						String mes = as[0];
 						String mes1 = as[3];
 						int ki = 0, num1 = 0;
@@ -273,7 +280,7 @@ public class InfectStatistic {
 							if (num1 == 2)
 								break;
 						}
-					}
+					} 
 					else if (as[1].equals("疑似患者")) {
 						if (as[2].equals("流入")) {
 							String mes = as[0];
@@ -308,17 +315,19 @@ public class InfectStatistic {
 							}
 						}
 					}
-					//System.out.println(line[k]);
+					// System.out.println(line[k]);
 				}
-				
-				/*for (int j = 0; j < 34; j++)
-					System.out.println(provinces[j].name + " 感染患者" + provinces[j].ip + "人 " + " 疑似患者" + provinces[j].sp
-							+ "人 " + "治愈" + provinces[j].cure + "人 " + "死亡" + provinces[j].death + "人");*/
+
+				/*
+				 * for (int j = 0; j < 34; j++) System.out.println(provinces[j].name + " 感染患者" +
+				 * provinces[j].ip + "人 " + " 疑似患者" + provinces[j].sp + "人 " + "治愈" +
+				 * provinces[j].cure + "人 " + "死亡" + provinces[j].death + "人");
+				 */
 			}
-		}
+		} 
 		else {
 			num = 0;
-			date=ss[0];
+			date = ss[0];
 			String[] line = new String[2000];
 			Dates begindate = Dates[ss.length - 1];
 			for (int i = 0; i < ss.length; i++) {
@@ -349,7 +358,8 @@ public class InfectStatistic {
 								break;
 							}
 						}
-					} else if (as[2].equals("疑似患者")) {
+					} 
+					else if (as[2].equals("疑似患者")) {
 						int ki = 0;
 						String coun = as[3].substring(0, as[3].length() - 1);
 						int count = Integer.parseInt(coun);
@@ -360,7 +370,8 @@ public class InfectStatistic {
 							}
 						}
 					}
-				} else if (as[1].equals("死亡")) {
+				} 
+				else if (as[1].equals("死亡")) {
 					String mes = as[0];
 					int ki = 0;
 					String coun = as[2].substring(0, as[2].length() - 1);
@@ -368,11 +379,12 @@ public class InfectStatistic {
 					for (ki = 0; ki < 34; ki++) {
 						if (provinces[ki].name.equals(mes)) {
 							provinces[ki].death += count;
-							provinces[ki].ip -=count;
+							provinces[ki].ip -= count;
 							break;
 						}
 					}
-				} else if (as[1].equals("治愈")) {
+				} 
+				else if (as[1].equals("治愈")) {
 					String mes = as[0];
 					int ki = 0;
 					String coun = as[2].substring(0, as[2].length() - 1);
@@ -380,11 +392,12 @@ public class InfectStatistic {
 					for (ki = 0; ki < 34; ki++) {
 						if (provinces[ki].name.equals(mes)) {
 							provinces[ki].cure += count;
-							provinces[ki].ip -=count;
+							provinces[ki].ip -= count;
 							break;
 						}
 					}
-				} else if (as[1].equals("排除")) {
+				} 
+				else if (as[1].equals("排除")) {
 					String mes = as[0];
 					int ki = 0;
 					String coun = as[3].substring(0, as[3].length() - 1);
@@ -395,7 +408,8 @@ public class InfectStatistic {
 							break;
 						}
 					}
-				} else if (as[1].equals("感染患者")) {
+				} 
+				else if (as[1].equals("感染患者")) {
 					String mes = as[0];
 					String mes1 = as[3];
 					int ki = 0, num1 = 0;
@@ -413,7 +427,7 @@ public class InfectStatistic {
 						if (num1 == 2)
 							break;
 					}
-				}
+				} 
 				else if (as[1].equals("疑似患者")) {
 					if (as[2].equals("流入")) {
 						String mes = as[0];
@@ -448,106 +462,108 @@ public class InfectStatistic {
 						}
 					}
 				}
-				//System.out.println(line[k]);
+				// System.out.println(line[k]);
 			}
-			/*for (int j = 0; j < 34; j++)
-				System.out.println(provinces[j].name + " 感染患者" + provinces[j].ip + "人 " + " 疑似患者" + provinces[j].sp
-						+ "人 " + "治愈" + provinces[j].cure + "人 " + "死亡" + provinces[j].death + "人");*/
+			/*
+			 * for (int j = 0; j < 34; j++) System.out.println(provinces[j].name + " 感染患者" +
+			 * provinces[j].ip + "人 " + " 疑似患者" + provinces[j].sp + "人 " + "治愈" +
+			 * provinces[j].cure + "人 " + "死亡" + provinces[j].death + "人");
+			 */
 		}
-		//没有指明省份的情况下
-		
-		if(allctry==null&&pnum==0) {
-			pcout=35;
-		     Provin country=getcountry(provinces);
-		     String p=country.name + " 感染患者" + country.ip + "人 " + "疑似患者" + country.sp
-						+ "人 " + "治愈" + country.cure + "人 " + "死亡" + country.death + "人";
-		     message[0]=p;
-		     for(int j=0;j<34;j++) {
-		    	 String p1=provinces[j].name + " 感染患者" + provinces[j].ip + "人 " + "疑似患者" + provinces[j].sp
-							+ "人 " + "治愈" + provinces[j].cure + "人 " + "死亡" + provinces[j].death + "人";
-		    	 message[j+1]=p1;
-		     }
+		// 没有指明省份的情况下
 
-		}
-		else {
-			pcout=0;
-			if(allctry!=null) {
-				 Provin country=getcountry(provinces);
-			     String p=country.name + " 感染患者" + country.ip + "人 " + "疑似患者" + country.sp
-							+ "人 " + "治愈" + country.cure + "人 " + "死亡" + country.death + "人";
-			     message[pcout]=p;
-			     pcout++;
+		if (allctry == null && pnum == 0) {
+			pcout = 35;
+			Provin country = getCountry(provinces);
+			String p = country.name + " 感染患者" + country.ip + "人 " + "疑似患者" + country.sp + "人 " + "治愈" + country.cure
+					+ "人 " + "死亡" + country.death + "人";
+			message[0] = p;
+			for (int j = 0; j < 34; j++) {
+				String p1 = provinces[j].name + " 感染患者" + provinces[j].ip + "人 " + "疑似患者" + provinces[j].sp + "人 "
+						+ "治愈" + provinces[j].cure + "人 " + "死亡" + provinces[j].death + "人";
+				message[j + 1] = p1;
 			}
-			for(int j=0;j<34;j++) {
-				for(int ji=0;ji<pnum;ji++)
-				{
-					if(provinces[j].name.equals(prvin[ji])) {
-						String p1=provinces[j].name + " 感染患者" + provinces[j].ip + "人 " + "疑似患者" + provinces[j].sp
+
+		} 
+		else {
+			pcout = 0;
+			if (allctry != null) {
+				Provin country = getCountry(provinces);
+				String p = country.name + " 感染患者" + country.ip + "人 " + "疑似患者" + country.sp + "人 " + "治愈" + country.cure
+						+ "人 " + "死亡" + country.death + "人";
+				message[pcout] = p;
+				pcout++;
+			}
+			for (int j = 0; j < 34; j++) {
+				for (int ji = 0; ji < pnum; ji++) {
+					if (provinces[j].name.equals(prvin[ji])) {
+						String p1 = provinces[j].name + " 感染患者" + provinces[j].ip + "人 " + "疑似患者" + provinces[j].sp
 								+ "人 " + "治愈" + provinces[j].cure + "人 " + "死亡" + provinces[j].death + "人";
-			    	 message[pcout]=p1;
-			    	 pcout++;
-			    	 break;
+						message[pcout] = p1;
+						pcout++;
+						break;
 					}
 				}
-		     }
-			//for(int j=0;j<pcout;j++)
-		    	 //System.out.println(message[j]);
+			}
+			// for(int j=0;j<pcout;j++)
+			// System.out.println(message[j]);
 		}
-		//指明类型的情况下
-		if(tnum!=0) {
-			//boolean flag=true;
-			String pr="";
-			for(int j=0;j<pcout;j++) {
+		// 指明类型的情况下
+		if (tnum != 0) {
+			// boolean flag=true;
+			String pr = "";
+			for (int j = 0; j < pcout; j++) {
 				String[] si = message[j].split(" ");
-				pr="";
-				pr=pr+si[0]+" ";
-				for(int ji=1;ji<si.length;ji++) {
-					boolean flag=true;
-					for(int ki=0;ki<tnum;ki++) {
-						if(si[ji].contains(types[ki])) {
-							pr=pr+si[ji]+" ";
+				pr = "";
+				pr = pr + si[0] + " ";
+				for (int ji = 1; ji < si.length; ji++) {
+					boolean flag = true;
+					for (int ki = 0; ki < tnum; ki++) {
+						if (si[ji].contains(types[ki])) {
+							pr = pr + si[ji] + " ";
 							break;
 						}
 					}
 				}
-				message[j]=pr;
+				message[j] = pr;
 			}
 		}
 		//
-		String[] tofile=new String[pcout];//要写进文件的字符串数组
-		for(int j=0;j<pcout;j++)
-			tofile[j]=message[j];
+		String[] tofile = new String[pcout];// 要写进文件的字符串数组
+		for (int j = 0; j < pcout; j++)
+			tofile[j] = message[j];
 		Comparator com = Collator.getInstance(Locale.CHINA);
-		//Arrays.sort(line,com);
-		if(allctry==null&&pnum==0) {
-			String[] change=new String[pcout-1];
-			for(int j=1;j<pcout;j++)
-				change[j-1]=message[j];
-			Arrays.sort(change,com);
-			//System.out.println(tofile[0]);
-			for(int j=0;j<pcout-1;j++)
-				tofile[j+1]=change[j];
+		// Arrays.sort(line,com);
+		if (allctry == null && pnum == 0) {
+			String[] change = new String[pcout - 1];
+			for (int j = 1; j < pcout; j++)
+				change[j - 1] = message[j];
+			Arrays.sort(change, com);
+			// System.out.println(tofile[0]);
+			for (int j = 0; j < pcout - 1; j++)
+				tofile[j + 1] = change[j];
+		} 
+		else if (allctry != null) {
+			String[] change = new String[pcout - 1];
+			for (int j = 1; j < pcout; j++)
+				change[j - 1] = message[j];
+			Arrays.sort(change, com);
+			for (int j = 0; j < pcout - 1; j++)
+				tofile[j + 1] = change[j];
 		}
-		else if(allctry!=null) {
-			String[] change=new String[pcout-1];
-			for(int j=1;j<pcout;j++)
-				change[j-1]=message[j];
-			Arrays.sort(change,com);
-			for(int j=0;j<pcout-1;j++)
-				tofile[j+1]=change[j];
-		}
-		
-		else Arrays.sort(tofile,com);
+
+		else
+			Arrays.sort(tofile, com);
 		FileWriter writer;
 		// 在d盘上创建一个名为testfile的文本文件
 		File fa = new File(output);
 		// 用FileOutputSteam包装文件，并设置文件可追加
 		OutputStream out = new FileOutputStream(fa, true);
 		// 字符数组
-		String pi2="日期 :"+date;
-		String pi1="执行命令: ";
-		for(int len=0;len<args.length;len++)
-			pi1=pi1+" "+args[len];
+		String pi2 = "日期 :" + date;
+		String pi1 = "执行命令: ";
+		for (int len = 0; len < args.length; len++)
+			pi1 = pi1 + " " + args[len];
 		for (int ji = 0; ji < pcout; ji++) {
 			System.out.println(tofile[ji]);
 			out.write(tofile[ji].getBytes()); // 向文件中写入数据

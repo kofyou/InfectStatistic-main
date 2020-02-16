@@ -48,6 +48,50 @@ class InfectStatistic {
 		destination.addSuspect(num);
 	}
 	
+	public static Date getLatestDate(File directory)
+	{
+		File[] logs=directory.listFiles();
+        
+        Date latestDate=getLogDate(logs[0].getName());
+        for (int i=1;i<logs.length;i++)//求出日志中最晚的一天
+        {
+         	
+         	Date temp=getLogDate(logs[i].getName());
+         	if (temp.compareTo(latestDate)>0)
+            {
+         		latestDate=temp;
+            }
+        }
+        return latestDate;
+	}
+	
+	public static Date getLogDate(String logName)
+	{
+		int logYear=Integer.parseInt(logName.substring(0, 4));
+        int logMonth=Integer.parseInt(logName.substring(5, 7));
+        int logDay=Integer.parseInt(logName.substring(8,10));
+        
+        return (new Date(logYear-1900, logMonth-1, logDay));
+	}
+	
+	public static Area getCountry(Map<String, Area> map)
+	{
+		
+		int infectSum=0;//全国所有的感染患者
+        int suspectSum=0;//全国所有疑似患者
+        int cureSum=0;//全国所有治愈
+        int deathSum=0;//全国所有死亡
+		
+		for (Map.Entry<String, Area> entry : map.entrySet()) //统计全国疫情
+        {
+    		infectSum+=entry.getValue().getInfectNum();
+    		suspectSum+=entry.getValue().getSuspectNum();
+    		cureSum+=entry.getValue().getCureNum();
+    		deathSum+=entry.getValue().getDeathNum();
+        }
+		return (new Area(infectSum,suspectSum,cureSum,deathSum));
+	}
+	
 	
     public static void main(String[] args) 
     {
@@ -69,10 +113,7 @@ class InfectStatistic {
 		
 		List<String> type = new ArrayList<>();//指令中若含有-type参数则记录需要统计那些疫情
 
-        int infectSum=0;//全国所有的感染患者
-        int suspectSum=0;//全国所有疑似患者
-        int cureSum=0;//全国所有治愈
-        int deathSum=0;//全国所有死亡
+       
         
         Area country=null;
         
@@ -134,6 +175,18 @@ class InfectStatistic {
     				System.out.println("输出文件路径错误");
     				System.exit(1);
     			}
+    		    if (!output.exists())//如果输出文件不存在则创建它
+    	        {
+    	        	try 
+    	        	{
+    					output.createNewFile();
+    				} 
+    	        	catch (IOException e) 
+    	        	{
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}        
+    	        }
         		i++;
         	}
         	else if (args[i].equals("-date"))//-date参数
@@ -220,21 +273,7 @@ class InfectStatistic {
         
         if (date!=null)
         {
-        	 String log=logs[0].getName();
-             Date latestDate=new Date(Integer.parseInt(log.substring(0, 4))-1900, 
-             		Integer.parseInt(log.substring(5, 7))-1, 
-             		Integer.parseInt(log.substring(8,10)));
-             for (int i=1;i<logs.length;i++)//求出日志中最晚的一天
-             {
-             	log=logs[i].getName();
-             	Date temp=new Date(Integer.parseInt(log.substring(0, 4))-1900, 
-                 		Integer.parseInt(log.substring(5, 7))-1, 
-                 		Integer.parseInt(log.substring(8,10)));
-             	 if (temp.compareTo(latestDate)>0)
-                  {
-             		 latestDate=temp;
-                  }
-             }
+             Date latestDate=getLatestDate(directory);
              if (date.compareTo(latestDate)>0)//如果-date日期比日志中最晚一天还要晚则报错
              {
              	System.out.println("-date超出范围");
@@ -248,12 +287,7 @@ class InfectStatistic {
         	{
         		if (date!=null)
         		{
-            		String logName=logs[i].getName();
-            		int logYear=Integer.parseInt(logName.substring(0, 4));
-                    int logMonth=Integer.parseInt(logName.substring(5, 7));
-                    int logDay=Integer.parseInt(logName.substring(8,10));
-                    
-                    Date logDate=new Date(logYear-1900, logMonth-1, logDay);
+                    Date logDate=getLogDate(logs[i].getName());
                     
                     if (logDate.compareTo(date)>0)//如果某一日志文件比-date日期晚，则跳过不统计该日志
                     {
@@ -331,28 +365,11 @@ class InfectStatistic {
 		}
         
         
-        for (Map.Entry<String, Area> entry : map.entrySet()) //统计全国疫情
-        {
-        		infectSum+=entry.getValue().getInfectNum();
-        		suspectSum+=entry.getValue().getSuspectNum();
-        		cureSum+=entry.getValue().getCureNum();
-        		deathSum+=entry.getValue().getDeathNum();
-        }
         
-        country=new Area(infectSum,suspectSum,cureSum,deathSum);
         
-        if (!output.exists())//如果输出文件不存在则创建它
-        {
-        	try 
-        	{
-				output.createNewFile();
-			} 
-        	catch (IOException e) 
-        	{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}        
-        }
+        country=getCountry(map);
+        
+       
         
         try {
 			FileWriter fileWriter = new  FileWriter(output);			

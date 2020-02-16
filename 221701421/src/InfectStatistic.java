@@ -23,6 +23,7 @@ class InfectStatistic {
             "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"
     };
     private HashMap<String, ProvanceInfo> provinceMap = new HashMap<>();
+    private List<String> fileList = new ArrayList<>();
     private int infectTotalNum,suspectedTotalNum,cureTotalNum,diedTotalNum;
     public InfectStatistic(){
         for(String p : provinceList){
@@ -32,8 +33,11 @@ class InfectStatistic {
     }
     public static void main(String[] args) {
         List list = Arrays.asList(args);
-        int dateIndex = list.indexOf("-date");//截止日期
-        String dateString = args[dateIndex + 1];
+        int dateIndex = list.indexOf("-date");//截止日期.
+        String dateString = "";
+        if(dateIndex > 0){
+            dateString = args[dateIndex + 1];
+        }
         int dirIndex = list.indexOf("-log");//日志文件目录
         String dirPath = args[dirIndex + 1];
         int outputIndex = list.indexOf("-out");//输出文件目录
@@ -61,10 +65,12 @@ class InfectStatistic {
         File logDir = new File(dirPath);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
         Date date = null;
-        try{
-            date = simpleDateFormat.parse(dateString);
-        }catch (ParseException e){
-            System.out.println("时间参数非法");
+        if(dateIndex >= 0) {
+            try {
+                date = simpleDateFormat.parse(dateString);
+            } catch (ParseException e) {
+                System.out.println("时间参数非法");
+            }
         }
         InfectStatistic infectStatistic = new InfectStatistic();
         infectStatistic.statistic(logDir,date);
@@ -82,25 +88,38 @@ class InfectStatistic {
 
 
     public void statistic(File dir, Date date){//统计
-        BufferedReader reader = null;
-        String line;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
-        for(File file : dir.listFiles()){
-            String fileDateString = file.getName().split("\\.")[0];//日志日期
-            try{
+        try {
+            BufferedReader reader = null;
+            String line;
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+            for (File f : dir.listFiles()) {//将目录下所有的文件名加入fileList列表用于排序
+                fileList.add(f.getName());
+            }
+            Collections.sort(fileList);
+            String lastDateString = fileList.get(fileList.size() - 1).split("\\.")[0];//最大日期
+            Date lastDate = simpleDateFormat.parse(lastDateString);
+            if (date != null && date.compareTo(lastDate) > 0) {
+                System.out.println("抱歉，日期超出范围");
+                return;
+            }
+            for (String f : fileList) {
+                System.out.println(f);
+            }
+            for (File file : dir.listFiles()) {
+                String fileDateString = file.getName().split("\\.")[0];//日志日期
                 Date fileDate = simpleDateFormat.parse(fileDateString);//日志日期
-                if(fileDate.compareTo(date) > 0){
+                if (date != null && fileDate.compareTo(date) > 0) {
                     break;
                 }
                 reader = new BufferedReader(new FileReader(file));
-                while ((line = reader.readLine())!= null){
-                    if(line.charAt(0) != '/'){//该行不为注释
+                while ((line = reader.readLine()) != null) {
+                    if (line.charAt(0) != '/') {//该行不为注释
                         updateProvinceInfo(line);
                     }
                 }
-            } catch (Exception e){
-                e.printStackTrace();
             }
+        }catch (Exception e){
+
         }
     }
 
@@ -109,7 +128,6 @@ class InfectStatistic {
         ProvanceInfo province = provinceMap.get(message[0]);
         String lastMessage = message[message.length-1];
         int num = Integer.parseInt(lastMessage.substring(0,lastMessage.length()-1));//更新人数
-        System.out.println(line);
         switch (message.length){
             case 3://死亡、治愈
                 if(message[1].equals("死亡")){
@@ -117,13 +135,11 @@ class InfectStatistic {
                     province.infectNumSub(num);
                     diedTotalNum += num;
                     infectTotalNum -= num;
-                    System.out.print("  diedTotalNum" + num);
                 }else{//治愈
                     province.cureNumAdd(num);
                     province.infectNumSub(num);
                     cureTotalNum += num;
                     infectTotalNum -= num;
-                    System.out.print("  cureTotalNum" + num);
                 }
                 break;
             case 4://新增、确诊、排除
@@ -131,22 +147,18 @@ class InfectStatistic {
                     if(message[2].equals("感染患者")){
                         province.infectNumAdd(num);
                         infectTotalNum += num;
-                        System.out.print("  infectTotalNum" + num);
                     }else{//疑似患者
                         province.suspectedAdd(num);
                         suspectedTotalNum += num;
-                        System.out.print("  suspectedTotalNum" + num);
                     }
                 }else if(message[1].equals("排除")){//排除疑似患者
                     province.suspectedSub(num);
                     suspectedTotalNum -= num;
-                    System.out.print("  suspectedTotalNum-" + num);
                 }else{//确诊感染
                     province.suspectedSub(num);
                     province.infectNumAdd(num);
                     suspectedTotalNum -= num;
                     infectTotalNum += num;
-                    System.out.print("  suspectedTotalNum-" + num + "  infectTotalNum" + num);
                 }
                 break;
             case 5://从A省流入B省
@@ -160,7 +172,6 @@ class InfectStatistic {
                 }
                 break;
         }
-        System.out.println();
     }
 
     public void output(String outputPath, ArrayList<String>provinceList, HashMap<String, Integer> typeMap){

@@ -1,7 +1,6 @@
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,7 +12,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.regex.Pattern;
 
 /**
  * Lib
@@ -46,22 +44,22 @@ class DataManager{
 	public static List<int[]> solveData(List<String>data){
 		List<int[]> result = new LinkedList<int[]>();
 		ListInit(result);
-//		Iterator<int[]> i = result.iterator();
-//    	while(i.hasNext()) {
-//    		int[] tmp = i.next();
-//    		for(int j = 0;j<tmp.length;j++) {
-//    			System.out.print(tmp[j]);
-//    		}
-//    		System.out.println();
-//    	}
-		
-		
 		AddipHandler addip = new AddipHandler(result);
 		AddSpHandler addSp = new AddSpHandler(result);
 		ChangeHandler change = new ChangeHandler(result);
+		CureHandler cure = new CureHandler(result);
+		DeathHandler death = new DeathHandler(result);
+		ExcludeHandler exclude = new ExcludeHandler(result);
+		SwapIpHandler swapIp = new SwapIpHandler(result);
+		SwapSpHandler swapSp = new SwapSpHandler(result);
 		addip.nextHandler = addSp;
 		addSp.nextHandler = change;
-		
+		change.nextHandler = cure;
+		cure.nextHandler = death;
+		death.nextHandler = exclude;
+		exclude.nextHandler = swapIp;
+		swapIp.nextHandler = swapSp;
+		swapSp.nextHandler = null;
 		Iterator<String> it = data.iterator();
     	while(it.hasNext()) {
     		String s = it.next();
@@ -72,9 +70,19 @@ class DataManager{
 
 	private static void ListInit(List<int[]> result) {
 		for(int i = 0; i < ProvinceValue.values().length ;i++) {
-			int[] vals = {i,0,0,0};
+			int[] vals = {i,0,0,0,0};
 			result.add(vals);
 		}
+	}
+
+	public static void mergeData(List<int[]> result) {
+		Iterator<int[]> it = result.iterator();
+    	while(it.hasNext()) {
+    		int[] t = it.next();
+    		if(t[1] == 0 &&  t[2] == 0 && t[3] == 0 && t[4] ==0) {
+    			it.remove();
+    		}
+    	}
 	}
 }
 
@@ -125,10 +133,6 @@ class CmdArgs {
 			key = key.toLowerCase().trim();
 			
 			value = argVals();
-//			Iterator<String> it = value.iterator();
-//	    	while(it.hasNext()) {
-//	    		System.out.println(it.next());
-//	    	}
 			map.put(key, value);
 		}
 		return map;
@@ -167,94 +171,6 @@ class CmdArgs {
     	return values;
     }
 }
-
-enum ProvinceValue{
-	China(0,"全国"), Beijing(1,"北京"), Tianjin(2,"天津"), Hebei(3,"河北"),
-	Liaoning(4,"辽宁"), Jilin(5,"吉林"), Heilongjiang(6,"黑龙江"), Shandong(7,"山东"),
-	Jiangsu(8,"江苏"), Shanghai(9,"上海"), Zhejiang(10,"浙江"), Anhui(11,"安徽"),
-	Fujian(12,"福建"), Jiangxi(13,"江西"), Guangdong(14,"广东"), Guangxi(15,"广西"),
-	Hainan(16,"海南"), Henan(17,"河南"), Hunan(18,"湖南"), Hubei(19,"湖北"),
-	Shanxi(20,"山西"), Neimenggu(21,"内蒙古"), Ningxia(22,"宁夏"), Qinghai(23,"青海"),
-	ShanXi(24,"陕西"), Gansu(25,"甘肃"), Xinjiang(26,"新疆"), Sichuan(27,"四川"),
-	Guizhou(28,"贵州"), Yunnan(29,"云南"), Chongqin(30,"重庆"), Xizang(31,"西藏"),
-	Xianggang(32,"香港"), Aomen(33,"澳门"), Taiwan(34,"台湾");
-	private int key;
-	private String text;
-	private ProvinceValue(int key,String text){
-		this.key = key;
-		this.text = text;
-	}
-
-	private static HashMap<Integer,String> map = new HashMap<Integer,String>();
-	static {
-        for(ProvinceValue d : ProvinceValue.values()){
-            map.put(d.key,d.text);
-        }
-    }
-
-	public static int keyOfProvince(String string) {
-		for (Entry<Integer, String> entry : map.entrySet()) {
-	        if (entry.getValue().equals(string)) {
-	            return entry.getKey();
-	        }
-	    }
-		return -1;
-	}
-	
-	String getText() {
-		return text;
-	}
-	
-	int getKey() {
-		return key;
-	}
-}
-
-enum TypeValue{
-	IP(0,"感染患者"), SP(1,"疑似患者"), CURE(2,"治愈"), DEAD(3,"死亡");
-	private int key;
-	private String text;
-	private TypeValue(int key,String text){
-		this.key = key;
-		this.text = text;
-	}
-	
-	String getText() {
-		return text;
-	}
-	
-	int getKey() {
-		return key;
-	}
-	
-}
-
-enum ListKey{
-	LOG(0,"读取路径"), DATE(1,"限定日期"), PROVINCE(2,"限定省份"), 
-	TYPE(3,"限定类型"), OUT(4,"输出路径");
-	private int key;
-	private String text;
-	private ListKey(int key,String text){
-		this.key = key;
-		this.text = text;
-	}
-	
-	private static HashMap<Integer,String> map = new HashMap<Integer,String>();
-	static {
-        for(ListKey d : ListKey.values()){
-            map.put(d.key,d.text);
-        }
-    }
-	
-
-	public static ListKey valueOf(int ordinal) {
-		if (ordinal < 0 || ordinal >= values().length) {
-			throw new IndexOutOfBoundsException("Invalid ordinal");
-		} 
-		return values()[ordinal];
-	}
-}
-
 //命令模式的command类
 interface Command{
 	void execute(Map<String,List<String>> map);
@@ -262,7 +178,7 @@ interface Command{
 
 class ListCommand implements Command{
 	private ListKey listKey;
-	private List<String[]> result = new LinkedList<String[]>();
+	private List<int[]> result = new LinkedList<int[]>();
 	private List<String> logLine = new LinkedList<String>();
 	
 	/**
@@ -278,7 +194,8 @@ class ListCommand implements Command{
 			switch(listKey) {
 				case DATE:
 					dateKey(map);
-					DataManager.solveData(logLine);
+					result = DataManager.solveData(logLine);
+					DataManager.mergeData(result);
 					break;
 				case LOG:
 					logKey(map);
@@ -290,39 +207,49 @@ class ListCommand implements Command{
 					typeKey(map);
 					break;
 				case PROVINCE:
-					provinceKey(map);
+					provinceKey(map,result);
+					break;
+			}
+		}
+		Iterator<String> it2 = logLine.iterator();
+    	while(it2.hasNext()) {
+    		System.out.println(it2.next());
+    	}
+		
+		Iterator<int[]> it = result.iterator();
+    	while(it.hasNext()) {
+    		int[] t = it.next();
+    		for(int i = 0; i < t.length; i++ ) {
+    			System.out.print(t[i] + " ");
+    		}
+    		System.out.println("");
+    	}
+		
+    	
+			
+	}
+
+	private void provinceKey(Map<String, List<String>> map, List<int[]> result) {
+		List<String> provinceList = map.get("province");
+		for(int i = 0; i < logLine.size();i++) {
+			boolean flag = false;
+			for(int j = 0; j < provinceList.size(); j++) {
+				if(logLine.get(i).matches(".*" + provinceList.get(j) + ".*")) {
+					flag = true;
 					break;
 				}
 			}
-//			Iterator<String> it = logLine.iterator();
-//	    	while(it.hasNext()) {
-//	    		System.out.println(it.next());
-//	    	}
+			if(flag == false) {
+				logLine.remove(i);
+			}
 		}
-
-	
-	private void provinceKey(Map<String, List<String>> map) {
-		//System.out.println("now is in ProvinceKey Handler");
-//		List<String> provinceList = map.get("province");
-//		for(int i = 0; i < logLine.size();i++) {
-//			boolean flag = false;
-//			for(int j = 0; j < provinceList.size(); j++) {
-//				if(logLine.get(i).matches(".*" + provinceList.get(j) + ".*")) {
-//					flag = true;
-//					break;
-//				}
-//			}
-//			if(flag == false) {
-//				logLine.remove(i);
-//			}
-//		}
-//		for(int i = 0;i < logLine.size();i++) {
-//			System.out.println(logLine.get(i));
-//		}
+		for(int i = 0;i < logLine.size();i++) {
+			System.out.println(logLine.get(i));
+		}
 	}
 
 	private void typeKey(Map<String, List<String>> map) {
-//		//System.out.println("now is in TypeKey Handler");
+//		System.out.println("now is in TypeKey Handler");
 //		List<String> typeList = map.get("type");
 //		for(int i = 0; i < logLine.size();i++) {
 //			boolean flag = false;
@@ -557,7 +484,8 @@ class AddipHandler extends MyHandler{
 	@Override
 	public void handle() {
 		int index = ProvinceValue.keyOfProvince(province);
-		 result.get(index)[1] += num;
+		result.get(0)[1] +=num;
+		result.get(index)[1] += num;
 	}
 }
 
@@ -586,76 +514,144 @@ class AddSpHandler extends MyHandler{
 	@Override
 	public void handle() {
 		int index = ProvinceValue.keyOfProvince(province);
-		 result.get(index)[2] += num;
-		}
+		result.get(0)[2] +=num;
+		result.get(index)[2] += num;
+	}
 }
 
 //患者治愈
 class CureHandler extends MyHandler{
-	private String reg;
+	private String reg = "^.*\\s治愈\\s.*$";;
+	private String province;
+	private int num;
+	
+	public List<int[]> result;
+	public CureHandler(List<int[]> result) {
+		this.result = result;
+	}
 	@Override
 	public boolean regFit(String string) {
-		if(string.matches(reg))return true;
+		if(string.matches(reg)) {
+			String[] splitString = string.split("\\s");
+			province = splitString[0];
+			splitString = splitString[2].split("人");
+			num = Integer.valueOf(splitString[0]);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void handle() {
-		// TODO Auto-generated method stub
-		
+		int index = ProvinceValue.keyOfProvince(province);
+		result.get(index)[1] -= num;
+		result.get(0)[1] -=num;
+		result.get(index)[3] += num;
+		result.get(0)[3] +=num;
 	}
 }
 
 //感染患者流入
-class SwapipHandler extends MyHandler{
-	private String reg;
+class SwapIpHandler extends MyHandler{
+	private String reg = "^.*\\s感染患者\\s流入\\s.*$";
+	private String province1;
+	private String province2;
+	private int num;
+	
+	public List<int[]> result;
+	public SwapIpHandler(List<int[]> result) {
+		this.result = result;
+	}
 	@Override
 	public boolean regFit(String string) {
-		if(string.matches(reg))return true;
+		if(string.matches(reg)) {
+			String[] splitString = string.split("\\s");
+			province1 = splitString[0];
+			province2 = splitString[3];
+			splitString = splitString[4].split("人");
+			num = Integer.valueOf(splitString[0]);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void handle() {
-		// TODO Auto-generated method stub
-		
+		int index1 = ProvinceValue.keyOfProvince(province1);
+		int index2 = ProvinceValue.keyOfProvince(province2);
+		result.get(index1)[1] -= num;
+		result.get(index2)[1] += num;
 	}
 }
 
 //疑似患者流入
 class SwapSpHandler extends MyHandler{
-	private String reg;
+	private String reg = "^.*\\s疑似患者\\s流入\\s.*$";
+	private String province1;
+	private String province2;
+	private int num;
+	
+	public List<int[]> result;
+	public SwapSpHandler(List<int[]> result) {
+		this.result = result;
+	}
 	@Override
 	public boolean regFit(String string) {
-		if(string.matches(reg))return true;
+		if(string.matches(reg)) {
+			String[] splitString = string.split("\\s");
+			province1 = splitString[0];
+			province2 = splitString[3];
+			splitString = splitString[4].split("人");
+			num = Integer.valueOf(splitString[0]);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void handle() {
-		
+		int index1 = ProvinceValue.keyOfProvince(province1);
+		int index2 = ProvinceValue.keyOfProvince(province2);
+		result.get(index1)[2] -= num;
+		result.get(index2)[2] += num;
 	}
 }
 
 //患者死亡
 class DeathHandler extends MyHandler{
-	private String reg;
+	private String reg = "^.*\\s死亡\\s.*$";
+	private String province;
+	private int num;
+	
+	public List<int[]> result;
+	public DeathHandler(List<int[]> result) {
+		this.result = result;
+	}
 	@Override
 	public boolean regFit(String string) {
-		if(string.matches(reg))return true;
+		if(string.matches(reg)) {
+			String[] splitString = string.split("\\s");
+			province = splitString[0];
+			splitString = splitString[2].split("人");
+			num = Integer.valueOf(splitString[0]);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void handle() {
-		// TODO Auto-generated method stub
-		
+		int index = ProvinceValue.keyOfProvince(province);
+		result.get(index)[1] -= num;
+		result.get(0)[1] -=num;
+		result.get(index)[4] += num;
+		result.get(0)[4] +=num;
 	}
 }
 
 //疑似确诊感染患者
 class ChangeHandler extends MyHandler{
-	private String reg = "^.*\\s疑似患者\\s确认感染\\s.*$";
+	private String reg = "^.*\\s疑似患者\\s确诊感染\\s.*$";
 	private String province;
 	private int num;
 	
@@ -678,23 +674,127 @@ class ChangeHandler extends MyHandler{
 	@Override
 	public void handle() {
 		int index = ProvinceValue.keyOfProvince(province);
-		 result.get(index)[1] += num;
-		 result.get(index)[2] -= num;
+		result.get(index)[1] += num;
+		result.get(index)[2] -= num;
+		result.get(0)[1] +=num;
+		result.get(0)[2] -=num;
 	}
 }
 
 //排除疑似患者
 class ExcludeHandler extends MyHandler{
-	private String reg;
+	private String reg = "^.*\\s排除\\s疑似患者\\s.*$";
+	private String province;
+	private int num;
+	
+	public List<int[]> result;
+	public ExcludeHandler(List<int[]> result) {
+		this.result = result;
+	}
 	@Override
 	public boolean regFit(String string) {
-		if(string.matches(reg))return true;
+		if(string.matches(reg)) {
+			String[] splitString = string.split("\\s");
+			province = splitString[0];
+			splitString = splitString[3].split("人");
+			num = Integer.valueOf(splitString[0]);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void handle() {
-		// TODO Auto-generated method stub
-		
+		int index = ProvinceValue.keyOfProvince(province);
+		result.get(0)[2] -=num;
+		result.get(index)[2] -= num;
+	}
+}
+
+
+enum ProvinceValue{
+	China(0,"全国"), Beijing(1,"北京"), Tianjin(2,"天津"), Hebei(3,"河北"),
+	Liaoning(4,"辽宁"), Jilin(5,"吉林"), Heilongjiang(6,"黑龙江"), Shandong(7,"山东"),
+	Jiangsu(8,"江苏"), Shanghai(9,"上海"), Zhejiang(10,"浙江"), Anhui(11,"安徽"),
+	Fujian(12,"福建"), Jiangxi(13,"江西"), Guangdong(14,"广东"), Guangxi(15,"广西"),
+	Hainan(16,"海南"), Henan(17,"河南"), Hunan(18,"湖南"), Hubei(19,"湖北"),
+	Shanxi(20,"山西"), Neimenggu(21,"内蒙古"), Ningxia(22,"宁夏"), Qinghai(23,"青海"),
+	ShanXi(24,"陕西"), Gansu(25,"甘肃"), Xinjiang(26,"新疆"), Sichuan(27,"四川"),
+	Guizhou(28,"贵州"), Yunnan(29,"云南"), Chongqin(30,"重庆"), Xizang(31,"西藏"),
+	Xianggang(32,"香港"), Aomen(33,"澳门"), Taiwan(34,"台湾");
+	private int key;
+	private String text;
+	private ProvinceValue(int key,String text){
+		this.key = key;
+		this.text = text;
+	}
+
+	private static HashMap<Integer,String> map = new HashMap<Integer,String>();
+	static {
+        for(ProvinceValue d : ProvinceValue.values()){
+            map.put(d.key,d.text);
+        }
+    }
+
+	public static int keyOfProvince(String string) {
+		for (Entry<Integer, String> entry : map.entrySet()) {
+	        if (entry.getValue().equals(string)) {
+	            return entry.getKey();
+	        }
+	    }
+		return -1;
+	}
+	
+	String getText() {
+		return text;
+	}
+	
+	int getKey() {
+		return key;
+	}
+}
+
+enum TypeValue{
+	IP(0,"感染患者"), SP(1,"疑似患者"), CURE(2,"治愈"), DEAD(3,"死亡");
+	private int key;
+	private String text;
+	private TypeValue(int key,String text){
+		this.key = key;
+		this.text = text;
+	}
+	
+	String getText() {
+		return text;
+	}
+	
+	int getKey() {
+		return key;
+	}
+	
+}
+
+enum ListKey{
+	LOG(0,"读取路径"), DATE(1,"限定日期"), PROVINCE(2,"限定省份"), 
+	TYPE(3,"限定类型"), OUT(4,"输出路径");
+	private int key;
+	private String text;
+	private ListKey(int key,String text){
+		this.key = key;
+		this.text = text;
+	}
+	
+	private static HashMap<Integer,String> map = new HashMap<Integer,String>();
+	static {
+        for(ListKey d : ListKey.values()){
+            map.put(d.key,d.text);
+        }
+    }
+	
+
+	public static ListKey valueOf(int ordinal) {
+		if (ordinal < 0 || ordinal >= values().length) {
+			throw new IndexOutOfBoundsException("Invalid ordinal");
+		} 
+		return values()[ordinal];
 	}
 }

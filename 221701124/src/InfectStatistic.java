@@ -81,7 +81,12 @@ class InfectStatistic {
     					System.out.println("日志目录路径格式错误");
     					return false;
     				}
+    				break;
     			}
+    		}
+    		for (i = 1 ; i < args.length ; i++) {
+    			if (args[i] == "-log")
+    				i++;
     			else if (args[i] == "-out") {
     				if (GetTargetPath(++i) == false) {
     					System.out.println("输出文件路径格式错误");
@@ -90,7 +95,7 @@ class InfectStatistic {
     			}
     			else if (args[i] == "-date") {
     				if (GetDate(++i) == false) {
-    					System.out.println("日期参数错误");
+    					System.out.println("日期超出范围");
     					return false;
     				}
     			}
@@ -173,10 +178,12 @@ class InfectStatistic {
     	 * 判断日期是否超过当前日期
     	 */
     	public boolean GetDate (int i) {
+    		String latestTime = "";
     		boolean result = true;
+    		latestTime = GetLatestTime();
     		if (i < args.length) {
     			if (IsDate(args[i])) {
-    				if (acqTime.compareTo(args[i]) >= 0) {
+    				if (latestTime.compareTo(args[i]) >= 0) {
     					acqTime = args[i];
     					result = true;
     				}
@@ -209,7 +216,30 @@ class InfectStatistic {
         }
     	
     	/*
-    	 * 获取患者类型
+    	 * 获取日志文件中最新文档标记的时间
+    	 */
+    	public String GetLatestTime() {
+        	String latestTime = "";
+    		File file = new File(originPath);
+    		File[] tempList = file.listFiles();
+    		int i = 0;
+    		for (i = 0 ; i < tempList.length ; i++) {
+    			if (tempList[i].isFile()) { 
+    				String fileName = tempList[i].getName();
+    				String[] names = fileName.split("\\.");
+    				if (i == 0) {
+    					latestTime = names[0];
+    				}
+    				if (latestTime.compareTo(names[0]) < 0) {
+    					latestTime = names[0];
+    				}
+    			} 
+    		} 
+    		return latestTime;
+    	}
+    	
+    	/*
+    	 * 获取需要列出的患者类型
     	 */
     	public boolean GetType(int i) {
     		boolean result = true;
@@ -378,6 +408,7 @@ class InfectStatistic {
     	
     	/*
     	 * 新增
+    	 * 根据日志文件中的数据，计算每个地区新增感染和疑似的人数
     	 */
     	public void AddPeople (String [] people) {
     		int n = 0 , m = 0;
@@ -399,6 +430,7 @@ class InfectStatistic {
     	
     	/*
     	 * 死亡
+    	 * 根据日志文件中的数据，计算每个地区患者死亡的人数
     	 */
     	public void DeadPeople (String [] people) {
     		int n=0;
@@ -418,6 +450,7 @@ class InfectStatistic {
     	
     	/*
     	 * 治愈
+    	 * 根据日志文件中的数据，计算每个地区患者治愈的人数
     	 */
     	public void CurePeople (String [] people) {
     		int n=0;
@@ -437,6 +470,7 @@ class InfectStatistic {
     	
     	/*
     	 * 排除
+    	 * 根据日志文件中的数据，计算每个地区疑似的人数变化
     	 */
     	public void ExcludePeople (String [] people) {
     		int n = 0 , m = 0;
@@ -458,6 +492,7 @@ class InfectStatistic {
     	
     	/*
     	 * 流入
+    	 * 根据日志文件中的数据，计算患者流动地区的感染和疑似的人数变化
     	 */
     	public void InflowPeople (String [] people) {
     		int n = 0 , m = 0;
@@ -489,6 +524,7 @@ class InfectStatistic {
     	
     	/*
     	 * 确认感染
+    	 * 根据日志文件中的数据，计算每个地区确认感染的人数
     	 */
     	public void ConfirmPeople (String [] people) {
     		int n = 0;
@@ -514,20 +550,36 @@ class InfectStatistic {
     			File writeName = new File(targetPath); // 相对路径，如果没有则要建立一个新的output.txt文件  
                 writeName.createNewFile(); // 创建新文件  
                 BufferedWriter out = new BufferedWriter(new FileWriter(writeName));  
-                int n = 0 , m = 0;
-                String outData=" ";
+                int n = 0 , m = 0 , k = 0 , t = 0;
+                String outData="";
+                for (n = 0 ; n < 4 ; n++) {
+                	if (patients[n]!=0)
+                		t++;
+                }
                 for (n = 0 ; n < 32 ; n++) {
                 	if (area[n] == 1) {
+                		k = 0;
                 		outData = areaStr[n]+" ";
                 		for (m = 0 ; m < 4 ; m++) {
-                			if (patients[m] == 1)
-                				outData += patientsStr[0] + totalNumber[n][m] + "人" + " ";
-                			else if (patients[m] == 2)
-                				outData += patientsStr[1] + totalNumber[n][m] + "人" + " ";
-                			else if (patients[m] == 3)
-                				outData += patientsStr[2] + totalNumber[n][m] + "人" + " ";
-                			else if (patients[m] == 4)
-                				outData += patientsStr[3] + totalNumber[n][m] + "人" + " ";
+                			if (patients[m] == 1) {
+                				outData += patientsStr[0] + totalNumber[n][m] + "人" ;
+                				k++;
+                			}	
+                			else if (patients[m] == 2) {
+                				outData += patientsStr[1] + totalNumber[n][m] + "人" ;
+                				k++;
+                			}
+                			else if (patients[m] == 3) {
+                				outData += patientsStr[2] + totalNumber[n][m] + "人" ;
+                				k++;
+                			}
+                			else if (patients[m] == 4) {
+                				outData += patientsStr[3] + totalNumber[n][m] + "人" ;
+                				k++;
+                			}
+                			if (k < t) {
+                				outData += " ";
+                			}
                 		}
                 		out.write(outData + "\r\n");
                 	}
@@ -547,10 +599,11 @@ class InfectStatistic {
         InfectStatistic.Analysis cla = infectstatistic.new Analysis(args); 
         boolean b = cla.JudgeParameter();
         if (b == false) {
-        	System.out.println("命令行参数存在问题！");
         }
-        InfectStatistic.FileProcess fp = infectstatistic.new FileProcess();
-        fp.ReadLogFile();
-        fp.WriteOutFile();
+        else{
+        	InfectStatistic.FileProcess fp = infectstatistic.new FileProcess();
+        	fp.ReadLogFile();
+        	fp.WriteOutFile();
+        }
     }
 }

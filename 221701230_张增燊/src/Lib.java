@@ -2,11 +2,12 @@ import java.util.*;
 
 class Province {
 	
-	private String name;
-	private int ip;
-	private int sp;
-	private int cure;
-	private int dead;
+	private String name;//省份的名字
+	private int ip;//感染患者
+	private int sp;//疑似患者
+	private int cure;//治愈
+	private int dead;//死亡
+	private int isinlog;//当天是否被改变
 	
 	public Province(String name)//构造函数
 	{
@@ -15,6 +16,17 @@ class Province {
 		sp=0;
 		cure=0;
 		dead=0;
+		isinlog=0;
+	}
+	
+	public int getIsinlog()
+	{
+		return isinlog;
+	}
+	
+	public void setIsinlog()
+	{
+		isinlog=1;
 	}
 	
 	public String getName()

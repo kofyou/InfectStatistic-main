@@ -158,6 +158,7 @@ public class InfectStatistic {
 			Dates[j] = new Dates(j1, j2);
 		}
 		if (date != null) {
+			num=0;
 			int len=0;//统计是截止到哪一个日志文件
 			//System.out.println(ss[0]);
 			String str1=date + ".log.txt";
@@ -168,8 +169,13 @@ public class InfectStatistic {
 			}
 			else {
 				for(int ji=0;ji<ss.length;ji++) {
-					if(str1.compareTo(ss[ji])<0||str1.compareTo(ss[ji+1])>=0) {
+					if(str1.equals(ss[ji])) {
+						len=ji;
+						//System.out.println(len);
+					}
+					if(str1.compareTo(ss[ji])<0 && str1.compareTo(ss[ji+1])>=0) {
 						len=ji+1;
+						//System.out.println(len);
 						break;
 					}
 				}
@@ -183,9 +189,11 @@ public class InfectStatistic {
 					// num = 0;
 					while ((str = bf.readLine()) != null) {
 						line[num] = str;
+						//System.out.println(str);
 						num++;
 					}
 				}
+				
 				for (int k = 0; k < num; k++) {
 					String[] as = line[k].split(" ");
 					// String mes=as[0];
@@ -459,8 +467,7 @@ public class InfectStatistic {
 							+ "人 " + "治愈" + provinces[j].cure + "人 " + "死亡" + provinces[j].death + "人";
 		    	 message[j+1]=p1;
 		     }
-		     for(int j=0;j<message.length;j++)
-		    	 System.out.println(message[j]);
+
 		}
 		else {
 			pcout=0;
@@ -483,8 +490,8 @@ public class InfectStatistic {
 					}
 				}
 		     }
-			for(int j=0;j<pcout;j++)
-		    	 System.out.println(message[j]);
+			//for(int j=0;j<pcout;j++)
+		    	 //System.out.println(message[j]);
 		}
 		//指明类型的情况下
 		if(tnum!=0) {
@@ -512,7 +519,16 @@ public class InfectStatistic {
 			tofile[j]=message[j];
 		Comparator com = Collator.getInstance(Locale.CHINA);
 		//Arrays.sort(line,com);
-		if(allctry!=null) {
+		if(allctry==null&&pnum==0) {
+			String[] change=new String[pcout-1];
+			for(int j=1;j<pcout;j++)
+				change[j-1]=message[j];
+			Arrays.sort(change,com);
+			//System.out.println(tofile[0]);
+			for(int j=0;j<pcout-1;j++)
+				tofile[j+1]=change[j];
+		}
+		else if(allctry!=null) {
 			String[] change=new String[pcout-1];
 			for(int j=1;j<pcout;j++)
 				change[j-1]=message[j];

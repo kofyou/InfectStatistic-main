@@ -61,11 +61,15 @@ public class InfectStatistic {
                         break;
                     default:
                         System.out.println("\n存在错误的命令行参数！");
-                        break;
+                        System.exit(0);
                 }
             }
             if (cmds.log.equals("")) {
                 System.out.println("未指定-log参数！");
+                System.exit(0);
+            }
+            if (cmds.out.equals("")) {
+                System.out.println("未指定-out参数！");
                 System.exit(0);
             }
         }

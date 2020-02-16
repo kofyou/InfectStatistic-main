@@ -25,17 +25,17 @@ public class InfectStatistic
 
     /*
      * type：感染类型列表
-     * ip：感染患者 ，sp：疑似患者，
-     * cure：治愈 ，dead：死亡患者
      */
-    public String[] type = {"ip", "sp", "cure", "dead"};
-
+    public String[] type = {"感染患者", "疑似患者", "治愈", "死亡患者"};
     /*
-     * typeCheck：确认-type输出顺序
-     * type[0]:ip  type[1]:sp
-     * type[2]:cure   iptype[3]:dead
+     * typeOrder：确认-type输出顺序
+     * ip：type[x]=0      sp：type[x]=1
+     * cure：type[x]=2   dead：type[x]=3
+     *
      */
-    public int[] typeCheck = {0,0,0,0};
+    public int[] typeOrder = {-1,-1,-1,-1};
+    public int checkType = 0;
+
 
     /*
      * province：各省份列表 除去港澳台 31个省份 + "全国"
@@ -55,6 +55,7 @@ public class InfectStatistic
      * statistics[][5]：-type四种可选值 + -provice查询确认位
      */
     public int[][] statistics = new int[32][5];
+    public int checkProvince = 0;
 
     /*
      * 解析cmd命令
@@ -154,33 +155,33 @@ public class InfectStatistic
          */
         public int getValidType(int itemType)
         {
-            int typeOrder = 1;
+            int typeOrderNum = 0;
             int itemTypeFlag = itemType;
             while (itemType < strCmd.length)
             {
                 if(strCmd[itemType].equals("ip"))
                 {
-                    typeCheck[0] = typeOrder;
+                    typeOrder[typeOrderNum] = 0;
                     itemType++;
-                    typeOrder++;
+                    typeOrderNum++;
                 }
                 else if(strCmd[itemType].equals("sp"))
                 {
-                    typeCheck[1] = typeOrder;
+                    typeOrder[typeOrderNum] = 1;
                     itemType++;
-                    typeOrder++;
+                    typeOrderNum++;
                 }
                 else if(strCmd[itemType].equals("cure"))
                 {
-                    typeCheck[2] = typeOrder;
+                    typeOrder[typeOrderNum] = 2;
                     itemType++;
-                    typeOrder++;
+                    typeOrderNum++;
                 }
                 else if(strCmd[itemType].equals("dead"))
                 {
-                    typeCheck[3] = typeOrder;
+                    typeOrder[typeOrderNum] = 3;
                     itemType++;
-                    typeOrder++;
+                    typeOrderNum++;
                 }
                 else
                     break;
@@ -188,7 +189,7 @@ public class InfectStatistic
             if (itemType == itemTypeFlag)
                 return -1;
             else
-                return (itemType-1);
+                return (itemType - 1);
         }
 
         /*
@@ -290,6 +291,7 @@ public class InfectStatistic
                 }
                 else if (strCmd[i].equals("-type"))
                 {
+                    checkType = 1;
                     i = getValidType(++i);
                     if (i < 0)
                     {
@@ -299,6 +301,7 @@ public class InfectStatistic
                 }
                 else if (strCmd[i].equals("-province"))
                 {
+                    checkProvince = 1;
                     i = getValidProvince(++i);
                     if (i < 0)
                     {
@@ -316,6 +319,15 @@ public class InfectStatistic
             {
                 System.out.println("该日暂无记录！请重新输入！");
                 return false;
+            }
+            if (checkType == 0)
+            {
+                for (int j=0; j < 4 ;j++)
+                    typeOrder[j] = j;
+            }
+            if (checkProvince == 0)
+            {
+                statistics[0][4] = 1;
             }
             return true;
         }
@@ -448,6 +460,10 @@ public class InfectStatistic
             if (ipIncrease.find())
             {
                 itemProvince1 = getItemProvince(logFileContentArray[0]);
+                if (checkProvince == 0)
+                {
+                    statistics[itemProvince1][4] = 1;
+                }
                 count = Integer.valueOf(logFileContentArray[3].replace("人", ""));
                 statistics(itemProvince1,0,count);
             //    System.out.println(province[itemProvince1]+"新增 感染患者"+count);
@@ -455,6 +471,10 @@ public class InfectStatistic
             else if (spIncrease.find())
             {
                 itemProvince1 = getItemProvince(logFileContentArray[0]);
+                if (checkProvince == 0 )
+                {
+                    statistics[itemProvince1][4] = 1;
+                }
                 count = Integer.valueOf(logFileContentArray[3].replace("人", ""));
                 statistics(itemProvince1,1,count);
             //    System.out.println(province[itemProvince1]+"新增 疑似患者"+count);
@@ -463,6 +483,11 @@ public class InfectStatistic
             {
                 itemProvince1 = getItemProvince(logFileContentArray[0]);
                 itemProvince2 = getItemProvince(logFileContentArray[3]);
+                if (checkProvince == 0)
+                {
+                    statistics[itemProvince1][4] = 1;
+                    statistics[itemProvince2][4] = 1;
+                }
                 count = Integer.valueOf(logFileContentArray[4].replace("人", ""));
                 statistics(itemProvince1, itemProvince2, 0, count);
              //   System.out.println(province[itemProvince1]+"感染患者 流入"+ province[itemProvince2] + count);
@@ -471,6 +496,11 @@ public class InfectStatistic
             {
                 itemProvince1 = getItemProvince(logFileContentArray[0]);
                 itemProvince2 = getItemProvince(logFileContentArray[3]);
+                if (checkProvince == 0)
+                {
+                    statistics[itemProvince1][4] = 1;
+                    statistics[itemProvince2][4] = 1;
+                }
                 count = Integer.valueOf(logFileContentArray[4].replace("人", ""));
                 statistics(itemProvince1, itemProvince2, 1, count);
             //    System.out.println(province[itemProvince1]+"疑似患者 流入"+province[itemProvince2] + count);
@@ -478,6 +508,10 @@ public class InfectStatistic
             else if (ipDead.find())
             {
                 itemProvince1 = getItemProvince(logFileContentArray[0]);
+                if (checkProvince == 0)
+                {
+                    statistics[itemProvince1][4] = 1;
+                }
             //    count = Integer.valueOf(logFileContentArray[2].replace("人", ""));
                 String scount = logFileContentArray[2].replace("人", "");
                 statistics(itemProvince1, 0, 3, scount);
@@ -486,6 +520,10 @@ public class InfectStatistic
             else if (ipCure.find())
             {
                 itemProvince1 = getItemProvince(logFileContentArray[0]);
+                if (checkProvince == 0)
+                {
+                    statistics[itemProvince1][4] = 1;
+                }
                 String scount = logFileContentArray[2].replace("人", "");
                 statistics(itemProvince1, 0, 2, scount);
             //    System.out.println(province[itemProvince1]+"治愈"+count);
@@ -493,6 +531,10 @@ public class InfectStatistic
             else if (spChecked.find())
             {
                 itemProvince1 = getItemProvince(logFileContentArray[0]);
+                if (checkProvince == 0)
+                {
+                    statistics[itemProvince1][4] = 1;
+                }
                 String scount = logFileContentArray[3].replace("人", "");
                 statistics(itemProvince1, 1, 0, scount);
             //    System.out.println(province[itemProvince1]+"疑似患者 确诊感染"+count);
@@ -500,6 +542,10 @@ public class InfectStatistic
             else if (spRemove.find())
             {
                 itemProvince1 = getItemProvince(logFileContentArray[0]);
+                if (checkProvince == 0)
+                {
+                    statistics[itemProvince1][4] = 1;
+                }
                 count = Integer.valueOf(logFileContentArray[3].replace("人", ""));
                 count = -count;
                 statistics(itemProvince1,1,count);
@@ -516,17 +562,56 @@ public class InfectStatistic
          */
         }
 
-
-
         /*
          * writeOutFile：输出统计结果
          * journalFileContent：-out指定输出文件路径
          */
-        public void writeOutFile (String journalFileName)
+        public void writeOutFile ()
         {
+            int itemProvince;
+            int itemType;
+            int typeInt;
+            String content = "";
+            try
+            {
+                File outFile = new File(out);
+                // if file doesnt exists, then create it
+                if (!outFile.exists())
+                    outFile.createNewFile();
 
+                FileWriter fw = new FileWriter(outFile.getAbsoluteFile());
+                BufferedWriter bw = new BufferedWriter(fw);
+                for (itemProvince = 0; itemProvince < 32; itemProvince++)
+                {
+                    if (statistics[itemProvince][4] == 1)
+                    {
+                        content = province[itemProvince]+" ";
+                        for (itemType = 0; itemType < 4; itemType++)
+                        {
+                            typeInt = typeOrder[itemType];
+                            if (typeInt >= 0)
+                            {
+                                content += type[typeInt] + statistics[itemProvince][typeInt] + "人 ";
+                            }
+                        }
+                    }
+                    bw.write(content);
+                    bw.write("\n");
+                }
+
+
+
+
+                bw.close();
+
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
+
 
     public static void main(String[] arg)
     {
@@ -535,7 +620,7 @@ public class InfectStatistic
         commondAnalysis.validCmd();
         InfectStatistic.FileOpration fileOpration = infectStatistic.new FileOpration();
         fileOpration.getLogList();
-
+        fileOpration.writeOutFile();
 
 
         //infectStatistic.validCmd()

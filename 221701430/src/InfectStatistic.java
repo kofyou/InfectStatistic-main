@@ -176,6 +176,9 @@ class InfectStatistic {
 	static class CommandLineRun{
 		public CommandLine commandline;
 		public File file_test;
+		//以下为存放各省数据的列表
+		public ArrayList<Province> province_list;
+		//以下为全国数据
 		public int ip;
 		public int sp;
 		public int cure;
@@ -184,11 +187,19 @@ class InfectStatistic {
 		public CommandLineRun(CommandLine cmdline) throws IOException {
 			commandline = new CommandLine();
 			commandline = cmdline;
+			//初始化全国总数据和各省总数据
+			ip = 0;
+			sp = 0;
+			cure = 0;
+			dead = 0;
+			creat_provinces_list();
 			//这里记得要改成参数值！！！！！！！！！！
 			file_test = new File("D:\\InfectStatistic-main\\221701430\\log\\2020-01-22.log.txt");
-			get_data(file_test);
+			process_data(file_test);
 		}
-		public void get_data(File f) throws IOException {
+		
+		//用于处理单个文件的
+		public void process_data(File f) throws IOException {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f),"UTF-8"));
 			String temp;
 			
@@ -212,15 +223,17 @@ class InfectStatistic {
 	        type_list.add(type_7);
 	        type_list.add(type_8);
 	        
-	        
+	        //进行数据读取并匹配，最后进行统计
 	        while((temp = reader.readLine()) != null) {
 	        	if(temp.charAt(0) == '/') {
 	        		continue;
 	        	}
-	        	
+	        	//用于记录文件某行匹配的是哪一模式
 	        	char flag = '0';
 	        	Pattern pattern;
 		        Matcher matcher;
+		        
+		        //数据匹配
 	        	for(int i = 0;i < 8;i++) {
 	        		pattern = Pattern.compile(type_list.get(i));
 	        		matcher = pattern.matcher(temp);
@@ -231,20 +244,125 @@ class InfectStatistic {
 						continue;
 					}
 	        	}
+	        	//测试用++++++++++++++++++++++++++++++++++++++++++++++++++
 	        	System.out.println(temp);
-	        	System.out.println("this is p" + flag);
+	        	
+	        	//数据处理
+	        	pattern = Pattern.compile(type_list.get((int)(flag-48)-1));
+        		matcher = pattern.matcher(temp);
+        		Province p,p1,p2;
+        		if(matcher.find()) {
+        			switch (flag) {
+        			//(\\W+) (新增 感染患者) (\\d+)(人)
+    				case '1':
+    					p = get_province(matcher.group(1));
+    					p.ip += Integer.parseInt(matcher.group(3));
+    					break;
+    				//(\\W+) (新增 疑似患者) (\\d+)(人)	
+    				case '2':
+    					p = get_province(matcher.group(1));
+    					p.sp += Integer.parseInt(matcher.group(3));
+    					break;
+    				//(\\W+) (感染患者 流入) (\\W+) (\\d+)(人)
+    				case '3':
+    					p1 = get_province(matcher.group(1));
+    					p2 = get_province(matcher.group(3));
+    					p1.ip -= Integer.parseInt(matcher.group(4));
+    					p2.ip += Integer.parseInt(matcher.group(4));
+    					break;
+    				//(\\W+) (疑似患者 流入) (\\W+) (\\d+)(人)
+    				case '4':
+    					p1 = get_province(matcher.group(1));
+    					p2 = get_province(matcher.group(3));
+    					p1.sp -= Integer.parseInt(matcher.group(4));
+    					p2.sp += Integer.parseInt(matcher.group(4));
+    					break;
+    				//(\\W+) (死亡) (\\d+)(人)
+    				case '5':
+    					p = get_province(matcher.group(1));
+    					p.dead += Integer.parseInt(matcher.group(3));
+    					p.ip -= Integer.parseInt(matcher.group(3));
+    					break;
+    				//(\\W+) (治愈) (\\d+)(人)
+    				case '6':
+    					p = get_province(matcher.group(1));
+    					p.cure += Integer.parseInt(matcher.group(3));
+    					p.ip -= Integer.parseInt(matcher.group(3));
+    					break;
+    				//(\\W+) (疑似患者 确诊感染) (\\d+)(人)
+    				case '7':
+    					p = get_province(matcher.group(1));
+    					p.ip += Integer.parseInt(matcher.group(3));
+    					p.sp -= Integer.parseInt(matcher.group(3));
+    					break;
+    				//(\\W+) (排除 疑似患者) (\\d+)(人)
+    				case '8':
+    					p = get_province(matcher.group(1));
+    					p.sp -= Integer.parseInt(matcher.group(3));
+    					break;
+    				default:
+    					break;
+    				}
+        		}else {
+        			System.out.println("NO MATCH");
+				}
 	        	
 	        }
-	        
-	        /*
-	        if (m1.find( )) {
-	            System.out.println("Found value: " + m1.group(0) );
-	            System.out.println("Found value: " + m1.group(1) );
-	            System.out.println("Found value: " + m1.group(2) );
-	            System.out.println("Found value: " + m1.group(3) ); 
-	         } else {
-	            System.out.println("NO MATCH");
-	         }*/
+	        country_total();
+	        for(int i = 0;i<province_list.size();i++) {
+	        	System.out.println("省名：" + province_list.get(i).name + 
+	        			" ip:" + province_list.get(i).ip + 
+	        			" sp:" + province_list.get(i).sp + 
+	        			" cure:" + province_list.get(i).cure + 
+	        			" dead:" + province_list.get(i).dead);
+	        }
+		}
+		
+		//创建排序好的省份列表
+		public void creat_provinces_list(){
+			province_list = new ArrayList<InfectStatistic.CommandLineRun.Province>();
+			String[] provinces = {"全国","安徽","澳门","北京","重庆","福建","甘肃","广东","广西",
+		            "贵州", "海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏",
+		            "江西", "辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
+		            "四川", "台湾","天津","西藏","香港","新疆","云南","浙江"};
+			for(int i = 0;i < provinces.length;i++) {
+				Province province = new Province();
+				province.name = provinces[i];
+				province.ip = 0;
+				province.sp = 0;
+				province.cure = 0;
+				province.dead = 0;
+				province_list.add(province);
+			}
+		}
+		
+		//使用省名在省列表中获取省对象
+		public Province get_province(String pname) {
+			for(int i = 0;i<province_list.size();i++) {
+	        	if(pname.equals(province_list.get(i).name)) {
+	        		return province_list.get(i);
+	        	}
+	        }
+			System.out.println("该省不存在");
+			return null;
+		}
+		
+		//全国总数据统计
+		public void country_total() {
+			//从第一个省开始累加
+			for(int i = 1;i<province_list.size();i++) {
+	        	province_list.get(0).ip += province_list.get(i).ip;
+	        	province_list.get(0).sp += province_list.get(i).sp;
+	        	province_list.get(0).cure += province_list.get(i).cure;
+	        	province_list.get(0).dead += province_list.get(i).dead;
+	        }
+		}
+		static class Province{
+			public String name;
+			public int ip;
+			public int sp;
+			public int cure;
+			public int dead;
 		}
 	}
 	
@@ -277,6 +395,8 @@ class InfectStatistic {
         ArrayList<String> commandline_test = new ArrayList<String>();
         commandline_test.add("list");
         commandline_test.add("-log");
+        commandline_test.add("D:\\InfectStatistic-main\\221701430\\log\\2020-01-22.log.txt");
+        commandline_test.add("-out");
         commandline_test.add("123");
         commandline_test.add("-type");
         commandline_test.add("444");

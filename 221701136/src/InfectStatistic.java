@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 class InfectStatistic {
 	
-	String commandDate;
+	
 	
 	//获取当前的系统时间并格式化输出
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -50,6 +50,7 @@ class InfectStatistic {
     
     
     String date,inputAddress,outputAddress;
+    String commandDate;
     
 	//type和province的类型可能不止一种，故创建其字符串数组
 	List<String> typeList=new List<String>();
@@ -71,7 +72,7 @@ class InfectStatistic {
 		
 		for(int commandOrder=1;commandOrder<args.length;commandOrder++) {
 				if(args[commandOrder].equals("-data")) {
-					currentDate = changeToValidDate(args[++commandOrder]);
+					commandDate = changeToValidDate(args[++commandOrder]);
 				}
 				if(args[commandOrder].equals("-log")) {
 					inputAddress = args[++commandOrder];
@@ -148,7 +149,7 @@ class InfectStatistic {
 	/*
 	 *函数功能：查询路径文件
 	 *输入参数：-log路径
-	 *输出参数：文件名称
+	 *输出参数：
 	 **/
 	public void searchFile(String inputAddress) {
 	File file = new File(inputAddress);
@@ -156,21 +157,9 @@ class InfectStatistic {
 	
 	//获取inputAddress路径下的所有文件和文件目录
 	File[] tempList = file.listFiles();
-	
-	//获取当前日志的最晚更新日期
+
 	SimpleDateFormat format = new SimpleDataFormat("yyyy-MM-dd");
-	
-	//设置日志最晚更新时间为tempList[0]
-	string latestFileName = tempList[0].getName();
-	Date latestDate = format.parse(latetFileName);
-	for(int i=1;i<tempList.length();i++) {
-		fileName = tempList[i].getName();
-		Date fileDate = format.parse(fileName);
-		if(fileDate.after(latestDate)) {
-			latestDate = fileDate;
-		}
-	}
-	
+		
 	Date commandDate = format.parse(date);
 	
 	//若提供的日期大于当前时间，则报错
@@ -179,7 +168,7 @@ class InfectStatistic {
 	}
 	
 	//获取所有小于commandDate的日志,并读取内容
-	for(int j=0;j<tempList.length;j++) {
+	for(int j = 0;j<tempList.length;j++) {
 		fileName = tempList[i].getName();
 		Date fileDate = format.parse(fileName);
 		if(fileDate.before(commandDate)) {
@@ -204,7 +193,6 @@ class InfectStatistic {
 			handleInformation(line);
 		}	
 	}
-	
 	}
 	
 	
@@ -216,7 +204,6 @@ class InfectStatistic {
 	 *输出参数：
 	 **/
 	public void handleInformation(String lineInformation) {
-		
 		
 		String lineTypeOne = "(\\s+) 新增 感染患者 (\\d+)人";
 		String lineTypeTwo = "(\\s+) 新增 疑似患者 (\\d+)人";

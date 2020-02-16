@@ -1,12 +1,10 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.time.YearMonth;
 import java.util.Date;
 
 /**
@@ -493,8 +491,43 @@ public class InfectStatistic {
             if(pro[i].get_cure() != 0 || pro[i].get_death() != 0 || pro[i].get_infected() != 0 || pro[i].get_suspected() != 0)
             {
 
-                word += pro[i].get_pro_name() + " 感染患者" + pro[i].get_infected() + " 疑似患者" + 
-                pro[i].get_suspected() + " 治愈" + pro[i].get_cure() + " 死亡" + pro[i].get_death() + "\n";
+                word += pro[i].get_pro_name();
+
+                for(int x = 0 ; x < type.length ; x++)
+                {
+
+                    if(type[x] != null)
+                    {
+
+                        if(type[x].equals("ip"))
+                        {
+
+                            word += " 感染患者" + pro[i].get_infected() + "人";;
+                        }
+
+                        else if(type[x].equals("sp"))
+                        {
+
+                            word += " 疑似患者" + pro[i].get_suspected() + "人";;
+                        }
+
+                        else if(type[x].equals("cure"))
+                        {
+
+                            word += " 治愈" + pro[i].get_cure() + "人";
+
+                        }
+
+                        else if(type[x].equals("dead"))
+                        {
+
+                            word += " 死亡" + pro[i].get_death() + "人";
+                        }
+
+                    }
+                }
+
+                word += "\n";
 
                 fwriter.write(word);
 
@@ -510,7 +543,7 @@ public class InfectStatistic {
 
     }
 
-    public void output_pro_type(String pa , province[] pro , String[] provin , String[] type) throws IOException   // 将统计结果输出到output.txt
+    public void output_pro_type(String pa , province[] pro , String[] out_pro , String[] type) throws IOException   // 将统计结果输出到output.txt
     {
 
         String path = new String(pa);
@@ -522,15 +555,64 @@ public class InfectStatistic {
 
             String word = new String();
 
-            if(pro[i].get_cure() != 0 || pro[i].get_death() != 0 || pro[i].get_infected() != 0 || pro[i].get_suspected() != 0)
+            for(int y = 0 ; y < out_pro.length ; y++)
             {
 
-                word += pro[i].get_pro_name() + " 感染患者" + pro[i].get_infected() + " 疑似患者" + 
-                pro[i].get_suspected() + " 治愈" + pro[i].get_cure() + " 死亡" + pro[i].get_death() + "\n";
+                if(out_pro[y] != null)
+                {
 
-                fwriter.write(word);
+                    if(pro[i].get_pro_name().equals(out_pro[y]))
+                    {
 
-                word = "";
+                        word += pro[i].get_pro_name();
+
+                        for(int x = 0 ; x < type.length ; x++)
+                        {
+
+                            if(type[x] != null)
+                            {
+
+                                if(type[x].equals("ip"))
+                                {
+
+                                    word += " 感染患者" + pro[i].get_infected() + "人";
+
+                                }
+
+                                else if(type[x].equals("sp"))
+                                {
+
+                                    word += " 疑似患者" + pro[i].get_suspected() + "人";
+
+                                }
+
+                                else if(type[x].equals("cure"))
+                                {
+
+                                    word += " 治愈" + pro[i].get_cure() + "人";
+
+                                }
+
+                                else if(type[x].equals("dead"))
+                                {
+
+                                    word += " 死亡" + pro[i].get_death() + "人";
+
+                                }
+
+                            }
+
+                        }
+
+                        word += "\n";
+
+                        fwriter.write(word);
+
+                        word = "";
+
+                    }
+
+                }
 
             }
 

@@ -35,7 +35,7 @@ class InfectStatistic {
         List list = Arrays.asList(args);
         int dateIndex = list.indexOf("-date");//截止日期.
         String dateString = "";
-        if(dateIndex > 0){
+        if (dateIndex > 0) {
             dateString = args[dateIndex + 1];
         }
         int dirIndex = list.indexOf("-log");//日志文件目录
@@ -43,21 +43,24 @@ class InfectStatistic {
         int outputIndex = list.indexOf("-out");//输出文件目录
         String outputPath = args[outputIndex + 1];
         int provinceListIndex = list.indexOf("-province");//查询省份列表
-        int provinceListLastIndex = findLastIndex(args,provinceListIndex);
-        ArrayList<String> provinceList = new ArrayList<String >();
-        for(int i = provinceListIndex; i <= provinceListLastIndex; i++){
-            provinceList.add(args[i]);
+        int provinceListLastIndex = findLastIndex(args, provinceListIndex);
+        HashMap<String, Integer> typeMap = new HashMap<>();//查询的类别
+        ArrayList<String> provinceList = new ArrayList<String>();
+
+        if(provinceListIndex >= 0) {
+            for (int i = provinceListIndex; i <= provinceListLastIndex; i++) {
+                provinceList.add(args[i]);
+            }
         }
         int typeIndex = list.indexOf("-type");
-        int typeLastIndex = findLastIndex(args,typeIndex);
-        HashMap<String, Integer> typeMap = new HashMap<>();//查询的类别
+        int typeLastIndex = findLastIndex(args, typeIndex);
         int t = typeIndex > 0 ? 0 : 1;
-        typeMap.put("ip",t);
-        typeMap.put("sp",t);
-        typeMap.put("cure",t);
-        typeMap.put("dead",t);
-        if(t == 0){
-            for(int i = typeIndex; i <= typeLastIndex; i++){
+        typeMap.put("ip", t);
+        typeMap.put("sp", t);
+        typeMap.put("cure", t);
+        typeMap.put("dead", t);
+        if (typeIndex >= 0) {//有传入-type参数
+            for (int i = typeIndex; i <= typeLastIndex; i++) {
                 typeMap.put(args[i], 1);
             }
         }
@@ -130,6 +133,7 @@ class InfectStatistic {
         int num = Integer.parseInt(lastMessage.substring(0,lastMessage.length()-1));//更新人数
         switch (message.length){
             case 3://死亡、治愈
+                province.setDoesRefered(true);
                 if(message[1].equals("死亡")){
                     province.diedNumAdd(num);
                     province.infectNumSub(num);
@@ -143,6 +147,7 @@ class InfectStatistic {
                 }
                 break;
             case 4://新增、确诊、排除
+                province.setDoesRefered(true);
                 if(message[1].equals("新增")){
                     if(message[2].equals("感染患者")){
                         province.infectNumAdd(num);
@@ -163,6 +168,8 @@ class InfectStatistic {
                 break;
             case 5://从A省流入B省
                 ProvanceInfo provinceB = provinceMap.get(message[3]);
+                province.setDoesRefered(true);
+                provinceB.setDoesRefered(true);
                 if(message[1].equals("感染患者")){
                     province.infectNumSub(num);
                     provinceB.infectNumAdd(num);
@@ -185,7 +192,7 @@ class InfectStatistic {
             cureDoesShow = typeMap.get("cure");
             diedDoesShow = typeMap.get("dead");
 
-            if(provinceList.contains("全国")){
+            if(provinceList.contains("全国") || provinceList.size() == 0){
                 writer.format("全国  ");
                 if(infectDoesShow > 0){
                     writer.format("感染患者:%d人  ", infectTotalNum);
@@ -202,28 +209,24 @@ class InfectStatistic {
                 writer.format("\n");
             }
 
-            for(ProvanceInfo p : provinceMap.values()){
-                if(provinceList.contains(p.getName())){
-                    writer.format(p.getName() + "  ");
-                    if(infectDoesShow > 0){
-                        writer.format("感染患者:%d人  ", p.getInfectNum());
+            if(provinceList.size() == 0){//指令没有传入-province参数
+                for(ProvanceInfo p : provinceMap.values()){
+                    if(p.isDoesRefered()){
+                        p.output(writer,typeMap);
                     }
-                    if(suspectedDoesShow > 0){
-                        writer.format("疑似患者%d人  ", p.getSuspectedNum());
-                    }
-                    if(cureDoesShow > 0){
-                        writer.format("治愈%d人  ", p.getCureNum());
-                    }
-                    if(diedDoesShow > 0){
-                        writer.format("死亡%d人  ", p.getDiedNum());
-                    }
-                    writer.format("\n");
                 }
-                infectNum += p.getInfectNum();
-                suspectedNum += p.getSuspectedNum();
-                cureNum += p.getCureNum();
-                diedNum += p.getDiedNum();
+            }else{//有传入-province参数
+                for(ProvanceInfo p : provinceMap.values()){
+                    if(provinceList.contains(p.getName())){
+                        p.output(writer,typeMap);
+                    }
+                    infectNum += p.getInfectNum();
+                    suspectedNum += p.getSuspectedNum();
+                    cureNum += p.getCureNum();
+                    diedNum += p.getDiedNum();
+                }
             }
+
             writer.flush();
         }catch (Exception e){
             e.printStackTrace();
@@ -233,10 +236,12 @@ class InfectStatistic {
 
 class ProvanceInfo{
     private String name;//省名
-    private int infectNum;//感染数
-    private int suspectedNum;//疑似数
-    private int diedNum;//死亡数
-    private int cureNum;//治愈数
+    private int infectNum = 0;//感染数
+    private int suspectedNum = 0;//疑似数
+    private int diedNum = 0;//死亡数
+    private int cureNum = 0;//治愈数
+    private boolean doesRefered = false;//是否有日志提到
+
 
     public ProvanceInfo(String name){
         this.name = name;
@@ -308,5 +313,35 @@ class ProvanceInfo{
 
     public String getName() {
         return name;
+    }
+
+    public boolean isDoesRefered() {
+        return doesRefered;
+    }
+
+    public void setDoesRefered(boolean doesRefered) {
+        this.doesRefered = doesRefered;
+    }
+
+    public void output(Formatter writer, HashMap<String, Integer> typeMap) {
+        int infectDoesShow, suspectedDoesShow, cureDoesShow, diedDoesShow;
+        infectDoesShow = typeMap.get("ip");
+        suspectedDoesShow = typeMap.get("sp");
+        cureDoesShow = typeMap.get("cure");
+        diedDoesShow = typeMap.get("dead");
+        writer.format(name + "  ");
+        if (infectDoesShow > 0) {
+            writer.format("感染患者:%d人  ", infectNum);
+        }
+        if (suspectedDoesShow > 0) {
+            writer.format("疑似患者%d人  ", suspectedNum);
+        }
+        if (cureDoesShow > 0) {
+            writer.format("治愈%d人  ", cureNum);
+        }
+        if (diedDoesShow > 0) {
+            writer.format("死亡%d人  ", diedNum);
+        }
+        writer.format("\n");
     }
 }

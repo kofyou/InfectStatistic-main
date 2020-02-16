@@ -64,6 +64,10 @@ public class InfectStatistic {
                         break;
                 }
             }
+            if (cmds.log.equals("")) {
+                System.out.println("未指定-log参数！");
+                System.exit(0);
+            }
         }
         String str;     //存放读取的每一行
         //FileUtil util = new FileUtil();

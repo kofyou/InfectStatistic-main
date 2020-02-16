@@ -1,19 +1,20 @@
-
 import java.awt.List;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Locale;  
+import java.util.Locale;
 public class InfectStatistic {
 	public class Province{
 		String name;
@@ -26,7 +27,7 @@ public class InfectStatistic {
 		}
 	}
 	
-	public static void main(String[] args) throws UnsupportedEncodingException, FileNotFoundException{
+	public static void main(String[] args) throws IOException{
 		/*各省直辖市及自治区*/
 		InfectStatistic t = new InfectStatistic();
 		String[] prs = new String[32];
@@ -42,10 +43,15 @@ public class InfectStatistic {
 		String cmd=args[0];
 		String[] type = new String[]{" "," "," "," "};
 		
-		String local = "D:/log/",date = null,output = "D:/output.txt";
+		String local = "D:/log/",date = null,output = "D:/output.txt"; //默认位置(如果用户未指定位置)
 		//默认时间为当前时间
 		Calendar calendar = Calendar.getInstance();
-		date = ""+calendar.get(Calendar.YEAR)+"-"+(calendar.get(Calendar.MONTH)+1)+"-"+calendar.get(Calendar.DATE)+"";
+    	int t1 = calendar.get(Calendar.MONTH)+1;
+    	int t2 = calendar.get(Calendar.DATE);
+    	String s1= ""+t1+"",s2=""+t2+"";
+    	if(t1<10) s1 = "0"+t1+"";
+    	if(t2<10) s1 = "0"+t2+"";
+		date = ""+calendar.get(Calendar.YEAR)+"-"+s1+"-"+s2+""; //默认当前时间
 		if(cmd.equals("list")){
 		for(int i=1;i<args.length;i++){
 			if(args[i].equals("-date")){
@@ -80,14 +86,27 @@ public class InfectStatistic {
 		//提取输入目录下的所有文件名
 		String basePath=local;
 		String[] list=new File(basePath).list();
+		
+		date = date+".log.txt";
+		int res=list[list.length-1].compareTo(date);
 		if(list[0].equals(null)) System.out.println("选定目录下无文件,请重新选择!");
 		else{
-		for(int j=0;j<list.length;j++){
+		if(res<0) num = list.length;
+		else {
+			for(int i=list.length-1;i>0;i--){
+				if(list[i].compareTo(date)<=0){
+					num = i+1;
+					i=0;
+				}
+			}
+		}
+		for(int j=0;j<num;j++){
 		try {
+			/*读取文件*/
 			FileInputStream f = new FileInputStream(local+list[j]);
 			InputStreamReader reader = new InputStreamReader(f, "UTF-8");
 			BufferedReader bf = new BufferedReader(reader);
-			BufferedReader bf2 = new BufferedReader(reader);
+
 			String str = null,str0 = null;
 			int a=0,b=0,sum=0;
 			while ((str = bf.readLine())!= null){
@@ -162,16 +181,24 @@ public class InfectStatistic {
 						provinces[0].mayInfect -= sum;
 					}
 				}
-				num++;
 			}
 			bf.close();
-			bf2.close();
 			f.close();
 		} catch (IOException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();
 		}
 	   }
+		/*写入文件*/
+		File f = new File(output);
+		while(!f.getParentFile().exists()) {
+            boolean mkdir = f.getParentFile().mkdirs();
+            if (!mkdir) {
+                throw new RuntimeException("创建目标文件所在目录失败！");
+            }
+       }
+        FileOutputStream fop = new FileOutputStream(f);
+        OutputStreamWriter writer = new OutputStreamWriter(fop, "UTF-8");
 		String[] print = new String[32];
 		for(int i=0;i<32;i++){
 			print[i]=provinces[i].name;
@@ -191,19 +218,19 @@ public class InfectStatistic {
 			
 		}
 		/*-type*/
-		if(prs[0].equals(" "))
+		if(prs[0].equals(" ")&&!type[0].equals(" "))
 		for (int i = 0; i < 32; i++) { 
 			
 			  if(provinces[i].cure!=0||provinces[i].dead!=0
 				||provinces[i].infected!=0||provinces[i].mayInfect!=0)
-			  	System.out.println(print[i]);
+			  	writer.append(print[i]+"\n");
 			}
 		/*-type -province*/
-		else{
+		else if(!type[0].equals(" ")){
 			for (int i = 0; i < 32; i++) {
 				String[] s0 = print[i].split("\t"); 
 				for(int j=0;j<prs.length;j++)
-			  	if(prs[j].equals(s0[0])) System.out.println(print[i]);
+			  	if(prs[j].equals(s0[0])) writer.append(print[i]+"\n");
 			}
 		}
 		/*默认情况*/
@@ -211,10 +238,15 @@ public class InfectStatistic {
 		for (int i = 0; i < 32; i++) {  
 		   if(provinces[i].cure!=0||provinces[i].dead!=0
 			||provinces[i].infected!=0||provinces[i].mayInfect!=0){
-			   System.out.println(""+provinces[i].name+"\t感染患者"+provinces[i].infected+"人\t"
-			   		+ "疑似患者"+provinces[i].mayInfect+"人\t治愈"+provinces[i].cure+"人\t死亡"+provinces[i].dead+"人");
+			   writer.append(""+provinces[i].name+"\t感染患者"+provinces[i].infected+"人\t"
+			   		+ "疑似患者"+provinces[i].mayInfect+"人\t治愈"+provinces[i].cure+"人\t死亡"+provinces[i].dead+"人\n");
 		   }
-		}  
+		   
+		}
+		System.out.println("文件数据已保存至 "+output+"");
+		writer.append("//该文档并非真实数据，仅供测试使用");
+		writer.close();
+	    fop.close();
 	  }
    }
 

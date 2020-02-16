@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,26 +25,14 @@ import java.util.LinkedList;
  * @version 1.0
  * @since 2020/2/11
  */
-public class Lib {
-}
-
-
-class DateOutOfBoundsException extends Exception{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	public DateOutOfBoundsException(String s){
-        super(s);
-	}
-}
-
+public class Lib {}
 
 class DataManager{
 	public static List<int[]> solveData(List<String>data){
+		System.out.println("---开始统计数据");
 		List<int[]> result = new LinkedList<int[]>();
 		ListInit(result);
+		System.out.println("建立责任链");
 		AddipHandler addip = new AddipHandler(result);
 		AddSpHandler addSp = new AddSpHandler(result);
 		ChangeHandler change = new ChangeHandler(result);
@@ -60,6 +49,7 @@ class DataManager{
 		exclude.nextHandler = swapIp;
 		swapIp.nextHandler = swapSp;
 		swapSp.nextHandler = null;
+		System.out.println("建立责任链完成");
 		Iterator<String> it = data.iterator();
     	while(it.hasNext()) {
     		String s = it.next();
@@ -189,8 +179,9 @@ class ListCommand implements Command{
      */
 	@Override
 	public void execute(Map<String, List<String>> map) {
-		String proString;
-		String typeString;
+		System.out.println("现在开始执行list命令");
+		String proString = null;
+		List<String> typeString = new LinkedList<String>();
 		for(int i = 0; i < ListKey.values().length ;i++) {
 			listKey = ListKey.valueOf(i);
 			switch(listKey) {
@@ -203,7 +194,7 @@ class ListCommand implements Command{
 					logKey(map);
 					break;
 				case OUT:
-					outKey(map);
+					outKey(map,proString,typeString);
 					break;
 				case TYPE:
 					typeString = typeKey(map);
@@ -231,7 +222,7 @@ class ListCommand implements Command{
 
 	private String provinceKey(Map<String, List<String>> map, List<int[]> result) {
 		List<String> provinceList = map.get("province");
-		String proIndex = new String();
+		String proIndex = new String(" ");
 		for(int i = 0; i < provinceList.size(); i++) {
 			proIndex += provinceList.get(i).toString();
 			proIndex += " ";
@@ -239,32 +230,76 @@ class ListCommand implements Command{
 		return proIndex;
 	}
 
-	private String typeKey(Map<String, List<String>> map) {
+	private List<String> typeKey(Map<String, List<String>> map) {
 		List<String> typeList = map.get("type");
-		String typeIndex = new String();
-		for(int i = 0; i < typeList.size(); i++) {
-			typeIndex += typeList.get(i).toString();
-			typeIndex += " ";
-		}
-		return typeIndex;
+		return typeList;
 	}
 
-	private void outKey(Map<String, List<String>> map) {
-		//System.out.println("now is in OutKey Handler");
-		
+	private void outKey(Map<String, List<String>> map,String proString,List<String> typeString) {
+		List<String> outList = map.get("out");
+		String out = outList.get(0);
+		try {
+			File file = new File(out);
+	        FileWriter writer = new FileWriter(file);
+	        BufferedWriter bw = new BufferedWriter(writer);
+	        Iterator<int[]> it = result.iterator();
+	        
+	    	while(it.hasNext()) {
+	    		int[] t = it.next();
+	    		if(proString.matches(".* " + ProvinceValue.valueOf(t[0]).getText() + " .*")) {
+	    			bw.write(ProvinceValue.valueOf(t[0]).getText() + " ");
+	    			for(int i = 0; i < typeString.size(); i++) {
+	    				System.out.println("outputing");
+	    				String type = typeString.get(i).toUpperCase().trim();
+	    				switch(type) {
+	    				case "IP":
+	    					bw.write(TypeValue.IP.getText() + t[1] 
+	    							+ ConstantClassField.PERSON + " ");
+	    					break;
+	    				case "SP":
+	    					bw.write(TypeValue.SP.getText() + t[2] 
+	    							+ ConstantClassField.PERSON + " ");
+	    					break;
+	    				case "CURE":
+	    					bw.write(TypeValue.CURE.getText() + t[3] 
+	    							+ ConstantClassField.PERSON + " ");
+	    					break;
+	    				case "DEAD":
+	    					bw.write(TypeValue.DEAD.getText() + t[4] 
+	    							+ ConstantClassField.PERSON);
+	    					break;
+	    				}
+	    			}
+	    			bw.write("\n");
+	    		}
+	    	}
+	        bw.flush(); // 把缓存区内容压入文件
+	        bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
 	}
 
 	private void logKey(Map<String, List<String>> map) {
-		//System.out.println("now is in LogKey Handler");
-		//List<String> logList = map.get("log");
-		//System.out.println("log is " + logList.get(0));
+		System.out.println("---分析-log参数");
+		try {
+			List<String> logList = map.get("log");
+			if(logList == null) {
+					throw new NoLogException("无输入路径");
+			}else {
+				System.out.println("输入路径为："+ logList.get(0));
+			}
+			System.out.println("---分析完成");
+		} catch (NoLogException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void dateKey(Map<String, List<String>> map) {
-
-		//System.out.println("now is in DateKey Handler");
+		System.out.println("---分析-date参数");
 		List<String> logList = map.get("log");
 		List<String> dateList = map.get("date");
+		System.out.println("输入的日期为：" + dateList.get(0));
 		
 		if(dateList == null || dateList.get(0) == "default") {
 			List<File> fileList = TxtTool.getFileList(logList.get(0));
@@ -281,7 +316,6 @@ class ListCommand implements Command{
 			return;
 		}
 		
-		//System.out.println("date deadline is " + dateList.get(0));
 		String date = dateList.get(0);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		try {
@@ -303,20 +337,10 @@ class ListCommand implements Command{
 				e.printStackTrace();
 			}
 			
-			//System.out.println("处理前的文件列表  " + fileList);
+			System.out.println("处理前的文件列表  " + fileList);
 			TxtTool.dateScreen(fileList,dateObj);
-			//System.out.println("处理后的文件列表  " + fileList);
-			String result = new String();
-			for(int i = 0; i < fileList.size(); i++) {
-				result += TxtTool.txt2String(fileList.get(i));
-			}
-			String[] line = result.split("\\n");
-			for(int i = 0;i < line.length;i++) {
-				if(!line[i].matches("^\\s$")) {
-					logLine.add(line[i].trim());
-				}
-			}
-			
+			System.out.println("处理后的文件列表  " + fileList);
+			System.out.println("---分析完成");
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -348,22 +372,6 @@ class TxtTool {
         }
         return result.toString();
     }
-
-
-	public static void string2Txt(File file) {
-        try {
-            file.createNewFile(); // 创建新文件,有同名的文件的话直接覆盖
-            FileWriter writer = new FileWriter(file);
-            BufferedWriter bw = new BufferedWriter(writer);
-            bw.write("我会写入文件啦1\r\n"); // \r\n即为换行
-            bw.write("我会写入文件啦2\r\n"); // \r\n即为换行
-            bw.flush(); // 把缓存区内容压入文件
-            bw.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     
     public static List<File> getFileList(String strPath) {
         File dir = new File(strPath);
@@ -373,8 +381,7 @@ class TxtTool {
             for (int i = 0; i < files.length; i++) {
                 if (files[i].isDirectory()) { // 判断是文件还是文件夹
                     getFileList(files[i].getAbsolutePath()); // 获取文件绝对路径
-                } 
-                else { 
+                }else { 
                     //System.out.println("-" + strFileName);
                     filelist.add(files[i]);
                 }
@@ -417,8 +424,7 @@ abstract class MyHandler{
 			if(nextHandler != null) {
 				nextHandler.handleRequest(string);
 			}
-		}
-		else {
+		}else {
 			handle();
 		}
 	}
@@ -426,7 +432,7 @@ abstract class MyHandler{
 
 //新增感染患者
 class AddipHandler extends MyHandler{
-	private String reg = "^.*\\s新增\\s感染患者\\s.*$";
+	private String reg = ConstantClassField.ADD_IP_REG;
 	private String province;
 	private int num;
 	
@@ -440,7 +446,7 @@ class AddipHandler extends MyHandler{
 		if(string.matches(reg)) {
 			String[] splitString = string.split("\\s");
 			province = splitString[0];
-			splitString = splitString[3].split("人");
+			splitString = splitString[3].split(ConstantClassField.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -457,7 +463,7 @@ class AddipHandler extends MyHandler{
 
 //新增疑似患者
 class AddSpHandler extends MyHandler{
-	private String reg = "^.*\\s新增\\s疑似患者\\s.*$";
+	private String reg = ConstantClassField.ADD_SP_REG;
 	private String province;
 	private int num;
 	
@@ -470,7 +476,7 @@ class AddSpHandler extends MyHandler{
 		if(string.matches(reg)) {
 			String[] splitString = string.split("\\s");
 			province = splitString[0];
-			splitString = splitString[3].split("人");
+			splitString = splitString[3].split(ConstantClassField.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -487,7 +493,7 @@ class AddSpHandler extends MyHandler{
 
 //患者治愈
 class CureHandler extends MyHandler{
-	private String reg = "^.*\\s治愈\\s.*$";;
+	private String reg = ConstantClassField.CURE_REG;
 	private String province;
 	private int num;
 	
@@ -500,7 +506,7 @@ class CureHandler extends MyHandler{
 		if(string.matches(reg)) {
 			String[] splitString = string.split("\\s");
 			province = splitString[0];
-			splitString = splitString[2].split("人");
+			splitString = splitString[2].split(ConstantClassField.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -519,7 +525,7 @@ class CureHandler extends MyHandler{
 
 //感染患者流入
 class SwapIpHandler extends MyHandler{
-	private String reg = "^.*\\s感染患者\\s流入\\s.*$";
+	private String reg = ConstantClassField.SWAP_IP_REG;
 	private String province1;
 	private String province2;
 	private int num;
@@ -534,7 +540,7 @@ class SwapIpHandler extends MyHandler{
 			String[] splitString = string.split("\\s");
 			province1 = splitString[0];
 			province2 = splitString[3];
-			splitString = splitString[4].split("人");
+			splitString = splitString[4].split(ConstantClassField.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -552,7 +558,7 @@ class SwapIpHandler extends MyHandler{
 
 //疑似患者流入
 class SwapSpHandler extends MyHandler{
-	private String reg = "^.*\\s疑似患者\\s流入\\s.*$";
+	private String reg = ConstantClassField.SWAP_SP_REG;
 	private String province1;
 	private String province2;
 	private int num;
@@ -567,7 +573,7 @@ class SwapSpHandler extends MyHandler{
 			String[] splitString = string.split("\\s");
 			province1 = splitString[0];
 			province2 = splitString[3];
-			splitString = splitString[4].split("人");
+			splitString = splitString[4].split(ConstantClassField.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -585,7 +591,7 @@ class SwapSpHandler extends MyHandler{
 
 //患者死亡
 class DeathHandler extends MyHandler{
-	private String reg = "^.*\\s死亡\\s.*$";
+	private String reg = ConstantClassField.DEATH_REG;
 	private String province;
 	private int num;
 	
@@ -598,7 +604,7 @@ class DeathHandler extends MyHandler{
 		if(string.matches(reg)) {
 			String[] splitString = string.split("\\s");
 			province = splitString[0];
-			splitString = splitString[2].split("人");
+			splitString = splitString[2].split(ConstantClassField.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -617,7 +623,7 @@ class DeathHandler extends MyHandler{
 
 //疑似确诊感染患者
 class ChangeHandler extends MyHandler{
-	private String reg = "^.*\\s疑似患者\\s确诊感染\\s.*$";
+	private String reg = ConstantClassField.CHANGE_REG;
 	private String province;
 	private int num;
 	
@@ -630,7 +636,7 @@ class ChangeHandler extends MyHandler{
 		if(string.matches(reg)) {
 			String[] splitString = string.split("\\s");
 			province = splitString[0];
-			splitString = splitString[3].split("人");
+			splitString = splitString[3].split(ConstantClassField.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -649,7 +655,7 @@ class ChangeHandler extends MyHandler{
 
 //排除疑似患者
 class ExcludeHandler extends MyHandler{
-	private String reg = "^.*\\s排除\\s疑似患者\\s.*$";
+	private String reg = ConstantClassField.EXCLUDE_REG;
 	private String province;
 	private int num;
 	
@@ -662,7 +668,7 @@ class ExcludeHandler extends MyHandler{
 		if(string.matches(reg)) {
 			String[] splitString = string.split("\\s");
 			province = splitString[0];
-			splitString = splitString[3].split("人");
+			splitString = splitString[3].split(ConstantClassField.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -677,18 +683,28 @@ class ExcludeHandler extends MyHandler{
 	}
 }
 
+class ConstantClassField {
+    public static final String ADD_IP_REG =  "^.*\\s新增\\s感染患者\\s.*$";
+    public static final String ADD_SP_REG = "^.*\\s新增\\s疑似患者\\s.*$";
+    public static final String CHANGE_REG = "^.*\\s疑似患者\\s确诊感染\\s.*$";
+    public static final String CURE_REG = "^.*\\s治愈\\s.*$";
+    public static final String DEATH_REG = "^.*\\s死亡\\s.*$";
+    public static final String SWAP_IP_REG = "^.*\\s感染患者\\s流入\\s.*$";
+    public static final String SWAP_SP_REG = "^.*\\s疑似患者\\s流入\\s.*$";
+    public static final String EXCLUDE_REG = "^.*\\s排除\\s疑似患者\\s.*$";
+    public static final String PERSON = "人";
+}
 
 enum ProvinceValue{
-	China(0,"全国"), Anhui(1,"安徽"),Aomen(2,"澳门"), Beijing(3,"北京"),
-	Chongqin(4,"重庆"), Fujian(5,"福建"),Gansu(6,"甘肃"), Guangdong(7,"广东"),
-	Guangxi(8,"广西"), Guizhou(9,"贵州"), Hainan(10,"海南"), Hebei(11,"河北"),
-	Henan(12,"河南"), Heilongjiang(13,"黑龙江"),Hubei(14,"湖北"), Hunan(15,"湖南"), 
-	Jiangsu(16,"江苏"), Jiangxi(17,"江西"), Jilin(18,"吉林"), Liaoning(19,"辽宁"), 
-	Neimenggu(20,"内蒙古"), Ningxia(21,"宁夏"),Qinghai(22,"青海"),Shandong(23,"山东"),
-	Shanxi(24,"山西"),ShanXi(25,"陕西"),Shanghai(26,"上海"), Sichuan(27,"四川"),
-	Taiwan(28,"台湾"),Tianjin(29,"天津"),Xizang(30,"西藏"),Xinjiang(31,"新疆"),
-	Xianggang(32,"香港"), Yunnan(33,"云南"), Zhejiang(34,"浙江");
-	 
+	China(0,"全国"), Anhui(1,"安徽"),Aomen(2,"澳门"), Beijing(3,"北京")
+	,Chongqin(4,"重庆"), Fujian(5,"福建"),Gansu(6,"甘肃"), Guangdong(7,"广东")
+	,Guangxi(8,"广西"), Guizhou(9,"贵州"), Hainan(10,"海南"), Hebei(11,"河北")
+	,Henan(12,"河南"), Heilongjiang(13,"黑龙江"),Hubei(14,"湖北"), Hunan(15,"湖南")
+	,Jiangsu(16,"江苏"), Jiangxi(17,"江西"), Jilin(18,"吉林"), Liaoning(19,"辽宁")
+	,Neimenggu(20,"内蒙古"), Ningxia(21,"宁夏"),Qinghai(22,"青海")
+	,Shandong(23,"山东"),Shanxi(24,"山西"),ShanXi(25,"陕西"),Shanghai(26,"上海")
+	,Sichuan(27,"四川"),Taiwan(28,"台湾"),Tianjin(29,"天津"),Xizang(30,"西藏")
+	,Xinjiang(31,"新疆"),Xianggang(32,"香港"), Yunnan(33,"云南"),Zhejiang(34,"浙江");
 	private int key;
 	private String text;
 	private ProvinceValue(int key,String text){
@@ -712,6 +728,13 @@ enum ProvinceValue{
 		return -1;
 	}
 	
+	public static ProvinceValue valueOf(int ordinal) {
+		if (ordinal < 0 || ordinal >= values().length) {
+			throw new IndexOutOfBoundsException("Invalid ordinal");
+		} 
+		return values()[ordinal];
+	}
+	
 	String getText() {
 		return text;
 	}
@@ -722,7 +745,7 @@ enum ProvinceValue{
 }
 
 enum TypeValue{
-	IP(0,"感染患者"), SP(1,"疑似患者"), CURE(2,"治愈"), DEAD(3,"死亡");
+	IP(1,"感染患者"), SP(2,"疑似患者"), CURE(3,"治愈"), DEAD(4,"死亡");
 	private int key;
 	private String text;
 	private TypeValue(int key,String text){
@@ -737,7 +760,6 @@ enum TypeValue{
 	int getKey() {
 		return key;
 	}
-	
 }
 
 enum ListKey{
@@ -763,5 +785,27 @@ enum ListKey{
 			throw new IndexOutOfBoundsException("Invalid ordinal");
 		} 
 		return values()[ordinal];
+	}
+}
+
+
+class DateOutOfBoundsException extends Exception{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public DateOutOfBoundsException(String s){
+        super(s);
+	}
+}
+class NoLogException extends Exception{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public NoLogException(String s){
+        super(s);
 	}
 }

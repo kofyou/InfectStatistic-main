@@ -1,4 +1,3 @@
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,14 +14,12 @@ import java.util.Map;
  */
 class InfectStatistic {
     public static void main(String[] args) {
-    	System.out.println("12 5 25 30".matches(".* 5 .*"));
     	String[] test = {"list","-date"
     			,"2020-01-23"
-    			,"-log",
-    			"C:/Users/jhuy/Documents/GitHub/InfectStatistic-main/221701325/log",
-    			"-province","福建","新疆",
+    			,"-log","C:/Users/jhuy/Documents/GitHub/InfectStatistic-main/221701325/log",
+    			"-province","福建","新疆","全国",
     			"-type","ip","sp",
-    			"-out","D:/output.txt"};
+    			"-out","C:/Users/jhuy/Documents/GitHub/InfectStatistic-main/221701325/out.txt"};
     	CmdArgs cmdArgs = new CmdArgs(test,"benjamin");
     	Map<String,List<String>> map = new HashMap<String,List<String>>();
     	

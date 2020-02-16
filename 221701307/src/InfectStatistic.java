@@ -57,6 +57,7 @@ public class InfectStatistic
     public int[][] statistics = new int[32][5];
     public int checkProvince = 0;
 
+    public String[] txtCmd;
     /*
      * 解析cmd命令
      */
@@ -67,6 +68,7 @@ public class InfectStatistic
         CommondAnalysis(String[] arg)
         {
             strCmd = arg;
+            txtCmd = arg;
         }
 
         /*
@@ -355,7 +357,6 @@ public class InfectStatistic
             {
                 if (file.getName().compareTo(logFileName) <= 0)
                 {
-                    System.out.println(file.getName());
                     filePath = log + file.getName();
                     readLogFile(filePath);
                 }
@@ -585,25 +586,27 @@ public class InfectStatistic
                 {
                     if (statistics[itemProvince][4] == 1)
                     {
-                        content = province[itemProvince]+" ";
+                        content = province[itemProvince]+"  ";
                         for (itemType = 0; itemType < 4; itemType++)
                         {
                             typeInt = typeOrder[itemType];
                             if (typeInt >= 0)
                             {
-                                content += type[typeInt] + statistics[itemProvince][typeInt] + "人 ";
+                                content += type[typeInt] + statistics[itemProvince][typeInt] + "人  ";
                             }
                         }
+                        bw.write(content);
+                        bw.write("\n");
                     }
-                    bw.write(content);
-                    bw.write("\n");
                 }
-
-
-
-
+                bw.write("// 该文档并非真实数据，仅供测试使用\n");
+                String fileTail = "";
+                for (int j = 0; j < txtCmd.length; j++)
+                {
+                    fileTail += txtCmd[j]+" ";
+                }
+                bw.write("//命令："+fileTail);
                 bw.close();
-
             }
             catch (IOException e)
             {

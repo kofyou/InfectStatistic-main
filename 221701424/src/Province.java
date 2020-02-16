@@ -50,6 +50,11 @@ public class Province {
                         message += " 死亡 " + this.num_dead + "人 ";
                     }
                 }
+                String a = FileUtil.saveDigit(message);
+                int b = Integer.valueOf(a);
+                if (b == 0) {
+                    message = "";
+                }
             }            
         }
         else {

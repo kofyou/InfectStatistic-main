@@ -8,23 +8,17 @@
  */
 import java.util.Map;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
 
 
 class InfectStatistic {
@@ -53,7 +47,7 @@ class InfectStatistic {
 		File[] logs=directory.listFiles();
         
         Date latestDate=getLogDate(logs[0].getName());
-        for (int i=1;i<logs.length;i++)//求出日志中最晚的一天
+        for (int i=1,length=logs.length;i<length;i++)//求出日志中最晚的一天
         {
          	
          	Date temp=getLogDate(logs[i].getName());
@@ -117,40 +111,13 @@ class InfectStatistic {
         
         Area country=null;
         
-        map.put("安徽", new Area());
-        map.put("北京", new Area());
-        map.put("重庆", new Area());
-        map.put("福建", new Area());
-        map.put("甘肃", new Area());
-        map.put("广东", new Area());
-        map.put("广西", new Area());
-        map.put("贵州", new Area());
-        map.put("海南", new Area());
-        map.put("河北", new Area());
-        map.put("河南", new Area());
-        map.put("黑龙江", new Area());
-        map.put("湖北", new Area());
-        map.put("湖南", new Area());
-        map.put("吉林", new Area());
-        map.put("江苏", new Area());
-        map.put("江西", new Area());
-        map.put("辽宁", new Area());
-        map.put("内蒙古", new Area());
-        map.put("宁夏", new Area());
-        map.put("青海", new Area());
-        map.put("山东", new Area());
-        map.put("山西", new Area());
-        map.put("陕西", new Area());
-        map.put("上海", new Area());
-        map.put("四川", new Area());
-        map.put("天津", new Area());
-        map.put("西藏", new Area());
-        map.put("新疆", new Area());
-        map.put("云南", new Area());
-        map.put("浙江", new Area());
+        for (int i=0,length=areas.length;i<length;i++)
+        {
+        	map.put(areas[i], new Area());
+        }
         
-        
-        for (int i=0;i<args.length;i++)
+      
+        for (int i=0,length=args.length;i<length;i++)
         {
         	if (args[i].equals("-log"))//-log参数
         	{
@@ -283,7 +250,7 @@ class InfectStatistic {
        
         try 
         {
-        	for (int i=0;i<logs.length;i++)
+        	for (int i=0,length=logs.length;i<length;i++)
         	{
         		if (date!=null)
         		{
@@ -364,15 +331,9 @@ class InfectStatistic {
 			e.printStackTrace();
 		}
         
-        
-        
-        
         country=getCountry(map);
         
-       
-        
         try {
-			FileWriter fileWriter = new  FileWriter(output);			
 			
         	OutputStreamWriter bufferedWriter=new OutputStreamWriter(new FileOutputStream(output),"utf-8");
 
@@ -386,7 +347,7 @@ class InfectStatistic {
 					+"人 死亡"+country.getDeathNum()+"人\n");
 				}
 				
-				for (int i=0;i<areas.length;i++)
+				for (int i=0,length=areas.length;i<length;i++)
 				{
 					if (map.get(areas[i]).getIsRelate()==true)
 					{
@@ -409,7 +370,7 @@ class InfectStatistic {
 					bufferedWriter.write("\n");
 				}
 				
-				for (int i=0;i<areas.length;i++)
+				for (int i=0,length=areas.length;i<length;i++)
 				{
 					if (map.get(areas[i]).getIsRelate()==true)
 					{
@@ -426,6 +387,7 @@ class InfectStatistic {
 			bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
 			
 			bufferedWriter.flush();
+			bufferedWriter.close();
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

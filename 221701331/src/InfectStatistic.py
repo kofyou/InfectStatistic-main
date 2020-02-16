@@ -7,6 +7,7 @@ from pypinyin import lazy_pinyin
 
 PROVENCE_NAME = ["陕西", "甘肃", "青海", "宁夏", "新疆", "北京", "天津", "上海", "重庆", "河北", "山西", "辽宁", "吉林", "黑龙江", "江苏", "浙江", "安徽", "福建", "江西", "山东", "河南", "湖北", "湖南", "广东", "海南", "四川", "贵州", "云南", "台湾", "内蒙古", "广西", "西藏", "香港", "澳门"]
 TYPE_CN_MAP = {'infected': '感染患者', 'suspect': '疑似患者', 'cure': '治愈', 'death': '死亡'}
+EMPTY_DATA = {'infected': 0, 'suspect': 0, 'death': 0, 'cure': 0}
 
 
 class Statistic:
@@ -14,19 +15,19 @@ class Statistic:
         self.data = {}
 
     def change_infected(self, province, amount):
-        self.data.setdefault(province, {'infected': 0, 'suspect': 0, 'death': 0, 'cure': 0})
+        self.data.setdefault(province, {**EMPTY_DATA})
         self.data[province]['infected'] += amount
 
     def change_suspect(self, province, amount):
-        self.data.setdefault(province, {'infected': 0, 'suspect': 0, 'death': 0, 'cure': 0})
+        self.data.setdefault(province, {**EMPTY_DATA})
         self.data[province]['suspect'] += amount
 
     def add_death(self, province, amount):
-        self.data.setdefault(province, {'infected': 0, 'suspect': 0, 'death': 0, 'cure': 0})
+        self.data.setdefault(province, {**EMPTY_DATA})
         self.data[province]['death'] += amount
 
     def add_cure(self, province, amount):
-        self.data.setdefault(province, {'infected': 0, 'suspect': 0, 'death': 0, 'cure': 0})
+        self.data.setdefault(province, {**EMPTY_DATA})
         self.data[province]['cure'] += amount
 
     def parse_record_line(self, info_str: str):
@@ -92,7 +93,6 @@ option = parser.parse_args()
 if option.date and not re.match(r'\d{4}-\d{2}-\d{2}', option.date):
     sys.stderr.write('argument DATE is invalid: ' + option.date + '\nformat must be YYYY-mm-DD')
     exit(1)
-
 # check -log
 try:
     if option.log and len(os.listdir(option.log)) == 0:
@@ -101,12 +101,16 @@ try:
 except FileNotFoundError as e:
     sys.stderr.write('cannot find log directory {0}'.format(option.log))
     exit(1)
-
 # check -province
 # if option.province and option.province not in PROVENCE_NAME + ['全国']:
 # if option.province and len([x for x in (PROVENCE_NAME + ['全国']) if x in option.province]) == len(option.province):
 #     sys.stderr.write('province name invalid: {0}'.format(option.province))
 #     exit(1)
+
+# check -type
+if option.type and len(option.type) != len(set(option.type)):
+    sys.stderr.write('type repeat!')
+    exit(1)
 
 # ======= 日志文件处理 ========
 stat = Statistic()
@@ -132,20 +136,34 @@ output = ''
 data = {}
 if option.province:
     # data = list(filter(lambda value, key: key in option.province, data.items()))
-    for k, v in stat.data.items():
-        if k in option.province:
-            data[k] = v
+    # for k, v in stat.data.items():
+    #     if k in option.province:
+    #         data[k] = v
+    for p in option.province:
+        data[p] = stat.data[p] if p in stat.data.keys() else {**EMPTY_DATA}
+else:
+    data = stat.data
+sortedProvince = sorted(list(data.keys()), key=lambda x: (lazy_pinyin(x[0]), lazy_pinyin(x[1]) if len(x) > 1 else None))
+# sortedProvince = sorted(list(data.keys()), key=lambda x: (lazy_pinyin(x[i]) for i in range(0, len(x) - 1)))
 if option.type:
     mapList = []
+    new_data = {}
     for t in option.type:
         if t == 'ip':
-            t = 'infected'
+            mapList.append('infected')
         elif t == 'sp':
-            t = 'suspect'
+            mapList.append('suspect')
         elif t == 'dead':
-            t = 'death'
-    for item in data:
-        map(lambda x: {x[0]: x[1] for x[0] in option.type}, item.items())
-        filter(lambda x: x in option.type, item.keys())
+            mapList.append('death')
+        else:
+            mapList.append('cure')
+    for k, v in data.items():
+        new_data[k] = {}
+        for t in mapList:
+            new_data[k][t] = v[t]
+    data = new_data
 
-print(data)
+for v in sortedProvince:
+    print(v)
+    for k2, v2 in data[v].items():
+        print('  ' + TYPE_CN_MAP[k2] + ' ' + str(v2) + '人')

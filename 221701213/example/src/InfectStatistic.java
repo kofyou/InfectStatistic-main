@@ -125,8 +125,10 @@ public class InfectStatistic {
 
     }
 
-    public String[] read_log_name(String pa)   // 读取路径下的日志名称
+    public String[] read_log_name(String pa , String date)   // 读取路径下的日志名称
     {
+
+        date += ".log.txt";
 
         File path = new File(pa);
 
@@ -139,9 +141,14 @@ public class InfectStatistic {
         for (File file : list)
         {
 
-            file_name[i] = file.getName();
+            if(file.getName().compareTo(date)<=0)
+            {
 
-            i++;
+                file_name[i] = file.getName();
+
+                i++;
+
+            }
 
         }
 
@@ -429,6 +436,112 @@ public class InfectStatistic {
 
     }
 
+    public void output_pro(String pa , province[] pro , String[] out_pro) throws IOException   // 将统计结果输出到output.txt
+    {
+
+        String path = new String(pa);
+
+        FileWriter fwriter = new FileWriter(path);
+
+        for(int i = 0 ; i < pro.length ; i++)
+        {
+
+            String word = new String();
+
+            for(int x = 0 ; x < out_pro.length ; x++)
+            {
+
+                if(out_pro[x] != null)
+                {
+
+                    if(pro[i].get_pro_name().equals(out_pro[x]))
+                    {
+
+                        word += pro[i].get_pro_name() + " 感染患者" + pro[i].get_infected() + " 疑似患者" + 
+                        pro[i].get_suspected() + " 治愈" + pro[i].get_cure() + " 死亡" + pro[i].get_death() + "\n";
+
+                        fwriter.write(word);
+
+                        word = "";
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        fwriter.flush();
+
+        fwriter.close();
+
+    }
+
+    public void output_type(String pa , province[] pro , String[] type) throws IOException   // 将统计结果输出到output.txt
+    {
+
+        String path = new String(pa);
+
+        FileWriter fwriter = new FileWriter(path);
+
+        for(int i = 0 ; i < pro.length ; i++)
+        {
+
+            String word = new String();
+
+            if(pro[i].get_cure() != 0 || pro[i].get_death() != 0 || pro[i].get_infected() != 0 || pro[i].get_suspected() != 0)
+            {
+
+                word += pro[i].get_pro_name() + " 感染患者" + pro[i].get_infected() + " 疑似患者" + 
+                pro[i].get_suspected() + " 治愈" + pro[i].get_cure() + " 死亡" + pro[i].get_death() + "\n";
+
+                fwriter.write(word);
+
+                word = "";
+
+            }
+
+        }
+
+        fwriter.flush();
+
+        fwriter.close();
+
+    }
+
+    public void output_pro_type(String pa , province[] pro , String[] provin , String[] type) throws IOException   // 将统计结果输出到output.txt
+    {
+
+        String path = new String(pa);
+
+        FileWriter fwriter = new FileWriter(path);
+
+        for(int i = 0 ; i < pro.length ; i++)
+        {
+
+            String word = new String();
+
+            if(pro[i].get_cure() != 0 || pro[i].get_death() != 0 || pro[i].get_infected() != 0 || pro[i].get_suspected() != 0)
+            {
+
+                word += pro[i].get_pro_name() + " 感染患者" + pro[i].get_infected() + " 疑似患者" + 
+                pro[i].get_suspected() + " 治愈" + pro[i].get_cure() + " 死亡" + pro[i].get_death() + "\n";
+
+                fwriter.write(word);
+
+                word = "";
+
+            }
+
+        }
+
+        fwriter.flush();
+
+        fwriter.close();
+
+    }
+
     public void process_command(String[] args , province[] pro) throws IOException  // 处理命令行参数
     {
 
@@ -448,10 +561,8 @@ public class InfectStatistic {
         boolean if_province = false;
         String[] path = new String [2];       
         String date = new String();
-        String[] type;
-        String[] out_pro;       
-        int type_x = 0;
-        int out_pro_x = 0;
+        String[] type = new String [args.length];
+        String[] out_pro = new String[args.length];
 
         for(int i = 1 ; i < args.length ; i++)
         {
@@ -488,7 +599,12 @@ public class InfectStatistic {
 
                 if_type = true;
 
-                type_x = i+1;
+                for(int x = i+1 ; x < args.length ; x++)
+                {
+
+                    type[x-i-1] = args[x];
+
+                }
 
             }
 
@@ -497,7 +613,12 @@ public class InfectStatistic {
 
                 if_province = true;
 
-                out_pro_x = i+1;
+                for(int x = i+1 ; x < args.length ; x++)
+                {
+
+                    out_pro[x-i-1] = args[x];
+
+                }
 
             }
 
@@ -523,27 +644,55 @@ public class InfectStatistic {
 
         }
         
-
-       /* String[] file_name;
+        String[] file_name;
         
-        file_name = this.read_log_name(path[0]);
+        file_name = this.read_log_name(path[0] , date);
 
         for(int i = 0 ; i < file_name.length ; i++)
         {
 
-            this.process_log(path[0] , file_name[i] , pro);
+            if(file_name[i] != null)
+            {
+
+                this.process_log(path[0] , file_name[i] , pro);
+
+            }
 
         }
 
         this.process_country(pro);
 
-        this.output(path[1], pro);*/
+        if(if_type && !if_province )
+        {
+
+            this.output_type(path[1] , pro , type);
+
+        }
+
+        else if(if_province && !if_type)
+        {
+
+            this.output_pro(path[1] , pro , out_pro);
+
+        }
+
+        else if(if_province && if_type)
+        {
+
+            this.output_pro_type(path[1] , pro , out_pro , type);
+
+        }
+
+        else
+        {
+
+            this.output(path[1], pro);
+
+        }
         
     }
 
     public static void main(String[] args) throws IOException {
-
-        String[] ar = new String[] {"list","-date","2020-01-22","-log","D:/log/","-out","D:/output.txt","-province","全国","浙江","福建"};
 
         InfectStatistic in = new InfectStatistic();
 
@@ -557,7 +706,7 @@ public class InfectStatistic {
 
         in.init_province(pro , province_name);
         
-        in.process_command(ar , pro);
+        in.process_command(args , pro);
         
     }
 }

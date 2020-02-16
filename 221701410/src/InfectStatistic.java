@@ -5,13 +5,12 @@ import java.util.regex.Pattern;
 
 /**
  * InfectStatistic
- * TODO
- *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author hujh4779
+ * @version 1.0
+ * @since 2020.2.14
  */
 class InfectStatistic {
+
     private String[] provinceString = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南",
             "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东",
             "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
@@ -24,6 +23,7 @@ class InfectStatistic {
         LogHandle logHandle = infectStatistic.new LogHandle();
         if (!logHandle.readLogs(commandHandle.getEndDate(), commandHandle.getLogPath())) {
             System.out.println("日期超出范围");
+            return;
         }
         DataHandle dataHandle = infectStatistic.new DataHandle();
         dataHandle.dataProcess(logHandle.getStringList());
@@ -31,7 +31,14 @@ class InfectStatistic {
                 commandHandle.getProvinceList(), commandHandle.getProvinceSign(), commandHandle.getTypeSign());
     }
 
+    /**
+     * CommandHandle
+     * @author hujh4779
+     * @version 1.0
+     * @since 2020.2.15
+     */
     class CommandHandle {
+
         private String logPath;
         private String outputPath;
         private String endDate;
@@ -45,9 +52,9 @@ class InfectStatistic {
             this.outputPath = "";
             this.endDate = "";
             typeSign = false;
-            this.patientTypeSign = new int[4];
+            this.patientTypeSign = new int[patientType.length];
             provinceSign = false;
-            this.provinceList = new int[32];
+            this.provinceList = new int[provinceString.length];
         }
 
         public String getLogPath() {
@@ -90,65 +97,78 @@ class InfectStatistic {
             this.endDate = endDate;
         }
 
-        public boolean commandProcess(String[] args) {
+        /**
+         * commandProcess
+         * @description 根据传入的命令行参数，设置类变量
+         * @param args 命令行参数
+         */
+        public void commandProcess(String[] args) {
             if (args[0].equals("list")) { //命令匹配
                 for (int i = 1; i < args.length; i++) {
-                    if (args[i].equals("-log")) {
-                        i++;
-                        this.setLogPath(args[i]);
-                    }
-                    else if (args[i].equals("-out")) {
-                        i++;
-                        this.setOutputPath(args[i]);
-                    }
-                    else if (args[i].equals("-date")) {
-                        i++;
-                        this.setEndDate(args[i]);
-                    }
-                    else if (args[i].equals("-type")) {
-                        typeSign = true;
-                        int j = 0;
-                        while (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+                    switch (args[i]) {
+                        case "-log":
                             i++;
-                            j++;
-                            if (args[i].equals("ip")) {
-                                patientTypeSign[0] = j;
-                            }
-                            else if (args[i].equals("sp")) {
-                                patientTypeSign[1] = j;
-                            }
-                            else if (args[i].equals("cure")) {
-                                patientTypeSign[2] = j;
-                            }
-                            else if (args[i].equals("dead")) {
-                                patientTypeSign[3] = j;
-                            }
-                            else {
-                                return false;
-                            }
-                        }
-                    }
-                    else if (args[i].equals("-province")) {
-                        provinceSign = true;
-                        while (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+                            this.setLogPath(args[i]);
+                            break;
+                        case "-out":
                             i++;
-                            for (int j = 0; j < provinceString.length; j++) {
-                                if (args[i].equals(provinceString[j])) {
-                                    provinceList[j] = 1;
+                            this.setOutputPath(args[i]);
+                            break;
+                        case "-date":
+                            i++;
+                            this.setEndDate(args[i]);
+                            break;
+                        case "-type":
+                            typeSign = true;
+                            int j = 0;
+                            while (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+                                i++;
+                                j++;
+                                switch (args[i]) {
+                                    case "ip":
+                                        patientTypeSign[0] = j;
+                                        break;
+                                    case "sp":
+                                        patientTypeSign[1] = j;
+                                        break;
+                                    case "cure":
+                                        patientTypeSign[2] = j;
+                                        break;
+                                    case "dead":
+                                        patientTypeSign[3] = j;
+                                        break;
+                                    default:
+                                        return;
                                 }
                             }
-                        }
+                            break;
+                        case "-province":
+                            provinceSign = true;
+                            while (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+                                i++;
+                                for (int k = 0; k < provinceString.length; k++) {
+                                    if (args[i].equals(provinceString[k])) {
+                                        provinceList[k] = 1;
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            return;
                     }
                 }
             }
-            else {
-                return false;
-            }
-            return true;
         }
     }
 
+    /**
+     * LogHandle
+     * @author hujh4779
+     * @version 1.0
+     * @since 2020.2.15
+     */
     class LogHandle {
+
         private ArrayList<String> stringList;
 
         public LogHandle() {
@@ -159,43 +179,62 @@ class InfectStatistic {
             return stringList;
         }
 
+        /**
+         * readLogs
+         * @description 根据传入的最迟日期和日志目录逐行读取日志，并添加至stringList变量中
+         * @param endDate 读取日志最迟日期
+         * @param logPath 读取日志目录
+         */
         public boolean readLogs(String endDate, String logPath) {
             File file = new File(logPath);
             File[] fileList = file.listFiles();
             assert fileList != null;
-            for (int i = 0; i < fileList.length; i++) {
-                String fileName = fileList[i].getName();
+            String biggestDate = "";
+            for (File value : fileList) {
+                String fileName = value.getName();
                 String fileNameWithout = fileName.substring(0, 10);
-                if (endDate.compareTo(fileNameWithout) >= 0) {
-                    try {
-                        //FileReader fr = new FileReader(logPath + fileName);
-                        //System.out.println(fileName);
-                        BufferedReader bf = new BufferedReader(new InputStreamReader(new FileInputStream(
-                                new File(logPath + fileName)),"UTF-8"));
-                        String str;
-                        while ((str = bf.readLine()) != null) {
-                            if(!str.startsWith("//")) {
-                                this.stringList.add(str);
-                                //System.out.println(str);
-                            }
-                        }
-                        bf.close();
-                        //fr.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else {
-                    //return false;
+                if (biggestDate.compareTo(fileNameWithout) < 0) {
+                    biggestDate = fileNameWithout;
                 }
             }
-            return true;
+            if (endDate.compareTo(biggestDate) > 0) {
+                return false;
+            }
+            else {
+                for (File value : fileList) {
+                    String fileName = value.getName();
+                    String fileNameWithout = fileName.substring(0, 10);
+                    if (endDate.compareTo(fileNameWithout) >= 0) {
+                        try {
+                            BufferedReader bf = new BufferedReader(new InputStreamReader(new FileInputStream(
+                                    new File(logPath + fileName)), "UTF-8"));
+                            String str;
+                            while ((str = bf.readLine()) != null) {
+                                if (!str.startsWith("//")) {
+                                    this.stringList.add(str);
+                                }
+                            }
+                            bf.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                return true;
+            }
         }
     }
 
+    /**
+     * DataHandle
+     * @author hujh4779
+     * @version 1.0
+     * @since 2020.2.15
+     */
     class DataHandle {
-        private int[][] patient = new int[32][4];
-        private int[] influencedProvince = new int[32];
+
+        private int[][] patient = new int[provinceString.length][patientType.length];
+        private int[] influencedProvince = new int[provinceString.length];
 
         public int[][] getPatient() {
             return patient;
@@ -205,6 +244,11 @@ class InfectStatistic {
             this.patient = patient;
         }
 
+        /**
+         * dataProcess
+         * @description 将传入的字符串数组匹配正则表达式模式，并调用其他方法进行处理
+         * @param stringList 传入日志中的每一行字符串
+         */
         public void dataProcess(ArrayList<String> stringList) {
             String pattern1 = "\\W+ 新增 感染患者 \\d+人";
             String pattern2 = "\\W+ 新增 疑似患者 \\d+人";
@@ -215,39 +259,32 @@ class InfectStatistic {
             String pattern7 = "\\W+ 疑似患者 确诊感染 \\d+人";
             String pattern8 = "\\W+ 排除 疑似患者 \\d+人";
             influencedProvince[0] = 1;
-            for(int i = 0; i < stringList.size(); i++){
-                //System.out.println(stringList.size());
-                String str = stringList.get(i);
-                //System.out.println(str);
+            for (String str : stringList) {
                 if (Pattern.matches(pattern1, str)) {
-                    //System.out.println("1");
                     ipAdd(str);
-                }
-                else if (Pattern.matches(pattern2, str)) {
+                } else if (Pattern.matches(pattern2, str)) {
                     spAdd(str);
-                }
-                else if (Pattern.matches(pattern3, str)) {
+                } else if (Pattern.matches(pattern3, str)) {
                     ipFlow(str);
-                }
-                else if (Pattern.matches(pattern4, str)) {
+                } else if (Pattern.matches(pattern4, str)) {
                     spFlow(str);
-                }
-                else if (Pattern.matches(pattern5, str)) {
+                } else if (Pattern.matches(pattern5, str)) {
                     deadAdd(str);
-                }
-                else if (Pattern.matches(pattern6, str)) {
+                } else if (Pattern.matches(pattern6, str)) {
                     cureAdd(str);
-                }
-                else if (Pattern.matches(pattern7, str)) {
+                } else if (Pattern.matches(pattern7, str)) {
                     spToIp(str);
-                }
-                else if (Pattern.matches(pattern8, str)) {
+                } else if (Pattern.matches(pattern8, str)) {
                     spSub(str);
                 }
             }
-
         }
 
+        /**
+         * ipAdd
+         * @description 根据单条日志记录修改patient和influencedProvince
+         * @param str 传入单条日志记录
+         */
         public void ipAdd(String str) {
             String pattern = "(\\W+) 新增 感染患者 (\\d+)人";
             Pattern r = Pattern.compile(pattern);
@@ -269,6 +306,11 @@ class InfectStatistic {
             }
         }
 
+        /**
+         * spAdd
+         * @description 根据单条日志记录修改patient和influencedProvince
+         * @param str 传入单条日志记录
+         */
         public void spAdd(String str) {
             String pattern = "(\\W+) 新增 疑似患者 (\\d+)人";
             Pattern r = Pattern.compile(pattern);
@@ -290,6 +332,11 @@ class InfectStatistic {
             }
         }
 
+        /**
+         * ipFlow
+         * @description 根据单条日志记录修改patient和influencedProvince
+         * @param str 传入单条日志记录
+         */
         public void ipFlow(String str) {
             String pattern = "(\\W+) 感染患者 流入 (\\W+) (\\d+)人";
             Pattern r = Pattern.compile(pattern);
@@ -316,6 +363,11 @@ class InfectStatistic {
             }
         }
 
+        /**
+         * spFlow
+         * @description 根据单条日志记录修改patient和influencedProvince
+         * @param str 传入单条日志记录
+         */
         public void spFlow(String str) {
             String pattern = "(\\W+) 疑似患者 流入 (\\W+) (\\d+)人";
             Pattern r = Pattern.compile(pattern);
@@ -342,6 +394,11 @@ class InfectStatistic {
             }
         }
 
+        /**
+         * deadAdd
+         * @description 根据单条日志记录修改patient和influencedProvince
+         * @param str 传入单条日志记录
+         */
         public void deadAdd(String str) {
             String pattern = "(\\W+) 死亡 (\\d+)人";
             Pattern r = Pattern.compile(pattern);
@@ -365,6 +422,11 @@ class InfectStatistic {
             }
         }
 
+        /**
+         * cureAdd
+         * @description 根据单条日志记录修改patient和influencedProvince
+         * @param str 传入单条日志记录
+         */
         public void cureAdd(String str) {
             String pattern = "(\\W+) 治愈 (\\d+)人";
             Pattern r = Pattern.compile(pattern);
@@ -388,6 +450,11 @@ class InfectStatistic {
             }
         }
 
+        /**
+         * spToIp
+         * @description 根据单条日志记录修改patient和influencedProvince
+         * @param str 传入单条日志记录
+         */
         public void spToIp(String str) {
             String pattern = "(\\W+) 疑似患者 确诊感染 (\\d+)人";
             Pattern r = Pattern.compile(pattern);
@@ -411,6 +478,11 @@ class InfectStatistic {
             }
         }
 
+        /**
+         * spSub
+         * @description 根据单条日志记录修改patient和influencedProvince
+         * @param str 传入单条日志记录
+         */
         public void spSub(String str) {
             String pattern = "(\\W+) 排除 疑似患者 (\\d+)人";
             Pattern r = Pattern.compile(pattern);
@@ -432,8 +504,24 @@ class InfectStatistic {
             }
         }
 
-        public void output(String outputPath, int[] patientTypeSign, int[] provinceList, boolean provinceSign, boolean typeSign) {
+        /**
+         * output
+         * @description 根据传入的参数，将类变量格式化输出
+         * @param outputPath 输出的日志目录
+         * @param patientTypeSign 命令行参数是否有-type
+         * @param provinceList 省份输出标志
+         * @param provinceSign 命令行参数是否有-province
+         * @param typeSign 类型输出标志
+         */
+        public void output(String outputPath, int[] patientTypeSign, int[] provinceList,
+                           boolean provinceSign, boolean typeSign) {
             try {
+                File file = new File(outputPath);
+                String dir = file.getParent();
+                File dirFile = new File(dir);
+                if (!dirFile.exists()) {
+                    dirFile.mkdir();
+                }
                 FileWriter fileWriter = new FileWriter(outputPath);
                 if (provinceSign) {
                     for (int i = 0; i < provinceString.length; i++) {
@@ -470,6 +558,7 @@ class InfectStatistic {
                                         }
                                     }
                                 }
+                                fileWriter.write("\n");
                             }
                             else {
                                 fileWriter.write(provinceString[i] + " 感染患者" + patient[i][0] + "人 疑似患者"

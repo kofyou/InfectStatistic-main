@@ -65,7 +65,7 @@ public class InfectStatistic {
 			}
 			else if(args[i].equals("-type")){
 				for(int j=0;j<4;j++)
-				if((j+i+1)<args.length) type[j] = args[i+j+1];       //记录type
+				if(!args[i+j+1].isEmpty) type[j] = args[i+j+1];       //记录type
 				if(type[0].isEmpty()){
 					System.out.println("请指定type!");
 					System.exit(0);
@@ -73,7 +73,7 @@ public class InfectStatistic {
 			}
 			else if(args[i].equals("-province")){
 				for(int j=0;j<args.length-i;j++)
-				if((j+i+1)<args.length) prs[j] = args[i+j+1];       //记录省
+				if(!args[i+j+1].isEmpty) prs[j] = args[i+j+1];       //记录省
 				if(prs[0].isEmpty()){
 					System.out.println("请指定省份!");
 					System.exit(0);

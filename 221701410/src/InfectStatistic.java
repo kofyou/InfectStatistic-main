@@ -161,7 +161,8 @@ class InfectStatistic {
 
         public boolean readLogs(String endDate, String logPath) {
             File file = new File(logPath);
-            File fileList[] = file.listFiles();
+            File[] fileList = file.listFiles();
+            assert fileList != null;
             for (int i = 0; i < fileList.length; i++) {
                 String fileName = fileList[i].getName();
                 String fileNameWithout = fileName.substring(0, 10);

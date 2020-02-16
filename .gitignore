@@ -12,3 +12,8 @@ InfectStatistic-example.iml
 
 # compile
 *.class
+
+# tests
+/221701410/tests
+/221701410/log
+/221701410/result

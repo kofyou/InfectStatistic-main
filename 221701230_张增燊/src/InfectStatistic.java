@@ -5,16 +5,17 @@ import java.lang.String;
 
 public class InfectStatistic {
 	
-	static Lib libs[];
-	static int count=0;
-	static int isIn[]=new int[35];
+	static Lib libs[];//用于存储某天的日志的数组
+	static int count=0;//用于纪律当前已经存了多少天的日志的计数单位
+	static int isIn[]=new int[35];//用于记录用户要求查询哪个省的数组
 	
 	public static void list(String log,String out,String date,
 			String type,String province)
 	{
 		//读取文件
 		GetFileList(log);
-		outList(type,date,province);
+		//输出信息
+		outListToFile(out,type,date,province);
 	}
 	//读文件的函数
 	public static void GetFileList(String log)
@@ -30,13 +31,13 @@ public class InfectStatistic {
 			{
 				//是文件就按行读取
 				String fileName = fileList[i].getName();
-				//根据文件名创建对应的lib元素
+				//根据文件名创建对应的lib元素，截取日期当作元素的date
 				String substr=fileList[i].getName().substring(0,10);
 				libs[count]=new Lib(substr);
 				count=count+1;
 				addYesterday();
 				//读文件
-				readFileByLines(log+"\\"+fileName,i);         
+				readFileByLines(log+"\\"+fileName,count-1);         
 			} 
 			if (fileList[i].isDirectory())
 			{
@@ -108,7 +109,8 @@ public class InfectStatistic {
 			Province temp=libs[x].provinces.get(i);
 			if(temp.getName().contentEquals(strarray[y])==true)
 			{
-				//如果找到就返回下标
+				//如果找到就返回下标,并标识出它是当天改变的省份
+				temp.setIsinlog();
 				return i;
 			}
 		}
@@ -268,44 +270,98 @@ public class InfectStatistic {
 	
 	public static void outList(String type,String date,String province)
 	{
+		
 		int x=findDate(date);
 		whatIn(x,province);
 		for (int k=0;k<libs[x].provinces.size();k++)
 		{
 			if(isIn[k]==1)
 			{
-				outType(type,libs[x].provinces.get(k));
+				System.out.print(outType(type,libs[x].provinces.get(k)));
 			}
 		}
 	}
 	
-	public static void outType(String type,Province pro)
+	public static String outType(String type,Province pro)
 	{
 		String[] strarray=type.split(" ");
-		System.out.print(pro.getName()+" ");
+		String raw=pro.getName();
 		for(int i=0;i<strarray.length;i++)
 		{
+			raw=raw+" ";
 			if(strarray[i].contentEquals("ip")==true)
 			{
-				System.out.print(pro.outIp()+" ");
+				raw=raw+pro.outIp();
 			}
 			else if(strarray[i].contentEquals("sp")==true)
 			{
-				System.out.print(pro.outSp()+" ");
+				raw=raw+pro.outSp();
 			}
 			else if(strarray[i].contentEquals("cure")==true)
 			{
-				System.out.print(pro.outCure()+" ");
+				raw=raw+pro.outCure();
 			}
 			else if(strarray[i].contentEquals("dead")==true)
 			{
-				System.out.print(pro.outDead()+" ");
+				raw=raw+pro.outDead();
 			}
 		}
-		System.out.print("\n");
+		raw=raw+"\n";
+		return raw;
+	}
+	
+	public static void outListToFile(String out,String type,
+			String date,String province)
+	{
+		 try {
+	            //创建文件路径
+	            File writename = new File(out);
+	            //判断是否存在
+	            if(!writename.exists())
+	            {
+	                //不存在就创建
+	                writename.mkdirs();
+	            }
+	    		File[] fileList = writename.listFiles();
+	            //创建文件路径
+	    		String filename=out+"\\listOut"+(fileList.length+1)+".txt";
+	            File writename1 = new File(filename);
+	            //判断是否存在
+	            if(!writename1.exists()) 
+	            {
+	                //不存在就创建
+	                writename1.createNewFile();
+	            }
+	            //创建写入文件方式，true为追加写入，原内容不覆盖
+	            FileWriter fw = new FileWriter(writename1,true);
+	            
+	            int x=findDate(date);
+	    		whatIn(x,province);
+	    		for (int k=0;k<libs[x].provinces.size();k++)
+	    		{
+	    			if(isIn[k]==1)
+	    			{
+	    				//追加写入
+	    				fw.append(outType(type,libs[x].provinces.get(k)));
+	    				//刷新
+	    	            fw.flush();
+	    			}
+	    		}
+	            
+	            //追加写入
+	            //fw.append(data);
+	            //刷新
+	            fw.flush();
+	            //关闭资源
+	            fw.close();
+	        }
+		 catch (Exception e) {
+	            e.printStackTrace();
+	        }
 	}
 	
 	public static void main(String[] args) {
+		//System.out.println("hello world");
 //		for(int i=0;i<args.length;i++)
 //		{
 //			System.out.println(args[i]);

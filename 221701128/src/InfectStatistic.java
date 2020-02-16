@@ -2,11 +2,13 @@
 public class InfectStatistic {
 	
 	public static int i;
-	public static int count;
+	public static int typeCount;
+	public static int provinceCount;
 	public static String fileDirect;
 	public static String outputFilepath;
 	public static String dateTime;
 	public static String typePeople[];
+	public static String province[];
 	
 	public static boolean judgeList (String str)
 	{
@@ -35,6 +37,16 @@ public class InfectStatistic {
 		else if(str[i].equalsIgnoreCase("-type"))
 		{
 			readType(str);
+		}
+		
+		else if(str[i].equalsIgnoreCase("-type"))
+		{
+			readType(str);
+		}
+		
+		else if(str[i].equalsIgnoreCase("-province"))
+		{
+			readProvince(str);
 		}
 	}
 	
@@ -82,27 +94,52 @@ public class InfectStatistic {
 		if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))
 		{
 			typePeople[0] = "all";
-			count++;
+			typeCount++;
 		}
 		
 		else
 		{
 			i++;			
-			count = 0;
+			typeCount = 0;
 			for(  ; i < str.length ; i++)
 			{	
 				if(str[i].equalsIgnoreCase("ip") 
 					|| str[i].equalsIgnoreCase("sp") 
 					|| str[i].equalsIgnoreCase("cure") 
 					|| str[i].equalsIgnoreCase("dead") )
-				typePeople[count++] = str[i];
+				typePeople[typeCount++] = str[i];
 				
 				if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))  break;
 			}
 		}
 		
-		for(int k=0;k<count;k++)
+		for(int k=0;k<typeCount;k++)
 		System.out.println(typePeople[k]);
+	}
+	
+	public static void readProvince (String str[])
+	{
+		province = new String[31];
+		if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))
+		{
+			province[0] = "全国";
+		    provinceCount++;
+		}
+		
+		else
+		{
+			i++;			
+			provinceCount = 0;
+			for(  ; i < str.length ; i++)
+			{	
+				province[provinceCount++] = str[i];
+				
+				if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))  break;
+			}
+		}
+		
+		for(int k=0;k<provinceCount;k++)
+		System.out.println(province[k]);
 	}
 	
 	public static void main(String args[])
@@ -118,4 +155,3 @@ public class InfectStatistic {
     }
 
 }
-

@@ -183,6 +183,17 @@ public class infectStatistic {
 		return true;
 	}
 
+	//提示命令函数
+	public static void validCommandTips(){
+		System.out.println("reference:");
+		System.out.println("list<required and first>:");
+		System.out.println("	-date<required>		must be valid date and lower now");
+		System.out.println("	-log<required>		must be valid folder path");
+		System.out.println("	-out<required>		must be valid file path");
+		System.out.println("	-type<optional>		must be ip/sp/cure/dead");
+		System.out.print("	-province<optional>	must be Chinese province(北京、上海...)/country");
+	}
+
 	//主函数
 	public static void main(String args[]) throws ParseException{
 		//检测命令行头部list
@@ -285,35 +296,48 @@ public class infectStatistic {
 							File folder=new File(logString.trim());
 							//检测命令行type/province参数值的合法性
 							if(t.isValidParameterType()&&t.isValidParameterProvince()) {
-								if(folder.isDirectory()) {
-									System.out.println("get");
+								if(logString.matches("^[A-z]:\\\\(.+?\\\\)*$")&&outString.matches("^[A-z]:\\\\(.+?\\\\)*$")) {
+									if(folder.isDirectory()) {
+										System.out.println("get");
+									}
+									else {
+											System.out.println("路径非法，不存在该文件夹");
+											infectStatistic.validCommandTips();
+									}
 								}
 								else {
-										System.out.println("路径非法，不存在该文件夹");
+									System.out.println("log/out参数值不是合法的文件路径");
+									infectStatistic.validCommandTips();
 								}
 							}
 							else {
 									System.out.println("省份或者类型参数值非法");
+									infectStatistic.validCommandTips();
 							}
 						}
 						else {
 							System.out.println("命令行日期参数非法");
+							infectStatistic.validCommandTips();
 						}
 					}
 					else {
 						System.out.println("缺少或重复date/log/out参数");
+						infectStatistic.validCommandTips();
 					}
 				}
 				else {
 					System.out.println("date/log/out/type/province参数值为空");
+					infectStatistic.validCommandTips();
 				}
 			}
 			else {
 				System.out.println("list后未紧接参数");
+				infectStatistic.validCommandTips();
 			}
 		}
 		else {
 			System.out.println("list命令格式错误");
+			infectStatistic.validCommandTips();
 		}
 	}
 }

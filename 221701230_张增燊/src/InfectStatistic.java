@@ -270,16 +270,46 @@ public class InfectStatistic {
 	
 	public static void outList(String type,String date,String province)
 	{
-		
 		int x=findDate(date);
-		whatIn(x,province);
-		for (int k=0;k<libs[x].provinces.size();k++)
+		if(province.contentEquals(" ")==true)
 		{
-			if(isIn[k]==1)
+			libs[x].provinces.get(0).setIsinlog();
+			for (int k=0;k<libs[x].provinces.size();k++)
 			{
-				System.out.print(outType(type,libs[x].provinces.get(k)));
+				Province temp=libs[x].provinces.get(k);
+				if(temp.getIsinlog()==1)
+				{
+					if(type.contentEquals(" ")==true)
+					{
+						System.out.print(temp.ToString());
+					}
+					else
+					{
+						System.out.print(outType(type,temp));
+					}
+				}
 			}
 		}
+		else
+		{
+			whatIn(x,province);
+			for (int k=0;k<libs[x].provinces.size();k++)
+			{
+				Province temp=libs[x].provinces.get(k);
+				if(isIn[k]==1)
+				{
+					if(type.contentEquals(" ")==true)
+					{
+						System.out.print(temp.ToString());
+					}
+					else
+					{
+						System.out.print(outType(type,temp));
+					}
+				}
+			}
+		}
+		
 	}
 	
 	public static String outType(String type,Province pro)
@@ -336,22 +366,53 @@ public class InfectStatistic {
 	            FileWriter fw = new FileWriter(writename1,true);
 	            
 	            int x=findDate(date);
-	    		whatIn(x,province);
-	    		for (int k=0;k<libs[x].provinces.size();k++)
+	    		if(province.contentEquals(" ")==true)
 	    		{
-	    			if(isIn[k]==1)
+	    			libs[x].provinces.get(0).setIsinlog();
+	    			for (int k=0;k<libs[x].provinces.size();k++)
 	    			{
-	    				//追加写入
-	    				fw.append(outType(type,libs[x].provinces.get(k)));
+	    				Province temp=libs[x].provinces.get(k);
+	    				if(temp.getIsinlog()==1)
+	    				{
+	    					if(type.contentEquals(" ")==true)
+	    					{
+	    						//追加写入
+	    	    				fw.append(temp.ToString());
+	    					}
+	    					else
+	    					{
+	    						//追加写入
+	    	    				fw.append(outType(type,temp));
+	    					}
+	    				}
+	    				//刷新
+	    	            fw.flush();
+	    			}
+	    		}
+	    		else
+	    		{
+	    			whatIn(x,province);
+	    			for (int k=0;k<libs[x].provinces.size();k++)
+	    			{
+	    				Province temp=libs[x].provinces.get(k);
+	    				if(isIn[k]==1)
+	    				{
+	    					if(type.contentEquals(" ")==true)
+	    					{
+	    						//追加写入
+	    	    				fw.append(temp.ToString());
+	    					}
+	    					else
+	    					{
+	    						//追加写入
+	    	    				fw.append(outType(type,temp));
+	    					}
+	    				}
 	    				//刷新
 	    	            fw.flush();
 	    			}
 	    		}
 	            
-	            //追加写入
-	            //fw.append(data);
-	            //刷新
-	            fw.flush();
 	            //关闭资源
 	            fw.close();
 	        }
@@ -370,19 +431,18 @@ public class InfectStatistic {
 		Scanner s = new Scanner(System.in); 
 		
 		System.out.print("输入log\n");
-		String log=s.nextLine();
+		String log="E:\\log";
 		System.out.print("输入out\n");
-		String out=s.nextLine();
+		String out="E:\\result";
 		System.out.print("输入date\n");
-		String date=s.nextLine();
+		String date="2020-01-23";
 		System.out.print("输入type\n");
-		String type=s.nextLine();
+		String type=" ";
 		System.out.print("输入province\n");
-		String province=s.nextLine();
-		System.out.print("\n");
-		list(log,out,date,type,province);
+		String province=" ";
 		
+		list(log,out,date,type,province);
+		System.out.println("去看文件");
 	}
 
-	
 }

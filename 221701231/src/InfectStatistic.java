@@ -2,18 +2,19 @@
  * InfectStatistic
  * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author 221701231_朱鸿昊
+ * @version 1.0.3
+ * @since 2020/2/16 15.28
  */
 class InfectStatistic {
     static class Controller{
         static public String inputLocation;    // 输入文件夹位置
         static public String outputLocation;    // 输出文件夹位置
-        static public String designatedProvince;  // 指定的省份
+        static public int numberOfDesignatedProvince = 0;    // 指定类型数量
+        static public String designatedProvince[] = new String[32];  // 指定的省份
         static public String designatedDate;    // 指定日期
         static public int numberOfTypes = 0;    // 指定类型数量
-        static public String designatedTypes[] =new String[4]; // 指定类型
+        static public String designatedTypes[] = new String[4]; // 指定类型
 
         public static void GetParameters(String[] parameters){
             //获得输入信息
@@ -29,7 +30,8 @@ class InfectStatistic {
                         break;
                     case ("-province"):
                         i0++;
-                        Controller.designatedProvince=parameters[i0];
+                        Controller.designatedProvince[numberOfDesignatedProvince]=parameters[i0];
+                        numberOfDesignatedProvince++;
                         break;
                     case ("-date"):
                         i0++;
@@ -45,18 +47,42 @@ class InfectStatistic {
                                 Controller.numberOfTypes++;
                             }
                             else {
+                                i0--;
                                 break;
                             }
                         }
+                        break;
+                    case ("list"):
+                        break;
+                    default:
+                        Controller.designatedProvince[numberOfDesignatedProvince]=parameters[i0];
+                        numberOfDesignatedProvince++;
                 }
+            }
+
+            // 处理没有输入-type的情况
+            if (Controller.numberOfTypes == 0){
+                Controller.numberOfTypes = 4;
+                designatedTypes=new String[]{"ip","sp","cure","dead"};
+            }
+
+            // 处理没有输入-province的情况
+            if (Controller.numberOfDesignatedProvince == 0){
+                Controller.numberOfDesignatedProvince = 1;
+                designatedProvince=new String[]{"全国"};
             }
         }
 
         public static void OutputParameters() {
-            System.out.println(Controller.inputLocation);
-            System.out.println(Controller.outputLocation);
-            System.out.println(Controller.designatedDate);
-            System.out.println(Controller.designatedProvince);
+            System.out.println("输入位置： " + Controller.inputLocation);
+            System.out.println("输出位置： " + Controller.outputLocation);
+            System.out.println("指定日期： " + Controller.designatedDate);
+            System.out.print("指定区域： ");
+            for (int i0 = 0;i0 < Controller.numberOfDesignatedProvince;i0++){
+                System.out.print(Controller.designatedProvince[i0]+" ");
+            }
+            System.out.println();
+            System.out.print("指定类型： ");
             for (int i0 = 0;i0 < Controller.numberOfTypes;i0++){
                 System.out.print(Controller.designatedTypes[i0]+" ");
             }

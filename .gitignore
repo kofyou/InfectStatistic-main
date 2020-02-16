@@ -8,4 +8,5 @@
 out
 gen
 .idea/
+.class
 InfectStatistic-example.iml

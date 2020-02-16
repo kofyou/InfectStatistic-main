@@ -93,10 +93,10 @@ class InfectStatistic {
             String line;
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
             for (File f : dir.listFiles()) {//将目录下所有的文件名加入fileList列表用于排序
-                fileList.add(f.getName());
+                fileList.add(f.getName().split("\\.")[0]);
             }
             Collections.sort(fileList);
-            String lastDateString = fileList.get(fileList.size() - 1).split("\\.")[0];//最大日期
+            String lastDateString = fileList.get(fileList.size() - 1);//最大日期
             Date lastDate = simpleDateFormat.parse(lastDateString);
             if (date != null && date.compareTo(lastDate) > 0) {
                 System.out.println("抱歉，日期超出范围");
@@ -105,8 +105,8 @@ class InfectStatistic {
             for (String f : fileList) {
                 System.out.println(f);
             }
-            for (File file : dir.listFiles()) {
-                String fileDateString = file.getName().split("\\.")[0];//日志日期
+            for (String fileDateString : fileList) {
+                File file = new File(dir.getPath() + "/" + fileDateString + ".log.txt");
                 Date fileDate = simpleDateFormat.parse(fileDateString);//日志日期
                 if (date != null && fileDate.compareTo(date) > 0) {
                     break;

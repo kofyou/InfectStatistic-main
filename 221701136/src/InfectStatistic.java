@@ -255,7 +255,30 @@ class InfectStatistic {
 		
 	}
 		
-
+	/*
+	 *函数功能：获取对应省份对应类型的患者previousNum
+	 *输入参数：
+	 *输出参数：
+	 **/
+	public int searchProvinceToTypeNum(String procince,String type) {
+		//获取省份对应下的感染患者数量
+				Set<String> thisSet = ProvinceToNumMap.keySet();
+				for(String str:thisSet) {
+					if(str.equals(province)) {
+						HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
+						Set<String> typeKeys = thisMap.keySet();
+						for(String strTwo:typeKeys) {
+							if(strTwo.equals(type)) {
+								previousNum = thisMap.get(strTwo);
+							}
+						}
+					}
+					}
+				return previousNum;
+	}
+	
+	
+	
 	/*
 	 *函数功能：增加感染患者
 	 *输入参数：
@@ -273,27 +296,17 @@ class InfectStatistic {
 		//去除数字后面的“人”，取出单独的数字
 		num = Integer.valueOf(linePart[3].replaceAll("人",""));
 		
-		int previousNum;
+		int previousNum,countryPreviousNum,currentNum,countryCurrentNum;
 		
-		//获取省份对应下的感染患者数量
-		Set<String> thisSet = ProvinceToNumMap.keySet();
-		for(String str:thisSet) {
-			if(str.equals(province)) {
-				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
-				Set<String> typeKeys = thisMap.keySet();
-				for(String strTwo:typeKeys) {
-					if(strTwo.equals("感染患者")) {
-						previousNum = thisMap.get(strTwo);
-					}
-				}
-			}
-		}
+		previousNum = searchProvinceToTypeNum(province,"感染患者");
 		
-		
+		countryPreviousNum = searchProvinceToTypeNum("全国","感染患者");
+			
 		currentNum = num + previousNum;
+		countryCurrentNum = num+countryPreviousNum;
 		
 	    ProvinceToNumMap.get(province).replace(linePart[2],currentNum);
-		
+	    ProvinceToNumMap.get("全国").replace(linePart[2],countryCurrentNum);
 	}
 	
 	
@@ -303,39 +316,31 @@ class InfectStatistic {
 	 *输出参数：
 	 **/
      public void addSuspectedPatients(String linePart[]) {
-		
-		//先将每一行的字符串分隔成字符串数组
-		String[] linePart = lineInformation.split(" ");
-		String province = linePart[0];
-				
-		//新增疑似感染患者的数量
-		int num;
-		
-		//去除数字后面的“人”，取出单独的数字
-		num = Integer.valueOf(linePart[3].replaceAll("人",""));
-		
-		int previousNum;
-		
-		//获取省份对应下的感染患者数量
-		Set<String> thisSet = ProvinceToNumMap.keySet();
-		for(String str:thisSet) {
-			if(str.equals(province)) {
-				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
-				Set<String> typeKeys = thisMap.keySet();
-				for(String strTwo:typeKeys) {
-					if(strTwo.equals("疑似患者")) {
-						previousNum = thisMap.get(strTwo);
-					}
-				}
-			}
+ 		//先将每一行的字符串分隔成字符串数组
+ 		String[] linePart = lineInformation.split(" ");
+ 		String province = linePart[0];
+ 				
+ 		//新增感染患者的数量
+ 		int num;
+ 		
+ 		//去除数字后面的“人”，取出单独的数字
+ 		num = Integer.valueOf(linePart[3].replaceAll("人",""));
+ 		
+ 		int previousNum,countryPreviousNum,currentNum,countryCurrentNum;
+ 		
+ 		previousNum = searchProvinceToTypeNum(province,"疑似患者");
+ 		
+ 		countryPreviousNum = searchProvinceToTypeNum("全国","疑似患者");
+ 			
+ 		currentNum = num + previousNum;
+ 		countryCurrentNum = num+countryPreviousNum;
+ 		
+ 	    ProvinceToNumMap.get(province).replace(linePart[2],currentNum);
+ 	    ProvinceToNumMap.get("全国").replace(linePart[2],countryCurrentNum);
 		}
 		
 		
-		currentNum = num + previousNum;
 		
-	    ProvinceToNumMap.get(province).replace(linePart[2],currentNum);
-		
-	}
 	
      /*
  	 *函数功能：感染患者流动
@@ -356,32 +361,10 @@ class InfectStatistic {
  		//去除数字后面的“人”，取出单独的数字
  		flowNum = Integer.valueOf(linePart[4].replaceAll("人",""));
  		
- 		int flowOutPreviousNum;
- 		int flowInPreviousNum;
+ 		int flowOutPreviousNum,flowInPreviousNum,flowOutCurrentNum,flowInCurrentNum;
  		
- 		//获取省份对应下的感染患者数量
- 		Set<String> thisSet = ProvinceToNumMap.keySet();
- 		for(String str:thisSet) {
- 			if(str.equals(flowOutProvince)) {
- 				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
- 				Set<String> typeKeys = m.keySet();
- 				for(String strTwo:typeKeys) {
- 					if(strTwo.equals("感染患者")) {
- 						flowOutPreviousNum = m.get(strTwo);
- 					}
- 				}
- 			}
- 			if(str.equals(flowInProvince)) {
- 				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
- 				Set<String> typeKeys = m.keySet();
- 				for(String strTwo:typeKeys) {
- 					if(strTwo.equals("感染患者")) {
- 						flowInPreviousNum = m.get(strTwo);
- 					}
- 				}
- 			}
- 		}
- 		
+ 		flowOutPreviousNum = searchProvinceToTypeNum(flowOutProvince,"感染患者");
+ 		flowInPreviousNum = searchProvinceToTypeNum(flowInPreviousNum,"感染患者");
  		
  		flowOutCurrentNum = flowOutPreviousNum-flowNum;
  		flowInCurrentNum = flowInPreviousNum+flowNum;
@@ -398,50 +381,29 @@ class InfectStatistic {
    	 **/
      public void suspectedPatientsMove(String linePart[]) {
    		
-   		//先将每一行的字符串分隔成字符串数组
-   		String[] linePart = lineInformation.split(" ");
-   		String flowOutProvince = linePart[0];
-   		String flowInProvince = linePart[3];
-   		
-   		
-   		//流动疑似患者数量
-   		int flowNum;
-   		
-   		//去除数字后面的“人”，取出单独的数字
-   		flowNum = Integer.valueOf(linePart[4].replaceAll("人",""));
-   		
-   		int flowOutPreviousNum;
-   		int flowInPreviousNum;
-   		
-   		//获取省份对应下的疑似患者数量
-   		Set<String> thisSet = ProvinceToNumMap.keySet();
-   		for(String str:thisSet) {
-   			if(str.equals(flowOutProvince)) {
-   				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
-   				Set<String> typeKeys = thisMap.keySet();
-   				for(String strTwo:typeKeys) {
-   					if(strTwo.equals("疑似患者")) {
-   						flowOutPreviousNum = thisMap.get(strTwo);
-   					}
-   				}
-   			}
-   			if(str.equals(flowInProvince)) {
-   				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
-   				Set<String> typeKeys = thisMap.keySet();
-   				for(String strTwo:typeKeys) {
-   					if(strTwo.equals("疑似患者")) {
-   						flowInPreviousNum = thisMap.get(strTwo);
-   					}
-   				}
-   			}
-   		}
-   		
-   		
-   		flowOutCurrentNum = flowOutPreviousNum-flowNum;
-   		flowInCurrentNum = flowInPreviousNum+flowNum;
-   		
-   	    ProvinceToNumMap.get(flowOutProvince).replace(linePart[1],flowOutCurrentNum);
-   	   ProvinceToNumMap.get(flowInProvince).replace(linePart[1],flowInCurrentNum);
+
+  		//先将每一行的字符串分隔成字符串数组
+  		String[] linePart = lineInformation.split(" ");
+  		String flowOutProvince = linePart[0];
+  		String flowInProvince = linePart[3];
+  		
+  		
+  		//流动患者数量
+  		int flowNum;
+  		
+  		//去除数字后面的“人”，取出单独的数字
+  		flowNum = Integer.valueOf(linePart[4].replaceAll("人",""));
+  		
+  		int flowOutPreviousNum,flowInPreviousNum,flowOutCurrentNum,flowInCurrentNum;
+  		
+  		flowOutPreviousNum = searchProvinceToTypeNum(flowOutProvince,"疑似患者");
+  		flowInPreviousNum = searchProvinceToTypeNum(flowInPreviousNum,"疑似患者");
+  		
+  		flowOutCurrentNum = flowOutPreviousNum-flowNum;
+  		flowInCurrentNum = flowInPreviousNum+flowNum;
+  		
+  	    ProvinceToNumMap.get(flowOutProvince).replace(linePart[1],flowOutCurrentNum);
+  	   ProvinceToNumMap.get(flowInProvince).replace(linePart[1],flowInCurrentNum);
    	}
    	
 
@@ -451,36 +413,27 @@ class InfectStatistic {
        	 *输出参数：
        	 **/
      public void addDeadPatients(String linePart[]) {
-       		
-       		//先将每一行的字符串分隔成字符串数组
-       		String[] linePart = lineInformation.split(" ");
-       		String province = linePart[0];
-       		
-       		
-       		
-       		//死亡患者数量
-       		int num;
-       		
-       		//去除数字后面的“人”，取出单独的数字
-       		num = Integer.valueOf(linePart[2].replaceAll("人",""));
-       		
-       		int previousNum;
-       		
-       		//获取省份对应下的死亡患者数量
-       		Set<String> thisSet = ProvinceToNumMap.keySet();
-       		for(String str:thisSet) {
-       			if(str.equals(province)) {
-       				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
-       				Set<String> typeKeys = thisMap.keySet();
-       				for(String strTwo:typeKeys) {
-       					if(strTwo.equals("死亡")) {
-       						previousNum = thisMap.get(strTwo);
-       					}
-       				}
-       			}
-       		}	
-       		currentNum = previousNum+num;
-       	    ProvinceToNumMap.get(province).replace(linePart[1],currentNum);  
+    	//先将每一行的字符串分隔成字符串数组
+  		String[] linePart = lineInformation.split(" ");
+  		String province = linePart[0];
+  				
+  		//新增感染患者的数量
+  		int num;
+  		
+  		//去除数字后面的“人”，取出单独的数字
+  		num = Integer.valueOf(linePart[2].replaceAll("人",""));
+  		
+  		int previousNum,countryPreviousNum,currentNum,countryCurrentNum;
+  		
+  		previousNum = searchProvinceToTypeNum(province,"死亡患者");
+  		
+  		countryPreviousNum = searchProvinceToTypeNum("全国","死亡");
+  			
+  		currentNum = num + previousNum;
+  		countryCurrentNum = num+countryPreviousNum;
+  		
+  	    ProvinceToNumMap.get(province).replace(linePart[2],currentNum);
+  	    ProvinceToNumMap.get("全国").replace(linePart[2],countryCurrentNum);
        	}
        	
      /*函数功能：统计治愈人数
@@ -488,35 +441,27 @@ class InfectStatistic {
          *输出参数：
           **/
      public void addCurePatients(String linePart[]) {
-           		
-           		//先将每一行的字符串分隔成字符串数组
-           		String[] linePart = lineInformation.split(" ");
-           		String province = linePart[0];
-           		
-           		
-           		
-           		//治愈患者数量
-           		int num;
-           		
-           		//去除数字后面的“人”，取出单独的数字
-           		num = Integer.valueOf(linePart[2].replaceAll("人",""));
-           		int previousNum;
-           		
-           		//获取省份对应下的治愈患者数量
-           		Set<String> thisSet = ProvinceToNumMap.keySet();
-           		for(String str:thisSet) {
-           			if(str.equals(province)) {
-           				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
-           				Set<String> typeKeys = thisMap.keySet();
-           				for(String strTwo:typeKeys) {
-           					if(strTwo.equals("治愈")) {
-           						previousNum = thisMap.get(strTwo);
-           					}
-           				}
-           			}
-           		}
-           		currentNum = previousNum+num;
-           	    ProvinceToNumMap.get(province).replace(linePart[1],currentNum);
+    	//先将每一行的字符串分隔成字符串数组
+   		String[] linePart = lineInformation.split(" ");
+   		String province = linePart[0];
+   				
+   		//新增感染患者的数量
+   		int num;
+   		
+   		//去除数字后面的“人”，取出单独的数字
+   		num = Integer.valueOf(linePart[2].replaceAll("人",""));
+   		
+   		int previousNum,countryPreviousNum,currentNum,countryCurrentNum;
+   		
+   		previousNum = searchProvinceToTypeNum(province,"治愈");
+   		
+   		countryPreviousNum = searchProvinceToTypeNum("全国","治愈");
+   			
+   		currentNum = num + previousNum;
+   		countryCurrentNum = num+countryPreviousNum;
+   		
+   	    ProvinceToNumMap.get(province).replace(linePart[2],currentNum);
+   	    ProvinceToNumMap.get("全国").replace(linePart[2],countryCurrentNum);
            	}
            	
                 
@@ -537,23 +482,29 @@ class InfectStatistic {
                		
                		//去除数字后面的“人”，取出单独的数字
                		num = Integer.valueOf(linePart[3].replaceAll("人",""));
-               		int previousNum;
                		
-               		//获取省份对应下的感染患者数量
-               		Set<String> thisSet = ProvinceToNumMap.keySet();
-               		for(String str:thisSet) {
-               			if(str.equals(province)) {
-               				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
-               				Set<String> typeKeys = thisMap.keySet();
-               				for(String strTwo:typeKeys) {
-               					if(strTwo.equals("感染患者")) {
-               						previousNum = thisMap.get(strTwo);
-               					}
-               				}
-               			}
-               		}
-               		currentNum = previousNum+num;
-               	    ProvinceToNumMap.get(province).replace("感染患者",currentNum);
+               		int previousSuspectedNum,previousInfectionNum;
+               		int currentSuspectedNum,currentInfectionNum;
+               		int countryPreviousSuspectedNum,countryPreviousInfectionNum;
+               		int countryCurrentSuspectedNum,countryCurrentInfectionNum;
+               		
+               		previousSuspectedNum = searchProvinceToTypeNum(province,"疑似患者");
+               		previousInfectionNum = searchProvinceToTypeNum(province,"感染患者");
+               		
+               		countryPreviousSuspectedNum = searchProvinceToTypeNum("全国","疑似患者");
+               		countryPreviousInfectionNum = searchProvinceToTypeNum("全国","感染患者");		
+               	
+               		currentSuspectedNum = previousSuspectedNum-num;
+               		currentInfectionNum = previousInfectionNum+num;
+               		
+               		countryCurrentSuspectedNum = countryPreviousSuspectedNum-num;
+               		countryCurrentInfectionNum = countryPreviousInfectionNum+num;
+               		
+               		
+               	    ProvinceToNumMap.get(province).replace("疑似患者",currentSuspectedNum);
+               	 ProvinceToNumMap.get(province).replace("感染患者",currentInfectionNum);
+               	 ProvinceToNumMap.get("全国").replace("感染患者",countryCurrentSuspectedNum);
+               	 ProvinceToNumMap.get("全国").replace("疑似患者",countryCurrentInfectionNum);
                	}
                     
      
@@ -562,35 +513,29 @@ class InfectStatistic {
     	 *输出参数：
     	 **/
          public void suspectedToNormal(String linePart[]) {
-    		
-    		//先将每一行的字符串分隔成字符串数组
-    		String[] linePart = lineInformation.split(" ");
-    		String province = linePart[0];
-    		
-    		
-    		
-    		//排除疑似患者数量
-    		int num;
-    		
-    		//去除数字后面的“人”，取出单独的数字
-    		num = Integer.valueOf(linePart[3].replaceAll("人",""));
-    		int previousNum;
-    		
-    		//获取省份对应下的疑似患者数量
-    		Set<String> thisSet = ProvinceToNumMap.keySet();
-    		for(String str:thisSet) {
-    			if(str.equals(province)) {
-    				HashMap<String,String> thisMap = ProvinceToNumMap.get(str);
-    				Set<String> typeKeys = thisMap.keySet();
-    				for(String strTwo:typeKeys) {
-    					if(strTwo.equals("疑似患者")) {
-    						previousNum = thisMap.get(strTwo);
-    					}
-    				}
-    			}
-    		}
-    		currentNum = previousNum+num;
-    	    ProvinceToNumMap.get(province).replace("疑似患者",currentNum);
+
+        		//先将每一行的字符串分隔成字符串数组
+        		String[] linePart = lineInformation.split(" ");
+        		String province = linePart[0];
+        	
+        		//疑似患者确认感染数量
+        		int num;
+        		
+        		//去除数字后面的“人”，取出单独的数字
+        		num = Integer.valueOf(linePart[3].replaceAll("人",""));
+        		
+        		int previousSuspectedNum,currentSuspectedNum;
+        	
+        		int countryPreviousSuspectedNum,countryCurrentSuspectedNum;
+        		
+        		previousSuspectedNum = searchProvinceToTypeNum(province,"疑似患者");
+        		countryPreviousSuspectedNum = searchProvinceToTypeNum("全国","疑似患者");
+        		
+        		currentSuspectedNum = previousSuspectedNum-num;
+        		countryCurrentSuspectedNum = countryPreviousSuspectedNum-num;
+        				
+        	    ProvinceToNumMap.get(province).replace("疑似患者",currentSuspectedNum);
+        	 ProvinceToNumMap.get("全国").replace("疑似患者",countryCurrentInfectionNum);
     	}
 
                    		

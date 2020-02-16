@@ -41,7 +41,8 @@ public class FileUtil {
             bWriter = new BufferedWriter(new FileWriter(cmds.out));
         else 
             bWriter = new BufferedWriter(new FileWriter("output.txt"));
-        
+      
+            
         //将"全国"数据复制到national中，从列表中删除并将列表排序后，再插入到列表第一的位置
         Province national = list.get(0);
         list.remove(0);
@@ -107,7 +108,7 @@ public class FileUtil {
 
     public static String[] readLog(Commands cmds) throws Exception {
         
-        File file = new File("C:\\Users\\13067\\Desktop\\test\\test");
+        File file = new File(cmds.log);
         //BufferedReader bReader = new BufferedReader(new FileReader("fileName"))
         FilenameFilter filter = new FilenameFilter(){
         

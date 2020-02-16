@@ -65,7 +65,7 @@ public class InfectStatistic {
         String str;     //存放读取的每一行
         //FileUtil util = new FileUtil();
         BufferedReader bReader;
-        String dir = "c:\\Users\\13067\\Desktop\\test\\test";
+        String dir = "";
         if (!cmds.log.equals("")) 
             dir = cmds.log;
             //bReader = new BufferedReader(new FileReader(cmds.log));       

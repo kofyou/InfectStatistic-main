@@ -189,6 +189,8 @@ class ListCommand implements Command{
      */
 	@Override
 	public void execute(Map<String, List<String>> map) {
+		String proString;
+		String typeString;
 		for(int i = 0; i < ListKey.values().length ;i++) {
 			listKey = ListKey.valueOf(i);
 			switch(listKey) {
@@ -204,10 +206,10 @@ class ListCommand implements Command{
 					outKey(map);
 					break;
 				case TYPE:
-					typeKey(map);
+					typeString = typeKey(map);
 					break;
 				case PROVINCE:
-					provinceKey(map,result);
+					proString = provinceKey(map,result);
 					break;
 			}
 		}
@@ -225,62 +227,26 @@ class ListCommand implements Command{
     		System.out.println("");
     	}
 		
-    	
-			
 	}
 
-	private void provinceKey(Map<String, List<String>> map, List<int[]> result) {
+	private String provinceKey(Map<String, List<String>> map, List<int[]> result) {
 		List<String> provinceList = map.get("province");
-		for(int i = 0; i < logLine.size();i++) {
-			boolean flag = false;
-			for(int j = 0; j < provinceList.size(); j++) {
-				if(logLine.get(i).matches(".*" + provinceList.get(j) + ".*")) {
-					flag = true;
-					break;
-				}
-			}
-			if(flag == false) {
-				logLine.remove(i);
-			}
+		String proIndex = new String();
+		for(int i = 0; i < provinceList.size(); i++) {
+			proIndex += provinceList.get(i).toString();
+			proIndex += " ";
 		}
-		for(int i = 0;i < logLine.size();i++) {
-			System.out.println(logLine.get(i));
-		}
+		return proIndex;
 	}
 
-	private void typeKey(Map<String, List<String>> map) {
-//		System.out.println("now is in TypeKey Handler");
-//		List<String> typeList = map.get("type");
-//		for(int i = 0; i < logLine.size();i++) {
-//			boolean flag = false;
-//			for(int j = 0; j < typeList.size(); j++) {
-//				String matchStr = new String();
-//				switch(typeList.get(j).toLowerCase().trim()) {
-//					case "ip":
-//						matchStr = TypeValue.IP.getText();
-//						break;
-//					case "sp":
-//						matchStr = TypeValue.SP.getText();
-//						break;
-//					case "cure":
-//						matchStr = TypeValue.CURE.getText();
-//						break;
-//					case "dead":
-//						matchStr = TypeValue.DEAD.getText();
-//						break;
-//				}
-//				if(logLine.get(i).matches(".*" + matchStr + ".*")) {
-//					flag = true;
-//					break;
-//				}
-//			}
-//			if(flag == false) {
-//				logLine.remove(i);
-//			}
-//		}
-//		for(int i = 0;i < logLine.size();i++) {
-//			System.out.println(logLine.get(i));
-//		}
+	private String typeKey(Map<String, List<String>> map) {
+		List<String> typeList = map.get("type");
+		String typeIndex = new String();
+		for(int i = 0; i < typeList.size(); i++) {
+			typeIndex += typeList.get(i).toString();
+			typeIndex += " ";
+		}
+		return typeIndex;
 	}
 
 	private void outKey(Map<String, List<String>> map) {
@@ -713,15 +679,16 @@ class ExcludeHandler extends MyHandler{
 
 
 enum ProvinceValue{
-	China(0,"全国"), Beijing(1,"北京"), Tianjin(2,"天津"), Hebei(3,"河北"),
-	Liaoning(4,"辽宁"), Jilin(5,"吉林"), Heilongjiang(6,"黑龙江"), Shandong(7,"山东"),
-	Jiangsu(8,"江苏"), Shanghai(9,"上海"), Zhejiang(10,"浙江"), Anhui(11,"安徽"),
-	Fujian(12,"福建"), Jiangxi(13,"江西"), Guangdong(14,"广东"), Guangxi(15,"广西"),
-	Hainan(16,"海南"), Henan(17,"河南"), Hunan(18,"湖南"), Hubei(19,"湖北"),
-	Shanxi(20,"山西"), Neimenggu(21,"内蒙古"), Ningxia(22,"宁夏"), Qinghai(23,"青海"),
-	ShanXi(24,"陕西"), Gansu(25,"甘肃"), Xinjiang(26,"新疆"), Sichuan(27,"四川"),
-	Guizhou(28,"贵州"), Yunnan(29,"云南"), Chongqin(30,"重庆"), Xizang(31,"西藏"),
-	Xianggang(32,"香港"), Aomen(33,"澳门"), Taiwan(34,"台湾");
+	China(0,"全国"), Anhui(1,"安徽"),Aomen(2,"澳门"), Beijing(3,"北京"),
+	Chongqin(4,"重庆"), Fujian(5,"福建"),Gansu(6,"甘肃"), Guangdong(7,"广东"),
+	Guangxi(8,"广西"), Guizhou(9,"贵州"), Hainan(10,"海南"), Hebei(11,"河北"),
+	Henan(12,"河南"), Heilongjiang(13,"黑龙江"),Hubei(14,"湖北"), Hunan(15,"湖南"), 
+	Jiangsu(16,"江苏"), Jiangxi(17,"江西"), Jilin(18,"吉林"), Liaoning(19,"辽宁"), 
+	Neimenggu(20,"内蒙古"), Ningxia(21,"宁夏"),Qinghai(22,"青海"),Shandong(23,"山东"),
+	Shanxi(24,"山西"),ShanXi(25,"陕西"),Shanghai(26,"上海"), Sichuan(27,"四川"),
+	Taiwan(28,"台湾"),Tianjin(29,"天津"),Xizang(30,"西藏"),Xinjiang(31,"新疆"),
+	Xianggang(32,"香港"), Yunnan(33,"云南"), Zhejiang(34,"浙江");
+	 
 	private int key;
 	private String text;
 	private ProvinceValue(int key,String text){

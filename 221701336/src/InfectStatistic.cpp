@@ -11,25 +11,84 @@
 #include<fstream>
 #include<cstring>
 #include<io.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<malloc.h>
+
+//cd C:\Users\鸟蛋花机\Desktop\软件工程\寒假第二次作业\InfectStatistic-main\221701336\src
+//InfectStatistic.exe list -date 2020-01-22 -log D:/log/ -out C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt 
 
 using namespace std;
 
-struct pNode
+string province[32]={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江",
+"湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西"
+,"陕西","上海","四川","天津","西藏","新疆","云南","浙江","全国"}; 
+
+typedef struct ListNode
 {
-    string province;//省份 
+    char province[8];//省份 
 	int numOfDead;//number of dead patients 死亡患者数量 
 	int numOfIP;//number of infection patients 感染患者数量 
 	int numOfSP;//number of suspected patients 疑似患者数量 
-	int numOfCured;//number of cured patients  已痊愈患者数量 
-	struct pNode *next;
-};
+	int numOfCured;//number of cured patients  已痊愈患者数量
+	struct ListNode *next; 
+	
+}Node,*PNode;
 
-void input(string path,pNode p);
-void output(string path,pNode p);
+
+void input(string path,Node p);
+void output(string path,Node p);
 void readDir(string date,string path);
+
+PNode CreatList(void)
+{
+	int len=31;
+	PNode PHead =(PNode)malloc(sizeof(Node));
+	if(PHead==NULL)
+	{
+		cout<<"空间分配失败"<<endl;
+	}
+	PHead->numOfCured=0;
+	PHead->numOfDead=0;
+	PHead->numOfIP=0;
+	PHead->numOfSP=0;
+	strcpy(PHead->province,province[31].c_str());
+		 
+	PNode pNew=(PNode)malloc(sizeof(Node));
+	if(pNew==NULL)
+	{
+		cout<<"分配新节点失败"<<endl;
+	}
+	pNew->numOfCured=0;
+	pNew->numOfDead=0;
+	pNew->numOfIP=0;
+	pNew->numOfSP=0;
+	strcpy(pNew->province,province[0].c_str());
+	pNew->next=NULL;
+	
+	PHead->next=pNew;
+	PNode PTail=pNew;
+	PTail->next=NULL;
+	
+	for(int i=1;i<len;i++)
+	{
+		PNode p=(PNode)malloc(sizeof(Node));
+		if(p==NULL)
+		{
+			cout<<"分配新节点失败"<<endl;
+		}
+		p->numOfCured=0;
+		p->numOfDead=0;
+		p->numOfIP=0;
+		p->numOfSP=0;
+		strcpy(p->province,province[i].c_str());
+		PTail->next=p; 
+		p->next=NULL;
+		PTail=p;
+	}
+	return PHead;
+}
 
 string getDate(int argc, char *argv[])//获得命令行参数中的日期 
 {
@@ -161,7 +220,8 @@ void readDir(string date,string path)
 } */
 
 
-void output(string path,pNode p)
+
+void output(string path,Node p)
 {
 	FILE *fp;
 	char fname[100];
@@ -213,12 +273,18 @@ int main(int argc,char *argv[])
 	
 	getProvince(argc,argv,province);
 	
+	PNode head=CreatList();	
+	PNode p=head;
+	while(p!=NULL)
+	{
+		cout<<p->province<<endl;
+		p=p->next;
+	}
 	
 	//readDir(date,log);//读取目录 
 	
-
-	pNode p={"福建",6,3,15,20};
-	//output(outPath,p);//输出 
+	Node pp={"福建",6,3,15,20,NULL};
+	output(outPath,pp);//输出 
 	system("pause");
 }
 

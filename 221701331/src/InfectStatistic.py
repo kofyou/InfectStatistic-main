@@ -1,12 +1,11 @@
-# encoding=utf8
 import re
 import sys
 import os
 import argparse
-from pypinyin import lazy_pinyin
+# from pypinyin import lazy_pinyin
+from Lib import parse_output_line
 
-PROVENCE_NAME = ["陕西", "甘肃", "青海", "宁夏", "新疆", "北京", "天津", "上海", "重庆", "河北", "山西", "辽宁", "吉林", "黑龙江", "江苏", "浙江", "安徽", "福建", "江西", "山东", "河南", "湖北", "湖南", "广东", "海南", "四川", "贵州", "云南", "台湾", "内蒙古", "广西", "西藏", "香港", "澳门"]
-TYPE_CN_MAP = {'infected': '感染患者', 'suspect': '疑似患者', 'cure': '治愈', 'death': '死亡'}
+SORTED_PROVENCE_NAME = ["安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"]
 EMPTY_DATA = {'infected': 0, 'suspect': 0, 'death': 0, 'cure': 0}
 
 
@@ -82,7 +81,8 @@ def map_info_type(s: str) -> int:
 parser = argparse.ArgumentParser(prog='InfectStatistic', description='show statistic of epidemic data')
 parser.add_argument('option', choices=['list'], type=str, help='only "list" support')
 parser.add_argument('-log', type=str, required=True, help='*directory* that contain logs file')
-parser.add_argument('-out', type=argparse.FileType('w'), required=True, help='*file* path that this script output')
+parser.add_argument('-out', type=argparse.FileType('w', encoding='utf8'), required=True,
+                    help='*file* path that this script output')
 parser.add_argument('-date', type=str, help='real time data until this param, format YYYY-mm-DD')
 parser.add_argument('-type', type=str, nargs='*', choices=['ip', 'sp', 'cure', 'dead'], help='type(s) to output')
 parser.add_argument('-province', type=str, nargs='*', help='which province(s) to display, input "全国" if needs sum')
@@ -135,16 +135,12 @@ stat.data['全国'] = stat.get_total()
 output = ''
 data = {}
 if option.province:
-    # data = list(filter(lambda value, key: key in option.province, data.items()))
-    # for k, v in stat.data.items():
-    #     if k in option.province:
-    #         data[k] = v
     for p in option.province:
         data[p] = stat.data[p] if p in stat.data.keys() else {**EMPTY_DATA}
 else:
-    data = stat.data
-sortedProvince = sorted(list(data.keys()), key=lambda x: (lazy_pinyin(x[0]), lazy_pinyin(x[1]) if len(x) > 1 else None))
-# sortedProvince = sorted(list(data.keys()), key=lambda x: (lazy_pinyin(x[i]) for i in range(0, len(x) - 1)))
+    data = {**stat.data}  # todo:这里应该不是深拷贝
+# sortedProvince = sorted(list(data.keys()), key=lambda x: lazy_pinyin(x[0]))
+# 排除type参数不包含的类型
 if option.type:
     mapList = []
     new_data = {}
@@ -157,13 +153,17 @@ if option.type:
             mapList.append('death')
         else:
             mapList.append('cure')
-    for k, v in data.items():
+    for k, province in data.items():
         new_data[k] = {}
         for t in mapList:
-            new_data[k][t] = v[t]
+            new_data[k][t] = province[t]
     data = new_data
-
-for v in sortedProvince:
-    print(v)
-    for k2, v2 in data[v].items():
-        print('  ' + TYPE_CN_MAP[k2] + ' ' + str(v2) + '人')
+# 生成输出文本
+if not option.province or '全国' in option.province:
+    output += parse_output_line('全国', data)
+for province in SORTED_PROVENCE_NAME:
+    output += parse_output_line(province, data)
+# 写入out参数指定的文件
+option.out.write(output)
+print(output)
+option.out.close()

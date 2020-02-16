@@ -3,10 +3,17 @@ import java.util.Arrays;
 import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.junit.Test;
 import java.text.Collator;
 import java.util.Locale;
+
 /**
  * InfectStatistic
+ * TODO
+ *
+ * @author 枣子今天不吃枣
+ * @version 1.0
+ * @since 2020-02-10
  */
 public class InfectStatistic {
     static ArrayList<Province> provincesList = new ArrayList<Province>();
@@ -101,7 +108,7 @@ public class InfectStatistic {
             String path = dir + "\\" + name;
         
             bReader = new BufferedReader(new FileReader(path));
-            while ((str = bReader.readLine()) != null) {
+            while ((str = bReader.readLine()) != null && !str.contains("//")) {
 
                 String[] splitInfo = str.split(" ");
                 int index;      //存放省列表下标
@@ -206,17 +213,6 @@ public class InfectStatistic {
             return -1;
         }
 
-        // public static void outPut(ArrayList<Province> list) throws Exception {
-        //     BufferedWriter bWriter = new BufferedWriter(new FileWriter("output.txt"));
-        //     for (Province p : list) {
-        //         String message = p.toString();
-        //         bWriter.write(message);
-        //         bWriter.newLine();
-        //     }
-            
-        //     bWriter.close();
-        // }
-
         
         public void outPut(ArrayList<Province> list,Commands cmds) throws Exception {
         
@@ -235,6 +231,7 @@ public class InfectStatistic {
                     bWriter.newLine();
                 }
             }
+            bWriter.write("// 该文档并非真实数据，仅供测试使用");
             
             bWriter.close();
         }
@@ -319,7 +316,12 @@ public class InfectStatistic {
                                 index = i;
                                 String[] lists = new String[index + 1];
                                 System.arraycopy(filter_lists, 0, lists, 0, index + 1);
-                                //filter_lists = (String[])lists.toArray(new String[lists.size()]);
+                                return lists;
+                            }
+                            else if (filter_lists[i].substring(0, 10).compareTo(cmds.date) >= 1) {
+                                index = i;
+                                String[] lists = new String[index];
+                                System.arraycopy(filter_lists, 0, lists, 0, index);
                                 return lists;
                             }
                     }

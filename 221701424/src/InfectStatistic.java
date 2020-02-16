@@ -73,6 +73,10 @@ public class InfectStatistic {
                 System.exit(0);
             }
         }
+        else {
+            System.out.println("不存在 " + args[0] + " 指令！");
+            System.exit(0);
+        }
         String str;     //存放读取的每一行
         //FileUtil util = new FileUtil();
         BufferedReader bReader;

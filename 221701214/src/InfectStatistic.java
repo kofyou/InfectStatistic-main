@@ -382,34 +382,10 @@ public class Homework2
 	 */
 	public void writeOut(String filePath) throws IOException
 	{
-		/*
-		for(int i = 0;i < allProvinces.length;i++)
-        {
-        	for(int j = 0;j < allType.length;j++)
-        	{
-        		System.out.print(people[i][j]);
-        	}
-        	System.out.println();
-        }
-        */
-		File dir = new File(filePath);
-	    // 一、检查放置文件的文件夹路径是否存在，不存在则创建
-	    if(!dir.exists()) 
-	    {
-	        dir.mkdirs();//创建多级目录
-	    }
-	    String[] fileName = filePath.split("\\");
-	    File checkFile = new File(filePath + fileName[fileName.length-1]);
 	    FileWriter writer = null;
 	    try 
 	    {
-	        // 二、检查目标文件是否存在，不存在则创建
-	        if(!checkFile.exists()) 
-	        {
-	            checkFile.createNewFile();// 创建目标文件
-	        }
-	        // 三、向目标文件中写入内容
-	        writer = new FileWriter(checkFile, true);
+	        writer = new FileWriter(filePath);
 	        for(int i = 0;i < allProvinces.length;i++)
 	        {
 	        	writer.write(allProvinces[i] + " ");
@@ -417,8 +393,9 @@ public class Homework2
 	        	{
 	        		writer.write(allType[j] + people[i][j] + "人 ");
 	        	}
+	        	writer.write("\n");
 	        }
-	        writer.flush();
+	        writer.write("// 该文档并非真实数据，仅供测试使用");
 	    } 
 	    catch (IOException e) 
 	    {
@@ -426,8 +403,8 @@ public class Homework2
 	    } 
 	    finally 
 	    {
-	        if (null != writer)
-	            writer.close();
+	    	writer.flush();
+	        writer.close();
 	    }
 	}
 	public static void main(String args[]) throws IOException

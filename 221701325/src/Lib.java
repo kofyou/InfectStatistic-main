@@ -1,5 +1,7 @@
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -41,10 +43,38 @@ class DateOutOfBoundsException extends Exception{
 
 
 class DataManager{
-	public static List<String[]> solveData(List<String>data){
-		List<String[]> result = new LinkedList<String[]>();
+	public static List<int[]> solveData(List<String>data){
+		List<int[]> result = new LinkedList<int[]>();
+		ListInit(result);
+//		Iterator<int[]> i = result.iterator();
+//    	while(i.hasNext()) {
+//    		int[] tmp = i.next();
+//    		for(int j = 0;j<tmp.length;j++) {
+//    			System.out.print(tmp[j]);
+//    		}
+//    		System.out.println();
+//    	}
 		
+		
+		AddipHandler addip = new AddipHandler(result);
+		AddSpHandler addSp = new AddSpHandler(result);
+		ChangeHandler change = new ChangeHandler(result);
+		addip.nextHandler = addSp;
+		addSp.nextHandler = change;
+		
+		Iterator<String> it = data.iterator();
+    	while(it.hasNext()) {
+    		String s = it.next();
+    		addip.handleRequest(s);
+    	}
 		return result;
+	}
+
+	private static void ListInit(List<int[]> result) {
+		for(int i = 0; i < ProvinceValue.values().length ;i++) {
+			int[] vals = {i,0,0,0};
+			result.add(vals);
+		}
 	}
 }
 
@@ -154,6 +184,22 @@ enum ProvinceValue{
 		this.key = key;
 		this.text = text;
 	}
+
+	private static HashMap<Integer,String> map = new HashMap<Integer,String>();
+	static {
+        for(ProvinceValue d : ProvinceValue.values()){
+            map.put(d.key,d.text);
+        }
+    }
+
+	public static int keyOfProvince(String string) {
+		for (Entry<Integer, String> entry : map.entrySet()) {
+	        if (entry.getValue().equals(string)) {
+	            return entry.getKey();
+	        }
+	    }
+		return -1;
+	}
 	
 	String getText() {
 		return text;
@@ -199,6 +245,7 @@ enum ListKey{
             map.put(d.key,d.text);
         }
     }
+	
 
 	public static ListKey valueOf(int ordinal) {
 		if (ordinal < 0 || ordinal >= values().length) {
@@ -231,7 +278,7 @@ class ListCommand implements Command{
 			switch(listKey) {
 				case DATE:
 					dateKey(map);
-					DataManager dateManager = new DataManager();
+					DataManager.solveData(logLine);
 					break;
 				case LOG:
 					logKey(map);
@@ -247,15 +294,11 @@ class ListCommand implements Command{
 					break;
 				}
 			}
+//			Iterator<String> it = logLine.iterator();
+//	    	while(it.hasNext()) {
+//	    		System.out.println(it.next());
+//	    	}
 		}
-//		Set<String> keySet = map.keySet();
-//		Iterator<String> it =keySet.iterator();
-//		while(it.hasNext()) {
-//			String key = it.next();
-//			if(key.matches("date")) {
-//				
-//			}
-//		}
 
 	
 	private void provinceKey(Map<String, List<String>> map) {
@@ -472,14 +515,14 @@ class TxtTool {
 
 //责任链模式处理日志文件
 abstract class MyHandler{
-	public abstract boolean regFit();
+	public abstract boolean regFit(String string);
 	public abstract void handle();
 	protected MyHandler nextHandler;
-	public final void handleRequest() {
+	public final void handleRequest(String string) {
 		//如果不符合我的正则表达式，传递给下一个handler
-		if(!regFit()) {
+		if(!regFit(string)) {
 			if(nextHandler != null) {
-				nextHandler.handleRequest();
+				nextHandler.handleRequest(string);
 			}
 		}
 		else {
@@ -490,42 +533,69 @@ abstract class MyHandler{
 
 //新增感染患者
 class AddipHandler extends MyHandler{
-	private Pattern reg;
+	private String reg = "^.*\\s新增\\s感染患者\\s.*$";
+	private String province;
+	private int num;
+	
+	public List<int[]> result;
+	public AddipHandler(List<int[]> result) {
+		this.result = result;
+	}
+
 	@Override
-	public boolean regFit() {
-		// TODO Auto-generated method stub
+	public boolean regFit(String string) {
+		if(string.matches(reg)) {
+			String[] splitString = string.split("\\s");
+			province = splitString[0];
+			splitString = splitString[3].split("人");
+			num = Integer.valueOf(splitString[0]);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void handle() {
-		// TODO Auto-generated method stub
-		
+		int index = ProvinceValue.keyOfProvince(province);
+		 result.get(index)[1] += num;
 	}
 }
 
 //新增疑似患者
 class AddSpHandler extends MyHandler{
-	private Pattern reg;
+	private String reg = "^.*\\s新增\\s疑似患者\\s.*$";
+	private String province;
+	private int num;
+	
+	public List<int[]> result;
+	public AddSpHandler(List<int[]> result) {
+		this.result = result;
+	}
 	@Override
-	public boolean regFit() {
-		// TODO Auto-generated method stub
+	public boolean regFit(String string) {
+		if(string.matches(reg)) {
+			String[] splitString = string.split("\\s");
+			province = splitString[0];
+			splitString = splitString[3].split("人");
+			num = Integer.valueOf(splitString[0]);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void handle() {
-		// TODO Auto-generated method stub
-		
-	}
+		int index = ProvinceValue.keyOfProvince(province);
+		 result.get(index)[2] += num;
+		}
 }
 
 //患者治愈
 class CureHandler extends MyHandler{
-	private Pattern reg;
+	private String reg;
 	@Override
-	public boolean regFit() {
-		// TODO Auto-generated method stub
+	public boolean regFit(String string) {
+		if(string.matches(reg))return true;
 		return false;
 	}
 
@@ -538,10 +608,10 @@ class CureHandler extends MyHandler{
 
 //感染患者流入
 class SwapipHandler extends MyHandler{
-	private Pattern reg;
+	private String reg;
 	@Override
-	public boolean regFit() {
-		// TODO Auto-generated method stub
+	public boolean regFit(String string) {
+		if(string.matches(reg))return true;
 		return false;
 	}
 
@@ -554,26 +624,25 @@ class SwapipHandler extends MyHandler{
 
 //疑似患者流入
 class SwapSpHandler extends MyHandler{
-	private Pattern reg;
+	private String reg;
 	@Override
-	public boolean regFit() {
-		// TODO Auto-generated method stub
+	public boolean regFit(String string) {
+		if(string.matches(reg))return true;
 		return false;
 	}
 
 	@Override
 	public void handle() {
-		// TODO Auto-generated method stub
 		
 	}
 }
 
 //患者死亡
 class DeathHandler extends MyHandler{
-	private Pattern reg;
+	private String reg;
 	@Override
-	public boolean regFit() {
-		// TODO Auto-generated method stub
+	public boolean regFit(String string) {
+		if(string.matches(reg))return true;
 		return false;
 	}
 
@@ -586,26 +655,40 @@ class DeathHandler extends MyHandler{
 
 //疑似确诊感染患者
 class ChangeHandler extends MyHandler{
-	private Pattern reg;
+	private String reg = "^.*\\s疑似患者\\s确认感染\\s.*$";
+	private String province;
+	private int num;
+	
+	public List<int[]> result;
+	public ChangeHandler(List<int[]> result) {
+		this.result = result;
+	}
 	@Override
-	public boolean regFit() {
-		// TODO Auto-generated method stub
+	public boolean regFit(String string) {
+		if(string.matches(reg)) {
+			String[] splitString = string.split("\\s");
+			province = splitString[0];
+			splitString = splitString[3].split("人");
+			num = Integer.valueOf(splitString[0]);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public void handle() {
-		// TODO Auto-generated method stub
-		
+		int index = ProvinceValue.keyOfProvince(province);
+		 result.get(index)[1] += num;
+		 result.get(index)[2] -= num;
 	}
 }
 
 //排除疑似患者
 class ExcludeHandler extends MyHandler{
-	private Pattern reg;
+	private String reg;
 	@Override
-	public boolean regFit() {
-		// TODO Auto-generated method stub
+	public boolean regFit(String string) {
+		if(string.matches(reg))return true;
 		return false;
 	}
 

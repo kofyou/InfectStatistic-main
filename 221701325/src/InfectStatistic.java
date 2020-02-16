@@ -15,7 +15,9 @@ import java.util.Map;
  */
 class InfectStatistic {
     public static void main(String[] args) {
-    	String[] test = {"list","-date","2020-01-23","-log",
+    	String[] test = {"list","-date"
+    			,"2020-01-22"
+    			,"-log",
     			"C:/Users/jhuy/Documents/GitHub/InfectStatistic-main/221701325/log",
     			//"-province","福建","新疆",
     			//"-type","ip","sp",

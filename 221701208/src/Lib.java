@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -22,21 +24,15 @@ public class Lib {
         fileName = outLocate.substring(divideIndex+1,outLocate.length());
         File folder = new File(filePath);
         if (!folder.exists() && !folder.isDirectory()) {  //文件夹路径不存在
-            System.out.println("文件夹路径不存在，创建路径:" + filePath);
-            folder.mkdirs();
-        } else {
-            System.out.println("文件夹路径存在:" + filePath);
+            folder.mkdirs();//创建路径
         }
         File file = new File(filePath + fileName); // 如果文件不存在就创建
-        if (!file.exists()) {
-            System.out.println("文件不存在，创建文件:" + filePath + fileName);
+        if (!file.exists()) {//文件不存在，创建文件
             try {
                 file.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            System.out.println("文件已存在，文件为:" + filePath + fileName);
         }
     }
 
@@ -56,6 +52,26 @@ public class Lib {
 
 
 
+    public static int getNumber(String str){
+        int number=0;
+        char[] strNumber=str.toCharArray();
+        int index;
+        for(index=0;index<strNumber.length;index++){
+           if( !(strNumber[index]>='0' && strNumber[index]<='9') )
+               break;
+        }
+        String realNumber = str.substring(0,index);
+        number = Integer.valueOf(realNumber);
+        return  number;
+    }
+
+
+    public static void setDate(InfectStatistic statistic){
+        Date d = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String dateNowStr = sdf.format(d);
+        statistic.strDate = dateNowStr;
+    }
 
 
 }

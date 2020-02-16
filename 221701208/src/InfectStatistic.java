@@ -173,7 +173,8 @@ class InfectStatistic {
      * @param result 结果集
      */
     void countDeadAndCure(String[] info,Map<String,Record> result){
-        int number = Integer.valueOf(info[info.length-1].substring(0,info[info.length-1].length()-1));//获得人数
+        int number = Lib.getNumber(info[info.length-1].substring(0,info[info.length-1].length()-1));//获得人数
+
         String province = info[0];
         if(!result.containsKey(province)){ //result 中还未出现过这个省的记录
             Record newRecord = new Record();
@@ -212,7 +213,10 @@ class InfectStatistic {
     void countIpAndSp(String[] info,Map<String,Record> result){
         String tmp = info[info.length-1];
         String strNumber=tmp.substring(0,tmp.length()-1);
-        int number =  Integer.valueOf(strNumber);//获得人数
+
+        //int number =  Integer.valueOf(strNumber);//获得人数
+        int number = Lib.getNumber(strNumber);
+
         String province = info[0];
         String ip="感染患者",sp="疑似患者";
         if(info[1].equals("新增") && info[2].equals(ip)){//新增感染
@@ -257,7 +261,6 @@ class InfectStatistic {
                 result.put(province,aRecord);
             }
 
-
         }
 
         else if(info[2].equals("确诊感染")){
@@ -279,7 +282,7 @@ class InfectStatistic {
      * @param result 结果集
      */
     void countMovedIpAndSp(String[] info,Map<String,Record> result){
-        int number = Integer.valueOf(info[info.length-1].substring(0,info[info.length-1].length()-1));//获得人数
+        int number = Lib.getNumber(info[info.length-1].substring(0,info[info.length-1].length()-1));//获得人数
         String sourceProvince = info[0];
         String aimProvince = info[3];
         String ip = "感染患者",sp = "疑似患者";
@@ -313,8 +316,6 @@ class InfectStatistic {
             Record aRecord = result.get(sourceProvince);//减去数据
             aRecord.countSuspected(-number);
             result.put(sourceProvince,aRecord);
-
-
         }
         else {
             System.out.print("此纪录无法处理： ");
@@ -437,16 +438,6 @@ class InfectStatistic {
 
 
     void partProvinceAllType(Record totalCountryNumber , Vector<String> province , FileOutputStream outFile){
-        /* String record = "全国 " + Lib.allType[0] + totalCountryNumber.getInfectionNumber() + Lib.unit +
-                Lib.allType[1] + totalCountryNumber.getSuspectedNumber() + Lib.unit +
-                Lib.allType[2] + totalCountryNumber.getCureNumber() + Lib.unit +
-                Lib.allType[3] + totalCountryNumber.getDeadNumber() + Lib.unit + "\n";
-        try {
-            outFile.write(record.getBytes());//写入全国数据
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
         result.put("全国",totalCountryNumber);
         String record;
 
@@ -473,21 +464,6 @@ class InfectStatistic {
     }
 
     void partProvincePartType(Record totalCountryNumber , Vector<String> province , FileOutputStream outFile,Vector<String> type){
-
-         /*String record = "全国 ";
-        for(String i : Lib.allType){
-            for(String j : type){
-                if(i.equals(j)){
-                    record += i + totalCountryNumber.getNumber(j) + Lib.unit;
-                }
-            }
-        }
-        record += "\n";
-        try {
-            outFile.write(record.getBytes());//写入全国数据
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         result.put("全国",totalCountryNumber);
         String record;
         for(String item : province){
@@ -555,11 +531,12 @@ class InfectStatistic {
 
 
 
-    public static void main(String[] ags) {
-        String[] args = {"list","-log","E:/log/","-out","E:/out/output.txt","-date","2020-01-29","-type","cure","dead","ip","-province","全国","福建","河北"};
+    public static void main(String[] args) {
+       // String[] args = {"list","-log","E:/log/","-out","E:/out/output.txt","-date","2020-01-29","-type","cure","dead","ip","-province","全国","福建","河北"};
         InfectStatistic statistic = new InfectStatistic();
-        int index=1; //args[0]=list,不用处理
+        int index=1; //args[0]=list,只会出现一个命令，所以不用处理
         int startIndex,endIndex;
+        //......读取并设置参数......
         while(index < args.length){
             switch (args[index]){
                 case "-log" : statistic.setLogLocate(args[++index]);break;
@@ -586,24 +563,23 @@ class InfectStatistic {
                     index--;
                 }break;
 
-                default:System.out.println("参数错误");
+                default:System.out.println("命令参数错误");
             }
             index++;
         }
 
-        if(statistic.strDate == null){
-            Date d = new Date();
-            System.out.println(d);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String dateNowStr = sdf.format(d);
-            statistic.strDate = dateNowStr;
-
-        }
-
-        //....开始读入文件......
+        //....如果参数中没有日期则设为当前日期
+        if(statistic.strDate == null)
+            Lib.setDate(statistic);
+        //....开始读入文件列表......
         String[] fileList = statistic.getFileList(statistic.logLocate);//获取文件夹下的文件列表
-        statistic.statisticData(statistic.logLocate,statistic.strDate,fileList,statistic.result);//统计数据
-        statistic.saveResult(statistic.result,statistic.outLocate,args,statistic.province,statistic.type);//保存结果
+        //.....计数据............
+        statistic.statisticData(statistic.logLocate,statistic.strDate,fileList,statistic.result);
+        //......保存结果..........
+        statistic.saveResult(statistic.result,statistic.outLocate,args,statistic.province,statistic.type);
+
+
+
 
 
     }

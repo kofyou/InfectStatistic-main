@@ -9,3 +9,8 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+*.o
+*.dev
+*.layout
+*.win
+*.exe

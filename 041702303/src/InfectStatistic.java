@@ -338,11 +338,20 @@ public class infectStatistic {
 							File folder=new File(logString.trim());
 							//检测命令行type/province参数值的合法性
 							if(t.isValidParameterType()&&t.isValidParameterProvince()) {
-								if(folder.isDirectory()) {
-									System.out.println("get");
+								if((logString.matches("^[A-z]:\\\\(.+?\\\\)*$")||
+								(logString+"\\").matches("^[A-z]:\\\\(.+?\\\\)*$"))&&
+								outString.substring(0, outString.lastIndexOf(".")).matches("^[A-z]:\\\\(.+?\\\\)*$"))
+								{
+									if(folder.isDirectory()) {
+										System.out.println("get");
+									}
+									else {
+											System.out.println("不存在该文件夹");
+											infectStatistic.validCommandTips();
+									}
 								}
-								else {
-										System.out.println("路径非法，不存在该文件夹");
+								else{
+									System.out.println("文件/文件夹路径非法");
 										infectStatistic.validCommandTips();
 								}								
 							}

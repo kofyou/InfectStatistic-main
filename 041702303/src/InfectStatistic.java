@@ -40,11 +40,14 @@ public class infectStatistic {
 	String typeName[]= {"感染患者","疑似患者","治愈","死亡"};
 	//类型英文名
 	String enTypeName[]= {"ip","sp","cure","dead"};
-	
+	//改变的省份
+	int ChangeProvince[]=new int[34];
+
 	//构造函数
 	infectStatistic(Date date,String type[],String province[],String out){
 		StatisticsNumber=new int[provinceNumber][typeNumber];
 		for(int i=0;i<provinceNumber;i++) {
+			ChangeProvince[i]=-1;
 			for(int j=0;j<typeNumber;j++) {
 				StatisticsNumber[i][j]=0;
 			}
@@ -84,6 +87,46 @@ public class infectStatistic {
 		return (File[]) fileList.toArray(new File[fileList.size()]);
 	}
 	
+	//获取参数输出的省份下标
+	public int[] getOutProvinceIndex() {
+		int province[];
+		if(parameterProvince.length!=0) {
+			province= new int[provinceNumber];
+			for(int i=0;i<provinceNumber;i++) {
+				province[i]=-1;
+			}
+			for(int i=0;i<parameterProvince.length;i++) {
+				if(parameterProvince[i].equals("全国")) {
+					continue;
+				}
+				province[getProvinceIndex(parameterProvince[i])]=1;
+			}
+		}
+		else {
+			province= ChangeProvince;
+		}
+		return province;
+	}
+	
+	//判断参数输出的类型下标
+	public  int[] getOutTypeIndex() {
+		int type[]= new int[typeNumber];
+		if(parameterType.length!=0) {
+			for(int i=0;i<typeNumber;i++) {
+				type[i]=-1;
+			}
+			for(int i=0;i<parameterType.length;i++) {
+				type[i]=getTypeIndex(parameterType[i]);
+			}
+		}
+		else {
+			for(int i=0;i<typeNumber;i++) {
+				type[i]=i;
+			}
+		}
+		return type;
+	}
+
 	//获取对应省份的下标
 	public int getProvinceIndex(String province) {
 		for(int i=0;i<provinceNumber;i++) {
@@ -229,9 +272,9 @@ public class infectStatistic {
 	public static void validCommandTips(){
 		System.out.println("reference:");
 		System.out.println("	list<required and first>:");
-		System.out.println("		-date<required>		must be valid date and lower now");
-		System.out.println("		-log<required>		must be valid folder path");
-		System.out.println("		-out<required>		must be valid file path");
+		System.out.println("		-date<required>		must be valid and sole date and lower now");
+		System.out.println("		-log<required>		must be valid nd sole folder path");
+		System.out.println("		-out<required>		must be valid nd sole file path");
 		System.out.println("		-type<optional>		must be ip/sp/cure/dead");
 		System.out.print("		-province<optional>	must be Chinese province(北京、上海...)/country");
 	}
@@ -285,12 +328,21 @@ public class infectStatistic {
 					if((!parameterTreeMap.containsKey(i+1))&&i+1!=args.length) {
 						if(parameterTreeMap.get(i).equals("-date")) {
 							dateString=args[i+1];
+							if(parameterTreeMap.containsKey(i+2)) {
+								invalidCommand=1;
+							}
 						}
 						else if(parameterTreeMap.get(i).equals("-log")) {
 							logString=args[i+1];
+							if(parameterTreeMap.containsKey(i+2)) {
+								invalidCommand=1;
+							}
 						}
 						else if(parameterTreeMap.get(i).equals("-out")) {
 							outString=args[i+1];
+							if(parameterTreeMap.containsKey(i+2)) {
+								invalidCommand=1;
+							}
 						}
 						else if(parameterTreeMap.get(i).equals("-province")) {
 							if(i<maxParameterIndex) {
@@ -324,7 +376,7 @@ public class infectStatistic {
 				SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 				String type[]= {};
 				String province[]= {};
-				//检测命令行参数值为空,0--非空 1--空
+				//检测命令行参数值为空/重复,0--非空 1--空/重复
 				if(invalidCommand==0) {
 					//检测date/log/out参数必须存在且命令行参数唯一性
 					if(parameterExist[1]==1&&parameterExist[2]==1&&
@@ -371,7 +423,7 @@ public class infectStatistic {
 					}
 				}
 				else {
-					System.out.println("date/log/out/type/province参数值为空");
+					System.out.println("date/log/out/type/province参数值为空/重复");
 					infectStatistic.validCommandTips();
 				}
 			}

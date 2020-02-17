@@ -138,6 +138,11 @@ public class InfectStatistic {
 			{
 				increamentState(i);
 			}
+			
+			else if(fileContent.get(i + 2).equals("流入")) //判别为流入的情况
+			{
+				flowState(i);
+			}
 		}
 	}
 
@@ -146,33 +151,65 @@ public class InfectStatistic {
 	 * 该方法统计情况为新增的日志数据
 	 */
 	{
-		String provin = fileContent.get(count);
+		String provin = fileContent.get(count);  //获取这条信息关联的省份
 		String type = fileContent.get(count + 2); //感染患者或者疑似患者
 		String str = fileContent.get(count + 3); ;
 		str = str.substring(0 , str.length() - 1); //截取人数
 		
-		if(!statistic.containsKey(provin + type)) 
+		if(!statistic.containsKey(provin + type)) //检查哈希表中是否已经存在该省份的数据了
 		{
-			initStatistic(count);
+			initStatistic(provin);
 		}
 		
 		//新增情况举例:福建 新增 感染患者 23人
 		
 		int sum = Integer.parseInt(str) + Integer.parseInt(statistic.get(provin + type));
+		
 		statistic.put(provin + type , String.valueOf(sum));
-
-		System.out.println(statistic.get(provin + type));	
+	
 	}
 	
-	public static void initStatistic(int count)
+	public static void flowState(int count)
+	/*
+	 * 该方法统计情况为流入的日志数据
+	 */
+	{
+		String provin2 = fileContent.get(count);  //获取有患者流出的省份
+		String provin1 = fileContent.get(count + 3);  //获取有患者流入的省份
+		String type = fileContent.get(count + 1); //感染患者或者疑似患者
+		String str = fileContent.get(count + 4);
+		str = str.substring(0 , str.length() - 1); //截取人数
+		
+		if(!statistic.containsKey(provin1 + type))  //检查哈希表中是否已经存在该省份的数据了
+		{
+			initStatistic(provin1);
+		}
+		
+		if(!statistic.containsKey(provin2 + type)) 
+		{
+			initStatistic(provin2);
+		}
+		
+		
+		int sum1 = Integer.parseInt(str) + Integer.parseInt(statistic.get(provin1 + type)); //统计有患者流入的省份
+		int sum2 = Integer.parseInt(statistic.get(provin2 + type)) - Integer.parseInt(str); //统计有患者流出的省份
+		
+		statistic.put(provin1 + type , String.valueOf(sum1));
+		statistic.put(provin2 + type , String.valueOf(sum2));
+
+		System.out.println(statistic.get(provin1 + type));	
+		System.out.println(statistic.get(provin2 + type));	
+	}
+	
+	public static void initStatistic(String provin)
 	/*
 	 * 该方法用于初始化统计数据的哈希表，如果日志中出现了该省的信息，则进行初始化
 	 */
 	{
-		statistic.put(fileContent.get(count) + "感染患者", "0");  //如果哈希表中并没有存放该省份，就初始化该省份
-		statistic.put(fileContent.get(count) + "疑似患者", "0");
-		statistic.put(fileContent.get(count) + "治愈", "0");
-		statistic.put(fileContent.get(count) + "死亡", "0");
+		statistic.put(provin + "感染患者", "0");  //如果哈希表中并没有存放该省份，就初始化该省份
+		statistic.put(provin + "疑似患者", "0");
+		statistic.put(provin + "治愈", "0");
+		statistic.put(provin + "死亡", "0");
 	}
 	
 	public static void readOutputPath (String str[])

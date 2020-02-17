@@ -50,6 +50,8 @@ class InfectStatistic {
                 this.cure = cure;
                 this.dead = dead;
             }
+            Province(){		
+    		}
 /********** 功能：打印一条统计疫情信息 输入参数：无 返回值：信息字符串***************/
             String printline() {
             return(provinceName+" 感染患者"+ip+"人 疑似患者"+sp+"人 治愈"+cure+"人 死亡"+dead+"人");
@@ -379,7 +381,49 @@ static Province[] sortline(Province[] wannasort,int num) {
     } 
     return result;
 }
-
+/************** 功能：拣选省疫情信息  输入参数：字符串省的名称,要搜索的省的个数  返回值：筛选后的信息数组************** */
+static Province[] selectMes(String[] pro) {
+	int flag=0;//是否找到已查的省
+    int j=0;//控制筛选的信息索引
+    int i=0;//控制所有信息的索引
+    Province[] aftersel=new Province[selcount];//筛选之后的信息数组 
+    for(i=0;i<selcount;i++) {
+    	aftersel[i]=new Province();
+    }
+    i=0;
+    while(j<selcount) {
+    while(i<count) {
+    	flag=0;
+    	if(result[i].provinceName.equals(pro[j])) {
+    		aftersel[j]=result[i];
+    		j++;
+    		i=-1;//从头开始循环查找
+    		flag=1;
+    		if(j==selcount) {
+    			break;
+    		}
+    	}
+    	else if(i==count-1&&flag==0) {//循环了一圈没有相应信息
+    		if(pro[j].equals("全国")) {//全国情况
+    			aftersel[j]=calAll(result,count);
+    			j++;
+    			flag=1;	    			
+    		}
+    		else {
+	    		aftersel[j]=new Province(pro[j],0,0,0,0);
+	    		j++;
+	    		flag=1;		    		
+    		}
+    		if(j==selcount) {
+        			break;
+        		}
+    	}
+    	i++;
+    }
+    i=0;
+    }
+    return aftersel;
+}
 
 }
 

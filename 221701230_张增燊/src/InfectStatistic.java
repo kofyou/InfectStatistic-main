@@ -238,7 +238,7 @@ public class InfectStatistic {
 			}
 		}
 	}
-	
+	//从输入的province参数找到对应的省份
 	public static void whatIn(int x,String province)
 	{
 		String[] strarray=province.split(" ");
@@ -257,13 +257,34 @@ public class InfectStatistic {
 		}while(find<strarray.length);
 		
 	}
-	
+	//根据输入的date参数找到对应的日期
 	public static int findDate(String date)
 	{
-		for(int i=0;i<libs.length;i++)
+		if(date.contentEquals(" ")==true)
+			return libs.length-1;
+		else if(date.compareTo(libs[libs.length-1].getDate())>0)
 		{
-			if(date.contentEquals(libs[i].getDate())==true)
-				return i;
+			return -1;
+		}
+		else if(date.compareTo(libs[0].getDate())<0)
+		{
+			return -1;
+		}
+		else
+		{
+			for(int i=0;i<libs.length;i++)
+			{
+				if(date.contentEquals(libs[i].getDate())==true)
+					return i;
+				else if(i+1<libs.length)
+				{
+					if(date.compareTo(libs[i].getDate())>0&&
+							date.compareTo(libs[i+1].getDate())<0)
+					{
+						return i;
+					}
+				}
+			}
 		}
 		return -1;
 	}
@@ -366,6 +387,12 @@ public class InfectStatistic {
 	            FileWriter fw = new FileWriter(writename1,true);
 	            
 	            int x=findDate(date);
+	            if(x==-1)
+	            {
+	            	fw.append("日期超出范围\n");
+	            	fw.close();
+	            	return;
+	            }
 	    		if(province.contentEquals(" ")==true)
 	    		{
 	    			libs[x].provinces.get(0).setIsinlog();
@@ -435,7 +462,7 @@ public class InfectStatistic {
 		System.out.print("输入out\n");
 		String out="E:\\result";
 		System.out.print("输入date\n");
-		String date="2020-01-23";
+		String date=" ";
 		System.out.print("输入type\n");
 		String type=" ";
 		System.out.print("输入province\n");

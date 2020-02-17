@@ -137,7 +137,7 @@ class InfectStatistic {
 			frompath=args[i];
 	    }    
 	    
-/************功能：比较日期大小 输入参数：两个需要比较的日期字符串 返回值：前<后返回true，前>后返回false*****************************/
+/******************功能：比较日期大小 输入参数：两个需要比较的日期字符串 返回值：前<后返回true，前>后返回false*****************************/
 		    static boolean isBefore(String date1,String date2) {
 		    	if(date1.compareTo(date2)>=0) {
 		    		return false;
@@ -146,18 +146,15 @@ class InfectStatistic {
 		    		return true;
 		    	}
 		    }
-		    
-     	//处理日志文件
-     	public void deal()
-     	{	    
-  
-     	    }
-     	//生成output.txt文件
-     	public void output()
-     	{
-
-     	}
-
-     	//处理"-date"命令
+/*******************功能：获取最新日志的时间  输入参数：无 返回值：日期字符串**************************************/
+		    static String getLastdate() {
+		    	String date="";
+		    	File file = new File(frompath);
+		    	String[] filename = file.list();//获取所有日志文件名    
+		    	date=filename[filename.length-1].substring(0,10);   
+		    	//System.out.print(date);
+		    	return date;
+   }
 
 }
+

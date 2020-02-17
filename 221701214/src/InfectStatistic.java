@@ -7,23 +7,37 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 public class Homework2 
 {
-	
+	public String[] allTypes = {"sp","ip","cure","dead"};
 	public String[] allType = {"感染患者","疑似患者","治愈","死亡患者"};
 	public String[] allProvinces = {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北"
 									,"河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏"
 									,"青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
 	public int[][] people = new int[32][4];//三十一个省份（加全国），四种类型
 	ArrayList<String> allLog = new ArrayList<String>();//存储所有的日志文件
-	
+	public int[] provinceFlag = new int[32];//根据参数-province确定输出内容
+	public int[] typeFlag = new int[4];//根据参数-type确定输出内容
+	String date = "";//根据参数date确定输出日期
+	String dateOrder = "";//全局变量存储-date指令
+	String provinceOrder = "";//全局变量存储-province指令
+	String typeOrder = "";//全局变量存储-type指令
 	
 	/*
 	 * 命令行处理
 	 */
 	public void orderHandle(String[] inputOrder) throws IOException
 	{
+		for(int j = 0;j < allType.length;j++)
+		{
+			typeFlag[j] = 0;
+		}
+		for(int j = 0;j < allProvinces.length;j++)
+		{
+			provinceFlag[j] = 0;
+		}
 		if(!(inputOrder[0].equals("list")))
 		{
 			System.out.println("命令行仅支持list");
@@ -33,33 +47,59 @@ public class Homework2
 		{
 			if(inputOrder[i].equals("-log"))//指定日志目录位置
 			{
-				allLog = queryFileNames(inputOrder[i+1]);
-				for(int j = 0;j < allLog.size();j++)
-				{
-					readLog(allLog.get(j));
-				}
+				allLog = queryFileNames(inputOrder[i + 1]);
 			}
 			else if(inputOrder[i].equals("-out"))//指定输出文件路径和文件名
 			{
-				writeOut(inputOrder[i+1]);
+				dateOrder = inputOrder[i+1];
 			}
 			else if(inputOrder[i].equals("-date"))//指定日志日期
 			{
-				
+				date = inputOrder[i+1] + ".log.txt";
 			}
 			else if(inputOrder[i].equals("-type"))//指定列出患者类型
 			{
-				
+				typeOrder = "get -type";
+				int k = i + 1;
+				while(k < inputOrder.length)
+				{
+					for(int j = 0;j < allType.length;j++)
+					{
+						if(inputOrder[k].equals(allTypes[j]))
+						{
+							typeFlag[j] = 1;
+						}
+					}
+					k++;
+				}
 			}
 			else if(inputOrder[i].equals("-province"))//指定列出的省
 			{
-				
+				provinceOrder = "get -province";
+				int k = i + 1;
+				while(k < inputOrder.length)
+				{
+					for(int j = 0;j < allProvinces.length;j++)
+					{
+						if(inputOrder[k].equals(allProvinces[j]))
+						{
+							provinceFlag[j] = 1;
+						}
+					}
+					k++;
+				}
 			}
 		}
-		for(int i = 0;i<allLog.size();i++)
+		for(int k = 0;k < allLog.size();k++)
 		{
-			readLog(allLog.get(i));
+			readLog(allLog.get(k));
+			String[] log = allLog.get(k).split("\\\\");
+			if(log[log.length - 1].equals(date))
+			{
+				break;
+			}
 		}
+		writeOut(dateOrder);
 	}
 	
 	/*
@@ -79,6 +119,24 @@ public class Homework2
 			}
 		}
 		return es;
+	}
+	
+	/*
+	 * 将指定日期后的日志文件移出ArrayList
+	 */
+	public void removeLog(String logDate)
+	{
+		int logNum = 0;
+		String logName = "";
+		logName = logDate + ".log.txt";
+		for(int i = 0 ;i < allLog.size();i++)
+		{
+			if(allLog.get(i).equals(logName))
+			{
+				List sublist = allLog.subList(i,allLog.size());
+		        allLog.removeAll(sublist);
+			}
+		}
 	}
 	
 	/*
@@ -382,18 +440,41 @@ public class Homework2
 	 */
 	public void writeOut(String filePath) throws IOException
 	{
+		if(typeOrder.equals(""))
+		{
+			for(int i = 0;i < allType.length;i++)
+			{
+				typeFlag[i] = 1;
+			}
+		}
+		if(provinceOrder.equals(""))
+		{
+			for(int i = 0;i < allProvinces.length;i++)
+			{
+				if(people[i][0] != 0 || people[i][1] != 0 || people[i][2] != 0 || people[i][3] != 0)
+				{
+					provinceFlag[i] = 1;
+				}
+			}
+		}
 	    FileWriter writer = null;
 	    try 
 	    {
 	        writer = new FileWriter(filePath);
 	        for(int i = 0;i < allProvinces.length;i++)
 	        {
-	        	writer.write(allProvinces[i] + " ");
-	        	for(int j = 0;j < allType.length;j++)
+	        	if(provinceFlag[i] == 1)
 	        	{
-	        		writer.write(allType[j] + people[i][j] + "人 ");
+	        		writer.write(allProvinces[i] + " ");
+		        	for(int j = 0;j < allType.length;j++)
+		        	{
+		        		if(typeFlag[j] == 1)
+		        		{
+			        		writer.write(allType[j] + people[i][j] + "人 ");
+		        		}
+		        	}
+		        	writer.write("\n");
 	        	}
-	        	writer.write("\n");
 	        }
 	        writer.write("// 该文档并非真实数据，仅供测试使用");
 	    } 

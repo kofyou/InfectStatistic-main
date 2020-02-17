@@ -66,7 +66,7 @@ class InfectStatistic {
         }
 
         File logDir = new File(dirPath);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;
         if(dateIndex >= 0) {
             try {
@@ -94,7 +94,7 @@ class InfectStatistic {
         try {
             BufferedReader reader = null;
             String line;
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             for (File f : dir.listFiles()) {//将目录下所有的文件名加入fileList列表用于排序
                 fileList.add(f.getName().split("\\.")[0]);
             }
@@ -104,9 +104,6 @@ class InfectStatistic {
             if (date != null && date.compareTo(lastDate) > 0) {
                 System.out.println("抱歉，日期超出范围");
                 return;
-            }
-            for (String f : fileList) {
-                System.out.println(f);
             }
             for (String fileDateString : fileList) {
                 File file = new File(dir.getPath() + "/" + fileDateString + ".log.txt");

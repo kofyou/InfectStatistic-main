@@ -111,7 +111,7 @@ public class InfectStatistic {
 	        	file.createNewFile();
 	        }
             
-            FileWriter fileWritter = new FileWriter(file,true);
+            FileWriter fileWritter = new FileWriter(file);
             for(int i=0;i <fileContent.size();i++)
 			{
             	fileWritter.write(fileContent.get(i));
@@ -143,6 +143,17 @@ public class InfectStatistic {
 			{
 				flowState(i);
 			}
+			
+			else if(fileContent.get(i + 1).equals("死亡") || fileContent.get(i + 1).equals("治愈")) //判别为死亡或者治愈的情况
+			{
+				deadCureState(i);
+			}
+			
+			else if(fileContent.get(i + 2).equals("确诊感染") || fileContent.get(i + 1).equals("排除")) //判别为确诊感染或排除的情况
+			{
+				confirmState(i);
+			}
+			
 		}
 	}
 
@@ -197,8 +208,59 @@ public class InfectStatistic {
 		statistic.put(provin1 + type , String.valueOf(sum1));
 		statistic.put(provin2 + type , String.valueOf(sum2));
 
-		System.out.println(statistic.get(provin1 + type));	
-		System.out.println(statistic.get(provin2 + type));	
+	}
+	
+	public static void deadCureState(int count)
+	/*
+	 * 该方法统计情况为死亡或者治愈的日志数据
+	 */
+	{
+		String provin = fileContent.get(count);  //获取数据相关的省份
+		String type = fileContent.get(count + 1); //获取是治愈了还是死亡了
+		String str = fileContent.get(count + 2);
+		str = str.substring(0 , str.length() - 1); //截取人数
+		
+		if(!statistic.containsKey(provin + type))  //检查哈希表中是否已经存在该省份的数据了
+		{
+			initStatistic(provin);
+		}
+				
+		int sum = Integer.parseInt(str) + Integer.parseInt(statistic.get(provin + type));			
+		int infect = Integer.parseInt(statistic.get(provin + "感染患者")) - Integer.parseInt(str);  //无论是治愈了还是死亡了，感染患者现存数都要减去
+		
+		statistic.put(provin + type , String.valueOf(sum));
+		statistic.put(provin + "感染患者" , String.valueOf(infect));
+
+	}
+	
+	public static void confirmState(int count)
+	/*
+	 * 该方法统计情况为确诊感染的日志数据
+	 */
+	{
+		String provin = fileContent.get(count);  //获取数据相关的省份
+		String str = fileContent.get(count + 3);
+		str = str.substring(0 , str.length() - 1); //截取人数
+		
+		if(!statistic.containsKey(provin + "疑似患者"))  //检查哈希表中是否已经存在该省份的数据了
+		{
+			initStatistic(provin);
+		}
+		
+		int infect = 0;
+		int unknownInfect = 0;
+		
+		if(fileContent.get(count + 2).equals("确诊感染")) //如果是确认感染，那感染患者数量要加上
+		{
+			infect = Integer.parseInt(statistic.get(provin + "感染患者")) + Integer.parseInt(str);
+			statistic.put(provin + "感染患者" , String.valueOf(infect));
+		}
+		
+
+		unknownInfect = Integer.parseInt(statistic.get(provin + "疑似患者")) - Integer.parseInt(str);  //无论是排除还是确诊，疑似患者现存数都要减去
+		
+		statistic.put(provin + "疑似患者" , String.valueOf(unknownInfect));
+
 	}
 	
 	public static void initStatistic(String provin)
@@ -333,6 +395,9 @@ public class InfectStatistic {
     	}
 		
 		readDirect();
+		for (String key : statistic.keySet()) {  //通过foreach方法来遍历
+		       System.out.println("key= "+ key + " and value= " + statistic.get(key));
+		      }
     	return;
     }
 

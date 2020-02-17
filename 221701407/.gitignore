@@ -18,3 +18,7 @@
 
 #忽略result文件夹
 /result/
+/bin/
+
+#忽略test文件
+/src/InfectStatisticTest.java

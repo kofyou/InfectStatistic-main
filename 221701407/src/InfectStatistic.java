@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -104,6 +103,7 @@ class InfectStatistic {
     public static class LogControl {
     	
     	public static ArrayList<String> SortLog(String date,String log,ArrayList<String> provin) throws IOException, ParseException {
+    		
     		File file=new File(log);
     		File[] tempList=file.listFiles();
     		ArrayList<String> FileName=new ArrayList<String>();//存储文件名
@@ -112,6 +112,7 @@ class InfectStatistic {
     		ArrayList<String> Provinces=new ArrayList<String>();//log中每一行的省份
     		ArrayList<String> OutputText=new ArrayList<String>();//最终所有省份（包含全国）统计结果
     		String province="";
+    		
     		for(int i=0;i<tempList.length;i++) {
     			if(tempList[i].isFile()) {
     				FileName.add(tempList[i].toString());
@@ -122,7 +123,8 @@ class InfectStatistic {
     				SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd");
     				//FileName=..\log\2020-01-22.log.txt
 					String FileNameDate=FileName.get(i).toString().split("\\\\")[2].split("\\.")[0];
-					if(date.equals("")) {
+    				//String FileNameDate=FileName.get(i).toString().split("\\\\")[8].split("\\.")[0];
+    				if(date.equals("")) {
 						date=df.format(new Date());
 					}
 					long date1=df.parse(date).getTime();
@@ -333,8 +335,11 @@ class InfectStatistic {
     		ArrayList<String> type=command.type_argument;
     		
     		LogControl logcontrol=new LogControl();
-    		ArrayList<String> OutputText=logcontrol.SortLog(date,log,province);
-    		logcontrol.OutLog(log, out, date, province, type,OutputText);
+    		if(log.equals("")||out.equals("")) {
+    		}else {
+        		ArrayList<String> OutputText=logcontrol.SortLog(date,log,province);
+        		logcontrol.OutLog(log, out, date, province, type,OutputText);
+    		}
     			
     	}
 

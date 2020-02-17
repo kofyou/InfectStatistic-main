@@ -62,7 +62,34 @@ class InfectStatistic {
     		return;
     	}
 	}
-
+		static class cmdArgs {//获取使用命令
+	    String[] args;
+	    
+	    	cmdArgs(String[] passargs) {
+	    		args=passargs;
+	    	}
+	    	/*
+	    	     功能：判断是否存在某命令
+	    	     输入参数：需要查验的命令
+	    	     返回值：该命令的索引int值，如果没有该命令则返回-1
+	    	 */
+	    	int hasParam(String key) {    	
+	    		for(int i=0;i<args.length;i++) {
+	    			if(args[i].equals(key)) {
+	    				return i;
+	    			}
+	    		}
+	    		return -1;
+	    	}    
+		}
+		/*
+          	功能：判断日期的合法性
+          	输入参数：最新更新日志的时间，待验证日期字符串
+          	返回值：true,false
+         */
+		static boolean isCorrectdate(String lastdate,String date) {
+			return true;
+		}
      	//处理日志文件
      	public void deal()
      	{	    

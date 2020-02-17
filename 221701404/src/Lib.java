@@ -94,8 +94,9 @@ public class Lib {
         list.add("天津");
         list.add("上海");
         list.add("陕西");
-        list.add("四川");  
+        list.add("四川");
 
+		System.out.println(sortByAlphabet(list));
 	}
 
 	/**
@@ -166,6 +167,28 @@ public class Lib {
 			argsMap.put("province", province);
 			return argsMap;
 		}
+	}
+
+	/**
+	 * 根据字母表给出现的城市排序
+	 * @param cities
+	 * @return listNewNew
+	 */
+	public static List<String> sortByAlphabet(List<String> cities) {
+
+		List<String> listNew = new ArrayList<String>();
+		List<String> listNewNew = new ArrayList<String>();
+		for (String stringOld : cities) {
+			listNew.add(stringOld);
+		}
+
+		Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
+		Collections.sort(listNew, cmp);
+		for(String stringNew : listNew) {
+			listNewNew.add(stringNew);
+		}
+		return listNewNew;
+
 	}
 
 	/**

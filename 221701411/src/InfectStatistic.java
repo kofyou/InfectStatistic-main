@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.text.Collator;
 import java.util.Arrays;
 
-import InfectStatistic.test.line;
+//import InfectStatistic.test.line;
 /**
  * InfectStatistic
  * TODO
@@ -23,14 +23,14 @@ class InfectStatistic {
     static int count=0;//已有所有数据的条数
 	static int selcount=0;//所筛选指定省份的个数
 	static int seltypecount=0;////所筛选指定类型的个数
-	static line[] all=new line[34];//初始化结果
-	static line[] result=new line[34];//总的排序后结果
-    static line[] proresult=new line[34];//筛选省份后的排序后结果
+	static Province[] all=new Province[34];//初始化结果
+	static Province[] result=new Province[34];//总的排序后结果
+    static Province[] proresult=new Province[34];//筛选省份后的排序后结果
     static String topath=new String();//输出文档路径
     static String frompath=new String();//log文件路径
     static int index=0;//控制是否输入日期比日志最早一天还早，若是则值为-2
     static int isWrong=0;//输入日期是否出错（输入日期比最新的日志还晚）
-     	public class Province {
+     	static class Province {
 
             /** 省份名称 **/
             String provinceName; 
@@ -96,11 +96,7 @@ class InfectStatistic {
 	    	int i=pos+1;//获得路径所在索引   
 			frompath=args[i];
 	    } 
-		/*
-	      	功能：检验日志文件所在文档的路径的正确性
-	      	输入参数：String日志文件的路径
-	     	返回值：boolean
-	    */
+/************功能：检验日志文件所在文档的路径的正确性 输入参数：String日志文件的路径 返回值：boolean********************/
 	    static boolean isCorformpath(String path) {
 	    	//System.out.println(path.matches("^[A-z]:\\\\(.+?\\\\)*$"));
 	    	if(path.matches("^[A-z]:\\\\(.+?\\\\)*$")){//格式正确
@@ -130,12 +126,7 @@ class InfectStatistic {
 	    	int i=pos+1;//获得路径所在索引   
 			topath=args[i];
 			//System.out.print(topath);
-	    }    
-/****************** 功能：获取日志文档位置 输入参数：命令行String数组，-log命令所在索引 返回值：无*****************************/
-	    static void getFrompath(String[] args,int pos) {
-	    	int i=pos+1;//获得路径所在索引   
-			frompath=args[i];
-	    }    
+	    }     
 	    
 /******************功能：比较日期大小 输入参数：两个需要比较的日期字符串 返回值：前<后返回true，前>后返回false*****************************/
 		    static boolean isBefore(String date1,String date2) {
@@ -181,6 +172,175 @@ class InfectStatistic {
 		    	}    	
 		    	return -1;   	
 		    }
+/*************** 功能：读取log文件  输入参数：指定的输出日期，是否指定输出日期 返回值：无"d:/log/"**********************/
+		    static void readLog(String date,boolean hasDate) throws IOException {
+		    	//System.out.print("1");
+		    	if(hasDate==true) {    			
+		    		if(isCorrectdate(getLastdate(),date)) {//检验输入日期正确性
+		    			int i=0;//控制日志读取索引
+		    			File file = new File(frompath);
+		    			String[] filename = file.list();//获取所有日志文件名     	
+		    			index=findPot(date);
+		    			if(index==-2) {//比最新的日期还早
+		    				File f = new File(topath);
+		    		        BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
+		    		        output.write("无");  
+		    		        output.close();
+		    			}
+		    			else {
+			    			while(i<=index) { 
+			    				//System.out.print(findPot(date));			
+								FileInputStream fs=new FileInputStream(frompath+filename[i]);
+							    InputStreamReader is=new InputStreamReader(fs,"UTF-8");
+							    BufferedReader br=new BufferedReader(is);
+							    String s="";				    
+							    while((s=br.readLine())!=null){//一行一行读
+							    	if(s.charAt(0)=='/'&&s.charAt(1)=='/') {//排除注释掉的内容
+							    		continue;
+							    	}
+							    	else {
+							    		String[] sp =s.split(" ");//分隔开的字符串
+							    		statistics(sp,all);
+							    	}
+							    	//System.out.print(s+"\n");
+					    	    }
+							    br.close();
+							    i++;
+					    	}
+		    			}
+		    		}
+		    		else {//日期不正确
+		    			isWrong=1;
+		    			System.out.print("输入的日期超出范围，请重新命令！");
+		    		}
+		    	}
+		    	else {//没输入指定日期
+		    		int i=0;//控制日志读取索引
+					File file = new File(frompath);
+					String[] filename = file.list();//获取所有日志文件名  
+					while(i<filename.length) {   			
+						FileInputStream fs=new FileInputStream(frompath+filename[i]);
+					    InputStreamReader is=new InputStreamReader(fs,"UTF-8");
+					    BufferedReader br=new BufferedReader(is);
+					    String s="";				    
+					    while((s=br.readLine())!=null){//一行一行读
+					    	if(s.charAt(0)=='/'&&s.charAt(1)=='/') {//排除注释掉的内容
+					    		continue;
+					    	}
+					    	else {
+					    		String[] sp =s.split(" ");//分隔开的字符串
+							    statistics(sp,all);			    		
+					    	}
+			    	    }
+					    br.close();
+					    i++;
+			    	}   		
+		    	}
+		    	if(index!=-2&&isWrong!=1) {
+		    		printtxt(sortline(all,count));
+		    	}
+		    }
+		    /*
+		     * 功能：找出指定地址是否已经存在记录
+		     * 输入参数：省的名字，总的记录数组
+		     *返回值：true,false
+		    */
+		    static boolean isExistlocation(String location,Province[] all) {
+		    for(int i=0;i<count;i++) {
+		    if(location.equals(all[i].provinceName)) {
+		    	return true;
+		    }
+		    }
+		    return false;    	
+		    }
+
+		    /*
+		     * 功能：找出指定地址的记录
+		     * 输入参数：省的名字，总的记录数组
+		     *返回值：一条记录
+		    */  
+		    static Province getLine(String location,Province[] all) {
+		    for(int i=0;i<count;i++) {
+		    if(location.equals(all[i].provinceName)) {
+		    	return all[i];
+		    }
+		    }
+		    return null;//不会用到
+		    }
+
+static void statistics(String[] ssp,Province[] all) {   	
+	String location="";    	
+	location=ssp[0];
+	Province Province1;
+	if(!isExistlocation(location,all)) {//不存在对应该省的记录
+		Province1=new Province(location,0,0,0,0);//新建数据条   		
+		all[count]=Province1;
+		count++;
+	}
+	else {
+		Province1=getLine(location,all);//获得原有的数据条
+	}
+	if(ssp[1].equals("新增")) {
+		if(ssp[2].equals("感染患者")) {//获得感染人数
+			Province1.ip+=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));
+			
+		}
+		else {//疑似患者
+			Province1.sp+=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));
+		}
+	}
+	else if(ssp[1].equals("死亡")) {
+		Province1.dead+=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
+		Province1.ip-=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
+	}
+	else if(ssp[1].equals("治愈")) {
+		Province1.cure+=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
+		Province1.ip-=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
+	}
+	else if(ssp[1].equals("疑似患者")) {
+		if(ssp[2].equals("确诊感染")){
+			int change=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));//改变人数
+			Province1.ip+=change;
+			Province1.sp-=change; 			
+		}
+		else {//流入情况
+			String tolocation=ssp[3];//流入省
+			int change=Integer.valueOf(ssp[4].substring(0,ssp[4].length()-1));//改变人数
+			Province Province2;
+	    	if(!isExistlocation(tolocation,all)) {//不存在对应该省的记录
+	    		Province2=new Province(tolocation,0,0,0,0);//新建数据条
+	    		all[count]=Province2;
+	    		count++;
+	    	}
+	    	else {
+	    		Province2=getLine(tolocation,all);//获得原有的数据条
+	    	}
+	    	Province1.sp-=change;
+	    	Province2.sp+=change;
+		}
+	}
+	else if(ssp[1].equals("排除")) {
+		Province1.sp-=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));   		
+	}
+	else {//感染患者流入情况
+		String tolocation=ssp[3];//流入省
+		//System.out.print(ssp[0]);
+		int change=Integer.valueOf(ssp[4].substring(0,ssp[4].length()-1));//改变人数
+		Province Province2;
+    	if(!isExistlocation(tolocation,all)) {//不存在对应该省的记录
+    		Province2=new Province(tolocation,0,0,0,0);//新建数据条
+    		all[count]=Province2;
+    		count++;
+    	}
+    	else {
+    		Province2=getLine(tolocation,all);//获得原有的数据条
+    	}
+    	Province1.ip-=change;
+    	Province2.ip+=change;   		
+	}
+	}
+
+
 
 }
 

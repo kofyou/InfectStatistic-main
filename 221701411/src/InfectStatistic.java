@@ -240,11 +240,7 @@ class InfectStatistic {
 		    		printtxt(sortline(all,count));
 		    	}
 		    }
-		    /*
-		     * 功能：找出指定地址是否已经存在记录
-		     * 输入参数：省的名字，总的记录数组
-		     *返回值：true,false
-		    */
+/******************功能：找出指定地址是否已经存在记录 输入参数：省的名字，总的记录数组 返回值：true,false*************/
 		    static boolean isExistlocation(String location,Province[] all) {
 		    for(int i=0;i<count;i++) {
 		    if(location.equals(all[i].provinceName)) {
@@ -254,11 +250,7 @@ class InfectStatistic {
 		    return false;    	
 		    }
 
-		    /*
-		     * 功能：找出指定地址的记录
-		     * 输入参数：省的名字，总的记录数组
-		     *返回值：一条记录
-		    */  
+/***************** 功能：找出指定地址的记录 输入参数：省的名字，总的记录数组 返回值：一条记录***************/  
 		    static Province getLine(String location,Province[] all) {
 		    for(int i=0;i<count;i++) {
 		    if(location.equals(all[i].provinceName)) {
@@ -339,7 +331,15 @@ static void statistics(String[] ssp,Province[] all) {
     	Province2.ip+=change;   		
 	}
 	}
-
+/************* 功能：将全国信息加在result总数组中 输入参数：无  返回值：无********************/
+static void addAll() {
+	Province[] mid=new Province[count+1];//暂存信息
+	mid[0]=calAll(result,count);
+	for(int i=1;i<count+1;i++) {
+		mid[i]=result[i-1];
+	}
+	result=mid;
+}
 
 
 }

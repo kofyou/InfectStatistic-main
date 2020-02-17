@@ -54,7 +54,36 @@ public class infectStatistic {
 		this.parameterProvince=province;
 		this.outPath=out;
 	}
-
+	
+	//获取文件名对应时间
+	public Date getFileNameDate(File file) throws ParseException {
+		String date=file.getName();
+		int index=date.indexOf(".");
+		date=date.substring(0, index);
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		return sdf.parse(date);
+	}
+	
+	
+	//通过日期参数获取所需处理日志文件
+	public File[] getFilesByDate(Date parameterDate,File folder) throws ParseException {
+		ArrayList<File> fileList=new ArrayList<File>();
+		if(isExistValidDateFile(folder, parameterDate)) {
+			File files[]=folder.listFiles();
+			for(File file : files) {
+				int result=getFileNameDate(file).compareTo(parameterDate);
+				//判断日期，处理小于等于命令行日期的日志文件
+				if(result<0||result==0) {
+						fileList.add(file);
+				}
+			}
+		}
+		else{ 
+			System.out.println("查找日志文件非法");
+		}
+		return (File[]) fileList.toArray(new File[fileList.size()]);
+	}
+	
 	//获取对应省份的下标
 	public int getProvinceIndex(String province) {
 		for(int i=0;i<provinceNumber;i++) {
@@ -183,15 +212,28 @@ public class infectStatistic {
 		return true;
 	}
 
+	//判断是否存在合法日期日志文件
+	public boolean isExistValidDateFile(File folder,Date parameterDate) throws ParseException {
+		File files[]=folder.listFiles();
+		for(File file : files) {
+			int result=getFileNameDate(file).compareTo(parameterDate);
+			//判断存在大于日期参数的文件
+			if(result>0||result==0) {
+					return true;
+			}
+		}
+		return false;
+	}
+
 	//提示命令函数
 	public static void validCommandTips(){
 		System.out.println("reference:");
-		System.out.println("list<required and first>:");
-		System.out.println("	-date<required>		must be valid date and lower now");
-		System.out.println("	-log<required>		must be valid folder path");
-		System.out.println("	-out<required>		must be valid file path");
-		System.out.println("	-type<optional>		must be ip/sp/cure/dead");
-		System.out.print("	-province<optional>	must be Chinese province(北京、上海...)/country");
+		System.out.println("	list<required and first>:");
+		System.out.println("		-date<required>		must be valid date and lower now");
+		System.out.println("		-log<required>		must be valid folder path");
+		System.out.println("		-out<required>		must be valid file path");
+		System.out.println("		-type<optional>		must be ip/sp/cure/dead");
+		System.out.print("		-province<optional>	must be Chinese province(北京、上海...)/country");
 	}
 
 	//主函数
@@ -296,19 +338,13 @@ public class infectStatistic {
 							File folder=new File(logString.trim());
 							//检测命令行type/province参数值的合法性
 							if(t.isValidParameterType()&&t.isValidParameterProvince()) {
-								if(logString.matches("^[A-z]:\\\\(.+?\\\\)*$")&&outString.matches("^[A-z]:\\\\(.+?\\\\)*$")) {
-									if(folder.isDirectory()) {
-										System.out.println("get");
-									}
-									else {
-											System.out.println("路径非法，不存在该文件夹");
-											infectStatistic.validCommandTips();
-									}
+								if(folder.isDirectory()) {
+									System.out.println("get");
 								}
 								else {
-									System.out.println("log/out参数值不是合法的文件路径");
-									infectStatistic.validCommandTips();
-								}
+										System.out.println("路径非法，不存在该文件夹");
+										infectStatistic.validCommandTips();
+								}								
 							}
 							else {
 									System.out.println("省份或者类型参数值非法");

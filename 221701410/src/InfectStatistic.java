@@ -27,8 +27,8 @@ class InfectStatistic {
         }
         DataHandle dataHandle = infectStatistic.new DataHandle();
         dataHandle.dataProcess(logHandle.getStringList());
-        dataHandle.output(commandHandle.getOutputPath(), commandHandle.getPatientTypeSign(),
-                commandHandle.getProvinceList(), commandHandle.getProvinceSign(), commandHandle.getTypeSign());
+        dataHandle.output(commandHandle.getOutputPath(), commandHandle.getTypeList(), commandHandle.getProvinceList(),
+                commandHandle.getProvinceSign(), commandHandle.getTypeSign());
     }
 
     /**
@@ -43,7 +43,7 @@ class InfectStatistic {
         private String outputPath;
         private String endDate;
         private boolean typeSign;
-        private int[] patientTypeSign;
+        private ArrayList<String> typeList;
         private boolean provinceSign;
         private int[] provinceList;
 
@@ -52,7 +52,7 @@ class InfectStatistic {
             this.outputPath = "";
             this.endDate = "";
             typeSign = false;
-            this.patientTypeSign = new int[patientType.length];
+            this.typeList = new ArrayList<>();
             provinceSign = false;
             this.provinceList = new int[provinceString.length];
         }
@@ -73,8 +73,8 @@ class InfectStatistic {
             return typeSign;
         }
 
-        public int[] getPatientTypeSign() {
-            return patientTypeSign;
+        public ArrayList<String> getTypeList() {
+            return typeList;
         }
 
         public boolean getProvinceSign() {
@@ -120,22 +120,20 @@ class InfectStatistic {
                             break;
                         case "-type":
                             typeSign = true;
-                            int j = 0;
                             while (i + 1 < args.length && !args[i + 1].startsWith("-")) {
                                 i++;
-                                j++;
                                 switch (args[i]) {
                                     case "ip":
-                                        patientTypeSign[0] = j;
+                                        typeList.add(patientType[0]);
                                         break;
                                     case "sp":
-                                        patientTypeSign[1] = j;
+                                        typeList.add(patientType[1]);
                                         break;
                                     case "cure":
-                                        patientTypeSign[2] = j;
+                                        typeList.add(patientType[2]);
                                         break;
                                     case "dead":
-                                        patientTypeSign[3] = j;
+                                        typeList.add(patientType[3]);
                                         break;
                                     default:
                                         return;
@@ -186,26 +184,30 @@ class InfectStatistic {
          * @param logPath 读取日志目录
          */
         public boolean readLogs(String endDate, String logPath) {
-            File file = new File(logPath);
-            File[] fileList = file.listFiles();
-            assert fileList != null;
-            String biggestDate = "";
-            for (File value : fileList) {
-                String fileName = value.getName();
-                String fileNameWithout = fileName.substring(0, 10);
-                if (biggestDate.compareTo(fileNameWithout) < 0) {
-                    biggestDate = fileNameWithout;
-                }
-            }
-            if (endDate.compareTo(biggestDate) > 0) {
-                return false;
-            }
-            else {
+            try {
+                File file = new File(logPath);
+                File[] fileList = file.listFiles();
+                assert fileList != null;
+                String biggestDate = "";
+                String fileNameOut;
+                String fileNameWithoutOut;
                 for (File value : fileList) {
-                    String fileName = value.getName();
-                    String fileNameWithout = fileName.substring(0, 10);
-                    if (endDate.compareTo(fileNameWithout) >= 0) {
-                        try {
+                    fileNameOut = value.getName();
+                    fileNameWithoutOut = fileNameOut.substring(0, 10);
+                    if (biggestDate.compareTo(fileNameWithoutOut) < 0) {
+                        biggestDate = fileNameWithoutOut;
+                    }
+                }
+                if (endDate.compareTo(biggestDate) > 0) {
+                    return false;
+                }
+                else {
+                    String fileName;
+                    String fileNameWithout;
+                    for (File value : fileList) {
+                        fileName = value.getName();
+                        fileNameWithout = fileName.substring(0, 10);
+                        if (endDate.compareTo(fileNameWithout) >= 0) {
                             BufferedReader bf = new BufferedReader(new InputStreamReader(new FileInputStream(
                                     new File(logPath + fileName)), "UTF-8"));
                             String str;
@@ -215,12 +217,13 @@ class InfectStatistic {
                                 }
                             }
                             bf.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
                         }
                     }
+                    return true;
                 }
-                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
             }
         }
     }
@@ -508,12 +511,12 @@ class InfectStatistic {
          * output
          * @description 根据传入的参数，将类变量格式化输出
          * @param outputPath 输出的日志目录
-         * @param patientTypeSign 命令行参数是否有-type
+         * @param typeList 命令行参数的类型列表
          * @param provinceList 省份输出标志
          * @param provinceSign 命令行参数是否有-province
-         * @param typeSign 类型输出标志
+         * @param typeSign 命令行参数是否有-type
          */
-        public void output(String outputPath, int[] patientTypeSign, int[] provinceList,
+        public void output(String outputPath, ArrayList<String> typeList, int[] provinceList,
                            boolean provinceSign, boolean typeSign) {
             try {
                 File file = new File(outputPath);
@@ -528,11 +531,10 @@ class InfectStatistic {
                         if (provinceList[i] == 1){
                             if (typeSign) {
                                 fileWriter.write(provinceString[i]);
-                                for (int j = 1; j <= patientType.length; j++) {
+                                for (String s : typeList) {
                                     for (int k = 0; k < patientType.length; k++) {
-                                        if (patientTypeSign[k] == j) {
+                                        if (s.equals(patientType[k])) {
                                             fileWriter.write(" " + patientType[k] + patient[i][k] + "人");
-                                            break;
                                         }
                                     }
                                 }
@@ -550,11 +552,10 @@ class InfectStatistic {
                         if (influencedProvince[i] == 1){
                             if (typeSign) {
                                 fileWriter.write(provinceString[i]);
-                                for (int j = 1; j <= patientType.length; j++) {
+                                for (String s : typeList) {
                                     for (int k = 0; k < patientType.length; k++) {
-                                        if (patientTypeSign[k] == j) {
+                                        if (s.equals(patientType[k])) {
                                             fileWriter.write(" " + patientType[k] + patient[i][k] + "人");
-                                            break;
                                         }
                                     }
                                 }

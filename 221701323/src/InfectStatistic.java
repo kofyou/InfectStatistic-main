@@ -1,7 +1,9 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -11,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jdk.javadoc.internal.doclets.formats.html.markup.StringContent;
 
 import java.text.SimpleDateFormat;
 /**
@@ -22,15 +25,62 @@ import java.text.SimpleDateFormat;
  */
 
 public class InfectStatistic {
-
     public static void main(String[] args) {
-        String log="C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\log";
-        String out="C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\result";
-        Calendar cal = GregorianCalendar.getInstance();
-        cal.set(2020, 0, 22);
-        Date date=cal.getTime();//new Date();
-        String[] provinces={"全国","福建"};
+        String str="list -log C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\log -out C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\result\\ListOut.txt -province 福建 浙江 -type ip dead";
+        String[] strs=str.split(" ");
+        String log=null;
+        String out=null;
+        Date date=new Date();
+        String[] provinces=null;
         String[] types=null;
+        for(int i=1;i<strs.length;i++){
+            if(strs[i].equals("-log")){
+                log=strs[++i];
+            }else if(strs[i].equals("-out")){
+                out=strs[++i];
+            }
+            else if(strs[i].equals("-date")){
+                String[] s=strs[++i].split("-");
+                Calendar cal = GregorianCalendar.getInstance();
+                cal.set(Integer.parseInt(s[0]),Integer.parseInt(s[1])-1, Integer.parseInt(s[2]));
+                date=cal.getTime();
+            }else if(strs[i].equals("-type")){
+                int n=i++;
+                i++;
+                while(strs[i].charAt(0)!='-'){
+                    i++;
+                    if(i==strs.length)break;
+                }
+                i--;
+                int m=i;
+                String[] news=new String[m-n];
+                for(int p=n+1;p<=m;p++){
+                    news[p-n-1]=strs[p];
+                }
+                types=news;
+            }else if(strs[i].equals("-province")){
+                int n=i++;
+                i++;
+                while(strs[i].charAt(0)!='-'){
+                    i++;
+                    if(i<strs.length)break;
+                }
+                i--;
+                int m=i;
+                String[] news=new String[m-n];
+                for(int p=n+1;p<=m;p++){
+                    news[p-n-1]=strs[p];
+                }
+                // for (String string : news) {
+                //     System.out.println(string);
+                // }
+                provinces=news;
+                
+            }else continue;
+        }
+        // for (String string : provinces) {
+        //     System.out.println(string);
+        // }
         List list=new List(log, out, date, provinces, types);
         // list.printList();
         Work work=new Work(list);
@@ -84,17 +134,17 @@ class ProvinceList{
             List[i]=new Province(list[i]);
         }
     }
-    // public void printout(){
-    //     for (Province p : List) {
-    //         if(p.ip!=0||p.sp!=0||p.cure!=0||p.dead!=0){
-    //             System.out.println("城市："+p.ProvinceName);
-    //             System.out.println("ip="+p.ip);
-    //             System.out.println("sp="+p.sp);
-    //             System.out.println("cure="+p.cure);
-    //             System.out.println("dead="+p.dead);
-    //         }
-    //     }
-    // }
+    public void printout(){
+        for (Province p : List) {
+            if(p.ip!=0||p.sp!=0||p.cure!=0||p.dead!=0){
+                System.out.println("城市："+p.ProvinceName);
+                System.out.println("ip="+p.ip);
+                System.out.println("sp="+p.sp);
+                System.out.println("cure="+p.cure);
+                System.out.println("dead="+p.dead);
+            }
+        }
+    }
     public Province Select(String name){
         for (Province p : List) {
             if(p.ProvinceName.equals(name))return p;
@@ -150,7 +200,7 @@ class List{
         //String dateString = formatter.format(currentTime); 
         // DateFormat d1 =java.text.DateFormat.getDateInstance();
         System.out.println("log=" + Log + "\nOut=" + Out + "\nDate=" +formatter.format(DateNow)+"\n");
-        // Provinces.printout();
+        Provinces.printout();
         Types.printout();
     }
 }
@@ -391,16 +441,40 @@ class Work{
             }
 
         }
-
-        //控制只输入types的累类型
-        for (Province p : list.Provinces.List) {
-            System.out.print(p.ProvinceName+" ");
-            for (Entry<String, String> entry : list.Types.Types.entrySet()) {
-                
-                System.out.print(entry.getValue()+p.GiveNumber(entry.getKey())+"人 "); 
+        // String[] li=list.Out.split("//");
+        // String OutName=li[li.length-1];
+        File file=new File(list.Out);
+        if(file.exists()){
+            System.out.println("文件已经存在了");
+        }else{
+            try{
+                file.createNewFile();
             }
-            System.out.print("\n");
+            catch(IOException e){
+                e.printStackTrace();
+            }
+            
+
         }
+        //控制只输入types的累类型
+        try {
+            FileWriter fw = new FileWriter(file);
+            for (Province p : list.Provinces.List) {
+                fw.write(p.ProvinceName+" ");
+                for (Entry<String, String> entry : list.Types.Types.entrySet()) {
+                    
+                    fw.write(entry.getValue()+p.GiveNumber(entry.getKey())+"人 "); 
+                }
+                fw.write("\n");
+            }
+            fw.write("// 该文档并非真实数据，仅供测试使用\n");
+            fw.flush();
+            fw.close();
+            System.out.println("写入成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
     }
 
 }

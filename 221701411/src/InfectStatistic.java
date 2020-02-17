@@ -17,7 +17,7 @@ import java.util.Arrays;
  * TODO
  *
  * @author 代铭杰
- * @version 1.0
+ * @version 2.0
  */
 class InfectStatistic {
     static int count=0;//已有所有数据的条数
@@ -36,7 +36,7 @@ class InfectStatistic {
             String provinceName; 
             /** 感染患者 **/
             int ip; 
-            /** 疑似患者* */
+            /** 疑似患者**/
             int sp;
             /** 治愈 **/
             int cure;
@@ -58,6 +58,7 @@ class InfectStatistic {
             }
 
         }
+/*******************************主函数入口***********************************/     	
 	public static void main(String[] args) throws IOException {
     	if(args.length==0) {
     		System.out.println("输入命令行为空，请重新输入！");
@@ -67,8 +68,22 @@ class InfectStatistic {
     		System.out.println("未输入命令‘list’，则不可以带参数，请重新输入！");
     		return;
     	}
+    	for(int j=0;j<34;j++) {
+	    	all[j]=new Province();
+	    	result[j]=new Province();
+	    	proresult[j]=new Province();
+	    }
+    	cmdArgs cmd=new cmdArgs(args);
+    	int hasDate=cmd.hasParam("-date");//存命令的索引
+    	int hasPro=cmd.hasParam("-province");//检查是否有province命令
+    	int hasType=cmd.hasParam("-type");//检查是否有类型命令
+    	int hasPath=cmd.hasParam("-out");//获取输出路径索引
+    	int hasLog=cmd.hasParam("-log");//获取log路径索引
+    	getTopath(args,hasPath);
+    	getFrompath(args,hasLog);
 	}
-		static class cmdArgs {//获取使用命令
+		//获取使用命令
+		static class cmdArgs {
 	    String[] args;
 	    
 	    	cmdArgs(String[] passargs) {
@@ -84,11 +99,7 @@ class InfectStatistic {
 	    		return -1;
 	    	}    
 		}
-		/*
-          	功能：判断日期的合法性
-          	输入参数：最新更新日志的时间，待验证日期字符串
-          	返回值：true,false
-         */
+/**************功能：判断日期的合法性 输入参数：最新更新日志的时间，待验证日期字符串 返回值：true,false*****************/
 		static boolean isCorrectdate(String lastdate,String date) {
 			if(isBefore(lastdate,date)) {
 	    		return false;

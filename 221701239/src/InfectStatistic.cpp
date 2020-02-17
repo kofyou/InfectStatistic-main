@@ -13,10 +13,14 @@
 #include <vector>  
 #include<map>
 #include <windows.h>
+#include<sstream>
 
 using namespace std;
 map<string, string> m_single;      //存储命令行只有一个值的元素的信息
 map<string, vector<string>> m_many;   //存储命令行可能有多个值的元素的信息
+//每个省包括全国的肺炎信息类
+map<string, vector<int>> m_province;  //存储每个省的肺炎相关信息,(感染患者,疑似患者,治愈数,死亡数)
+
 
 //将字符转utf-8
 string UTF8ToGB(const char* str)
@@ -41,25 +45,87 @@ string UTF8ToGB(const char* str)
 
 	return result;
 }
-//按字符串读取文件
+
+
+//往map中插入一个pair
+void insert_province(string province_name)
+{
+	int i;
+	vector<int> list;
+	for (i = 0; i < 4; i++)
+		list.push_back(0);
+	m_province.insert(make_pair(province_name, list));
+}
+//从字符串中提取数字
+int draw_number(string temp)
+{
+	stringstream s1(temp);
+	int itemp;
+	s1 >> itemp;
+	return itemp;
+}
+//处理新增的情况
+void process_xin_zeng(fstream& file,string province_name)
+{
+	string temp;
+	file >> temp;
+	temp = UTF8ToGB(temp.c_str()).c_str();
+	if (temp.compare("感染患者") == 0)
+	{
+		file >> temp;
+		int num = draw_number(temp);
+		(m_province["全国"])[0] += num;
+		(m_province[province_name])[0] += num;
+	}
+	else
+	{
+		file >> temp;
+		int num = draw_number(temp);
+		(m_province["全国"])[1] += num;
+		(m_province[province_name])[1] += num;
+	}
+}
+//按字符串读取并处理文件
 void process_file(vector<string> file_list)
 {
+	//6种情况,新增(感染患者,疑似患者),感染患者,疑似患者(流入,确诊),死亡,治愈,排除(疑似患者).
+	int i;
+	insert_province("全国");
+	//首先加入全国的情况
 	fstream fei_yan_log(file_list[0]);
 	string temp;
-	fei_yan_log >> temp;
-	temp = UTF8ToGB(temp.c_str()).c_str();
-	cout << temp;
+	string province_name;
+	bool is_province = true; //是否读到省份的标志位
+	while (!fei_yan_log.eof())
+	{
+		fei_yan_log >> temp;
+		temp = UTF8ToGB(temp.c_str()).c_str();
+		if (temp.substr(0, 1).compare("/") == 0)
+			break;
+		if (is_province)
+		{
+			if (m_province.find(temp) == m_province.end())
+				insert_province(temp);
+			is_province = false;
+			province_name = temp;
+		}
+		if (temp.compare("新增") == 0)
+		{
+			process_xin_zeng(fei_yan_log, province_name);
+			is_province = true;
+		}
+	}
 }
 
 
- //该函数实现了对命令行信息的处理
+//该函数实现了对命令行信息的处理
 void process_cmd(int num, char* cmd_i[])
 {
 	int i;
 	string temp;   //中转字符串
 	for (i = 3; i < num; i++)
 	{
-		if (strcmp(cmd_i[i], "-province")==0 || strcmp(cmd_i[i], "-type")==0)
+		if (strcmp(cmd_i[i], "-province") == 0 || strcmp(cmd_i[i], "-type") == 0)
 		{
 			vector<string> list_temp;
 			string m_name = cmd_i[i];//记录命令行参数名称
@@ -71,7 +137,7 @@ void process_cmd(int num, char* cmd_i[])
 				cout << cmd_i[i] << "\n";
 				if (i >= num - 1)
 					break;
-				temp=temp.substr(0, 1);
+				temp = temp.substr(0, 1);
 			}
 			m_many.insert(make_pair(m_name, list_temp));
 		}
@@ -116,6 +182,8 @@ void getFiles(const std::string & path, std::vector<std::string> & files)
 
 int main(int argc, char* argv[])
 {
+
+
 	process_cmd(argc, argv);
 	int i;
 	cout << argc;

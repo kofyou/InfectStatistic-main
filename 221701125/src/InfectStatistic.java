@@ -35,7 +35,7 @@ class InfectStatistic {
 		source.decreaseInfect(num);
 		destination.addInfect(num);
 	}
-	
+																														
 	public static void suspectInto(Area source,Area destination, int num)//疑似患者从source流入destination
 	{
 		source.decreaseSuspect(num);
@@ -280,8 +280,8 @@ class InfectStatistic {
     				{
     					map.get(splitLine[0]).setIsRelate();
     				}
-    				
-    				int num=Integer.parseInt(splitLine[splitLine.length-1].substring(0, splitLine[splitLine.length-1].length()-1));			
+    				int lastIndex=splitLine.length-1;
+    				int num=Integer.parseInt(splitLine[lastIndex].substring(0, splitLine[lastIndex].length()-1));			
     				
     				if (splitLine[1].equals("新增"))
     				{

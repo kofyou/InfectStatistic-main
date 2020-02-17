@@ -266,43 +266,63 @@ class InfectStatistic {
 		    return null;//不会用到
 		    }
 
-static void statistics(String[] ssp,Province[] all) {   	
-	String location="";    	
-	location=ssp[0];
-	Province Province1;
-	if(!isExistlocation(location,all)) {//不存在对应该省的记录
-		Province1=new Province(location,0,0,0,0);//新建数据条   		
-		all[count]=Province1;
-		count++;
-	}
-	else {
-		Province1=getLine(location,all);//获得原有的数据条
-	}
-	if(ssp[1].equals("新增")) {
-		if(ssp[2].equals("感染患者")) {//获得感染人数
-			Province1.ip+=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));
-			
+	static void statistics(String[] ssp,Province[] all) {   	
+		String location="";    	
+		location=ssp[0];
+		Province Province1;
+		if(!isExistlocation(location,all)) {//不存在对应该省的记录
+			Province1=new Province(location,0,0,0,0);//新建数据条   		
+			all[count]=Province1;
+			count++;
 		}
-		else {//疑似患者
-			Province1.sp+=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));
+		else {
+			Province1=getLine(location,all);//获得原有的数据条
 		}
-	}
-	else if(ssp[1].equals("死亡")) {
-		Province1.dead+=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
-		Province1.ip-=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
-	}
-	else if(ssp[1].equals("治愈")) {
-		Province1.cure+=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
-		Province1.ip-=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
-	}
-	else if(ssp[1].equals("疑似患者")) {
-		if(ssp[2].equals("确诊感染")){
-			int change=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));//改变人数
-			Province1.ip+=change;
-			Province1.sp-=change; 			
+		if(ssp[1].equals("新增")) {
+			if(ssp[2].equals("感染患者")) {//获得感染人数
+				Province1.ip+=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));
+				
+			}
+			else {//疑似患者
+				Province1.sp+=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));
+			}
 		}
-		else {//流入情况
+		else if(ssp[1].equals("死亡")) {
+			Province1.dead+=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
+			Province1.ip-=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
+		}
+		else if(ssp[1].equals("治愈")) {
+			Province1.cure+=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
+			Province1.ip-=Integer.valueOf(ssp[2].substring(0,ssp[2].length()-1));
+		}
+		else if(ssp[1].equals("疑似患者")) {
+			if(ssp[2].equals("确诊感染")){
+				int change=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));//改变人数
+				Province1.ip+=change;
+				Province1.sp-=change; 			
+			}
+			else {//流入情况
+				String tolocation=ssp[3];//流入省
+				int change=Integer.valueOf(ssp[4].substring(0,ssp[4].length()-1));//改变人数
+				Province Province2;
+		    	if(!isExistlocation(tolocation,all)) {//不存在对应该省的记录
+		    		Province2=new Province(tolocation,0,0,0,0);//新建数据条
+		    		all[count]=Province2;
+		    		count++;
+		    	}
+		    	else {
+		    		Province2=getLine(tolocation,all);//获得原有的数据条
+		    	}
+		    	Province1.sp-=change;
+		    	Province2.sp+=change;
+			}
+		}
+		else if(ssp[1].equals("排除")) {
+			Province1.sp-=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));   		
+		}
+		else {//感染患者流入情况
 			String tolocation=ssp[3];//流入省
+			//System.out.print(ssp[0]);
 			int change=Integer.valueOf(ssp[4].substring(0,ssp[4].length()-1));//改变人数
 			Province Province2;
 	    	if(!isExistlocation(tolocation,all)) {//不存在对应该省的记录
@@ -313,30 +333,10 @@ static void statistics(String[] ssp,Province[] all) {
 	    	else {
 	    		Province2=getLine(tolocation,all);//获得原有的数据条
 	    	}
-	    	Province1.sp-=change;
-	    	Province2.sp+=change;
+	    	Province1.ip-=change;
+	    	Province2.ip+=change;   		
 		}
-	}
-	else if(ssp[1].equals("排除")) {
-		Province1.sp-=Integer.valueOf(ssp[3].substring(0,ssp[3].length()-1));   		
-	}
-	else {//感染患者流入情况
-		String tolocation=ssp[3];//流入省
-		//System.out.print(ssp[0]);
-		int change=Integer.valueOf(ssp[4].substring(0,ssp[4].length()-1));//改变人数
-		Province Province2;
-    	if(!isExistlocation(tolocation,all)) {//不存在对应该省的记录
-    		Province2=new Province(tolocation,0,0,0,0);//新建数据条
-    		all[count]=Province2;
-    		count++;
-    	}
-    	else {
-    		Province2=getLine(tolocation,all);//获得原有的数据条
-    	}
-    	Province1.ip-=change;
-    	Province2.ip+=change;   		
-	}
-	}
+		}
 /************* 功能：将全国信息加在result总数组中 输入参数：无  返回值：无********************/
 	static void addAll() {
 		Province[] mid=new Province[count+1];//暂存信息
@@ -347,83 +347,97 @@ static void statistics(String[] ssp,Province[] all) {
 		result=mid;
 	}
 /************ 功能：把所有记录输出到txt文件 输入参数：总的记录数组all 返回值：无*************/
-static void printtxt(Province[] result) throws IOException {
-	File f = new File(topath);
-    BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
-    output.write(calAll(result,count).printline()+"\n");
-    for(int i=0;i<count;i++) {//写入统计数据
-    	output.write(result[i].printline()+"\n");
-    }
-    output.write("//该文档并非真实数据，仅供测试使用");
-	output.close();
-}
+	static void printtxt(Province[] result) throws IOException {
+		File f = new File(topath);
+		BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
+		output.write(calAll(result,count).printline()+"\n");
+		for(int i=0;i<count;i++) {//写入统计数据
+			output.write(result[i].printline()+"\n");
+		}
+		output.write("//该文档并非真实数据，仅供测试使用");
+		output.close();
+	}
 /************* 功能：拼音顺序排序line数组 输入参数：记录数组,排序数组个数 返回值：排序好的数组**********/
-static Province[] sortline(Province[] wannasort,int num) {
-	String[] location=new String[num];
-	for(int i=0;i<num;i++) {
-		location[i]=wannasort[i].provinceName;    		
-	}    	
-    Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
-    Arrays.sort(location, cmp);
-    int i=0; 
-    int j=0;//控制省份拼音顺序索引
-    while(j<num) {       	
-    	while(i<num) {
-        	if(wannasort[i].provinceName.equals(location[j])) {
-        		result[j]=wannasort[i];
-        		j++;
-        		if(j>=num) {
-        			break;
-        		}
-        	}
-        	i++;
-    	}
-    } 
-    return result;
-}
+	static Province[] sortline(Province[] wannasort,int num) {
+		String[] location=new String[num];
+		for(int i=0;i<num;i++) {
+			location[i]=wannasort[i].provinceName;    		
+		}    	
+	    Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
+	    Arrays.sort(location, cmp);
+	    int i=0; 
+	    int j=0;//控制省份拼音顺序索引
+	    while(j<num) {       	
+	    	while(i<num) {
+	        	if(wannasort[i].provinceName.equals(location[j])) {
+	        		result[j]=wannasort[i];
+	        		j++;
+	        		if(j>=num) {
+	        			break;
+	        		}
+	        	}
+	        	i++;
+	    	}
+	    } 
+	    return result;
+	}
 /************** 功能：拣选省疫情信息  输入参数：字符串省的名称,要搜索的省的个数  返回值：筛选后的信息数组************** */
-static Province[] selectMes(String[] pro) {
-	int flag=0;//是否找到已查的省
-    int j=0;//控制筛选的信息索引
-    int i=0;//控制所有信息的索引
-    Province[] aftersel=new Province[selcount];//筛选之后的信息数组 
-    for(i=0;i<selcount;i++) {
-    	aftersel[i]=new Province();
-    }
-    i=0;
-    while(j<selcount) {
-    while(i<count) {
-    	flag=0;
-    	if(result[i].provinceName.equals(pro[j])) {
-    		aftersel[j]=result[i];
-    		j++;
-    		i=-1;//从头开始循环查找
-    		flag=1;
-    		if(j==selcount) {
-    			break;
-    		}
+	static Province[] selectMes(String[] pro) {
+		int flag=0;//是否找到已查的省
+		int j=0;//控制筛选的信息索引
+		int i=0;//控制所有信息的索引
+		Province[] aftersel=new Province[selcount];//筛选之后的信息数组 
+		for(i=0;i<selcount;i++) {
+			aftersel[i]=new Province();
+		}
+		i=0;
+		while(j<selcount) {
+			while(i<count) {
+				flag=0;
+				if(result[i].provinceName.equals(pro[j])) {
+					aftersel[j]=result[i];
+					j++;
+					i=-1;//从头开始循环查找
+					flag=1;
+					if(j==selcount) {
+						break;
+					}
+				}
+				else if(i==count-1&&flag==0) {//循环了一圈没有相应信息
+					if(pro[j].equals("全国")) {//全国情况
+						aftersel[j]=calAll(result,count);
+						j++;
+						flag=1;	    			
+					}
+					else {
+						aftersel[j]=new Province(pro[j],0,0,0,0);
+						j++;
+						flag=1;		    		
+					}
+					if(j==selcount) {
+        				break;
+        			}
+				}
+				i++;
+			}
+			i=0;
     	}
-    	else if(i==count-1&&flag==0) {//循环了一圈没有相应信息
-    		if(pro[j].equals("全国")) {//全国情况
-    			aftersel[j]=calAll(result,count);
-    			j++;
-    			flag=1;	    			
-    		}
-    		else {
-	    		aftersel[j]=new Province(pro[j],0,0,0,0);
-	    		j++;
-	    		flag=1;		    		
-    		}
-    		if(j==selcount) {
-        			break;
-        		}
-    	}
-    	i++;
-    }
-    i=0;
-    }
-    return aftersel;
-}
+    	return aftersel;
+	}
+/***********功能：判断所拣选的省份有哪些 输入参数：命令字符串数组args，province命令所在索引 返回值：省份字符串数组***********/
+	static String[] selectPro(String[] args,int pos) {
+		String[] province=new String[34];   
+		int i=pos+1;   
+		while(i<args.length&&args[i].charAt(0)!='-') {//不是命令
+			province[selcount]=args[i];
+			selcount++;
+			i++;
+		}    	  
+		/*for(i=0;i<selcount;i++) {
+			System.out.print(province[i]+"\n");
+		}*/
+		return province;
+	}
 
 }
 

@@ -47,11 +47,15 @@ public class Homework2
 		{
 			if(inputOrder[i].equals("-log"))//指定日志目录位置
 			{
+				if(isValidLogAddress(inputOrder[i + 1]))
+				{
+					
+				}
 				allLog = queryFileNames(inputOrder[i + 1]);
 			}
 			else if(inputOrder[i].equals("-out"))//指定输出文件路径和文件名
 			{
-				dateOrder = inputOrder[i+1];
+				dateOrder = inputOrder[i + 1];
 			}
 			else if(inputOrder[i].equals("-date"))//指定日志日期
 			{
@@ -121,23 +125,6 @@ public class Homework2
 		return es;
 	}
 	
-	/*
-	 * 将指定日期后的日志文件移出ArrayList
-	 */
-	public void removeLog(String logDate)
-	{
-		int logNum = 0;
-		String logName = "";
-		logName = logDate + ".log.txt";
-		for(int i = 0 ;i < allLog.size();i++)
-		{
-			if(allLog.get(i).equals(logName))
-			{
-				List sublist = allLog.subList(i,allLog.size());
-		        allLog.removeAll(sublist);
-			}
-		}
-	}
 	
 	/*
 	 * 读取日志文件的内容

@@ -7,13 +7,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Template;
-
-import javafx.beans.binding.When;
 
 
 
@@ -183,6 +182,8 @@ class InfectStatistic {
 		public int sp;
 		public int cure;
 		public int dead;
+		//以下为需要处理的文件名列表
+		public ArrayList<String> filename_list;
 		
 		public CommandLineRun(CommandLine cmdline) throws IOException {
 			commandline = new CommandLine();
@@ -193,9 +194,23 @@ class InfectStatistic {
 			cure = 0;
 			dead = 0;
 			creat_provinces_list();
+			creat_filename_list("D:\\InfectStatistic-main\\221701430\\log\\", "2020-01-25");
 			//这里记得要改成参数值！！！！！！！！！！
-			file_test = new File("D:\\InfectStatistic-main\\221701430\\log\\2020-01-22.log.txt");
-			process_data(file_test);
+			for(int i = 0;i < filename_list.size();i++) {
+				file_test = new File("D:\\InfectStatistic-main\\221701430\\log\\" + filename_list.get(i));
+				if(file_test != null) {
+					process_data(file_test);
+				}
+			}
+			country_total();
+			//测试输出！！！！！！！！！！！！！！！！！！！
+	        for(int i = 0;i<province_list.size();i++) {
+	        	System.out.println("省名：" + province_list.get(i).name + 
+	        			" ip:" + province_list.get(i).ip + 
+	        			" sp:" + province_list.get(i).sp + 
+	        			" cure:" + province_list.get(i).cure + 
+	        			" dead:" + province_list.get(i).dead);
+	        }
 		}
 		
 		//用于处理单个文件的
@@ -308,14 +323,7 @@ class InfectStatistic {
 				}
 	        	
 	        }
-	        country_total();
-	        for(int i = 0;i<province_list.size();i++) {
-	        	System.out.println("省名：" + province_list.get(i).name + 
-	        			" ip:" + province_list.get(i).ip + 
-	        			" sp:" + province_list.get(i).sp + 
-	        			" cure:" + province_list.get(i).cure + 
-	        			" dead:" + province_list.get(i).dead);
-	        }
+	        
 		}
 		
 		//创建排序好的省份列表
@@ -357,6 +365,8 @@ class InfectStatistic {
 	        	province_list.get(0).dead += province_list.get(i).dead;
 	        }
 		}
+		
+		//省类
 		static class Province{
 			public String name;
 			public int ip;
@@ -364,6 +374,51 @@ class InfectStatistic {
 			public int cure;
 			public int dead;
 		}
+		
+		//创建需要读取的文件名列表
+		public void creat_filename_list(String path,String date) {
+			List<String> temp_list = new ArrayList<String>();
+			filename_list = new ArrayList<String>();
+			String []temp;
+			int index = -1;
+			//path 即为log的参数值
+			File name = new File(path);
+			temp = name.list();
+			//若date无要求则为log文件夹下所有文件
+			if(date == null) {
+				if(name.isDirectory()) {		
+					for(int i = 0;i < temp.length;i++) {
+						filename_list.add(temp[i]);
+					}
+				}
+			}else {//若date有要求则为date前的所有文件
+				if(name.isDirectory()) {
+					//由于list()的返回值是排好序的
+					for(int i = 0;i < temp.length;i++) {
+						//如果列表中为22 24 26 而date为25的情况
+						if((temp[i].compareTo((date + ".log.txt")) > 0)) {
+							index = i - 1;
+							break;
+						}
+						//如果列表中为22 24 26 而date为26的情况
+						else if((temp[i].compareTo((date + ".log.txt")) == 0)){
+							index = i;
+							break;
+						}
+					}
+					if(index == -1) {
+						System.err.println("日期超出范围");
+						System.exit(0);
+					}
+					for(int i = 0;i <= index;i++) {
+						filename_list.add(temp[i]);
+					}
+				}
+			}
+			Collections.sort(filename_list);
+		}
+		
+		
 	}
 	
 	
@@ -395,7 +450,7 @@ class InfectStatistic {
         ArrayList<String> commandline_test = new ArrayList<String>();
         commandline_test.add("list");
         commandline_test.add("-log");
-        commandline_test.add("D:\\InfectStatistic-main\\221701430\\log\\2020-01-22.log.txt");
+        commandline_test.add("D:\\InfectStatistic-main\\221701430\\log\\");
         commandline_test.add("-out");
         commandline_test.add("123");
         commandline_test.add("-type");

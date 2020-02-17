@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * InfectStatistic
@@ -14,7 +16,7 @@ class InfectStatistic {
         static public String outputLocation;    // 输出文件夹位置
         static public int numberOfDesignatedProvince = 0;    // 指定类型数量
         static public String designatedProvince[] = new String[32];  // 指定的省份
-        static public String designatedDate;    // 指定日期
+        static public String designatedDate="-1";    // 指定日期
         static public int numberOfTypes = 0;    // 指定类型数量
         static public String designatedTypes[] = new String[4]; // 指定类型
 
@@ -229,8 +231,62 @@ class InfectStatistic {
             return true;
         }
 
+        public static int ReadFiles(String path) {
+            ArrayList<String> listFileName = new ArrayList<String>();
+            GetAllFileName(path, listFileName);
+            for (String name : listFileName) {
+                if (FileProcessor.ComparingTheDate(name)) {
+                    FileProcessor.ReadASingleFile(name);
+                }
+            }
+            return 0;
+        }
+
+        public static void GetAllFileName(String path,ArrayList<String> listFileName){
+            File file = new File(path);
+            File [] files = file.listFiles();
+            String [] names = file.list();
+            if(names != null){
+                String [] completNames = new String[names.length];
+                for(int i=0;i<names.length;i++){
+                completNames[i]=path+names[i];
+                }
+                listFileName.addAll(Arrays.asList(completNames));
+            }
+            for(File a:files){
+                if(a.isDirectory()){//如果文件夹下有子文件夹，获取子文件夹下的所有文件全路径。
+                GetAllFileName(a.getAbsolutePath()+"\\",listFileName);
+                }
+            }
+        }
+
         public static int GetNumber(String number){
             return Integer.parseInt(number.substring(0,number.length()-1));
+        }
+
+        public static boolean ComparingTheDate(String name){
+            int index=0;
+            if (Controller.designatedDate.equals("-1")){
+                return true;
+            }
+            else {
+                for (int i0 = name.length()-1;i0 >= 0;i0--){
+                    if (name.charAt(i0)=='/'){
+                        index = i0+1;
+                        break;
+                    }
+                }
+                name = name.substring(index,name.length()-8);
+                String dates[] = name.split("-");
+                String designatedDate[] = Controller.designatedDate.split("-");
+                for (int i0 = 0;i0 < 3;i0++){
+                    if (Integer.valueOf(designatedDate[i0])<Integer.valueOf(dates[i0])){
+                        return false;
+                    }
+                }
+
+            }
+            return true;
         }
     }
 
@@ -325,14 +381,12 @@ class InfectStatistic {
 
         Controller.GetParameters(args); // 获取输入的参数
         //FileProcessor.CreateOutputFile();   // 创建输出文件
-        System.out.println();
-        FileProcessor.ReadASingleFile(Controller.inputLocation+"2020-01-22.log.txt");
+        FileProcessor.ReadFiles(Controller.inputLocation);
 
         for (int i0 = 0;i0 < 32;i0++){
             if (BasicInformation.KeyOfOutput[i0] == 1){
                 System.out.println(BasicInformation.Areas[i0].OutputInformation());
             }
         }
-
     }
 }

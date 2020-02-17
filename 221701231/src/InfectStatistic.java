@@ -151,16 +151,16 @@ class InfectStatistic {
         // 读取单行方法
         public static boolean ReadASingleLine(String line){
             String words[] = line.split(" ");
-            String word = words[0];
-            String number;  // 用于记录数字
+            String number;  // 用于记录数
+            int num;
             int indexOfArea = 0;    // 每行最开始的地区的数组索引
+            int indexOfTarge = 0;
 
-            // 首先判断这行是不是注释内容
-            if (word.equals("//")){
-                return false;
+            if (words[0].equals("//")){
+                return false;   // 首先判断这行是不是注释内容
             }
 
-            indexOfArea = BasicInformation.GetIndexOfArea(word);    // 获得地区索引
+            indexOfArea = BasicInformation.GetIndexOfArea(words[0]);    // 获得地区索引
 
             BasicInformation.KeyOfOutput[indexOfArea] = 1;  // 把该地区的输出key设为1
 
@@ -172,33 +172,65 @@ class InfectStatistic {
                         switch (words[i0]){
                             case ("感染患者"):
                                 i0++;
-                                number = words[i0].substring(0,words[i0].length()-1);
-                                BasicInformation.Areas[0].numberOfInfectedPatients += Integer.parseInt(number);
-                                BasicInformation.Areas[indexOfArea].numberOfInfectedPatients += Integer.parseInt(number);
+                                num = FileProcessor.GetNumber(words[i0]);
+                                BasicInformation.AddInfectedPatients(num,indexOfArea);
                                 break;
                             case ("疑似患者"):
                                 i0++;
-                                number = words[i0].substring(0,words[i0].length()-1);
-                                BasicInformation.Areas[0].numberOfSuspectedPatients += Integer.parseInt(number);
-                                BasicInformation.Areas[indexOfArea].numberOfSuspectedPatients += Integer.parseInt(number);
+                                num = FileProcessor.GetNumber(words[i0]);
+                                BasicInformation.AddSuspectedPatients(num,indexOfArea);
                                 break;
                         }
                         break;
                     case ("治愈"):
                         i0++;
-                        number = words[i0].substring(0,words[i0].length()-1);
-                        BasicInformation.Areas[0].numberOfPeopleCured += Integer.parseInt(number);
-                        BasicInformation.Areas[indexOfArea].numberOfPeopleCured += Integer.parseInt(number);
+                        num = FileProcessor.GetNumber(words[i0]);
+                        BasicInformation.AddCured(num,indexOfArea);
                         break;
                     case ("死亡"):
                         i0++;
-                        number = words[i0].substring(0,words[i0].length()-1);
-                        BasicInformation.Areas[0].numberOfDeaths += Integer.parseInt(number);
-                        BasicInformation.Areas[indexOfArea].numberOfDeaths += Integer.parseInt(number);
+                        num = FileProcessor.GetNumber(words[i0]);
+                        BasicInformation.AddDeaths(num,indexOfArea);
                         break;
+                    case ("排除"):
+                        i0 += 2;
+                        num = FileProcessor.GetNumber(words[i0]);
+                        BasicInformation.Areas[0].numberOfSuspectedPatients -= num;
+                        BasicInformation.Areas[indexOfArea].numberOfSuspectedPatients -= num;
+                        break;
+                    case ("感染患者"):
+                        i0 += 2;
+                        indexOfTarge = BasicInformation.GetIndexOfArea(words[i0]);
+                        i0++;
+                        num = FileProcessor.GetNumber(words[i0]);
+                        BasicInformation.Areas[indexOfArea].numberOfInfectedPatients -= num;
+                        BasicInformation.Areas[indexOfTarge].numberOfInfectedPatients += num;
+                        break;
+                    case ("疑似患者"):
+                        i0++;
+                        switch (words[i0]){
+                            case ("确诊感染"):
+                                i0++;
+                                num = FileProcessor.GetNumber(words[i0]);
+                                BasicInformation.AddInfectedPatients(num,indexOfArea);
+                                BasicInformation.Areas[0].numberOfSuspectedPatients -= num;
+                                BasicInformation.Areas[indexOfArea].numberOfSuspectedPatients -= num;
+                                break;
+                            case ("流入"):
+                                i0 ++;
+                                indexOfTarge = BasicInformation.GetIndexOfArea(words[i0]);
+                                i0++;
+                                num = FileProcessor.GetNumber(words[i0]);
+                                BasicInformation.Areas[indexOfArea].numberOfSuspectedPatients -= num;
+                                BasicInformation.Areas[indexOfTarge].numberOfSuspectedPatients += num;
+                        }
                 }
             }
             return true;
+        }
+
+        public static int GetNumber(String number){
+            return Integer.parseInt(number.substring(0,number.length()-1));
         }
     }
 
@@ -219,6 +251,30 @@ class InfectStatistic {
                 }
             }
             return res;
+        }
+
+        public static void AddInfectedPatients(int num,int indexOfArea){
+            BasicInformation.Areas[0].numberOfInfectedPatients += num;
+            BasicInformation.Areas[indexOfArea].numberOfInfectedPatients += num;
+        }
+
+        public static void AddSuspectedPatients(int num,int indexOfArea){
+            BasicInformation.Areas[0].numberOfSuspectedPatients += num;
+            BasicInformation.Areas[indexOfArea].numberOfSuspectedPatients += num;
+        }
+
+        public static void AddCured(int num,int indexOfArea){
+            BasicInformation.Areas[0].numberOfPeopleCured += num;
+            BasicInformation.Areas[0].numberOfInfectedPatients -=num;
+            BasicInformation.Areas[indexOfArea].numberOfPeopleCured += num;
+            BasicInformation.Areas[indexOfArea].numberOfInfectedPatients -= num;
+        }
+
+        public static void AddDeaths(int num,int indexOfArea){
+            BasicInformation.Areas[0].numberOfDeaths += num;
+            BasicInformation.Areas[0].numberOfInfectedPatients -=num;
+            BasicInformation.Areas[indexOfArea].numberOfDeaths += num;
+            BasicInformation.Areas[indexOfArea].numberOfInfectedPatients -= num;
         }
     }
 

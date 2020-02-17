@@ -3,26 +3,32 @@ import java.io.*;
 
 public class InfectStatistic {
 	
-	public static int i;
-	public static int typeCount;
-	public static int provinceCount;
-	public static String fileDirect;
-	public static String outputFilepath;
-	public static String dateTime;
-	public static String typePeople[];
-	public static String province[];
-	public static ArrayList<String> fileContent;
-	public static Map<String , String> statistic;
-	public static File fileArray[];
+	public static int i;   //用于读取命令参数时计数使用
+	public static int typeCount; 
+	public static int provinceCount;   //统计多参数的个数用，如后面跟了几个省份
+	public static String fileDirect;   //保存所有日志文件文件目录的路径
+	public static String outputFilepath;   //保存输出文件的路径
+	public static String dateTime;   //保存-date的参数
+	public static String typePeople[];   //保存要输出的类型
+	public static String province[];   //保存要输出的省份
+	public static ArrayList<String> fileContent;    //保存从文件中读取的内容
+	public static Map<String , String> statistic;    //保存统计的结果
+	public static File fileArray[];          //保存所有日志文件的路径
 	
 	public static boolean judgeList (String str)
+	/*  
+	 * 该方法判定args数组里的参数是否是命令行参数 
+	*/
 	{
 		str = str.substring(0,1);
 		if(str.equals("-")) return true;
 		else return false;
 	}
 	
-	public static void judgeType (String str[])
+	public static void judgeType (String str[])	
+	/*  
+	 * 该方法判定是什么类型的命令行参数 
+	 */
 	{
 		if(str[i].equalsIgnoreCase("-log"))
 		{
@@ -56,53 +62,123 @@ public class InfectStatistic {
 	}
 	
 	public static void readDirect()
+	/*  
+	 * 该方法用于读取目录下的日志文件并保存 
+	 */
 	{
-		try 
+
+		File file = new File(fileDirect);
+		fileArray = file.listFiles();			
+		statistic = new HashMap<String,String>();
+		for(int i=0; i < fileArray.length; i++)
 		{
-			File file = new File(fileDirect);
-			fileArray = file.listFiles();
 			fileContent = new ArrayList<String>();
-			
-			for(int i=0; i < fileArray.length; i++)
-			{
-				readFile(i);				
-			}
-			
+			readFile(i);
+			getStatistic();
 		}
-		catch(Exception e)
-		{
-			System.out.println("读取文件出错，请检查日志目录是否合理");
-		}
+
+
 
 	}
 	
 	public static void readFile(int fileCount)
+	/*  
+	 * 该方法用于读取日志文件内容并保存 
+	 */
 	{
 		try 
 		{
-			Scanner sc  = new Scanner(fileArray[fileCount]);
+			Scanner sc  = new Scanner(fileArray[fileCount],"UTF-8");
 			while(sc.hasNext())
 			{
 				String str = sc.next();
-				if (str.equals("//")) 
+				if (str.equals("//"))
 					break;
 				
 				else fileContent.add(str);
 			}
 			
+			
 			for(int i=0;i <fileContent.size();i++)
 			{
-				System.out.print(fileContent.get(i));
+				System.out.println(fileContent.get(i));
 			}
+			
+			File file =new File(outputFilepath);
+			
+            if(!file.exists())
+            {
+	        	file.createNewFile();
+	        }
+            
+            FileWriter fileWritter = new FileWriter(file,true);
+            for(int i=0;i <fileContent.size();i++)
+			{
+            	fileWritter.write(fileContent.get(i));
+			}
+            fileWritter.close();
+			sc.close();
 		} 
 		
 		catch (Exception e) 
 		{
 			System.out.println("读取文件出错，请检查日志目录是否合理");
 		}
+		
+	}
+	
+	public static void getStatistic()
+	/*
+	 * 该方法用于计算统计一个日志文件的各项数据
+	 */
+	{
+		for(int i = 0; i < fileContent.size() - 2; i++)
+		{
+			if(fileContent.get(i + 1).equals("新增") )  //判别新增
+			{
+				increamentState(i);
+			}
+		}
+	}
+
+	public static void increamentState(int count)
+	/*
+	 * 该方法统计情况为新增的日志数据
+	 */
+	{
+		String provin = fileContent.get(count);
+		String type = fileContent.get(count + 2); //感染患者或者疑似患者
+		String str = fileContent.get(count + 3); ;
+		str = str.substring(0 , str.length() - 1); //截取人数
+		
+		if(!statistic.containsKey(provin + type)) 
+		{
+			initStatistic(count);
+		}
+		
+		//新增情况举例:福建 新增 感染患者 23人
+		
+		int sum = Integer.parseInt(str) + Integer.parseInt(statistic.get(provin + type));
+		statistic.put(provin + type , String.valueOf(sum));
+
+		System.out.println(statistic.get(provin + type));	
+	}
+	
+	public static void initStatistic(int count)
+	/*
+	 * 该方法用于初始化统计数据的哈希表，如果日志中出现了该省的信息，则进行初始化
+	 */
+	{
+		statistic.put(fileContent.get(count) + "感染患者", "0");  //如果哈希表中并没有存放该省份，就初始化该省份
+		statistic.put(fileContent.get(count) + "疑似患者", "0");
+		statistic.put(fileContent.get(count) + "治愈", "0");
+		statistic.put(fileContent.get(count) + "死亡", "0");
 	}
 	
 	public static void readOutputPath (String str[])
+	/*  
+	 * 该方法用于保存输出文件路径 
+	 */
 	{
 		
 		if(i != str.length - 1) 
@@ -115,6 +191,9 @@ public class InfectStatistic {
 	}
 	
 	public static void readLog (String str[])
+	/*  
+	 * 该方法用于保存日志文件目录路径 
+	 */
 	{
 		if(i != str.length - 1) 
 		{
@@ -126,6 +205,9 @@ public class InfectStatistic {
 	}
 	
 	public static void readDateTime (String str[])
+	/*  
+	 * 该方法用于保存-date的参数值
+	 */
 	{
 		if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))
 		{
@@ -142,6 +224,9 @@ public class InfectStatistic {
 	}
 	
 	public static void readType (String str[])
+	/*  
+	 * 该方法用于保存-type的参数值
+	 */
 	{
 		typePeople = new String[4];
 		if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))
@@ -171,6 +256,9 @@ public class InfectStatistic {
 	}
 	
 	public static void readProvince (String str[])
+	/*  
+	 * 该方法用于保存-province的参数值
+	 */
 	{
 		province = new String[31];
 		if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))

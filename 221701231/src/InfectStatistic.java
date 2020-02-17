@@ -7,8 +7,8 @@ import java.util.Arrays;
  * TODO
  *
  * @author 221701231_朱鸿昊
- * @version 1.0.5
- * @since 2020/2/16 19:28
+ * @version 1.0.9
+ * @since 2020/2/17 18:01
  */
 class InfectStatistic {
     static class Controller{
@@ -128,6 +128,19 @@ class InfectStatistic {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        public static void OutputToFile() throws IOException {
+            BufferedWriter writer = null;
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(Controller.outputLocation,true),"UTF-8"));
+
+            for (int i0 = 0;i0 < 32;i0++){
+                if (BasicInformation.KeyOfOutput[i0] == 1){
+                    writer.write(BasicInformation.Areas[i0].OutputInformation()+"\r\n");
+                }
+            }
+            writer.flush();//刷新内存，将内存中的数据立刻写出。
+            writer.close();
         }
 
         // 读取单个文件方法
@@ -380,13 +393,12 @@ class InfectStatistic {
         BasicInformation.KeyOfOutput[0] = 1;
 
         Controller.GetParameters(args); // 获取输入的参数
-        //FileProcessor.CreateOutputFile();   // 创建输出文件
+        FileProcessor.CreateOutputFile();   // 创建输出文件
         FileProcessor.ReadFiles(Controller.inputLocation);
-
-        for (int i0 = 0;i0 < 32;i0++){
-            if (BasicInformation.KeyOfOutput[i0] == 1){
-                System.out.println(BasicInformation.Areas[i0].OutputInformation());
-            }
+        try {
+            FileProcessor.OutputToFile();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

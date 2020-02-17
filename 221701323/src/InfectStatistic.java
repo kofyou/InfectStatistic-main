@@ -32,13 +32,13 @@ public class InfectStatistic {
         String[] provinces={"全国","福建"};
         String[] types=null;
         List list=new List(log, out, date, provinces, types);
-        list.printList();
+        // list.printList();
         Work work=new Work(list);
         work.dealData();
-        work.printout();
-        work.PL.printout();
+        // work.printout();
+        // work.PL.printout();
         work.Show();
-        work.list.Provinces.printout();
+        // work.list.Provinces.printout();
     }
 }
 
@@ -56,6 +56,13 @@ class Province {
         cure=0;
         dead=0;
         ProvinceName=name;
+    }
+    public int GiveNumber(String str){
+        if(str.equals("ip"))return ip;
+        else if(str.equals("sp"))return sp;
+        else if(str.equals("cure"))return cure;
+        else if(str.equals("dead"))return dead;
+        else return 0;
     }
 }
 
@@ -77,17 +84,17 @@ class ProvinceList{
             List[i]=new Province(list[i]);
         }
     }
-    public void printout(){
-        for (Province p : List) {
-            if(p.ip!=0||p.sp!=0||p.cure!=0||p.dead!=0){
-                System.out.println("城市："+p.ProvinceName);
-                System.out.println("ip="+p.ip);
-                System.out.println("sp="+p.sp);
-                System.out.println("cure="+p.cure);
-                System.out.println("dead="+p.dead);
-            }
-        }
-    }
+    // public void printout(){
+    //     for (Province p : List) {
+    //         if(p.ip!=0||p.sp!=0||p.cure!=0||p.dead!=0){
+    //             System.out.println("城市："+p.ProvinceName);
+    //             System.out.println("ip="+p.ip);
+    //             System.out.println("sp="+p.sp);
+    //             System.out.println("cure="+p.cure);
+    //             System.out.println("dead="+p.dead);
+    //         }
+    //     }
+    // }
     public Province Select(String name){
         for (Province p : List) {
             if(p.ProvinceName.equals(name))return p;
@@ -246,7 +253,7 @@ class Work{
                     tempStr.trim();
                     
                     if(tempStr.charAt(0)!='/'){
-                        System.out.println(tempStr);
+                        // System.out.println(tempStr);
                         String[] lineList=tempStr.split(" ");
                         // for (String s : lineList) {
                         //     System.out.println(s);
@@ -382,6 +389,17 @@ class Work{
                 Province ps=PL.Select(list.Provinces.List[i].ProvinceName);
                 list.Provinces.List[i]=ps;
             }
+
+        }
+
+        //控制只输入types的累类型
+        for (Province p : list.Provinces.List) {
+            System.out.print(p.ProvinceName+" ");
+            for (Entry<String, String> entry : list.Types.Types.entrySet()) {
+                
+                System.out.print(entry.getValue()+p.GiveNumber(entry.getKey())+"人 "); 
+            }
+            System.out.print("\n");
         }
     }
 

@@ -438,6 +438,18 @@ class InfectStatistic {
 		}*/
 		return province;
 	}
-
+/************ 功能：判断所拣选的类型有哪些 输入参数：命令字符串数组args，type命令所在索引 返回值：类型字符串数组************/
+    static String[] selectType(String[] args,int pos) {
+    	String[] type=new String[4];   
+    	int i=pos+1;    	
+		while(i<args.length&&args[i].charAt(0)!='-') {//不是命令
+			type[seltypecount]=args[i];
+			seltypecount++;
+			i++;
+		}
+		
+    	return type;
+    }
 }
+
 

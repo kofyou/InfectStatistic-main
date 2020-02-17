@@ -1,4 +1,4 @@
-import java.io.File;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,8 +18,13 @@ class InfectStatistic {
     private String log, out;
     private String [] type, province;
     private Date date;
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    private final int typeNum = 4, provinceNum = 34;
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); //用于定义日期格式，方便进行对比。
+    private final int typeNum = 4, provinceNum = 34;          //用于规定选项的可使用参数数量。
+    private int[] internal = new int[4];                      //用于统计全国的情况， 避免多次查找。
+    private Map<String, Integer[]> status = new HashMap<>(); //用于统计每个省份的情况。
+    private String[] provinces = new String[]{"安徽", "北京" ,"重庆" ,"福建" ,"甘肃" ,"广东" ,"广西" ,"贵州" ,"海南" ,
+                 "河北" ,"河南" ,"黑龙江" ,"湖北" ,"湖南" ,"吉林" ,"江苏" ,"江西" ,"辽宁" ,"内蒙古" ,"宁夏" ,"青海" ,
+                 "山东" ,"山西" ,"陕西" ,"上海" ,"四川" ,"天津" ,"西藏" ,"新疆" ,"云南" ,"浙江"};
 
     private void init(String[] args) {
         type = new String[typeNum];
@@ -64,6 +69,10 @@ class InfectStatistic {
         else {
             System.out.println("请输入正确的命令和选项");
         }
+        for (String str : provinces) {
+            status.put(str, new Integer[]{0, 0, 0, 0});
+        }
+
     }
 
     private void dealLogs() {
@@ -97,13 +106,22 @@ class InfectStatistic {
     }
 
     public void caculateLogs(File file) {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            String dataLine;
+            while ((dataLine = br.readLine()) != null) {
 
+            }
+        }
+        catch (IOException ioE) {
+
+        }
     }
 
     public void outFile() {
         File file = new File(out);
         try {
-            if (!file.exists()) {
+            if (file.exists() && file.isFile()) {
 
             }
         }
@@ -123,7 +141,6 @@ class InfectStatistic {
         InfectStatistic infect = new InfectStatistic();
         infect.init(args);
         infect.dealLogs();
-        System.out.println("helloworld");
     }
 
 }

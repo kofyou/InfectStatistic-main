@@ -32,15 +32,15 @@ class InfectStatistic {
     static int isWrong=0;//输入日期是否出错（输入日期比最新的日志还晚）
      	public class Province {
 
-            /** 省份名称 */
+            /** 省份名称 **/
             String provinceName; 
-            /** 感染患者 */
+            /** 感染患者 **/
             int ip; 
-            /** 疑似患者 */
+            /** 疑似患者* */
             int sp;
-            /** 治愈 */
+            /** 治愈 **/
             int cure;
-            /** 死亡 */
+            /** 死亡 **/
             int dead;
 
             Province(String provinceName, int ip, int sp, int cure, int dead) {
@@ -68,11 +68,7 @@ class InfectStatistic {
 	    	cmdArgs(String[] passargs) {
 	    		args=passargs;
 	    	}
-	    	/*
-	    	     功能：判断是否存在某命令
-	    	     输入参数：需要查验的命令
-	    	     返回值：该命令的索引int值，如果没有该命令则返回-1
-	    	 */
+/**************功能：判断是否存在某命令   输入参数：需要查验的命令  返回值：该命令的索引int值，如果没有该命令则返回-1***************/
 	    	int hasParam(String key) {    	
 	    		for(int i=0;i<args.length;i++) {
 	    			if(args[i].equals(key)) {
@@ -95,11 +91,7 @@ class InfectStatistic {
 	    		return true;
 	    	}
 		}
-	    /*
-	       	功能：获取日志文档位置
-	      	输入参数：命令行String数组，-log命令所在索引
-	     	返回值：无
-	    */
+/*************功能：获取日志文档位置 输入参数：命令行String数组，-log命令所在索引 返回值：无***************************/
 	    static void getFrompath(String[] args,int pos) {
 	    	int i=pos+1;//获得路径所在索引   
 			frompath=args[i];
@@ -132,13 +124,20 @@ class InfectStatistic {
 	    		System.out.println("输入的日志文件路径格式错误，请重新输入命令！");
 	    		return false;
 	    	}
-	    }
+	    }   
+/*******************功能：获取输出文档位置 输入参数：命令行String数组，-out命令所在索引 返回值：无*****************************/
+	    static void getTopath(String[] args,int pos) {
+	    	int i=pos+1;//获得路径所在索引   
+			topath=args[i];
+			//System.out.print(topath);
+	    }    
+/****************** 功能：获取日志文档位置 输入参数：命令行String数组，-log命令所在索引 返回值：无*****************************/
+	    static void getFrompath(String[] args,int pos) {
+	    	int i=pos+1;//获得路径所在索引   
+			frompath=args[i];
+	    }    
 	    
-		    /*
-		      	功能：比较日期大小
-		      	输入参数：两个需要比较的日期字符串
-		     	返回值：前<后返回true，前>后返回false
-		    */
+/************功能：比较日期大小 输入参数：两个需要比较的日期字符串 返回值：前<后返回true，前>后返回false*****************************/
 		    static boolean isBefore(String date1,String date2) {
 		    	if(date1.compareTo(date2)>=0) {
 		    		return false;

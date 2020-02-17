@@ -450,6 +450,59 @@ class InfectStatistic {
 		
     	return type;
     }
+/*********** 功能：计算全国疫情情况 输入参数：所有信息之和line数组，信息条数 返回值：全国的line数组***************/ 
+    static Province calAll(Province[] all,int num) {
+    	int sumg=0;//全国感染患者总数
+        int sumy=0;//全国疑似患者总数
+        int sumd=0;//全国死亡人数
+        int sumr=0;//全国治愈人数
+        for(int i=0;i<num;i++) {
+        	sumg+=all[i].ip;
+        	sumy+=all[i].sp;
+        	sumd+=all[i].dead;
+        	sumr+=all[i].cure;
+        }
+        return new Province("全国",sumg,sumy,sumr,sumd);
+    }
+/*********** 功能：输出筛选省份后的结果  输入参数：要输出的数据数组line  返回值：无*******************/
+static void printSel(Province[] selresult) throws IOException {
+	int flag=-1;//全国信息的索引位置
+	File f = new File(topath);
+    BufferedWriter output = new BufferedWriter(new FileWriter(f,false));       
+    //output.write("当日情况："+"\n");
+    for(int i=0;i<selcount;i++) {//挑出全国信息放在首位
+    	if(selresult[i].provinceName.equals("全国")) {
+    		output.write(calAll(result,count).printline()+"\n");
+    		proresult[0]=calAll(result,count);
+    		flag=i;
+    		break;
+    	}
+    }        
+    for(int i=0;i<selcount;i++) {//写入统计数据
+    	if(selresult[i].provinceName.equals("全国")) {        
+    			i=i+1;//跳过全国       		
+    	}        	
+    	if(i<selcount) {
+    		output.write(selresult[i].printline()+"\n");
+    	}
+    }
+    output.write("//该文档并非真实数据，仅供测试使用");
+	output.close();
+	if(flag!=-1) {//有全国信息，提前
+    	for(int i=1;i<=flag;i++) {
+    		proresult[i]=selresult[i-1];
+    	}
+    	for(int i=flag+1;i<selcount;i++) {
+    		proresult[i]=selresult[i];
+    	}
+	}
+	else {
+		for(int i=0;i<selcount;i++) {
+    		proresult[i]=selresult[i];
+    	}	
+	}
+}    
 }
+
 
 

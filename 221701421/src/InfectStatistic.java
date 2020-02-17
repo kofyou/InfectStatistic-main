@@ -16,45 +16,57 @@ import java.util.logging.SimpleFormatter;
  * @version xxx
  * @since xxx
  */
+
 class InfectStatistic {
-    private String []provinceList = {
-        "安徽", "北京", "重庆","福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南",
-            "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
-            "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"
-    };
-    private HashMap<String, ProvanceInfo> provinceMap = new HashMap<>();
-    private List<String> fileList = new ArrayList<>();
-    private int infectTotalNum,suspectedTotalNum,cureTotalNum,diedTotalNum;
-    public InfectStatistic(){
-        for(String p : provinceList){
-            provinceMap.put(p, new ProvanceInfo(p));
-        }
-        infectTotalNum = suspectedTotalNum = cureTotalNum = diedTotalNum = 0;
-    }
+    private ArrayList<String> provinceList;//省份列表
+    private HashMap<String, Integer> typeMap;//查询的类别ip、sp、cure、dead
+    private String outputPath;//输出的目标文件路径
+    private File logDir;//日志文件夹
+    private Date date = null;//查询截止日期
+
     public static void main(String[] args) {
+        InfectStatistic infectStatistic = new InfectStatistic();
+        infectStatistic.processParameters(args);
+        infectStatistic.statistic();
+    }
+
+    public void processParameters(String []args){
         List list = Arrays.asList(args);
+
         int dateIndex = list.indexOf("-date");//截止日期.
         String dateString = "";
-        if (dateIndex > 0) {
+        if (dateIndex > 0) {//如果有传入-date参数
             dateString = args[dateIndex + 1];
         }
-        int dirIndex = list.indexOf("-log");//日志文件目录
-        String dirPath = args[dirIndex + 1];
-        int outputIndex = list.indexOf("-out");//输出文件目录
-        String outputPath = args[outputIndex + 1];
-        int provinceListIndex = list.indexOf("-province");//查询省份列表
-        int provinceListLastIndex = findLastIndex(args, provinceListIndex);
-        HashMap<String, Integer> typeMap = new HashMap<>();//查询的类别
-        ArrayList<String> provinceList = new ArrayList<String>();
 
-        if(provinceListIndex >= 0) {
+        int dirIndex = list.indexOf("-log");//日志文件目录
+        if (dirIndex < 0) {
+            System.out.println("错误：没有传入日志文件路径");
+            System.exit(-1);
+        }
+        String dirPath = args[dirIndex + 1];//日志文件夹路径
+        logDir = new File(dirPath);//日志文件夹
+
+        int outputIndex = list.indexOf("-out");//输出文件目录
+        if (outputIndex < 0) {
+            System.out.println("错误：没有传入输出文件路径");
+        }
+        outputPath = args[outputIndex + 1];
+
+        int provinceListIndex = list.indexOf("-province");//传入参数中-province的下标索引
+        int provinceListLastIndex = findLastIndex(args, provinceListIndex);//查询的最后一个省份的下标索引
+        provinceList = new ArrayList<String>();//省份列表
+
+        if (provinceListIndex >= 0) {//有传入-province参数
             for (int i = provinceListIndex; i <= provinceListLastIndex; i++) {
                 provinceList.add(args[i]);
             }
         }
+
+        typeMap = new HashMap<>();//查询的类别ip、sp、cure、dead
         int typeIndex = list.indexOf("-type");
         int typeLastIndex = findLastIndex(args, typeIndex);
-        int t = typeIndex > 0 ? 0 : 1;
+        int t = typeIndex > 0 ? 0 : 1;//是否有传入-type参数 t=0:有  t=1:没有
         typeMap.put("ip", t);
         typeMap.put("sp", t);
         typeMap.put("cure", t);
@@ -65,30 +77,51 @@ class InfectStatistic {
             }
         }
 
-        File logDir = new File(dirPath);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = null;
-        if(dateIndex >= 0) {
+        date = null;
+        if (dateIndex >= 0) {
             try {
                 date = simpleDateFormat.parse(dateString);
             } catch (ParseException e) {
                 System.out.println("时间参数非法");
             }
         }
-        InfectStatistic infectStatistic = new InfectStatistic();
-        infectStatistic.statistic(logDir,date);
-        infectStatistic.output(outputPath, provinceList,typeMap);
     }
 
-    public static int findLastIndex(String []list, int begin){
+    public void statistic(){
+        //开始统计
+        InfectStatisticOperator infectStatistic = new InfectStatisticOperator();
+        infectStatistic.statistic(logDir, date);
+        infectStatistic.output(outputPath, provinceList, typeMap);
+    }
+
+
+    public static int findLastIndex(String[] list, int begin) {
         int len = list.length;
         int index = begin + 1;
-        while(index < len && list[index].charAt(0) != '-'){
+        while (index < len && list[index].charAt(0) != '-') {
             index++;
         }
         return index - 1;
     }
+}
 
+
+class InfectStatisticOperator {
+    private String []provinceList = {
+        "安徽", "北京", "重庆","福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南",
+            "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
+            "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"
+    };
+    private HashMap<String, ProvanceInfo> provinceMap = new HashMap<>();
+    private List<String> fileList = new ArrayList<>();
+    private int infectTotalNum,suspectedTotalNum,cureTotalNum,diedTotalNum;
+    public InfectStatisticOperator(){
+        for(String p : provinceList){
+            provinceMap.put(p, new ProvanceInfo(p));
+        }
+        infectTotalNum = suspectedTotalNum = cureTotalNum = diedTotalNum = 0;
+    }
 
     public void statistic(File dir, Date date){//统计
         try {
@@ -239,17 +272,12 @@ class ProvanceInfo{
     private int cureNum = 0;//治愈数
     private boolean doesRefered = false;//是否有日志提到
 
-
     public ProvanceInfo(String name){
         this.name = name;
     }
 
     public int getInfectNum() {
         return infectNum;
-    }
-
-    public void setInfectNum(int infectNum) {
-        this.infectNum = infectNum;
     }
 
     public int infectNumAdd(int num){
@@ -264,10 +292,6 @@ class ProvanceInfo{
         return suspectedNum;
     }
 
-    public void setSuspectedNum(int suspectedNum) {
-        this.suspectedNum = suspectedNum;
-    }
-
     public int suspectedAdd(int num){
         return suspectedNum += num;
     }
@@ -280,10 +304,6 @@ class ProvanceInfo{
         return diedNum;
     }
 
-    public void setDiedNum(int diedNum) {
-        this.diedNum = diedNum;
-    }
-
     public int diedNumAdd(int num){
         return diedNum += num;
     }
@@ -294,10 +314,6 @@ class ProvanceInfo{
 
     public int getCureNum() {
         return cureNum;
-    }
-
-    public void setCureNum(int cureNum) {
-        this.cureNum = cureNum;
     }
 
     public int cureNumAdd(int num){

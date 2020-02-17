@@ -50,6 +50,10 @@ class InfectStatistic {
                 this.cure = cure;
                 this.dead = dead;
             }
+/********** 功能：打印一条统计疫情信息 输入参数：无 返回值：信息字符串***************/
+            String printline() {
+            return(provinceName+" 感染患者"+ip+"人 疑似患者"+sp+"人 治愈"+cure+"人 死亡"+dead+"人");
+            }
 
         }
 	public static void main(String[] args) throws IOException {
@@ -332,13 +336,24 @@ static void statistics(String[] ssp,Province[] all) {
 	}
 	}
 /************* 功能：将全国信息加在result总数组中 输入参数：无  返回值：无********************/
-static void addAll() {
-	Province[] mid=new Province[count+1];//暂存信息
-	mid[0]=calAll(result,count);
-	for(int i=1;i<count+1;i++) {
-		mid[i]=result[i-1];
+	static void addAll() {
+		Province[] mid=new Province[count+1];//暂存信息
+		mid[0]=calAll(result,count);
+		for(int i=1;i<count+1;i++) {
+			mid[i]=result[i-1];
+		}
+		result=mid;
 	}
-	result=mid;
+/************ 功能：把所有记录输出到txt文件 输入参数：总的记录数组all 返回值：无*************/
+static void printtxt(Province[] result) throws IOException {
+	File f = new File(topath);
+    BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
+    output.write(calAll(result,count).printline()+"\n");
+    for(int i=0;i<count;i++) {//写入统计数据
+    	output.write(result[i].printline()+"\n");
+    }
+    output.write("//该文档并非真实数据，仅供测试使用");
+	output.close();
 }
 
 

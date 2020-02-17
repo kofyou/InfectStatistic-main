@@ -1,3 +1,4 @@
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,9 +10,11 @@ public class InfectStatistic
 	public static String [] provinceList = null;
 	public static String [] typeList = null;
 	public static Date inputDate = new Date();
+	public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	public static String initMaxDateString = "1900-01-01";
 	public static String now = "";
 	public static int nowIndex = 0;
-	public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	
 	
 	public class Province
 	{
@@ -146,10 +149,48 @@ public class InfectStatistic
 		}
 	}
 	
+	//判断输入的日期是否超出范围
+	public static boolean checkDate(String path, Date date)
+	{
+		String [] list = new File(path).list();
+		int compareTo = 0;
+		Date maxDate = null;
+		try 
+		{
+			maxDate = format.parse(initMaxDateString);
+		} 
+		catch (ParseException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int i=0;i<list.length;i++)
+		{
+			try 
+			{
+				Date current = format.parse(list[i].substring(0, 10));
+				compareTo = current.compareTo(maxDate);
+				if(compareTo > 0)
+				{
+					maxDate = current;
+				}
+			} 
+			catch (ParseException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(maxDate.compareTo(date)<0)
+		{
+			return false;
+		}
+		return true;
+	}
+	
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
-
 		int number = args.length;
 		if(args[0].equals("list"))
 		{
@@ -158,7 +199,32 @@ public class InfectStatistic
 				getParameters(args[i]);
 			}
 		}
+		if(!checkDate(inputPath,inputDate))
+		{
+			System.out.print("输入的日期超出范围！");
+			return ;
+		}
+		else
+		{
+			
+		}
+		
+		
+		
+		
+		
+		
 	}
-
 }
+
+
+
+
+
+
+
+
+
+
+
 

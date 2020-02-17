@@ -29,7 +29,6 @@ public class Lib {}
 
 class DataManager{
 	public static List<int[]> solveData(List<String>data){
-		System.out.println("---开始统计数据");
 		List<int[]> result = new LinkedList<int[]>();
 		ListInit(result);
 		System.out.println("建立责任链");
@@ -49,16 +48,18 @@ class DataManager{
 		exclude.nextHandler = swapIp;
 		swapIp.nextHandler = swapSp;
 		swapSp.nextHandler = null;
-		System.out.println("建立责任链完成");
+		System.out.println("建立责任链完成，开始处理文本");
 		Iterator<String> it = data.iterator();
     	while(it.hasNext()) {
     		String s = it.next();
     		addip.handleRequest(s);
     	}
+    	System.out.println("---文本处理完成");
 		return result;
 	}
 
 	private static void ListInit(List<int[]> result) {
+		System.out.println("输出结果集初始化");
 		for(int i = 0; i < ProvinceValue.values().length ;i++) {
 			int[] vals = {i,0,0,0,0};
 			result.add(vals);
@@ -66,6 +67,7 @@ class DataManager{
 	}
 
 	public static void mergeData(List<int[]> result) {
+		System.out.println("---正在简化结果集");
 		Iterator<int[]> it = result.iterator();
     	while(it.hasNext()) {
     		int[] t = it.next();
@@ -133,8 +135,9 @@ class CmdArgs {
      * @return
      */
     String argKey() {
-    	if(index<args.length && args[index].matches("^\\-.*$")) {//index 作为现在处理到的位置
-    		String[] key = args[index].split("\\-");
+    	if(index<args.length && args[index].matches(Constant.COMMAND_REG)) {
+    		//index 作为现在处理到的位置
+    		String[] key = args[index].split(Constant.SPILT_COMMAND);
     		index++;
     		//System.out.println(key[1]);
     		return key[1];
@@ -150,13 +153,14 @@ class CmdArgs {
      */
 	List<String> argVals() {
     	List<String> values = new LinkedList<String>();
-    	while(index<args.length && (!args[index].matches("^\\-.*$"))) {//将参数所有的值放入values中
+    	while(index<args.length && (!args[index].matches(Constant.COMMAND_REG))) {
+    		//将参数所有的值放入values中
     		values.add(args[index]);
     		index++;
     	}
 		Iterator<String> it = values.iterator();
     	if(!it.hasNext()) {
-    		values.add("default");
+    		values.add(Constant.DEFAULT);
     	}
     	return values;
     }
@@ -179,7 +183,7 @@ class ListCommand implements Command{
      */
 	@Override
 	public void execute(Map<String, List<String>> map) {
-		System.out.println("现在开始执行list命令");
+		System.out.println("---现在开始执行list命令");
 		String proString = null;
 		List<String> typeString = new LinkedList<String>();
 		for(int i = 0; i < ListKey.values().length ;i++) {
@@ -189,6 +193,13 @@ class ListCommand implements Command{
 					dateKey(map);
 					result = DataManager.solveData(logLine);
 					DataManager.mergeData(result);
+					System.out.println("简化后结果集为：");
+					Iterator<int[]> it = result.iterator();
+			    	while(it.hasNext()) {
+			    		int[] t = it.next();
+			    		System.out.println(t[1]+Constant.SPACE + t[2] + Constant.SPACE 
+			    				+ t[3] + Constant.SPACE + t[4]);
+			    		}
 					break;
 				case LOG:
 					logKey(map);
@@ -204,40 +215,61 @@ class ListCommand implements Command{
 					break;
 			}
 		}
-		Iterator<String> it2 = logLine.iterator();
-    	while(it2.hasNext()) {
-    		System.out.println(it2.next());
-    	}
-		
-		Iterator<int[]> it = result.iterator();
-    	while(it.hasNext()) {
-    		int[] t = it.next();
-    		for(int i = 0; i < t.length; i++ ) {
-    			System.out.print(t[i] + " ");
-    		}
-    		System.out.println("");
-    	}
-		
 	}
 
 	private String provinceKey(Map<String, List<String>> map, List<int[]> result) {
-		List<String> provinceList = map.get("province");
-		String proIndex = new String(" ");
+		List<String> provinceList = map.get(Constant.PROVINCE);
+		if(provinceList == null || provinceList.get(0) == Constant.DEFAULT) {
+			System.out.println("---未指定provinc参数，默认输出全部省份");
+			String proIndex = new String(Constant.SPACE);
+			for(int i = 0; i < ProvinceValue.values().length; i++) {
+				proIndex += ProvinceValue.valueOf(i).getText();
+				proIndex += Constant.SPACE;
+			}
+			return proIndex;
+		}
+		System.out.println("分析-provinc参数");
+		String proIndex = new String(Constant.SPACE);
 		for(int i = 0; i < provinceList.size(); i++) {
 			proIndex += provinceList.get(i).toString();
-			proIndex += " ";
+			proIndex += Constant.SPACE;
 		}
+		System.out.println("---已获得province的正则表达式");
+		System.out.println("province分析完成");
 		return proIndex;
 	}
 
 	private List<String> typeKey(Map<String, List<String>> map) {
-		List<String> typeList = map.get("type");
+		List<String> typeList = map.get(Constant.TYPE);
+		if(typeList == null || typeList.get(0) == Constant.DEFAULT) {
+			typeList = new LinkedList<String>();
+			System.out.println("---未指定type参数，默认输出全部类型");
+			for(int i = 0; i < TypeValue.values().length; i++) {
+				typeList.add(TypeValue.values()[i].getEng());
+			}
+			return typeList;
+		}
+		System.out.println("分析-type参数");
+		System.out.println("---已获得type列表");
+		System.out.println("type分析完成");
 		return typeList;
 	}
 
 	private void outKey(Map<String, List<String>> map,String proString,List<String> typeString) {
-		List<String> outList = map.get("out");
+		System.out.println("分析-out参数");
+		List<String> outList = map.get(Constant.OUT);
+		try {
+			if(outList == null) {
+					throw new NoOutException("---无输出路径");
+			}else {
+				System.out.println("---输出路径为："+ outList.get(0));
+			}
+		} catch (NoOutException e) {
+			e.printStackTrace();
+		}
 		String out = outList.get(0);
+		System.out.println("out分析完成");
+		System.out.println("正在输出...\n...\n...");
 		try {
 			File file = new File(out);
 	        FileWriter writer = new FileWriter(file);
@@ -246,27 +278,27 @@ class ListCommand implements Command{
 	        
 	    	while(it.hasNext()) {
 	    		int[] t = it.next();
-	    		if(proString.matches(".* " + ProvinceValue.valueOf(t[0]).getText() + " .*")) {
-	    			bw.write(ProvinceValue.valueOf(t[0]).getText() + " ");
+	    		if(proString.matches(Constant.PREFIX_REG 
+	    				+ ProvinceValue.valueOf(t[0]).getText() + Constant.SUFFIX_REG)) {
+	    			bw.write(ProvinceValue.valueOf(t[0]).getText() + Constant.SPACE);
 	    			for(int i = 0; i < typeString.size(); i++) {
-	    				System.out.println("outputing");
 	    				String type = typeString.get(i).toUpperCase().trim();
 	    				switch(type) {
 	    				case "IP":
 	    					bw.write(TypeValue.IP.getText() + t[1] 
-	    							+ ConstantClassField.PERSON + " ");
+	    							+ Constant.PERSON + Constant.SPACE);
 	    					break;
 	    				case "SP":
 	    					bw.write(TypeValue.SP.getText() + t[2] 
-	    							+ ConstantClassField.PERSON + " ");
+	    							+ Constant.PERSON + Constant.SPACE);
 	    					break;
 	    				case "CURE":
 	    					bw.write(TypeValue.CURE.getText() + t[3] 
-	    							+ ConstantClassField.PERSON + " ");
+	    							+ Constant.PERSON + Constant.SPACE);
 	    					break;
 	    				case "DEAD":
 	    					bw.write(TypeValue.DEAD.getText() + t[4] 
-	    							+ ConstantClassField.PERSON);
+	    							+ Constant.PERSON);
 	    					break;
 	    				}
 	    			}
@@ -275,33 +307,35 @@ class ListCommand implements Command{
 	    	}
 	        bw.flush(); // 把缓存区内容压入文件
 	        bw.close();
+	        System.out.println("输出完成！");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
 	}
 
 	private void logKey(Map<String, List<String>> map) {
-		System.out.println("---分析-log参数");
+		System.out.println("分析-log参数");
 		try {
-			List<String> logList = map.get("log");
+			List<String> logList = map.get(Constant.LOG);
 			if(logList == null) {
-					throw new NoLogException("无输入路径");
+					throw new NoLogException("---无输入路径");
 			}else {
-				System.out.println("输入路径为："+ logList.get(0));
+				System.out.println("---输入路径为："+ logList.get(0));
 			}
-			System.out.println("---分析完成");
+			System.out.println("log分析完成");
 		} catch (NoLogException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void dateKey(Map<String, List<String>> map) {
-		System.out.println("---分析-date参数");
-		List<String> logList = map.get("log");
-		List<String> dateList = map.get("date");
-		System.out.println("输入的日期为：" + dateList.get(0));
+		System.out.println("分析-date参数");
+		List<String> logList = map.get(Constant.LOG);
+		List<String> dateList = map.get(Constant.DATE);
+		System.out.println("---输入的日期为：" + dateList.get(0));
 		
-		if(dateList == null || dateList.get(0) == "default") {
+		if(dateList == null || dateList.get(0) == Constant.DEFAULT) {
+			System.out.println("---未指定date，设为默认default");
 			List<File> fileList = TxtTool.getFileList(logList.get(0));
 			String result = new String();
 			for(int i = 0; i < fileList.size(); i++) {
@@ -309,38 +343,49 @@ class ListCommand implements Command{
 			}
 			String[] line = result.split("\\n");
 			for(int i = 0;i < line.length;i++) {
-				if(!line[i].matches("^\\s$")) {
+				if(!line[i].matches(Constant.BLANKSPACE_REG)) {
 					logLine.add(line[i].trim());
 				}
 			}
-			return;
 		}
 		
 		String date = dateList.get(0);
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat dateFormat = new SimpleDateFormat(Constant.DATE_FORMAT);
 		try {
 			Date dateObj = dateFormat.parse(date);
 			List<File> fileList = TxtTool.getFileList(logList.get(0));
 			
 			//获取文件列表的最后一个文件判断参数值是否超过当前最大日期
 			String pathStr = fileList.get(fileList.size() - 1).toString();
-			String[] fileStr = pathStr.split("\\\\");
-			String[] dateStr = fileStr[fileStr.length - 1].split("\\.");
+			String[] fileStr = pathStr.split(Constant.SPILT_FILEPATH);
+			String[] dateStr = fileStr[fileStr.length - 1].split(Constant.SPILT_DOT);
 			date = dateStr[0];
 			try {
 				Date dateObj2 = dateFormat.parse(date);
 				if(dateObj2.before(dateObj)) {
-					throw new DateOutOfBoundsException("date out of bounds.");
+					throw new DateOutOfBoundsException("---输入日期越界.");
 				}
 			}
 			catch(DateOutOfBoundsException e){
 				e.printStackTrace();
 			}
-			
-			System.out.println("处理前的文件列表  " + fileList);
+			System.out.println("---处理前的文件列表  " + fileList);
 			TxtTool.dateScreen(fileList,dateObj);
-			System.out.println("处理后的文件列表  " + fileList);
-			System.out.println("---分析完成");
+			System.out.println("---处理后的文件列表  " + fileList);
+			String result = new String();
+			for(int i = 0; i < fileList.size(); i++) {
+				result += TxtTool.txt2String(fileList.get(i));
+			}
+			String[] line = result.split("\\n");
+			System.out.println("整合后待处理文本：");
+			for(int i = 0;i < line.length;i++) {
+				if(!line[i].matches(Constant.BLANKSPACE_REG)) {
+					System.out.print(line[i]);
+					logLine.add(line[i].trim());
+				}
+			}
+			System.out.println("\n---");
+			System.out.println("date分析完成");
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -361,7 +406,7 @@ class TxtTool {
             BufferedReader br = new BufferedReader(new FileReader(file));
             while((s = br.readLine())!=null){//使用readLine方法，一次读一行
             	//若本行为'//'开头说明为注释，应忽略
-            	if(s.matches("^\\/\\/.*$"))
+            	if(s.matches(Constant.ANNOTATION_REG))
             		continue;
                 result.append(System.lineSeparator()+s);
             }
@@ -377,16 +422,15 @@ class TxtTool {
         File dir = new File(strPath);
         File[] files = dir.listFiles(); // 该文件目录下文件全部放入数组
         if (files != null) {
-        	//System.out.println("loading the files...");
+        	System.out.println("读取文件中...");
             for (int i = 0; i < files.length; i++) {
                 if (files[i].isDirectory()) { // 判断是文件还是文件夹
                     getFileList(files[i].getAbsolutePath()); // 获取文件绝对路径
                 }else { 
-                    //System.out.println("-" + strFileName);
                     filelist.add(files[i]);
                 }
             }
-        	//System.out.println("loading completed.");
+        	System.out.println("读取完成");
         }
         return filelist;
     }
@@ -394,8 +438,8 @@ class TxtTool {
     public static void dateScreen(List<File> fileList, Date dateObj) {			
 		for(int i = 0; i < fileList.size(); i++) {
 			String pathStr = fileList.get(i).toString();
-			String[] fileStr = pathStr.split("\\\\");
-			String[] dateStr = fileStr[fileStr.length - 1].split("\\.");
+			String[] fileStr = pathStr.split(Constant.SPILT_FILEPATH);
+			String[] dateStr = fileStr[fileStr.length - 1].split(Constant.SPILT_DOT);
 			String date = dateStr[0];
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			try {
@@ -432,7 +476,7 @@ abstract class MyHandler{
 
 //新增感染患者
 class AddipHandler extends MyHandler{
-	private String reg = ConstantClassField.ADD_IP_REG;
+	private String reg = Constant.ADD_IP_REG;
 	private String province;
 	private int num;
 	
@@ -444,9 +488,9 @@ class AddipHandler extends MyHandler{
 	@Override
 	public boolean regFit(String string) {
 		if(string.matches(reg)) {
-			String[] splitString = string.split("\\s");
+			String[] splitString = string.split(Constant.SPILT_SPACE);
 			province = splitString[0];
-			splitString = splitString[3].split(ConstantClassField.PERSON);
+			splitString = splitString[3].split(Constant.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -463,7 +507,7 @@ class AddipHandler extends MyHandler{
 
 //新增疑似患者
 class AddSpHandler extends MyHandler{
-	private String reg = ConstantClassField.ADD_SP_REG;
+	private String reg = Constant.ADD_SP_REG;
 	private String province;
 	private int num;
 	
@@ -474,9 +518,9 @@ class AddSpHandler extends MyHandler{
 	@Override
 	public boolean regFit(String string) {
 		if(string.matches(reg)) {
-			String[] splitString = string.split("\\s");
+			String[] splitString = string.split(Constant.SPILT_SPACE);
 			province = splitString[0];
-			splitString = splitString[3].split(ConstantClassField.PERSON);
+			splitString = splitString[3].split(Constant.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -493,7 +537,7 @@ class AddSpHandler extends MyHandler{
 
 //患者治愈
 class CureHandler extends MyHandler{
-	private String reg = ConstantClassField.CURE_REG;
+	private String reg = Constant.CURE_REG;
 	private String province;
 	private int num;
 	
@@ -504,9 +548,9 @@ class CureHandler extends MyHandler{
 	@Override
 	public boolean regFit(String string) {
 		if(string.matches(reg)) {
-			String[] splitString = string.split("\\s");
+			String[] splitString = string.split(Constant.SPILT_SPACE);
 			province = splitString[0];
-			splitString = splitString[2].split(ConstantClassField.PERSON);
+			splitString = splitString[2].split(Constant.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -525,7 +569,7 @@ class CureHandler extends MyHandler{
 
 //感染患者流入
 class SwapIpHandler extends MyHandler{
-	private String reg = ConstantClassField.SWAP_IP_REG;
+	private String reg = Constant.SWAP_IP_REG;
 	private String province1;
 	private String province2;
 	private int num;
@@ -537,10 +581,10 @@ class SwapIpHandler extends MyHandler{
 	@Override
 	public boolean regFit(String string) {
 		if(string.matches(reg)) {
-			String[] splitString = string.split("\\s");
+			String[] splitString = string.split(Constant.SPILT_SPACE);
 			province1 = splitString[0];
 			province2 = splitString[3];
-			splitString = splitString[4].split(ConstantClassField.PERSON);
+			splitString = splitString[4].split(Constant.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -558,7 +602,7 @@ class SwapIpHandler extends MyHandler{
 
 //疑似患者流入
 class SwapSpHandler extends MyHandler{
-	private String reg = ConstantClassField.SWAP_SP_REG;
+	private String reg = Constant.SWAP_SP_REG;
 	private String province1;
 	private String province2;
 	private int num;
@@ -570,10 +614,10 @@ class SwapSpHandler extends MyHandler{
 	@Override
 	public boolean regFit(String string) {
 		if(string.matches(reg)) {
-			String[] splitString = string.split("\\s");
+			String[] splitString = string.split(Constant.SPILT_SPACE);
 			province1 = splitString[0];
 			province2 = splitString[3];
-			splitString = splitString[4].split(ConstantClassField.PERSON);
+			splitString = splitString[4].split(Constant.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -591,7 +635,7 @@ class SwapSpHandler extends MyHandler{
 
 //患者死亡
 class DeathHandler extends MyHandler{
-	private String reg = ConstantClassField.DEATH_REG;
+	private String reg = Constant.DEATH_REG;
 	private String province;
 	private int num;
 	
@@ -602,9 +646,9 @@ class DeathHandler extends MyHandler{
 	@Override
 	public boolean regFit(String string) {
 		if(string.matches(reg)) {
-			String[] splitString = string.split("\\s");
+			String[] splitString = string.split(Constant.SPILT_SPACE);
 			province = splitString[0];
-			splitString = splitString[2].split(ConstantClassField.PERSON);
+			splitString = splitString[2].split(Constant.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -623,7 +667,7 @@ class DeathHandler extends MyHandler{
 
 //疑似确诊感染患者
 class ChangeHandler extends MyHandler{
-	private String reg = ConstantClassField.CHANGE_REG;
+	private String reg = Constant.CHANGE_REG;
 	private String province;
 	private int num;
 	
@@ -634,9 +678,9 @@ class ChangeHandler extends MyHandler{
 	@Override
 	public boolean regFit(String string) {
 		if(string.matches(reg)) {
-			String[] splitString = string.split("\\s");
+			String[] splitString = string.split(Constant.SPILT_SPACE);
 			province = splitString[0];
-			splitString = splitString[3].split(ConstantClassField.PERSON);
+			splitString = splitString[3].split(Constant.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -655,7 +699,7 @@ class ChangeHandler extends MyHandler{
 
 //排除疑似患者
 class ExcludeHandler extends MyHandler{
-	private String reg = ConstantClassField.EXCLUDE_REG;
+	private String reg = Constant.EXCLUDE_REG;
 	private String province;
 	private int num;
 	
@@ -666,9 +710,9 @@ class ExcludeHandler extends MyHandler{
 	@Override
 	public boolean regFit(String string) {
 		if(string.matches(reg)) {
-			String[] splitString = string.split("\\s");
+			String[] splitString = string.split(Constant.SPILT_SPACE);
 			province = splitString[0];
-			splitString = splitString[3].split(ConstantClassField.PERSON);
+			splitString = splitString[3].split(Constant.PERSON);
 			num = Integer.valueOf(splitString[0]);
 			return true;
 		}
@@ -683,7 +727,7 @@ class ExcludeHandler extends MyHandler{
 	}
 }
 
-class ConstantClassField {
+class Constant{
     public static final String ADD_IP_REG =  "^.*\\s新增\\s感染患者\\s.*$";
     public static final String ADD_SP_REG = "^.*\\s新增\\s疑似患者\\s.*$";
     public static final String CHANGE_REG = "^.*\\s疑似患者\\s确诊感染\\s.*$";
@@ -692,7 +736,24 @@ class ConstantClassField {
     public static final String SWAP_IP_REG = "^.*\\s感染患者\\s流入\\s.*$";
     public static final String SWAP_SP_REG = "^.*\\s疑似患者\\s流入\\s.*$";
     public static final String EXCLUDE_REG = "^.*\\s排除\\s疑似患者\\s.*$";
+    public static final String BLANKSPACE_REG = "^\\s$";
+    public static final String COMMAND_REG = "^\\-.*$";
+    public static final String PREFIX_REG = ".* ";
+    public static final String SUFFIX_REG = " .*";
+    public static final String ANNOTATION_REG = "^\\/\\/.*$";
     public static final String PERSON = "人";
+    public static final String SPACE = " ";
+    public static final String DEFAULT = "default";
+    public static final String SPILT_SPACE = "\\s";
+    public static final String SPILT_FILEPATH = "\\\\";
+    public static final String SPILT_DOT = "\\.";
+    public static final String SPILT_COMMAND = "\\-";
+    public static final String LOG = "log";
+    public static final String OUT = "out";
+    public static final String TYPE = "type";
+    public static final String DATE = "date";
+    public static final String PROVINCE = "province";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
 }
 
 enum ProvinceValue{
@@ -745,12 +806,15 @@ enum ProvinceValue{
 }
 
 enum TypeValue{
-	IP(1,"感染患者"), SP(2,"疑似患者"), CURE(3,"治愈"), DEAD(4,"死亡");
+	IP(1,"感染患者","ip"), SP(2,"疑似患者","sp"), CURE(3,"治愈","cure")
+	,DEAD(4,"死亡","dead");
 	private int key;
 	private String text;
-	private TypeValue(int key,String text){
+	private String eng;
+	private TypeValue(int key,String text,String eng){
 		this.key = key;
 		this.text = text;
+		this.eng = eng;
 	}
 	
 	String getText() {
@@ -759,6 +823,10 @@ enum TypeValue{
 	
 	int getKey() {
 		return key;
+	}
+	
+	String getEng() {
+		return eng;
 	}
 }
 
@@ -799,6 +867,7 @@ class DateOutOfBoundsException extends Exception{
         super(s);
 	}
 }
+
 class NoLogException extends Exception{
 	/**
 	 * 
@@ -806,6 +875,17 @@ class NoLogException extends Exception{
 	private static final long serialVersionUID = 1L;
 
 	public NoLogException(String s){
+        super(s);
+	}
+}
+
+class NoOutException extends Exception{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public NoOutException(String s){
         super(s);
 	}
 }

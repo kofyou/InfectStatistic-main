@@ -88,8 +88,66 @@ class InfectStatistic {
           	返回值：true,false
          */
 		static boolean isCorrectdate(String lastdate,String date) {
-			return true;
+			if(isBefore(lastdate,date)) {
+	    		return false;
+	    	}
+	    	else {
+	    		return true;
+	    	}
 		}
+	    /*
+	       	功能：获取日志文档位置
+	      	输入参数：命令行String数组，-log命令所在索引
+	     	返回值：无
+	    */
+	    static void getFrompath(String[] args,int pos) {
+	    	int i=pos+1;//获得路径所在索引   
+			frompath=args[i];
+	    } 
+		/*
+	      	功能：检验日志文件所在文档的路径的正确性
+	      	输入参数：String日志文件的路径
+	     	返回值：boolean
+	    */
+	    static boolean isCorformpath(String path) {
+	    	//System.out.println(path.matches("^[A-z]:\\\\(.+?\\\\)*$"));
+	    	if(path.matches("^[A-z]:\\\\(.+?\\\\)*$")){//格式正确
+	    		File file = new File(path);
+	    		if(!file.exists()) {//输入文件夹不存在
+	    			System.out.println("输入的日志文件路径不存在，请重新输入命令！");
+	    			return false; 
+	    		}
+	    		else {
+	    			String[] filename = file.list();//获取所有日志文件名     	
+	    			if(filename.length==0) {//文件夹里没日志
+	    				System.out.println("输入的日志文件夹内无内容，请重新输入命令！");
+	    				return false;
+	    			}
+	    			else {
+	    				return true;
+	    			}
+	    		}
+	    	}
+	    	else {
+	    		System.out.println("输入的日志文件路径格式错误，请重新输入命令！");
+	    		return false;
+	    	}
+	    }
+	    
+		    /*
+		      	功能：比较日期大小
+		      	输入参数：两个需要比较的日期字符串
+		     	返回值：前<后返回true，前>后返回false
+		    */
+		    static boolean isBefore(String date1,String date2) {
+		    	if(date1.compareTo(date2)>=0) {
+		    		return false;
+		    	}
+		    	else {
+		    		return true;
+		    	}
+		    }
+		    
      	//处理日志文件
      	public void deal()
      	{	    

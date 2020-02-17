@@ -465,43 +465,89 @@ class InfectStatistic {
         return new Province("全国",sumg,sumy,sumr,sumd);
     }
 /*********** 功能：输出筛选省份后的结果  输入参数：要输出的数据数组line  返回值：无*******************/
-static void printSel(Province[] selresult) throws IOException {
-	int flag=-1;//全国信息的索引位置
+	static void printSel(Province[] selresult) throws IOException {
+		int flag=-1;//全国信息的索引位置
+		File f = new File(topath);
+	    BufferedWriter output = new BufferedWriter(new FileWriter(f,false));       
+	    //output.write("当日情况："+"\n");
+	    for(int i=0;i<selcount;i++) {//挑出全国信息放在首位
+	    	if(selresult[i].provinceName.equals("全国")) {
+	    		output.write(calAll(result,count).printline()+"\n");
+	    		proresult[0]=calAll(result,count);
+	    		flag=i;
+	    		break;
+	    	}
+	    }        
+	    for(int i=0;i<selcount;i++) {//写入统计数据
+	    	if(selresult[i].provinceName.equals("全国")) {        
+	    			i=i+1;//跳过全国       		
+	    	}        	
+	    	if(i<selcount) {
+	    		output.write(selresult[i].printline()+"\n");
+	    	}
+	    }
+	    output.write("//该文档并非真实数据，仅供测试使用");
+		output.close();
+		if(flag!=-1) {//有全国信息，提前
+	    	for(int i=1;i<=flag;i++) {
+	    		proresult[i]=selresult[i-1];
+	    	}
+	    	for(int i=flag+1;i<selcount;i++) {
+	    		proresult[i]=selresult[i];
+	    	}
+		}
+		else {
+			for(int i=0;i<selcount;i++) {
+	    		proresult[i]=selresult[i];
+	    	}	
+		}
+	}
+/*********** 功能：输出筛选类型后的结果  输入参数：要输出的数据数组line，指定类型的String数组，输出的line数组长度  返回值：无*************/
+//provinceName+" 感染患者"+ip+"人 疑似患者"+sp+"人 治愈"+cure+"人 死亡"+dead+"人"
+static void printSelpart(Province[] selresult,String[] type,int len) throws IOException {
 	File f = new File(topath);
-    BufferedWriter output = new BufferedWriter(new FileWriter(f,false));       
+    BufferedWriter output = new BufferedWriter(new FileWriter(f,false));
+    int j=0;//控制输出line的索引
+    int flag=0;//标注该类型是否是第一个，考虑带省份的问题
     //output.write("当日情况："+"\n");
-    for(int i=0;i<selcount;i++) {//挑出全国信息放在首位
-    	if(selresult[i].provinceName.equals("全国")) {
-    		output.write(calAll(result,count).printline()+"\n");
-    		proresult[0]=calAll(result,count);
-    		flag=i;
-    		break;
-    	}
-    }        
-    for(int i=0;i<selcount;i++) {//写入统计数据
-    	if(selresult[i].provinceName.equals("全国")) {        
-    			i=i+1;//跳过全国       		
-    	}        	
-    	if(i<selcount) {
-    		output.write(selresult[i].printline()+"\n");
-    	}
+    while(j<len) {
+    	flag=0;
+	    for(int i=0;i<seltypecount;i++) {
+	    	if(type[i].equals("ip")) {
+	    		if(flag==0) {//本类型是第一个
+	    			output.write(selresult[j].provinceName+" ");
+	    		}
+		    	output.write("感染患者"+selresult[j].ip+"人 ");
+		    	flag=1;			    		
+	    	}
+	    	if(type[i].equals("sp")) {
+	    		if(flag==0) {//本类型是第一个
+	    			output.write(selresult[j].provinceName+" ");
+	    		}
+		    	output.write("疑似患者"+selresult[j].sp+"人 ");
+		    	flag=1;			    		
+	    	}
+	    	if(type[i].equals("cure")) {
+	    		if(flag==0) {//本类型是第一个
+	    			output.write(selresult[j].provinceName+" ");
+	    		}
+		    	output.write("治愈"+selresult[j].cure+"人 ");
+		    	flag=1;			    		
+	    	}
+	    	if(type[i].equals("dead")) {
+	    		if(flag==0) {//本类型是第一个
+	    			output.write(selresult[j].provinceName+" ");
+	    		}
+		    	output.write("死亡"+selresult[j].dead+"人 ");
+		    	flag=1;			    		
+	    	}
+	    }
+	    j++;
+	    output.write("\n");
     }
     output.write("//该文档并非真实数据，仅供测试使用");
 	output.close();
-	if(flag!=-1) {//有全国信息，提前
-    	for(int i=1;i<=flag;i++) {
-    		proresult[i]=selresult[i-1];
-    	}
-    	for(int i=flag+1;i<selcount;i++) {
-    		proresult[i]=selresult[i];
-    	}
-	}
-	else {
-		for(int i=0;i<selcount;i++) {
-    		proresult[i]=selresult[i];
-    	}	
-	}
-}    
+}    	
 }
 
 

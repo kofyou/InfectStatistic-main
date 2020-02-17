@@ -9,6 +9,7 @@
  */
 
 import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,9 +43,12 @@ public class infectStatistic {
 	String enTypeName[]= {"ip","sp","cure","dead"};
 	//改变的省份
 	int ChangeProvince[]=new int[34];
-
+	//命令行
+	String args[];
+		
 	//构造函数
-	infectStatistic(Date date,String type[],String province[],String out){
+	infectStatistic(String args[]){
+		this.args=args;
 		StatisticsNumber=new int[provinceNumber][typeNumber];
 		for(int i=0;i<provinceNumber;i++) {
 			ChangeProvince[i]=-1;
@@ -52,10 +56,15 @@ public class infectStatistic {
 				StatisticsNumber[i][j]=0;
 			}
 		}
+	}
+		
+	//设置参数
+	public void setParameters(Date date,String type[],String province[],String outsString,String logString) {
 		this.date=date;
 		this.parameterType=type;
 		this.parameterProvince=province;
-		this.outPath=out;
+		this.outPath=outsString;
+		this.logPath=logString;
 	}
 	
 	//获取文件名对应时间
@@ -150,6 +159,137 @@ public class infectStatistic {
 		return -1;
 	}
 
+	//获取命令行参数下标
+	public TreeMap<Integer, String> getParameterIndex(String args[],int parameterExist[]){
+		//用于存储命令行参数位于数组的下标
+		TreeMap<Integer, String> parameterTreeMap=new TreeMap<Integer, String>();
+		//初始化命令集合，提取参数下标
+		for(int i=1;i<args.length;i++) {
+			if(args[i].equals("-date")) {
+				parameterTreeMap.put(i, "-date");
+				parameterExist[0]++;
+			}
+			else if(args[i].equals("-log")) {
+				parameterTreeMap.put(i, "-log");
+				parameterExist[1]++;
+			}
+			else if(args[i].equals("-out")) {
+				parameterTreeMap.put(i, "-out");
+				parameterExist[2]++;
+			}
+			else if(args[i].equals("-province")) {
+				parameterTreeMap.put(i, "-province");
+				parameterExist[3]++;
+			}
+			else if(args[i].equals("-type")) {
+				parameterTreeMap.put(i, "-type");
+				parameterExist[4]++;
+			}
+		}
+		return parameterTreeMap;
+	}
+	
+	//获取命令行参数值
+	public boolean getCommandParameters(TreeMap<Integer, String> parameterTreeMap,
+			String[] required,ArrayList<String> province,ArrayList<String> type) {
+		//命令行参数的末位参数下标
+		int maxParameterIndex=parameterTreeMap.lastKey();
+		for (int i : parameterTreeMap.keySet()) {
+			//检测参数值存在，下标相邻为空，下标越界为空
+			if((!parameterTreeMap.containsKey(i+1))&&i+1!=args.length) {
+				if(parameterTreeMap.get(i).equals("-date")) {
+					required[0]=args[i+1];
+					if(!parameterTreeMap.containsKey(i+2)) {
+						return false;
+					}
+				}
+				else if(parameterTreeMap.get(i).equals("-log")) {
+					required[1]=args[i+1];
+					if(!parameterTreeMap.containsKey(i+2)) {
+						return false;
+					}
+				}
+				else if(parameterTreeMap.get(i).equals("-out")) {
+					required[2]=args[i+1];
+					if(!parameterTreeMap.containsKey(i+2)) {
+						return false;
+					}
+				}
+				else if(parameterTreeMap.get(i).equals("-province")) {
+					if(i<maxParameterIndex) {
+						for(int j=i+1;j<parameterTreeMap.higherKey(i);j++) {
+							province.add(args[j]);
+						}
+					}
+					else {
+						for(int j=i+1;j<args.length;j++) {
+							province.add(args[j]);
+						}
+					}
+				}
+				else if(parameterTreeMap.get(i).equals("-type")) {
+					if(i<maxParameterIndex) {
+						for(int j=i+1;j<parameterTreeMap.higherKey(i);j++) {
+							type.add(args[j]);
+						}
+					}
+					else {
+						for(int j=i+1;j<args.length;j++) {
+							type.add(args[j]);
+						}
+					}
+				}
+			}
+			else {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	//检测并设置参数
+	public boolean isValidCommand() throws ParseException, IOException {
+		String[] required= {"","",""};
+		String[] province= {};
+		String[] type= {};
+		ArrayList<String> provinceArrayList=new ArrayList<String>();
+		ArrayList<String> typeArrayList=new ArrayList<String>();
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		//用于判断命令行参数有且仅有出现一次
+		int parameterExist[]= {0,0,0,0,0};
+		//初始化命令集合，提取参数下标
+		TreeMap<Integer, String> parameterTreeMap=getParameterIndex(args, parameterExist);
+		//命令行参数的首位参数下标
+		int minParameterIndex=parameterTreeMap.firstKey();
+		//检测list命令头部的合法性
+		if(minParameterIndex==1) {
+			//解析参数，获取参数值
+			//检测命令行参数值为空/重复
+			if(getCommandParameters(parameterTreeMap, required, provinceArrayList, typeArrayList)) {
+				//检测date/log/out参数必须存在且命令行参数唯一性
+				if(parameterExist[1]==1&&parameterExist[2]==1&&
+					parameterExist[0]==1&&parameterExist[3]<2&&parameterExist[4]<2) {
+					type=typeArrayList.toArray(new String[typeArrayList.size()]);
+					province=provinceArrayList.toArray(new String[provinceArrayList.size()]);
+					//检测命令行日期参数的合法性
+					if(isValidDate(required[0].trim())) {
+						Date date=sdf.parse(required[0].trim());
+						setParameters(date,type,province,required[2],required[1]);
+						//检测命令行type/province参数值的合法性
+						if(isValidParameterType()&&isValidParameterProvince()) {
+								if((required[1].matches("^[A-z]:\\\\(.+?\\\\)*$")||
+									(required[1]+"\\").matches("^[A-z]:\\\\(.+?\\\\)*$"))&&
+									required[2].substring(0, required[2].lastIndexOf(".")).
+									matches("^[A-z]:\\\\(.+?\\\\)*$")){
+										return true;
+								}
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
 	//判断合法日期
 	public static boolean isValidDate(String dateString) throws ParseException {
 		char[] testDateArray=dateString.toCharArray();
@@ -280,161 +420,21 @@ public class infectStatistic {
 	}
 
 	//主函数
-	public static void main(String args[]) throws ParseException{
-		//检测命令行头部list
-		if(args.length!=0&&args[0].equals("list")&&args.length!=1) {
-			String dateString="";
-			String logString="";
-			String outString="";
-			ArrayList<String> provinceArrayList=new ArrayList<String>();
-			ArrayList<String> typeArrayList=new ArrayList<String>();
-			//用于存储命令行参数位于数组的下标
-			TreeMap<Integer, String> parameterTreeMap=new TreeMap<Integer, String>();
-			//用于判断命令行参数有且仅有出现一次
-			int parameterExist[]= {0,0,0,0,0};
-			//初始化命令集合，提取参数下标
-			for(int i=1;i<args.length;i++) {
-				if(args[i].equals("-date")) {
-					parameterTreeMap.put(i, "-date");
-					//记录命令行参数出现次数
-					parameterExist[0]++;
-				}
-				else if(args[i].equals("-log")) {
-					parameterTreeMap.put(i, "-log");
-					parameterExist[1]++;
-				}
-				else if(args[i].equals("-out")) {
-					parameterTreeMap.put(i, "-out");
-					parameterExist[2]++;
-				}
-				else if(args[i].equals("-province")) {
-					parameterTreeMap.put(i, "-province");
-					parameterExist[3]++;
-				}
-				else if(args[i].equals("-type")) {
-					parameterTreeMap.put(i, "-type");
-					parameterExist[4]++;
-				}
-			}
-			//命令行参数的首位参数下标
-			int maxParameterIndex=parameterTreeMap.lastKey();
-			int minParameterIndex=parameterTreeMap.firstKey();
-			int invalidCommand=0;
-			//检测list命令头部的合法性
-			if(minParameterIndex==1) {
-				//解析参数，获取参数值
-				for (int i : parameterTreeMap.keySet()) {
-					//检测参数值存在，下标相邻为空，下标越界为空
-					if((!parameterTreeMap.containsKey(i+1))&&i+1!=args.length) {
-						if(parameterTreeMap.get(i).equals("-date")) {
-							dateString=args[i+1];
-							if(parameterTreeMap.containsKey(i+2)) {
-								invalidCommand=1;
-							}
-						}
-						else if(parameterTreeMap.get(i).equals("-log")) {
-							logString=args[i+1];
-							if(parameterTreeMap.containsKey(i+2)) {
-								invalidCommand=1;
-							}
-						}
-						else if(parameterTreeMap.get(i).equals("-out")) {
-							outString=args[i+1];
-							if(parameterTreeMap.containsKey(i+2)) {
-								invalidCommand=1;
-							}
-						}
-						else if(parameterTreeMap.get(i).equals("-province")) {
-							if(i<maxParameterIndex) {
-								for(int j=i+1;j<parameterTreeMap.higherKey(i);j++) {
-									provinceArrayList.add(args[j]);
-								}
-							}
-							else {
-								for(int j=i+1;j<args.length;j++) {
-									provinceArrayList.add(args[j]);
-								}
-							}
-						}
-						else if(parameterTreeMap.get(i).equals("-type")) {
-							if(i<maxParameterIndex) {
-								for(int j=i+1;j<parameterTreeMap.higherKey(i);j++) {
-									typeArrayList.add(args[j]);
-								}
-							}
-							else {
-								for(int j=i+1;j<args.length;j++) {
-									typeArrayList.add(args[j]);
-								}
-							}
-						}
-					}
-					else {
-						invalidCommand=1;
-					}
-				}
-				SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
-				String type[]= {};
-				String province[]= {};
-				//检测命令行参数值为空/重复,0--非空 1--空/重复
-				if(invalidCommand==0) {
-					//检测date/log/out参数必须存在且命令行参数唯一性
-					if(parameterExist[1]==1&&parameterExist[2]==1&&
-							parameterExist[0]==1&&parameterExist[3]<2&&parameterExist[4]<2) {
-						type=typeArrayList.toArray(new String[typeArrayList.size()]);
-						province=provinceArrayList.toArray(new String[provinceArrayList.size()]);
-						//检测命令行日期参数的合法性
-						if(infectStatistic.isValidDate(dateString.trim())) {
-							Date date=sdf.parse(dateString.trim());
-							infectStatistic t=new infectStatistic(date,type,province,outString);
-							File folder=new File(logString.trim());
-							//检测命令行type/province参数值的合法性
-							if(t.isValidParameterType()&&t.isValidParameterProvince()) {
-								if((logString.matches("^[A-z]:\\\\(.+?\\\\)*$")||
-								(logString+"\\").matches("^[A-z]:\\\\(.+?\\\\)*$"))&&
-								outString.substring(0, outString.lastIndexOf(".")).matches("^[A-z]:\\\\(.+?\\\\)*$"))
-								{
-									if(folder.isDirectory()) {
-										System.out.println("get");
-									}
-									else {
-											System.out.println("不存在该文件夹");
-											infectStatistic.validCommandTips();
-									}
-								}
-								else{
-									System.out.println("文件/文件夹路径非法");
-										infectStatistic.validCommandTips();
-								}								
-							}
-							else {
-									System.out.println("省份或者类型参数值非法");
-									infectStatistic.validCommandTips();
-							}
-						}
-						else {
-							System.out.println("命令行日期参数非法");
-							infectStatistic.validCommandTips();
-						}
-					}
-					else {
-						System.out.println("缺少或重复date/log/out参数");
-						infectStatistic.validCommandTips();
-					}
-				}
-				else {
-					System.out.println("date/log/out/type/province参数值为空/重复");
-					infectStatistic.validCommandTips();
-				}
-			}
-			else {
-				System.out.println("list后未紧接参数");
-				infectStatistic.validCommandTips();
-			}
+	public static void main(String args[]) throws ParseException, IOException{
+	//检测命令行头部list
+	if(args.length!=0&&args[0].equals("list")&&args.length!=1) {
+		infectStatistic test=new infectStatistic(args);
+		if(test.isValidCommand()) {
+			System.out.println("get");
 		}
 		else {
-			System.out.println("list命令格式错误");
+			System.out.println("命令行格式错误,请检测");
 			infectStatistic.validCommandTips();
 		}
 	}
+	else {
+		System.out.println("命令行格式错误，请检测");
+		infectStatistic.validCommandTips();
+	}
+}
 }

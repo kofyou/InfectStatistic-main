@@ -18,7 +18,6 @@ import javax.annotation.PostConstruct;
 import javax.print.attribute.standard.OutputDeviceAssigned;
 
 
-import sun.nio.cs.ext.IBM037;
 
 
 
@@ -34,25 +33,44 @@ import sun.nio.cs.ext.IBM037;
  * @since 2020/2/8
  */
 class InfectStatistic {
-	private static String inputPath = "C://";
-	private static String outputPath = "C://";
-	private static String targetDate = "";
-	private static ArrayList<String> provinceArray = new ArrayList<String>();
-	private static Map<String, Province> map = new HashMap<String, Province>();
-	private static Province country = new Province();//用于统计全国人数
-	private static boolean ip = false;
-	private static boolean sp = false;
-	private static boolean cure = false;
-	private static boolean dead = false;
-	private static ArrayList<String> typeItem = new ArrayList<String>();
-	private static ArrayList<String> provinceItem = new ArrayList<String>();
-	private static String[] province = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北",
+	public static String inputPath = "C:\\Users\\Peter\\Documents\\GitHub\\InfectStatistic-main\\221701126\\log\\";
+	public static String outputPath = "C:\\Users\\Peter\\Documents\\GitHub\\InfectStatistic-main\\221701126\\result\\out.txt";
+	public static String targetDate = "";
+	public static ArrayList<String> provinceArray = new ArrayList<String>();
+	public static Map<String, Province> map = new HashMap<String, Province>();
+	public static Province country = new Province();//用于统计全国人数
+	public static boolean ip = false;
+	public static boolean sp = false;
+	public static boolean cure = false;
+	public static boolean dead = false;
+	public static ArrayList<String> typeItem = new ArrayList<String>();
+	public static ArrayList<String> provinceItem = new ArrayList<String>();
+	public static String[] province = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北",
 			"河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西",
 			"上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"
 	};
 	
-	//将命令行参数转换成对象存储起来
-	private static void solveArgs(String[] args) {
+	//获取目录下日期最大的文件名
+	public static String getMaxDate() {
+		String maxDate = "0";
+		File file = new File(inputPath);
+		if(file.exists()) {
+			String[] fileNames = file.list(); // 获得目录下的所有文件的文件名
+			for(String fileName : fileNames) {
+				//去后缀
+				fileName = fileName.substring(0, fileName.indexOf('.'));
+				//日期比较
+				if(fileName.compareTo(maxDate) > 0) {
+					maxDate = fileName;
+				}
+			}
+		}
+		
+		return maxDate;
+	}
+	
+	//将命令行参数转换成相应变量存储起来
+	public static void solveArgs(String[] args) {
 		int i = 0;
 		int pos = 1;
 		while(pos < args.length) {
@@ -118,15 +136,9 @@ class InfectStatistic {
 		
 	}
 	
-	//写入文件
-	private static void writeToFile() {
-		
-		
-		
-	}
 	
 	//打印一个省的信息
-	private static void printTheProvince(String provinceName, OutputStreamWriter osw) {
+	public static void printTheProvince(String provinceName, OutputStreamWriter osw) {
 		try {
 			
 			osw.write(provinceName);
@@ -202,15 +214,25 @@ class InfectStatistic {
 	}
 	
 	//测试打印结果
-	private static void printResult() {
+	public static void printResult() {
 		try {
 			File output = new File(outputPath);
 			OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(output));
-			for(String provinceName : province) {
-				if(provinceItem.contains(provinceName)) {
-					printTheProvince(provinceName, osw);
+			if(provinceItem.size() == 0) {
+				for(String provinceName : province) {
+					if(map.get(provinceName) != null) {
+						printTheProvince(provinceName, osw);
+					}
 				}
 			}
+			else {
+				for(String provinceName : province) {
+					if(provinceItem.contains(provinceName)) {
+						printTheProvince(provinceName, osw);
+					}
+				}
+			}
+			
 			osw.flush();
 			osw.close();
 		} catch (IOException e) {
@@ -220,7 +242,7 @@ class InfectStatistic {
 	}
 	
 	//获取各行的人数
-	private static int getNumber(String[] information) {
+	public static int getNumber(String[] information) {
 		//获取人数
 		String numString = information[information.length - 1];
 		int index = numString.indexOf("人");
@@ -230,12 +252,13 @@ class InfectStatistic {
 	}
 	
 	//处理待处理文件的每一个文件
-	private static void solveEveryFile(Vector<String> toHandleDate) {
+	public static void solveEveryFile(Vector<String> toHandleDate) {
 		
 		
 		StringBuffer sb = new StringBuffer();
 		for(String dateFile : toHandleDate) {
 			dateFile = inputPath + dateFile + ".log.txt";
+			System.out.println(dateFile);
 			try {
 	    		File file = new File(dateFile);
 	    		InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
@@ -386,35 +409,28 @@ class InfectStatistic {
 	}
 	
 	//处理date命令
-	private static void solveDateOrder(String targetDate) {
+	public static void solveDateOrder(String targetDate) {
+		String maxDate = getMaxDate();
+		if(targetDate.compareTo(maxDate) > 0) {
+			System.out.println("日期超出范围");
+			return;
+		}
 		//获取输入路径下的所有文件
 		File file = new File(inputPath);
 		if(file.isDirectory()) {
 			Vector<String> toHandleDate = new Vector<String>();//获取符合要求待处理的日期文件
 			String[] fileNames = file.list(); // 获得目录下的所有文件的文件名
-			boolean flag = false;
 			for(String fileName : fileNames) {//截断后缀名
 				fileName = fileName.substring(0, fileName.indexOf('.'));
 				//日期比较
 				if(fileName.compareTo(targetDate) <= 0) {
 					toHandleDate.add(fileName);
 					System.out.println(fileName);
-					if(fileNames.length == toHandleDate.size()) {
-						flag = true;
-					}
 				}
 				else {
-					flag = true;
 					break;
 				}
 				//System.out.println(fileName);
-			}
-			if(flag == false) {
-				System.out.println("日期超出范围");
-				toHandleDate.clear();
-			}
-			else {
-				flag = false;
 			}
 
 			if(toHandleDate.size() > 0) {
@@ -430,7 +446,11 @@ class InfectStatistic {
     	country.name = "全国";
   
     	solveArgs(args);
+    	if(targetDate.equals("")) {
+        	targetDate = getMaxDate();
+    	}
 
+    	System.out.println("最大日期为" + targetDate);
     	System.out.println(inputPath);
     	System.out.println(outputPath);
     	solveDateOrder(targetDate);

@@ -3,15 +3,12 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.Collator;
 import java.util.Arrays;
 
-//import InfectStatistic.test.line;
 /**
  * InfectStatistic
  * TODO
@@ -81,6 +78,45 @@ class InfectStatistic {
     	int hasLog=cmd.hasParam("-log");//获取log路径索引
     	getTopath(args,hasPath);
     	getFrompath(args,hasLog);
+    	if(!isCorformpath(frompath)) {//输入日志所在文件夹有错
+    		return;
+    	}
+    	if(hasDate!=-1) {//有指定日期
+    		readLog(args[hasDate+1],true);  
+    		if(index!=-2&&isWrong==0&&hasPro!=-1) {//有指定省份
+    			String[] province=selectPro(args,hasPro);    			
+    			Province[] a=selectMes(province);   			 			
+    			Province[] b=sortline1(a,selcount);
+    			printSel(b);
+    			if(hasType!=-1) {//有指定类型
+        			String[] type=selectType(args,hasType);
+        			printSelpart(proresult,type,selcount);
+    			}
+    		}
+    		else if(index!=-2&&isWrong==0&&hasType!=-1) {//有指定类型未指定省份
+    			String[] type=selectType(args,hasType);
+    			addAll();
+    			printSelpart(result,type,count+1);
+			}    		
+    	}
+    	else {//未指定日期
+    		readLog(args[hasDate+1],false);   		
+    		if(hasPro!=-1) {//有指定省份   			
+    			String[] province=selectPro(args,hasPro);    			
+    			Province[] a=selectMes(province);  			
+    			Province[] b=sortline1(a,selcount);
+    			printSel(b);
+    			if(hasType!=-1) {//有指定类型和省份
+        			String[] type=selectType(args,hasType);
+        			printSelpart(proresult,type,selcount);
+    			}
+    		}
+    		else if(hasType!=-1) {//有指定类型未指定省份
+    			String[] type=selectType(args,hasType);
+    			addAll();
+    			printSelpart(result,type,count+1);
+			}
+    	}    	
 	}
 		//获取使用命令
 		static class cmdArgs {
@@ -392,6 +428,35 @@ class InfectStatistic {
 	    } 
 	    return result;
 	}
+/***************** 功能：拼音顺序排序line数组（拣选省份后的） 输入参数：记录数组,排序数组个数 返回值：排序好的数组*****************/
+    static Province[] sortline1(Province[] wannasort,int num) {
+    	String[] location=new String[num];
+    	int i=0; 
+    	Province[] aa=new Province[num];
+    	for(i=0;i<num;i++) {
+    		aa[i]=new Province();
+    	}
+    	for(i=0;i<num;i++) {
+    		location[i]=wannasort[i].provinceName;   		
+    	}    	
+        Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
+        Arrays.sort(location, cmp);
+        i=0;
+        int j=0;//控制省份拼音顺序索引        	
+    	while(i<num) {
+        	if(wannasort[i].provinceName.equals(location[j])) {
+        		aa[j]=wannasort[i];
+        		j++;       		
+        		if(j>=num) {
+        			break;
+        		}
+        		i=-1;//重新开始循环
+        	}
+        	i++;
+    	}    
+        return aa;
+    }
+    
 /************** 功能：拣选省疫情信息  输入参数：字符串省的名称,要搜索的省的个数  返回值：筛选后的信息数组************** */
 	static Province[] selectMes(String[] pro) {
 		int flag=0;//是否找到已查的省

@@ -121,9 +121,7 @@ class InfectStatistic {
     		
     		for(int i=0;i<FileName.size();i++) {    			
     				SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd");
-    				//FileName=..\log\2020-01-22.log.txt
 					String FileNameDate=FileName.get(i).toString().split("\\\\")[2].split("\\.")[0];
-    				//String FileNameDate=FileName.get(i).toString().split("\\\\")[8].split("\\.")[0];
     				if(date.equals("")) {
 						date=df.format(new Date());
 					}
@@ -262,7 +260,6 @@ class InfectStatistic {
     		String OutputContent="";
     		
     		for(int i=0;i<OutputText.size();i++) {
-    			//System.out.println(OutputText.get(i));
     			if(province.size()<=0&&type.size()<=0) {
     				OutputContent+=OutputText.get(i).toString()+"\n";
     			}else if(type.size()<=0) {

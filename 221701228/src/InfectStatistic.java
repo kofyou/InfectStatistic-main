@@ -1,4 +1,7 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -186,6 +189,62 @@ public class InfectStatistic
 			return false;
 		}
 		return true;
+	}
+	
+	//读取目录下的文件
+	public static void readInfo(String path, Date date)
+	{
+		String [] list = new File(path).list();
+		int compareTo = 0;
+		for(int i=0;i<list.length;i++)
+		{
+			try 
+			{
+				Date current = format.parse(list[i].substring(0, 10));
+				compareTo = date.compareTo(current);
+				if (compareTo > 0)
+				{
+					String filePath = path + list[i];
+					File file = new File(filePath);
+					try (BufferedReader br = new BufferedReader(new FileReader(file));)
+					{
+				        String line = null;
+				        String [] info = null;
+				        while ((line = br.readLine()) != null)
+				        {
+				            line = line.trim();
+				            info = line.split(" ");
+				            if(info[0].substring(0, 2).equals("//"))
+				            {
+				            	break;
+				            }
+				            else if(info.length==3)
+				            {
+				            	
+				            }
+				            else if(info.length==4)
+				            {
+				            	
+				            }
+				            else if(info.length==5)
+				            {
+				            	
+				            }
+				        }
+
+				    } 
+					catch (IOException e) 
+					{
+						e.printStackTrace();
+					}
+				}
+			} 
+			catch (ParseException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public static void main(String[] args) 

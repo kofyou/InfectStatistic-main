@@ -1,9 +1,10 @@
 import java.util.*;
 import java.io.*;
+import java.text.Collator;
 
 public class InfectStatistic {
 	
-	public static int i;   //用于读取命令参数时计数使用
+	public static int cmdCount;   //用于读取命令参数时计数使用，在main函数中的循环中第一次使用
 	public static int typeCount; 
 	public static int provinceCount;   //统计多参数的个数用，如后面跟了几个省份
 	public static String fileDirect;   //保存所有日志文件文件目录的路径
@@ -13,11 +14,12 @@ public class InfectStatistic {
 	public static String province[];   //保存要输出的省份
 	public static ArrayList<String> fileContent;    //保存从文件中读取的内容
 	public static Map<String , String> statistic;    //保存统计的结果
+	public static Map<String, Object> sortMap;  //用于保存经过排序的统计结果
 	public static File fileArray[];          //保存所有日志文件的路径
 	
 	public static boolean judgeList (String str)
 	/*  
-	 * 该方法判定args数组里的参数是否是命令行参数 
+	 * 该方法判定args数组元素是否是命令行参数 
 	*/
 	{
 		str = str.substring(0,1);
@@ -30,35 +32,46 @@ public class InfectStatistic {
 	 * 该方法判定是什么类型的命令行参数 
 	 */
 	{
-		if(str[i].equalsIgnoreCase("-log"))
+		if(str[cmdCount].equalsIgnoreCase("-log"))
 		{
 			readLog(str);
 		}
 		
-		else if(str[i].equalsIgnoreCase("-out"))
+		else if(str[cmdCount].equalsIgnoreCase("-out"))
 		{
 			readOutputPath(str);
 		}
 		
-		else if(str[i].equalsIgnoreCase("-date"))
+		else if(str[cmdCount].equalsIgnoreCase("-date"))
 		{
 			readDateTime(str);
 		}
 		
-		else if(str[i].equalsIgnoreCase("-type"))
+		else if(str[cmdCount].equalsIgnoreCase("-type"))
 		{
 			readType(str);
 		}
 		
-		else if(str[i].equalsIgnoreCase("-type"))
+		else if(str[cmdCount].equalsIgnoreCase("-type"))
 		{
 			readType(str);
 		}
 		
-		else if(str[i].equalsIgnoreCase("-province"))
+		else if(str[cmdCount].equalsIgnoreCase("-province"))
 		{
 			readProvince(str);
 		}
+	}
+	
+	public static Map<String, Object> sortHashkey()
+	/*
+	 * 将HashMap的key值按照中文拼音排序
+	 */
+	{
+		Comparator<Object> CHINA_COMPARE = Collator.getInstance(java.util.Locale.CHINA);
+		Map<String, Object> map = new TreeMap<String, Object>(CHINA_COMPARE);
+		map.putAll(statistic);
+		return map;
 	}
 	
 	public static void readDirect()
@@ -68,16 +81,16 @@ public class InfectStatistic {
 	{
 
 		File file = new File(fileDirect);
-		fileArray = file.listFiles();			
+		fileArray = file.listFiles();		
 		statistic = new HashMap<String,String>();
+	    
 		for(int i=0; i < fileArray.length; i++)
 		{
 			fileContent = new ArrayList<String>();
 			readFile(i);
 			getStatistic();
+			if(fileArray[i].getName().equals(dateTime + ".log.txt")) break; //如果dateTime中规定了统计的日志日期，那就在统计完那个日志后结束统计
 		}
-
-
 
 	}
 	
@@ -280,10 +293,10 @@ public class InfectStatistic {
 	 */
 	{
 		
-		if(i != str.length - 1) 
+		if(cmdCount != str.length - 1) 
 		{
-			i++; //读取-out地址
-			outputFilepath = str[i]; //保存路径
+			cmdCount++; //读取-out地址
+			outputFilepath = str[cmdCount]; //保存路径
 		}
 		
 		System.out.print(outputFilepath);
@@ -294,10 +307,10 @@ public class InfectStatistic {
 	 * 该方法用于保存日志文件目录路径 
 	 */
 	{
-		if(i != str.length - 1) 
+		if(cmdCount != str.length - 1) 
 		{
-			i++; //读取-log地址
-			fileDirect = str[i]; //保存路径
+			cmdCount++; //读取-log地址
+			fileDirect = str[cmdCount]; //保存路径
 		}
 		
 		System.out.print(fileDirect);
@@ -308,15 +321,15 @@ public class InfectStatistic {
 	 * 该方法用于保存-date的参数值
 	 */
 	{
-		if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))
+		if(cmdCount == str.length - 1 || str[cmdCount+1].substring(0,1).equals("-"))
 		{
 			dateTime = "latest";
 		}
 		
 		else
 		{
-			i++;
-			dateTime = str[i];
+			cmdCount++;
+			dateTime = str[cmdCount];
 		}
 		
 		System.out.print(dateTime);
@@ -328,7 +341,7 @@ public class InfectStatistic {
 	 */
 	{
 		typePeople = new String[4];
-		if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))
+		if(cmdCount == str.length - 1 || str[cmdCount+1].substring(0,1).equals("-"))
 		{
 			typePeople[0] = "all";
 			typeCount++;
@@ -336,17 +349,17 @@ public class InfectStatistic {
 		
 		else
 		{
-			i++;			
+			cmdCount++;			
 			typeCount = 0;
-			for(  ; i < str.length ; i++)
+			for(  ; cmdCount < str.length ; cmdCount++)
 			{	
-				if(str[i].equalsIgnoreCase("ip") 
-					|| str[i].equalsIgnoreCase("sp") 
-					|| str[i].equalsIgnoreCase("cure") 
-					|| str[i].equalsIgnoreCase("dead") )
-				typePeople[typeCount++] = str[i];
+				if(str[cmdCount].equalsIgnoreCase("ip") 
+					|| str[cmdCount].equalsIgnoreCase("sp") 
+					|| str[cmdCount].equalsIgnoreCase("cure") 
+					|| str[cmdCount].equalsIgnoreCase("dead") )
+				typePeople[typeCount++] = str[cmdCount];
 				
-				if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))  break;
+				if(cmdCount == str.length - 1 || str[cmdCount+1].substring(0,1).equals("-"))  break;
 			}
 		}
 		
@@ -360,7 +373,7 @@ public class InfectStatistic {
 	 */
 	{
 		province = new String[31];
-		if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))
+		if(cmdCount == str.length - 1 || str[cmdCount+1].substring(0,1).equals("-"))
 		{
 			province[0] = "全国";
 		    provinceCount++;
@@ -368,13 +381,13 @@ public class InfectStatistic {
 		
 		else
 		{
-			i++;			
+			cmdCount++;			
 			provinceCount = 0;
-			for(  ; i < str.length ; i++)
+			for(  ; cmdCount < str.length ; cmdCount++)
 			{	
-				province[provinceCount++] = str[i];
+				province[provinceCount++] = str[cmdCount];
 				
-				if(i == str.length - 1 || str[i+1].substring(0,1).equals("-"))  break;
+				if(cmdCount == str.length - 1 || str[cmdCount+1].substring(0,1).equals("-"))  break;
 			}
 		}
 		
@@ -382,22 +395,25 @@ public class InfectStatistic {
 		System.out.println(province[k]);
 	}
 	
+	
 	public static void main(String args[])
     {
-		i = 0;
-		//if(args[i].equalsIgnoreCase("list"))
-    	for(i = 0;i < args.length; i++)
+		cmdCount = 0;
+		if(args[cmdCount].equalsIgnoreCase("list"))
+    	for(cmdCount = 0;cmdCount < args.length; cmdCount++)
     	{
-    		if(judgeList(args[i]))
+    		if(judgeList(args[cmdCount]))
     		{
     			judgeType(args);
     		}
     	}
 		
 		readDirect();
-		for (String key : statistic.keySet()) {  //通过foreach方法来遍历
-		       System.out.println("key= "+ key + " and value= " + statistic.get(key));
+		sortMap = sortHashkey();
+		for (String key : sortMap.keySet()) {  //通过foreach方法来遍历
+		       System.out.println("key= "+ key + " and value= " + sortMap.get(key));
 		      }
+
     	return;
     }
 

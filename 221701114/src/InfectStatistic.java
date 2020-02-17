@@ -5,7 +5,14 @@
 * Date:2020-2-16
 */
 
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 
 class InfectStatistic 
 {
@@ -18,9 +25,10 @@ class InfectStatistic
 	//记录list命令各参数是否出现，分别对应参数log、out、date、type、province,出现后相应元素值置为1
     public static int commandArgsFlag[] = {0,0,0,0,0};
     
-    public static String[] allLogFilesName;//记录所以日志文件的文件名
+    public static String[] allLogFilesName;  //记录所有日志文件的文件名
+    public static String maxDate=null; //日志目录下的最大日期
     
-    public static String maxDate=null;
+    public static ArrayList allProvince = new ArrayList();
     
     /*
     * Description:分析命令行穿给主函数的命令
@@ -109,7 +117,7 @@ class InfectStatistic
 		return theMaxDate;
 	}
 	
-    public static void main(String[] args) 
+    public static void main(String[] args) throws IOException 
     {
     	analysisOfCommand(args);
     	getAllLogFilesName();
@@ -128,9 +136,36 @@ class InfectStatistic
     	}
     	else 
     	{
-    		System.out.println("日期没有超出范围");
+    		//System.out.println("日期没有超出范围");
+    		for (int i = 0;i < allLogFilesName.length;i++)
+    		{
+    			//读取满足日期小于或等于指定日期的文件的每行
+    			if (allLogFilesName[i].compareTo(dateString+".log.txt") <= 0)
+    			{
+    		    	String oneLineOfFile = null;
+    		    	try 
+    		    	{
+    		    		InputStreamReader isr = new InputStreamReader(
+    		    			new FileInputStream(pathOfLog+allLogFilesName[i]), "UTF-8");
+    	    			BufferedReader br = new BufferedReader(isr);
+    		    		while ((oneLineOfFile = br.readLine()) != null 
+    		    			&& oneLineOfFile.length() != 0  //不读取空行
+    		    			&& oneLineOfFile.startsWith("//") == false)  //不读取注释行
+    		    		{
+    		    			System.out.println(oneLineOfFile);
+    		    		}
+    		    	} 
+    		    	catch (FileNotFoundException e) {
+    		    		e.printStackTrace();
+    		    	}
+    			}
+    		}
+    		
     		
     	}
+    	
+    	
+
 
     }
 }

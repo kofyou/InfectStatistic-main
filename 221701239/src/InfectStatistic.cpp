@@ -85,20 +85,43 @@ void process_xin_zeng(fstream& file,string province_name)
 		(m_province[province_name])[1] += num;
 	}
 }
+//处理治愈的情况
+void process_zhi_yu(fstream& file, string province_name)
+{
+	string temp;
+	file >> temp;
+	int num = draw_number(temp);
+	(m_province["全国"])[2] += num;
+	(m_province[province_name])[2] += num;
+}
+//处理死亡的情况
+void process_pass_away(fstream& file, string province_name)
+{
+	string temp;
+	file >> temp;
+	int num = draw_number(temp);
+	(m_province["全国"])[3] += num;
+	(m_province[province_name])[3] += num;
+}
 //按字符串读取并处理文件
 void process_file(vector<string> file_list)
 {
+	int num;   //测试用的
 	//6种情况,新增(感染患者,疑似患者),感染患者,疑似患者(流入,确诊),死亡,治愈,排除(疑似患者).
 	int i;
 	insert_province("全国");
 	//首先加入全国的情况
 	fstream fei_yan_log(file_list[0]);
 	string temp;
+	string temp_past;   //用于存储之前一次的读取
 	string province_name;
 	bool is_province = true; //是否读到省份的标志位
 	while (!fei_yan_log.eof())
 	{
+		
+		temp_past = temp;
 		fei_yan_log >> temp;
+		num=draw_number(temp);
 		temp = UTF8ToGB(temp.c_str()).c_str();
 		if (temp.substr(0, 1).compare("/") == 0)
 			break;
@@ -114,7 +137,36 @@ void process_file(vector<string> file_list)
 			process_xin_zeng(fei_yan_log, province_name);
 			is_province = true;
 		}
+		if (temp.compare("死亡") == 0)
+		{
+			process_pass_away(fei_yan_log, province_name);
+			is_province = true;
+		}
+		if (temp.compare("治愈") == 0)
+		{
+			process_zhi_yu(fei_yan_log, province_name);
+			is_province = true;
+		}
+		/*if (temp.compare("确诊") == 0)
+		{
+			is_province = true;
+		}
+		if (temp.compare("排除") == 0)
+		{
+			is_province = true;
+		}
+		if (temp.compare("流入") == 0)
+		{
+			is_province = true;
+		}*/
+		if (num > 0)
+		{
+			is_province = true;
+		}
 	}
+
+
+
 }
 
 

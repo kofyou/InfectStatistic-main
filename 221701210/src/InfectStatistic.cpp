@@ -1,8 +1,8 @@
 /***********************
 FileName:InfectStatistic.cpp
 Author:Cazenove
-Version:v1.4
-Date:2020.02.16
+Version:v1.5
+Date:2020.02.17
 Description:
     本程序为疫情统计程序，通过读取list命令中给定了log路径下的日志文件，以及给定的具体参数，将统计结果输出到给定out路径的文件中
     list命令 支持以下命令行参数：
@@ -16,12 +16,13 @@ Description:
     作业要求链接：https://edu.cnblogs.com/campus/fzu/2020SPRINGS/homework/10287
     项目github链接：https://github.com/Cazenove/InfectStatistic-main
 Version Description:
-    修复了date为空时出错的bug；优化了代码顺序
+    修复了参数可能读取错误的问题
 History:
     V1.0:参照作业要求初步完成了所有基本命令
     v1.1:使用面向对象方法重新编排代码，将省份信息与操作进行了封装。
     v1.2:使用enum+map来将if else结构替换为switch结构、美化了部分代码，修正了部分对需求理解的偏差。
     v1.3:新增了文件名称验证功能
+    v1.4:修复了date为空时出错的bug；优化了代码顺序
 ************************/
 
 #include <cstdlib>
@@ -100,11 +101,11 @@ Description:将list命令参数与枚举类型建立映射关系，用于简化i
 ***********************/
 enum EListValue
 {
-    logValue,
-    outValue,
-    dateValue,
-    typeValue,
-    provinceValue
+    logValue = 1,
+    outValue = 2,
+    dateValue = 3,
+    typeValue = 4,
+    provinceValue = 5
 };
 map<string,EListValue> mapListValue;
 
@@ -113,10 +114,10 @@ Description:将输出的命令类型与枚举类型建立映射关系，用于�
 ***********************/
 enum EDataValue
 {
-    ipValue,
-    spValue,
-    cureValue,
-    deadValue
+    ipValue = 1,
+    spValue = 2,
+    cureValue = 3,
+    deadValue = 4
 };
 map<string,EDataValue> mapDataValue;
 
@@ -286,35 +287,46 @@ void ProcessOption(int argc,char *argv[])//处理参数
         {
             switch(mapListValue[argv[index]])
             {
-                case logValue:
+                case logValue://-log参数
                     if(argv[index+1])
                     {
                         logPath = argv[index+1];
                         index++;
                     }
                     break;
-                case outValue:
+                case outValue://-out参数
                     if(argv[index+1])
                     {
                         outPath = argv[index+1];
                         index++;
                     }
                     break;
-                case dateValue:
+                case dateValue://-date参数
                     if(argv[index+1][0] != '-')//如果下一位不是其他操作符，那么则是date的参数值
                     {
                         date = argv[index+1];
                         index++;
                     }
                     break;
-                case typeValue:
+                case typeValue://-type参数
                     while((argv[index+1]) && (argv[index+1][0] != '-'))//-type后面可能有0到多个参数值
                     {
-                        type.push_back(argv[index+1]);
+                        if(strcmp(argv[index+1] ,"ip") == 0 ||
+                            strcmp(argv[index+1] ,"sp") == 0 ||
+                            strcmp(argv[index+1] ,"cure") == 0 ||
+                            strcmp(argv[index+1] ,"dead") == 0)
+                        {
+                            type.push_back(argv[index+1]);
+                        }
+                        else//-type出现未知参数
+                        {
+                            cout<<"Unknow command: "<<argv[index+1]<<"\n";
+                            exit(0);
+                        }
                         index++;
                     }
                     break;
-                case provinceValue:
+                case provinceValue://-province参数
                     while((argv[index+1]) && (argv[index+1][0] != '-'))
                     {
                         province.push_back(GbkToUtf8(argv[index+1]));//将gbk转为utf-8，以免出现乱码
@@ -322,10 +334,10 @@ void ProcessOption(int argc,char *argv[])//处理参数
                         index++;
                     }
                     break;
-                default:
+                default://其他参数
                     if(argv[index][0] == '-')
                     {
-                        cout<<"Unknown command: -"<<argv[index]<<"\n";
+                        cout<<"Unknown command: "<<argv[index]<<"\n";
                     }
                     break;
             }
@@ -475,7 +487,7 @@ void OutLog(string filePath, vector<string> type, vector<string> province)
         if((mapProvince[PROVINCENAME[i]].isPrint) || (!province.size() && mapProvince[PROVINCENAME[i]].isInLog))
         {
             ofLog<<PROVINCENAME[i]<<" ";
-            for(int j=0; j<type.size(); j++)
+            for(int j=0; j<type.size()-1; j++)
             {
                 switch(mapDataValue[type[j]])
                 {
@@ -495,16 +507,33 @@ void OutLog(string filePath, vector<string> type, vector<string> province)
                         break;
                 }
             }
+            switch(mapDataValue[type[type.size()-1]])//避免行末空格
+            {
+                case ipValue:
+                    ofLog<<"感染患者"<<mapProvince[PROVINCENAME[i]].ip<<"人";
+                    break;
+                case spValue:
+                    ofLog<<"疑似患者"<<mapProvince[PROVINCENAME[i]].sp<<"人";
+                    break;
+                case cureValue:
+                    ofLog<<"治愈"<<mapProvince[PROVINCENAME[i]].cure<<"人";
+                    break;
+                case deadValue:
+                    ofLog<<"死亡"<<mapProvince[PROVINCENAME[i]].dead<<"人";
+                    break;
+                default:
+                    break;
+            }
             ofLog<<"\n";
         }
     }
     ofLog<<"// 该文档并非真实数据，仅供测试使用\n";
-    ofLog<<"// 命令 InfectStatistic.exe";
-    for(int i=1; i<mainArgc; i++)
+    ofLog<<"// 命令：";
+    for(int i=1; i<mainArgc-1; i++)
     {
-        ofLog<<mainArgv[i]<<" ";
+        ofLog<<GbkToUtf8(mainArgv[i])<<" ";
     }
-
+    ofLog<<GbkToUtf8(mainArgv[mainArgc-1])<<"\n";
     ofLog.close();
 }
 

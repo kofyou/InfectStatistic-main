@@ -14,3 +14,6 @@ InfectStatistic-example.iml
 221701210/src/Lib.java
 *.json
 221701210/log/NewLog.txt
+221701210/result/TestOut1.txt
+221701210/result/TestOut2.txt
+221701210/result/TestOut3.txt

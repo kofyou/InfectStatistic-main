@@ -155,6 +155,32 @@ class InfectStatistic {
 		    	//System.out.print(date);
 		    	return date;
    }
+/****************** 功能：获取指定日期文件在所有日志中的索引  输入参数：指定日期字符串 返回值：索引int值************/
+		    static int findPot(String date) {
+		    	File file = new File(frompath);
+		        String[] filename = file.list();//获取所有日志文件名      
+		        int mid=-1;//中间存储变量，暂存返回值
+		        if(isBefore(date,filename[0].substring(0,10))) {//输入日期比日志最早还早
+		        	return -2;
+		        }
+		    	for(int i=0;i<filename.length-1;i++) {
+		    		String datecut1=filename[i].substring(0,10);//只获取文件名前的日期
+		    		String datecut2=filename[i+1].substring(0,10);//前后两个日期
+		    		if(date.equals(datecut1)) {   	   			
+		    			mid=i;
+		    			return mid;
+		    		}
+		    		else if(date.equals(datecut2)) {
+		    			mid=i+1;
+		    			return mid;
+		    		}
+		    		else if(isBefore(datecut1,date)&&isBefore(date,datecut2)) {//所给日期在两天有记录的日志之间
+		    			mid=i;
+		    			return mid;
+		    		}   		
+		    	}    	
+		    	return -1;   	
+		    }
 
 }
 

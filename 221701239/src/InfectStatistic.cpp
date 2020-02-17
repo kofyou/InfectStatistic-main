@@ -12,13 +12,47 @@
 #include <io.h>  
 #include <vector>  
 #include<map>
+#include <windows.h>
 
 using namespace std;
 map<string, string> m_single;      //存储命令行只有一个值的元素的信息
 map<string, vector<string>> m_many;   //存储命令行可能有多个值的元素的信息
 
+//将字符转utf-8
+string UTF8ToGB(const char* str)
+{
+	string result;
+	WCHAR *strSrc;
+	LPSTR szRes;
 
-									  //该函数实现了对命令行信息的处理
+	//获得临时变量的大小
+	int i = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
+	strSrc = new WCHAR[i + 1];
+	MultiByteToWideChar(CP_UTF8, 0, str, -1, strSrc, i);
+
+	//获得临时变量的大小
+	i = WideCharToMultiByte(CP_ACP, 0, strSrc, -1, NULL, 0, NULL, NULL);
+	szRes = new CHAR[i + 1];
+	WideCharToMultiByte(CP_ACP, 0, strSrc, -1, szRes, i, NULL, NULL);
+
+	result = szRes;
+	delete[]strSrc;
+	delete[]szRes;
+
+	return result;
+}
+//按字符串读取文件
+void process_file(vector<string> file_list)
+{
+	fstream fei_yan_log(file_list[0]);
+	string temp;
+	fei_yan_log >> temp;
+	temp = UTF8ToGB(temp.c_str()).c_str();
+	cout << temp;
+}
+
+
+ //该函数实现了对命令行信息的处理
 void process_cmd(int num, char* cmd_i[])
 {
 	int i;
@@ -95,6 +129,7 @@ int main(int argc, char* argv[])
 	{
 		//cout << file_list[i] << "\n" ;
 	}
+	process_file(file_list);
 	system("pause");
 
 }

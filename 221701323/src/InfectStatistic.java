@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
 import java.text.SimpleDateFormat;
 /**
  * InfectStatistic 
@@ -27,7 +29,7 @@ public class InfectStatistic {
         Calendar cal = GregorianCalendar.getInstance();
         cal.set(2020, 0, 22);
         Date date=cal.getTime();//new Date();
-        String[] provinces=null;
+        String[] provinces={"全国","福建"};
         String[] types=null;
         List list=new List(log, out, date, provinces, types);
         list.printList();
@@ -35,6 +37,8 @@ public class InfectStatistic {
         work.dealData();
         work.printout();
         work.PL.printout();
+        work.Show();
+        work.list.Provinces.printout();
     }
 }
 
@@ -75,12 +79,20 @@ class ProvinceList{
     }
     public void printout(){
         for (Province p : List) {
-            System.out.println("城市："+p.ProvinceName);
-            System.out.println("ip="+p.ip);
-            System.out.println("sp="+p.sp);
-            System.out.println("cure="+p.cure);
-            System.out.println("dead="+p.dead);
+            if(p.ip!=0||p.sp!=0||p.cure!=0||p.dead!=0){
+                System.out.println("城市："+p.ProvinceName);
+                System.out.println("ip="+p.ip);
+                System.out.println("sp="+p.sp);
+                System.out.println("cure="+p.cure);
+                System.out.println("dead="+p.dead);
+            }
         }
+    }
+    public Province Select(String name){
+        for (Province p : List) {
+            if(p.ProvinceName.equals(name))return p;
+        }
+        return new Province("");
     }
 }
 
@@ -268,7 +280,6 @@ class Work{
         // System.out.println(lineList[0]+lineList.length);
         if(lineList.length==3){
             if(lineList[1].equals("死亡")){
-                System.out.println("死亡");
                 //省死亡数+ 感染者数-
                 Add(lineList[0],"dead",FindNumber(lineList[2]));
                 Add(lineList[0],"ip",-1*FindNumber(lineList[2]));
@@ -297,7 +308,7 @@ class Work{
                 //疑似患者-
                 Add(lineList[0],"sp",-1*FindNumber(lineList[3]));
             }
-            else if(lineList[1].equals("疑似患者")&&lineList[2].equals("确认感染")){
+            else if(lineList[1].equals("疑似患者")&&lineList[2].equals("确诊感染")){
                 //疑似患者- 感染患者+
                 Add(lineList[0],"sp",-1*FindNumber(lineList[3]));
                 Add(lineList[0],"ip",FindNumber(lineList[3]));
@@ -353,4 +364,25 @@ class Work{
         Matcher m = p.matcher(str);  
         return Integer.parseInt(m.replaceAll("").trim()) ;
     }
+
+
+    //根据list的provinces输出结果
+    //1、
+    public void Show(){
+        for (int i=0;i<list.Provinces.List.length;i++){
+            if(list.Provinces.List[i].ProvinceName.equals("全国")){
+                for (Province p : PL.List) {
+                    list.Provinces.List[i].ip+=p.ip;
+                    list.Provinces.List[i].sp+=p.sp;
+                    list.Provinces.List[i].cure+=p.cure;
+                    list.Provinces.List[i].dead+=p.dead;
+                }
+            }
+            else {
+                Province ps=PL.Select(list.Provinces.List[i].ProvinceName);
+                list.Provinces.List[i]=ps;
+            }
+        }
+    }
+
 }

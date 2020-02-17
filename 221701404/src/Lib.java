@@ -179,12 +179,18 @@ public class Lib {
 		List<String> listNew = new ArrayList<String>();
 		List<String> listNewNew = new ArrayList<String>();
 		for (String stringOld : cities) {
+			if(stringOld.indexOf("重") >= 0) {
+				stringOld = stringOld.replaceAll("重", "冲");
+			}
 			listNew.add(stringOld);
 		}
 
 		Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
 		Collections.sort(listNew, cmp);
 		for(String stringNew : listNew) {
+			if(stringNew.indexOf("冲") >= 0) {
+				stringNew = stringNew.replaceAll("冲", "重");
+			}
 			listNewNew.add(stringNew);
 		}
 		return listNewNew;

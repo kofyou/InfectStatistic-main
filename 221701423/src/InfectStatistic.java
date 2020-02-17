@@ -68,7 +68,7 @@ class InfectStatistic {
             });
             statisticsMap.put("全国", countryStatistics);
         }
-        writeResult(command, statisticsMap, "java InfectStatistic " + String.join(" ", args));
+        writeResult(command, statisticsMap);
     }
 
     public static Command readArgs(String[] args) {
@@ -174,7 +174,7 @@ class InfectStatistic {
         return logList;
     }
 
-    public static boolean writeResult(Command command, Map<String, Statistics> statisticsMap, String arg) {
+    public static boolean writeResult(Command command, Map<String, Statistics> statisticsMap) {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(command.getOutFile()))) {
             for (String province : provinceList) {
                 if (command.getPrintProvinces().contains(province)) {
@@ -187,12 +187,10 @@ class InfectStatistic {
                             e.printStackTrace();
                         }
                     });
-                    bufferedWriter.newLine();
+                    bufferedWriter.write("\n");
                 }
             }
             bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
-            bufferedWriter.newLine();
-            bufferedWriter.write("// 命令 " + arg);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

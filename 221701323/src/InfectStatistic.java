@@ -1,10 +1,15 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.text.SimpleDateFormat;
 /**
  * InfectStatistic 
@@ -20,24 +25,21 @@ public class InfectStatistic {
         String log="C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\log";
         String out="C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\result";
         Calendar cal = GregorianCalendar.getInstance();
-        // System.out.println("请输入年月日：");
-        cal.set(2020, 0, 27);
+        cal.set(2020, 0, 22);
         Date date=cal.getTime();//new Date();
         String[] provinces=null;
         String[] types=null;
         List list=new List(log, out, date, provinces, types);
         list.printList();
         Work work=new Work(list);
-        work.Select();
-        work.FileSort();
+        work.dealData();
         work.printout();
-
+        work.PL.printout();
     }
 }
 
 
-//创建城市类，存储城市的个个状况
-
+//创建省份类
 class Province {
     public int ip;
     public int sp;
@@ -54,15 +56,14 @@ class Province {
 }
 
 
-//城市列表
+//创建城市列表类
 
 
 class ProvinceList{
-    static String[] povinces={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江","全国"
-};
+    static String[] povinces={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江","全国"};
     public Province[] List;
 
-    //构造函数
+    //城市列表
     public ProvinceList(String[] list){
         if(list==null){
             list=povinces;
@@ -84,7 +85,7 @@ class ProvinceList{
 }
 
 
-//状态类；
+//状态类
 
 class TypeList{
     public Map<String, String> Types = new HashMap<String, String>();
@@ -109,9 +110,7 @@ class TypeList{
         }
     }
 }
-
-
-//List类，用来存储输入的参数
+//list类存储命令
 
 class List{
     public String Log;
@@ -157,7 +156,7 @@ class Work{
         // PL.printout();
     }
 
-    //将string类型转化为Date类型好比较
+    //将string转化为date
     public Date strTodate(String str){
         Date date;
         str.trim();
@@ -200,7 +199,7 @@ class Work{
     }
 
 
-    //处理日志列表,选取符合Date的日志文件名
+    //处理日志列表，选取符合Date的日志文件
 
     public void Select(){
         int i=0;
@@ -217,5 +216,141 @@ class Work{
             }
         }
         FileList=newlist;
+    }
+
+
+    //根据日志列表读取文件，遍历文件每一行进行数据处理
+    public void dealData(){
+        this.Select();
+        this.FileSort();
+        for (String str : FileList) {
+            String fileName=list.Log+"\\"+str;
+            File file = new File(fileName);
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(file));
+                String tempStr;
+                while ((tempStr = reader.readLine()) != null) {
+                    tempStr.trim();
+                    
+                    if(tempStr.charAt(0)!='/'){
+                        System.out.println(tempStr);
+                        String[] lineList=tempStr.split(" ");
+                        // for (String s : lineList) {
+                        //     System.out.println(s);
+                        //     System.out.println(s.equals("治愈"));
+                        
+                        // }
+                        Deal(lineList);
+                    }
+                    
+                }
+                reader.close();
+            }catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        }
+        
+
+    }
+
+
+    // 对每一行的string数组进行分析处理
+    public void Deal(String[] lineList){
+        // System.out.println(lineList[0]+lineList.length);
+        if(lineList.length==3){
+            if(lineList[1].equals("死亡")){
+                System.out.println("死亡");
+                //省死亡数+ 感染者数-
+                Add(lineList[0],"dead",FindNumber(lineList[2]));
+                Add(lineList[0],"ip",-1*FindNumber(lineList[2]));
+
+            }
+            else if(lineList[1].equals("治愈")){
+                //治愈数+ 感染数-
+                Add(lineList[0],"cure",FindNumber(lineList[2]));
+                Add(lineList[0],"ip",-1*FindNumber(lineList[2]));
+
+            }
+        }
+        else if(lineList.length==4){
+            if(lineList[1].equals("新增")){
+                if(lineList[2].equals("感染患者")){
+                    
+                    //感染患者+
+                    Add(lineList[0],"ip",FindNumber(lineList[3]));
+                }
+                else if(lineList[2].equals("疑似患者")){
+                    //疑似患者+
+                    Add(lineList[0],"sp",FindNumber(lineList[3]));
+                }
+            }
+            else if(lineList[1].equals("排除")){
+                //疑似患者-
+                Add(lineList[0],"sp",-1*FindNumber(lineList[3]));
+            }
+            else if(lineList[1].equals("疑似患者")&&lineList[2].equals("确认感染")){
+                //疑似患者- 感染患者+
+                Add(lineList[0],"sp",-1*FindNumber(lineList[3]));
+                Add(lineList[0],"ip",FindNumber(lineList[3]));
+
+
+            }
+        }
+        else if(lineList.length==5){
+            if(lineList[1].equals("感染患者")){
+                //省1感染患者-  省2感染患者+
+                Add(lineList[0],"ip",-1*FindNumber(lineList[4]));
+                Add(lineList[3],"ip",FindNumber(lineList[4]));
+
+
+            }
+            else if(lineList[1].equals("疑似患者")){
+                //省1疑似患者-  省2疑似患者+
+                Add(lineList[0],"sp",-1*FindNumber(lineList[4]));
+                Add(lineList[3],"sp",FindNumber(lineList[4]));
+
+            }
+        }
+    }
+
+    //需要对province类进行操作 
+    //1、需要传入省名 
+    //2、需要传入类型
+    //3、需要传入加减
+    //因此确定函数的形式为 
+    public void Add(String name ,String type,int number){
+        for ( Province por : PL.List) {
+            if(por.ProvinceName.equals(name)){
+                if(type.equals("ip")){
+                    por.ip+=number;
+                }
+                else if(type.equals("cure")){
+                    por.cure+=number;
+                }
+                else if(type.equals("sp")){
+                    por.sp+=number;
+                }
+                else if(type.equals("dead")){
+                    por.dead+=number;
+                }
+            }
+        }
+
+    }
+    //需要从字符串中提去数字的函数
+    public int FindNumber(String str){
+        String regEx="[^0-9]";  
+        Pattern p = Pattern.compile(regEx);  
+        Matcher m = p.matcher(str);  
+        return Integer.parseInt(m.replaceAll("").trim()) ;
     }
 }

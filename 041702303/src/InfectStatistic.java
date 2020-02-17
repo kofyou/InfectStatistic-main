@@ -8,8 +8,12 @@
  * @since 2020-02-15
  */
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,6 +70,76 @@ public class infectStatistic {
 		this.outPath=outsString;
 		this.logPath=logString;
 	}
+
+	//处理文件夹
+	public void dealFolder() throws ParseException {
+		File folder=new File(logPath);
+		File[] validFiles=getFilesByDate(this.date, folder);
+		for(File file:validFiles) {
+			dealFile(file);
+		}
+	}
+	
+	//处理日志文件
+	public void dealFile(File file) {
+		try {
+			if(!file.exists()&&file.isDirectory()) {
+				throw new FileNotFoundException();
+			}
+			InputStreamReader inputReader=new InputStreamReader(new FileInputStream(file),"UTF-8");
+			BufferedReader br=new BufferedReader(inputReader);
+			String temp;
+			while((temp=br.readLine())!=null) {
+				if(temp.indexOf("//")!=0) {
+					String temps[]=temp.split(" ");
+					String number=temps[temps.length-1].substring(0, temps[temps.length-1].length()-1);
+					int changeNumber=Integer.parseInt(number);
+					int firstProvinceIndex=getProvinceIndex(temps[0]);
+					if(temps.length==4) {
+						if(temps[1].equals("新增")) {
+							if(temps[2].equals(typeName[0])) {
+								StatisticsNumber[firstProvinceIndex][0]+=changeNumber;
+							}
+							else {
+								StatisticsNumber[firstProvinceIndex][1]+=changeNumber;
+							}
+						}
+						else {
+							StatisticsNumber[firstProvinceIndex][1]-=changeNumber;
+							if(temps[1].equals("疑似患者")) {
+								StatisticsNumber[firstProvinceIndex][0]+=changeNumber;
+							}
+						}
+					}
+					else if(temps.length==3) {
+						if(temps[1].equals("死亡")) {
+							StatisticsNumber[firstProvinceIndex][3]+=changeNumber;
+						}
+						else {
+							StatisticsNumber[firstProvinceIndex][2]+=changeNumber;
+						}
+						StatisticsNumber[firstProvinceIndex][0]-=changeNumber;
+					}
+					else {
+						int secondProvinceIndex=getProvinceIndex(temps[3]);
+						if(temps[1].equals(typeName[0])) {
+							StatisticsNumber[firstProvinceIndex][0]-=changeNumber;
+							StatisticsNumber[secondProvinceIndex][0]+=changeNumber;
+						}
+						else {
+							StatisticsNumber[firstProvinceIndex][1]-=changeNumber;
+							StatisticsNumber[secondProvinceIndex][1]+=changeNumber;
+						}
+					}
+					ChangeProvince[getProvinceIndex(temps[0])]=1;
+				}
+			}
+			br.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	//获取文件名对应时间
 	public Date getFileNameDate(File file) throws ParseException {
@@ -91,7 +165,7 @@ public class infectStatistic {
 			}
 		}
 		else{ 
-			System.out.println("查找日志文件非法");
+			System.out.println("基于日期参数，日志文件不合法");
 		}
 		return (File[]) fileList.toArray(new File[fileList.size()]);
 	}
@@ -199,19 +273,19 @@ public class infectStatistic {
 			if((!parameterTreeMap.containsKey(i+1))&&i+1!=args.length) {
 				if(parameterTreeMap.get(i).equals("-date")) {
 					required[0]=args[i+1];
-					if(!parameterTreeMap.containsKey(i+2)) {
+					if(i+2<args.length&&!parameterTreeMap.containsKey(i+2)) {
 						return false;
 					}
 				}
 				else if(parameterTreeMap.get(i).equals("-log")) {
 					required[1]=args[i+1];
-					if(!parameterTreeMap.containsKey(i+2)) {
+					if(i+2<args.length&&!parameterTreeMap.containsKey(i+2)) {
 						return false;
 					}
 				}
 				else if(parameterTreeMap.get(i).equals("-out")) {
 					required[2]=args[i+1];
-					if(!parameterTreeMap.containsKey(i+2)) {
+					if(i+2<args.length&&!parameterTreeMap.containsKey(i+2)) {
 						return false;
 					}
 				}
@@ -295,7 +369,7 @@ public class infectStatistic {
 		char[] testDateArray=dateString.toCharArray();
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		//去除日期格式化
-		if(testDateArray[4]=='-'&&testDateArray[7]=='-') {
+		if(testDateArray.length==10&&testDateArray[4]=='-'&&testDateArray[7]=='-') {
 			for(int i=0;i<testDateArray.length;i++) {
 				if((testDateArray[i]<'0'||testDateArray[i]>'9')&&i!=4&&i!=7) {
 					return false;
@@ -421,20 +495,20 @@ public class infectStatistic {
 
 	//主函数
 	public static void main(String args[]) throws ParseException, IOException{
-	//检测命令行头部list
-	if(args.length!=0&&args[0].equals("list")&&args.length!=1) {
-		infectStatistic test=new infectStatistic(args);
-		if(test.isValidCommand()) {
-			System.out.println("get");
+		//检测命令行头部list
+		if(args.length!=0&&args[0].equals("list")&&args.length!=1) {
+			infectStatistic test=new infectStatistic(args);
+			if(test.isValidCommand()) {
+				System.out.println("get");
+			}
+			else {
+				System.out.println("命令行格式错误,请检测");
+				infectStatistic.validCommandTips();
+			}
 		}
 		else {
-			System.out.println("命令行格式错误,请检测");
+			System.out.println("命令行格式错误，请检测");
 			infectStatistic.validCommandTips();
 		}
 	}
-	else {
-		System.out.println("命令行格式错误，请检测");
-		infectStatistic.validCommandTips();
-	}
-}
 }

@@ -355,6 +355,30 @@ static void printtxt(Province[] result) throws IOException {
     output.write("//该文档并非真实数据，仅供测试使用");
 	output.close();
 }
+/************* 功能：拼音顺序排序line数组 输入参数：记录数组,排序数组个数 返回值：排序好的数组**********/
+static Province[] sortline(Province[] wannasort,int num) {
+	String[] location=new String[num];
+	for(int i=0;i<num;i++) {
+		location[i]=wannasort[i].provinceName;    		
+	}    	
+    Collator cmp = Collator.getInstance(java.util.Locale.CHINA);
+    Arrays.sort(location, cmp);
+    int i=0; 
+    int j=0;//控制省份拼音顺序索引
+    while(j<num) {       	
+    	while(i<num) {
+        	if(wannasort[i].provinceName.equals(location[j])) {
+        		result[j]=wannasort[i];
+        		j++;
+        		if(j>=num) {
+        			break;
+        		}
+        	}
+        	i++;
+    	}
+    } 
+    return result;
+}
 
 
 }

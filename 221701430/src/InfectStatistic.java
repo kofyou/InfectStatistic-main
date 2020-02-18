@@ -1,11 +1,14 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -166,7 +169,7 @@ class InfectStatistic {
 			}
 			
 			//测试看看解析是否成功
-			command_line.test();
+			//command_line.test();
 			return command_line;
 		}
 	}
@@ -174,7 +177,8 @@ class InfectStatistic {
 	//命令行运行类,使用此类进行命令行的运行,可以考虑加一个省类分别有省名以及其他数据
 	static class CommandLineRun{
 		public CommandLine commandline;
-		public File file_test;
+		public File file_read;
+		public File file_write;
 		//以下为存放各省数据的列表
 		public ArrayList<Province> province_list;
 		//以下为全国数据
@@ -186,31 +190,31 @@ class InfectStatistic {
 		public ArrayList<String> filename_list;
 		
 		public CommandLineRun(CommandLine cmdline) throws IOException {
-			commandline = new CommandLine();
-			commandline = cmdline;
+			cmdline.test();
 			//初始化全国总数据和各省总数据
 			ip = 0;
 			sp = 0;
 			cure = 0;
 			dead = 0;
 			creat_provinces_list();
-			creat_filename_list("D:\\InfectStatistic-main\\221701430\\log\\", "2020-01-25");
+			creat_filename_list(cmdline.arguments.log_value, cmdline.arguments.date_value);
 			//这里记得要改成参数值！！！！！！！！！！
 			for(int i = 0;i < filename_list.size();i++) {
-				file_test = new File("D:\\InfectStatistic-main\\221701430\\log\\" + filename_list.get(i));
-				if(file_test != null) {
-					process_data(file_test);
+				file_read = new File(cmdline.arguments.log_value + filename_list.get(i));
+				if(file_read != null) {
+					process_data(file_read);
 				}
 			}
 			country_total();
 			//测试输出！！！！！！！！！！！！！！！！！！！
-	        for(int i = 0;i<province_list.size();i++) {
+			print_file(cmdline);
+	        /*for(int i = 0;i<province_list.size();i++) {
 	        	System.out.println("省名：" + province_list.get(i).name + 
 	        			" ip:" + province_list.get(i).ip + 
 	        			" sp:" + province_list.get(i).sp + 
 	        			" cure:" + province_list.get(i).cure + 
 	        			" dead:" + province_list.get(i).dead);
-	        }
+	        }*/
 		}
 		
 		//用于处理单个文件的
@@ -260,7 +264,7 @@ class InfectStatistic {
 					}
 	        	}
 	        	//测试用++++++++++++++++++++++++++++++++++++++++++++++++++
-	        	System.out.println(temp);
+	        	//System.out.println(temp);
 	        	
 	        	//数据处理
 	        	pattern = Pattern.compile(type_list.get((int)(flag-48)-1));
@@ -418,7 +422,83 @@ class InfectStatistic {
 			Collections.sort(filename_list);
 		}
 		
-		
+		//按要求输出到文件
+		public void print_file(CommandLine commandline) throws IOException {
+			//构造输出流
+			String path = commandline.arguments.out_value;
+			file_write = new File(path);
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file_write),"UTF-8"));
+			
+			//按条件输出
+			Province temp_province = new Province();
+			//有对省份进行要求
+			if(commandline.arguments.province) {
+				for(int i = 0;i < commandline.arguments.province_value.size();i++) {
+					//获取符合要求的省份
+					temp_province = get_province(commandline.arguments.province_value.get(i));
+					//打印这个省份需要的数据
+					//当没有要求type时
+					if(!commandline.arguments.type) {
+						writer.write(temp_province.name + 
+		        			" 感染患者" + temp_province.ip + "人" + 
+		        			" 疑似患者" + temp_province.sp + "人" + 
+		        			" 治愈" + temp_province.cure + "人" + 
+		        			" 死亡" + temp_province.dead + "人");
+						writer.write("\n");
+					}else {//有要求type时
+						writer.write(temp_province.name + " ");
+						for(int j = 0;j < commandline.arguments.type_value.size();j++) {						
+							if(commandline.arguments.type_value.get(j).equals("ip")) {
+								writer.write("感染患者" + temp_province.ip + "人 ");
+							}
+							if(commandline.arguments.type_value.get(j).equals("sp")) {
+								writer.write("疑似患者" + temp_province.sp + "人 ");
+							}
+							if(commandline.arguments.type_value.get(j).equals("cure")) {
+								writer.write("治愈" + temp_province.cure + "人 ");
+							}
+							if(commandline.arguments.type_value.get(j).equals("dead")) {
+								writer.write("死亡" + temp_province.dead + "人 ");
+							}
+						}
+						writer.write("\n");
+					}
+				}				
+			}else {//没有对省份进行要求
+				for(int i = 0;i < province_list.size();i++) {
+					temp_province = province_list.get(i);
+					//打印这个省份需要的数据
+					//当没有要求type时
+					if(!commandline.arguments.type) {
+						writer.write(temp_province.name + 
+		        			" 感染患者" + temp_province.ip + "人" + 
+		        			" 疑似患者" + temp_province.sp + "人" + 
+		        			" 治愈" + temp_province.cure + "人" + 
+		        			" 死亡" + temp_province.dead + "人");
+						writer.write("\n");
+					}else {//有要求type时
+						writer.write(temp_province.name + " ");
+						for(int j = 0;j < commandline.arguments.type_value.size();j++) {						
+							if(commandline.arguments.type_value.get(j).equals("ip")) {
+								writer.write("感染患者" + temp_province.ip + "人 ");
+							}
+							if(commandline.arguments.type_value.get(j).equals("sp")) {
+								writer.write("疑似患者" + temp_province.sp + "人 ");
+							}
+							if(commandline.arguments.type_value.get(j).equals("cure")) {
+								writer.write("治愈" + temp_province.cure + "人 ");
+							}
+							if(commandline.arguments.type_value.get(j).equals("dead")) {
+								writer.write("死亡" + temp_province.dead + "人 ");
+							}
+						}
+						writer.write("\n");
+					}
+				}
+			}
+			writer.write("// 该文档并非真实数据，仅供测试使用\n");
+			writer.close();
+		}
 	}
 	
 	
@@ -452,14 +532,16 @@ class InfectStatistic {
         commandline_test.add("-log");
         commandline_test.add("D:\\InfectStatistic-main\\221701430\\log\\");
         commandline_test.add("-out");
-        commandline_test.add("123");
+        commandline_test.add("D:\\InfectStatistic-main\\221701430\\result\\test.txt");
         commandline_test.add("-type");
-        commandline_test.add("444");
-        commandline_test.add("555");
-        commandline_test.add("666");
+        commandline_test.add("ip");
+        commandline_test.add("sp");
+        commandline_test.add("dead");
         commandline_test.add("-province");
-        commandline_test.add("7");
-        commandline_test.add("8");
+        commandline_test.add("全国");
+        commandline_test.add("福建");
+        commandline_test.add("-date");
+        commandline_test.add("2020-01-26");
         
         CommandLineAnalysis commandline_analysis = new CommandLineAnalysis();
         commandline = commandline_analysis.analysis(commandline_test);

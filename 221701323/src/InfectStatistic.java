@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -13,21 +12,19 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jdk.javadoc.internal.doclets.formats.html.markup.StringContent;
-
 import java.text.SimpleDateFormat;
 /**
  * InfectStatistic 
  *
- * @author xxx
+ * @author 林智信
  * @version xxx
  * @since xxx
  */
 
 public class InfectStatistic {
     public static void main(String[] args) {
-        String str="list -log C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\log -out C:\\Users\\dell\\Desktop\\InfectStatistic-main\\221701323\\result\\ListOut.txt -province 福建 浙江 -type ip dead";
-        String[] strs=str.split(" ");
+        // String str="list -log C:\Users\dell\Desktop\InfectStatistic-main\221701323\log -out C:\Users\dell\Desktop\InfectStatistic-main\221701323\result\ListOut.txt -province 全国 福建 湖北 -type sp ip dead cure";
+        String[] strs=args;
         String log=null;
         String out=null;
         Date date=new Date();
@@ -47,48 +44,48 @@ public class InfectStatistic {
             }else if(strs[i].equals("-type")){
                 int n=i++;
                 i++;
-                while(strs[i].charAt(0)!='-'){
+                while(strs[i].charAt(0)!='-'&&i<strs.length){
                     i++;
-                    if(i==strs.length)break;
+                    if(i==strs.length){
+                        break;
+                    }
                 }
-                i--;
                 int m=i;
-                String[] news=new String[m-n];
-                for(int p=n+1;p<=m;p++){
+                String[] news=new String[m-n-1];
+                for(int p=n+1;p<m;p++){
                     news[p-n-1]=strs[p];
                 }
+                for (String string : news) {
+                    System.out.println(string);
+                }
                 types=news;
+                i--;
             }else if(strs[i].equals("-province")){
                 int n=i++;
                 i++;
-                while(strs[i].charAt(0)!='-'){
+                while(strs[i].charAt(0)!='-'&&i<strs.length){
                     i++;
-                    if(i<strs.length)break;
+                    if(i==strs.length){
+                        break;
+                    }
                 }
-                i--;
                 int m=i;
-                String[] news=new String[m-n];
-                for(int p=n+1;p<=m;p++){
+                String[] news=new String[m-n-1];
+                for(int p=n+1;p<m;p++){
                     news[p-n-1]=strs[p];
                 }
-                // for (String string : news) {
-                //     System.out.println(string);
-                // }
+                for (String string : news) {
+                    System.out.println(string);
+                }
                 provinces=news;
+                i--;
                 
             }else continue;
         }
-        // for (String string : provinces) {
-        //     System.out.println(string);
-        // }
         List list=new List(log, out, date, provinces, types);
-        // list.printList();
         Work work=new Work(list);
         work.dealData();
-        // work.printout();
-        // work.PL.printout();
         work.Show();
-        // work.list.Provinces.printout();
     }
 }
 
@@ -121,7 +118,7 @@ class Province {
 
 
 class ProvinceList{
-    static String[] povinces={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江","全国"};
+    static String[] povinces={"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
     public Province[] List;
 
     //城市列表
@@ -257,9 +254,6 @@ class Work{
 
     //日志名和日期比较
     public boolean Compare(String str){
-        // System.out.println(list.DateNow.toString()+"\n"+strTodate(str).toString());
-        // System.out.println(strTodate(str).compareTo(list.DateNow));
-        // System.out.println(list.DateNow.toString().equals(strTodate(str).toString()));
         if(strTodate(str).compareTo(list.DateNow)<0||list.DateNow.toString().equals(strTodate(str).toString()))
             return true; 
         else
@@ -303,13 +297,7 @@ class Work{
                     tempStr.trim();
                     
                     if(tempStr.charAt(0)!='/'){
-                        // System.out.println(tempStr);
                         String[] lineList=tempStr.split(" ");
-                        // for (String s : lineList) {
-                        //     System.out.println(s);
-                        //     System.out.println(s.equals("治愈"));
-                        
-                        // }
                         Deal(lineList);
                     }
                     

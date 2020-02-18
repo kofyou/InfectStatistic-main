@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Hashtable;
+
 
 /**
  * InfectStatistic
@@ -10,23 +12,138 @@ import java.util.ArrayList;
  */
 class InfectStatistic {
 				
-    public static void main(String[] args) {
+    public static void main(String[] _args) {
     	
-        //创建命令行参数解析器 启动程序
-    	new InfectStatistic().getArgsParser().parse(args);
+    	String[] args = {
+    			"list","-date","2020-01-22","-log",
+    			"D:\\GithubProjects\\InfectStatistic-main\\example\\log\\",
+    			"-out",
+    			"D:\\GithubProjects\\InfectStatistic-main\\example\\result\\output.txt",
+    			
+    	};
+    	if(args[0].equalsIgnoreCase("list")) {
+    		
+    		//初始化统计类
+    		InfectStatistic inf = new InfectStatistic(args);
+    		inf.parse();
+    	}
+    	else {
+    		System.out.println("命令" + args[0] + "不存在！");
+    	}
     }
-       
+    
+     private String[] args;
+	 private String date;
+	 private String logPath;
+	 private String outputPath;
+	 /** 传入的类型参数列表 */
+	 private ArrayList<String> typeList;
+	 /** 传入的需要显示的省份参数列表 */
+	 private ArrayList<String> provinceList;
+	 /** 省份数据映射表 */
+	 private Hashtable<String, Province> provinceHashtable;
+	 /** 是否读取全部日志文件 */
+	 private boolean isReadAll;
+	 /** 是否显示全国省份数据 */
+	 private boolean isShowAllProvince;
+	 /** 是否显示省份全部数据 */
+	 private boolean isShowAllData;
+     
+	 public InfectStatistic(String[] args) {
+		    date = new String();
+			logPath = new String();
+			outputPath = new String();
+			typeList = new ArrayList<String>();
+			provinceList = new ArrayList<String>();
+			provinceHashtable = new Hashtable<String, Province>();
+			this.args = args;
+			isReadAll = true;
+			isShowAllProvince = true;
+			isShowAllData = true;
+	}
+	 
+	 /**
+	  * description：解析传入的命令行参数列表并执行相关命令设置
+	  * @param args  命令行参数数组
+	  */
+	 private void parse() {
+		 for (int i = 0; args[i] != null; i++) {
+			switch (args[i]) {
+			case Constants.CMD_DATE:
+				isReadAll = false;
+				date = args[++i];
+				break;
+			case Constants.CMD_LOG:
+				logPath = args[++i];
+				break;
+			case Constants.CMD_OUT:
+				outputPath = args[++i];
+				break;
+			case Constants.CMD_TYPE:
+				isShowAllData = false;
+				i = executeTypeCmd(i + 1) - 1;
+				break;
+			case Constants.CMD_PROVINCE:
+				isShowAllProvince = false;
+				i = executeProvinceCmd(i + 1) - 1;
+				break;
+			default:
+				break;
+			}
+		}
+	 }   	 
+	 
+	 /** 处理“-type”指令 */
+	 private int executeTypeCmd(int index) {
+		 for (int i = 0; index < args.length && i < Constants.NUM_TYPE; i++) {
+			 String type = args[index];
+			 if (type.equals(Constants.TYPE_IP) || type.equals(Constants.TYPE_SP)
+					 || type.equals(Constants.TYPE_CURE) || type.equals(Constants.TYPE_DEAD)) {
+				 typeList.add(type);
+				 index++;
+			 }
+			 else {//后续无类型参数
+				 return index;
+			 }
+		}//到列表尾或者四个类型都加入完成
+		 return index;    		 
+	}
+	 
+	 /** 处理“-province”指令 */
+	 private int executeProvinceCmd(int index) {
+		for (int i = 0; index < args.length && i < Constants.NUM_PROVINCE; i++) {
+			String temp = args[index];
+			if (temp.equals(Constants.CMD_DATE) || temp.equals(Constants.CMD_LOG)
+					|| temp.equals(Constants.CMD_OUT) || temp.equals(Constants.CMD_TYPE)) {
+				return index;
+			}
+			else {//仍有省份参数
+				provinceList.add(args[index]);
+				index++;
+			}			
+		}//到列表尾或者全部省份都加入完成
+		return index;
+	}
+	 
     /**
      * description：常量类，储存所有全局常量
      * @author VisionWong
      */
-    public static class Constants{
-    	private static final String NAME_NATION = "全国";
-        private static final String CMD_LOG = "log";
-        private static final String CMD_OUT = "out";
-        private static final String CMD_DATE = "date";
-        private static final String CMD_TYPE = "type";
-        private static final String CMD_PROVINCE = "province";
+     public static class Constants{
+    	 
+    	 private static final int NUM_PROVINCE = 34;
+    	 private static final int NUM_TYPE = 4;
+    	 
+    	 private static final String TYPE_IP = "ip";
+    	 private static final String TYPE_SP = "sp";
+    	 private static final String TYPE_CURE = "cure";
+    	 private static final String TYPE_DEAD = "dead";
+    	 
+         private static final String CMD_LOG = "-log";
+         private static final String CMD_OUT = "-out";
+         private static final String CMD_DATE = "-date";
+         private static final String CMD_TYPE = "-type";
+         private static final String CMD_PROVINCE = "-province";
     }
        
     /**
@@ -123,16 +240,16 @@ class InfectStatistic {
 			String res = name + "";
 			for (int i = 0; i < types.length; i++) {
 				switch (types[i]) {
-				case "ip":
+				case Constants.TYPE_IP:
 					res += "感染患者" + ip + "人 ";
 					break;
-				case "sp":
+				case Constants.TYPE_SP:
 					res += "疑似患者" + sp + "人 ";
 					break;
-				case "cure":
+				case Constants.TYPE_CURE:
 					res += "治愈" + cure + "人 ";
 					break;
-				case "dead":
+				case Constants.TYPE_DEAD:
 					res += "死亡" + dead + "人 ";
 					break;
 				default:
@@ -142,41 +259,5 @@ class InfectStatistic {
 			return res;
 		}
     }
-     
-     /**
-      * description：命令函参数解析类，负责解析和执行命令行参数数组
-      * @author VisionWong
-      */
-     public class ArgsParser{
-    	 
-    	 private String date;
-    	 private String logPath;
-    	 private String outputPath;
-    	 private ArrayList<String> typeList;
-    	 private ArrayList<String> provinceList;
-    	 
-    	 
-    	 public ArgsParser() {
-			date = "";
-			logPath = "";
-			outputPath = "";
-			typeList = new ArrayList<String>();
-			provinceList = new ArrayList<String>();
-		}
-    	 
-    	 /**
-    	  * description：解析传入的命令行参数列表并执行
-    	  * @param args  命令行参数数组
-    	  */
-    	 public void parse(String[] args) {
-    		 
-    	 }
-    	       	
-    	 
-     }
-     
-     /** 获取命令行参数解析器 */
-     private ArgsParser getArgsParser() {
-		 return new ArgsParser();
-	 }
+         
 }

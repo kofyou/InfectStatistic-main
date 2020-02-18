@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -21,11 +25,17 @@ class InfectStatistic {
     			"D:\\GithubProjects\\InfectStatistic-main\\example\\result\\output.txt",
     			
     	};
+    	
     	if(args[0].equalsIgnoreCase("list")) {
     		
     		//初始化统计类
     		InfectStatistic inf = new InfectStatistic(args);
+    		//解析命令行参数列表
     		inf.parse();
+    		//读取日志文件
+    		inf.readFiles();
+    		//输出统计结果写入文件
+    		inf.writeFile();
     	}
     	else {
     		System.out.println("命令" + args[0] + "不存在！");
@@ -48,6 +58,8 @@ class InfectStatistic {
 	 private boolean isShowAllProvince;
 	 /** 是否显示省份全部数据 */
 	 private boolean isShowAllData;
+	 /** 程序是否出错提前结束 */
+	 private boolean isEnd;
      
 	 public InfectStatistic(String[] args) {
 		    date = new String();
@@ -60,6 +72,7 @@ class InfectStatistic {
 			isReadAll = true;
 			isShowAllProvince = true;
 			isShowAllData = true;
+			isEnd = false;
 	}
 	 
 	 /**
@@ -93,7 +106,11 @@ class InfectStatistic {
 		}
 	 }   	 
 	 
-	 /** 处理“-type”指令 */
+	 /**
+	  * description：处理“-type”指令
+	  * @param index 开始扫描的索引位置
+	  * @return 返回执行结束的索引位置
+	  */
 	 private int executeTypeCmd(int index) {
 		 for (int i = 0; index < args.length && i < Constants.NUM_TYPE; i++) {
 			 String type = args[index];
@@ -109,7 +126,11 @@ class InfectStatistic {
 		 return index;    		 
 	}
 	 
-	 /** 处理“-province”指令 */
+	 /**
+	  * description：处理“-province”指令
+	  * @param index 开始扫描的索引位置
+	  * @return 返回执行结束的索引位置
+	  */
 	 private int executeProvinceCmd(int index) {
 		for (int i = 0; index < args.length && i < Constants.NUM_PROVINCE; i++) {
 			String temp = args[index];
@@ -124,6 +145,67 @@ class InfectStatistic {
 		}//到列表尾或者全部省份都加入完成
 		return index;
 	}
+	 
+	 private void readFiles() {
+		 File file = new File(logPath);
+		 File[] logFiles = file.listFiles();
+		 String logDate = new String();
+		 
+		 if (logFiles.length == 0) {
+			 System.out.println("当前文件夹下没有日志文件！路径：" + logPath);
+			 isEnd = true;
+			 return;
+		 }
+		 
+		 if (isReadAll == false) {
+			//比较输入日期与最新日期
+			 String lastestDate = logFiles[logFiles.length - 1].getName();
+			 System.out.println("当前最新的日期文件名为：" + lastestDate);
+			 lastestDate = lastestDate.split(".")[0];
+			 if (date.compareTo(lastestDate) > 0) {
+				 System.out.println("日期超出范围，当前最新日期为：" + lastestDate);
+				 isEnd = true;
+				 return;
+			 }
+		 }
+		 
+		 //读取日志文件
+		 for (int i = 0; i < logFiles.length; i++) {
+			logDate = logFiles[i].getName().split(".")[0];
+			if (isReadAll || date.compareTo(logDate) >= 0) {
+				try {
+					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(logFiles[i]), "UTF-8"));;               
+		            String line = new String();          
+		                
+		            while ((line = br.readLine()) != null){
+		                String[] datas = line.split(" ");
+		                //处理单行数据
+		                executeOneLine(datas);
+		            }          
+		            br.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+		}
+		 //TODO： 判断是否统计全国数据
+	 }
+	 
+	 /**
+	  * description：处理文件读取的单行数据
+	  * @param datas  分割好的数据数组
+	  */
+	 private void executeOneLine(String[] datas) {
+		
+	}
+	 
+	 private void writeFile() {
+		 if (isEnd) {
+			 return;
+		 }
+		 
+	 }
 	 
     /**
      * description：常量类，储存所有全局常量

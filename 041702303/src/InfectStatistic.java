@@ -92,13 +92,17 @@ public class infectStatistic {
 			InputStreamReader inputReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
 			BufferedReader br = new BufferedReader(inputReader);
 			String temp;
+			String temps[];
+			String number;
+			int changeNumber;
+			int firstProvinceIndex;
 			while ((temp = br.readLine()) != null) {
 				//跳过//
 				if (temp.indexOf("//") != 0) {
-					String temps[] = temp.split(" ");
-					String number = temps[temps.length - 1].substring(0, temps[temps.length - 1].length() - 1);
-					int changeNumber = Integer.parseInt(number);
-					int firstProvinceIndex = getProvinceIndex(temps[0]);
+					temps = temp.split(" ");
+					number = temps[temps.length - 1].substring(0, temps[temps.length - 1].length() - 1);
+					changeNumber = Integer.parseInt(number);
+					firstProvinceIndex = getProvinceIndex(temps[0]);
 					if (temps.length == 4) {
 						if (temps[1].equals("新增")) {
 							if (temps[2].equals(typeName[0])) {
@@ -155,13 +159,14 @@ public class infectStatistic {
 		}
 		BufferedWriter bw = new BufferedWriter(outputWriter);
 		String allString = "";
+		int count;
 		// 输出第一行全国
 		if (parameterProvince[34] == 1) {
 			allString = "全国 ";
 			for (int i = 0; i < typeNumber; i++) {
 				if (outTypeIndex[i] != -1) {
 					allString += typeName[outTypeIndex[i]];
-					int count = 0;
+					count = 0;
 					for (int j = 0; j < provinceNumber; j++) {
 						count += StatisticsNumber[j][outTypeIndex[i]];
 					}
@@ -208,6 +213,8 @@ public class infectStatistic {
 	// 处理命令行参数并检测其合法性唯一性必要性
 	public boolean dealCommand() throws ParseException {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String temp;
+		int type[] = { 0, 0, 0, 0 };
 		int parameterExist[] = { 0, 0, 0, 0, 0 };
 		for (int i = 1; i < args.length; i++) {
 			if (args[i].equals("-date")) {
@@ -228,7 +235,7 @@ public class infectStatistic {
 				}
 			} else if (args[i].equals("-out")) {
 				++i;
-				String temp = args[i].substring(0, args[i].lastIndexOf("\\") + 1);
+				temp = args[i].substring(0, args[i].lastIndexOf("\\") + 1);
 				if (i != args.length && temp.matches("^[A-z]:\\\\(.+?\\\\)*$")) {
 					outPath = args[i];
 					parameterExist[2]++;
@@ -251,7 +258,6 @@ public class infectStatistic {
 				parameterExist[3]++;
 			} else if (args[i].equals("-type")) {
 				int j = 0;
-				int type[] = { 0, 0, 0, 0 };
 				while (i + 1 < args.length) {
 					// 检测参数值正确与否，错误i--回退检测是否其他参数
 					if (getTypeIndex(args[++i]) != -1) {
@@ -305,9 +311,10 @@ public class infectStatistic {
 	public File[] getFilesByDate(Date parameterDate, File folder) throws ParseException {
 		ArrayList<File> fileList = new ArrayList<File>();
 		if (isExistValidDateFile(folder, parameterDate)) {
+			int result;
 			File files[] = folder.listFiles();
 			for (File file : files) {
-				int result = getFileNameDate(file).compareTo(parameterDate);
+				result = getFileNameDate(file).compareTo(parameterDate);
 				//判断日期，处理小于等于命令行日期的日志文件
 				if (result < 0 || result == 0) {
 					fileList.add(file);
@@ -345,8 +352,9 @@ public class infectStatistic {
 	//检测基于日期参数日志文件是否合法
 	public boolean isExistValidDateFile(File folder, Date parameterDate) throws ParseException {
 		File files[] = folder.listFiles();
+		int result;
 		for (File file : files) {
-			int result = getFileNameDate(file).compareTo(parameterDate);
+			result = getFileNameDate(file).compareTo(parameterDate);
 			//判断存在大于日期参数的文件
 			if (result > 0 || result == 0) {
 				return true;

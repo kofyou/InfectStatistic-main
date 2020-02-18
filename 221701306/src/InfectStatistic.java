@@ -1,13 +1,12 @@
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static org.junit.Assert.assertNotNull;
-
+import java.util.TreeSet;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.File;
 import org.junit.Test;
-
-import com.sun.javafx.scene.EnteredExitedHandler;
 
 import java.lang.String;
 
@@ -20,10 +19,12 @@ import java.lang.String;
  */
 public class InfectStatistic {
     public static void main(String[] args) {
-        ListCommand aListCommand=new ListCommand(args);
-        Statistic aStatistic =new Statistic();
+        ListCommand aListCommand = new ListCommand(args);
+        Statistic aStatistic = new Statistic();
         aListCommand.checkCommand(aStatistic);
-        LogFiles aLogFiles=new LogFiles(aListCommand.arguments[0].value);
+        LogFiles aLogFiles = new LogFiles(aListCommand.arguments[0].value);
+        aLogFiles.readFiles(aListCommand.arguments[2].value, aStatistic);
+        aStatistic.outPutFile(aListCommand.arguments[1].value);
         System.out.println("helloworld");
     }
 
@@ -37,22 +38,22 @@ class ListCommand {
         // TODO Auto-generated constructor stub
         name = strs[0];
         arguments = new BaseArgument[5];
-        arguments[0]=new LogArgument("-log");
-        arguments[1]=new OutArgument("-out");
-        arguments[2]=new DateArgument("-date");
-        arguments[3]=new TypeArgument("-type");
-        arguments[4]=new ProvinceArgument("-province");
+        arguments[0] = new LogArgument("-log");
+        arguments[1] = new OutArgument("-out");
+        arguments[2] = new DateArgument("-date");
+        arguments[3] = new TypeArgument("-type");
+        arguments[4] = new ProvinceArgument("-province");
 
-        //命令输入格式检查
-        if(!checkInput(strs)) {
+        // 命令输入格式检查
+        if (!checkInput(strs)) {
             System.out.println("命令输入格式错误，退出程序");
             System.exit(1);
         }
-        
-        //分析命令行 赋值arguments
+
+        // 分析命令行 赋值arguments
         for (int i = 1, k = 0; i < strs.length && k < 5; ++i) {
             int n = 1;
-            //经检查strs[1]一定是参数
+            // 经检查strs[1]一定是参数
             ++i;
             while (!strs[i].startsWith("-")) {
                 ++n;
@@ -64,8 +65,8 @@ class ListCommand {
             for (int j = 0; j < n; ++j) {
                 argStrings[j] = strs[i - n + 1 + j];
             }
-            
-            //赋值BaseArgument[]
+
+            // 赋值BaseArgument[]
             switch (argStrings[0]) {
             case "-log":
                 arguments[0] = new LogArgument(argStrings);
@@ -82,106 +83,108 @@ class ListCommand {
             case "-province":
                 arguments[4] = new ProvinceArgument(argStrings);
                 break;
-            default:;
+            default:
+                ;
             }
         }
     }
 
     boolean checkInput(String[] strs) {
-        //若命令不是list 则返回false
-        if(!name.equals("list")) {
+        // 若命令不是list 则返回false
+        if (!name.equals("list")) {
             return false;
         }
-        //list后紧跟参数
-        if(!strs[1].startsWith("-")) {
+        // list后紧跟参数
+        if (!strs[1].startsWith("-")) {
             return false;
         }
         // 参数名正确：若参数不属于五种 则返回false
-        for(int i=1;i<strs.length;++i) {
-            if(strs[i].startsWith("-")) {
-                if(!(strs[i].equals("-log")||strs[i].equals("-out")||strs[i].equals("-type")||strs[i].equals("-date")||strs[i].equals("-province"))) {
+        for (int i = 1; i < strs.length; ++i) {
+            if (strs[i].startsWith("-")) {
+                if (!(strs[i].equals("-log") || strs[i].equals("-out") || strs[i].equals("-type")
+                        || strs[i].equals("-date") || strs[i].equals("-province"))) {
                     return false;
                 }
             }
         }
-        //若参数不包含-log和-out 则返回错误 //且-log只出现一次
-        for(int i=1;i<strs.length;++i) {
-            if(strs[i].equals("-log")) {
-                for(int j=i+1;j<strs.length;++j) {
-                    //-log出现多次
-                    if(strs[j].equals("-log")) {
+        // 若参数不包含-log和-out 则返回错误 //且-log只出现一次
+        for (int i = 1; i < strs.length; ++i) {
+            if (strs[i].equals("-log")) {
+                for (int j = i + 1; j < strs.length; ++j) {
+                    // -log出现多次
+                    if (strs[j].equals("-log")) {
                         return false;
                     }
                 }
                 break;
             }
-            //没找到-log
-            if(i==strs.length-1) {
+            // 没找到-log
+            if (i == strs.length - 1) {
                 return false;
             }
         }
-        for(int i=1;i<strs.length;++i) {
-            if(strs[i].equals("-out")) {
-                for(int j=i+1;j<strs.length;++j) {
-                    //-out出现多次
-                    if(strs[j].equals("-log")) {
+        for (int i = 1; i < strs.length; ++i) {
+            if (strs[i].equals("-out")) {
+                for (int j = i + 1; j < strs.length; ++j) {
+                    // -out出现多次
+                    if (strs[j].equals("-log")) {
                         return false;
                     }
                 }
                 break;
             }
-            //没找到-out
-            if(i==strs.length-1) {
+            // 没找到-out
+            if (i == strs.length - 1) {
                 return false;
             }
         }
-        //每种参数-date -type -province最多出现一次
-        for(int i=1;i<strs.length;++i) {
-            //存在-date
-            if(strs[i].equals("-date")) {
-                for(int j=i+1;j<strs.length;++j) {
-                    //-date出现多次
-                    if(strs[j].equals("-date")) {
+        // 每种参数-date -type -province最多出现一次
+        for (int i = 1; i < strs.length; ++i) {
+            // 存在-date
+            if (strs[i].equals("-date")) {
+                for (int j = i + 1; j < strs.length; ++j) {
+                    // -date出现多次
+                    if (strs[j].equals("-date")) {
                         return false;
                     }
                 }
                 break;
             }
         }
-        for(int i=1;i<strs.length;++i) {
-            //存在-type
-            if(strs[i].equals("-type")) {
-                for(int j=i+1;j<strs.length;++j) {
-                    //-type出现多次
-                    if(strs[j].equals("-type")) {
+        for (int i = 1; i < strs.length; ++i) {
+            // 存在-type
+            if (strs[i].equals("-type")) {
+                for (int j = i + 1; j < strs.length; ++j) {
+                    // -type出现多次
+                    if (strs[j].equals("-type")) {
                         return false;
                     }
                 }
                 break;
             }
         }
-        for(int i=1;i<strs.length;++i) {
-            //存在-province
-            if(strs[i].equals("-province")) {
-                for(int j=i+1;j<strs.length;++j) {
-                    //-province出现多次
-                    if(strs[j].equals("-province")) {
+        for (int i = 1; i < strs.length; ++i) {
+            // 存在-province
+            if (strs[i].equals("-province")) {
+                for (int j = i + 1; j < strs.length; ++j) {
+                    // -province出现多次
+                    if (strs[j].equals("-province")) {
                         return false;
                     }
                 }
                 break;
             }
         }
-        return true; 
+        return true;
     }
 
     void checkCommand(Statistic sta) {
-        for(int i=0;i<4;++i) {
-            if(!arguments[0].checkError()) {
+        for (int i = 0; i < 4; ++i) {
+            if (!arguments[0].checkError()) {
                 System.exit(1);
             }
         }
-        ((ProvinceArgument)arguments[4]).checkError(sta);
+        ((ProvinceArgument) arguments[4]).checkError(sta);
     }
 
 }
@@ -209,7 +212,7 @@ class LogArgument extends BaseArgument {
         // TODO Auto-generated constructor stub
         super(name);
     }
-    
+
     LogArgument(String[] strs) {
         super(strs);
         // TODO Auto-generated constructor stub
@@ -240,7 +243,7 @@ class OutArgument extends BaseArgument {
         // TODO Auto-generated constructor stub
         super(name);
     }
-    
+
     OutArgument(String[] strs) {
         super(strs);
         // TODO Auto-generated constructor stub
@@ -270,12 +273,12 @@ class OutArgument extends BaseArgument {
 }
 
 class DateArgument extends BaseArgument {
-    
+
     DateArgument(String name) {
         // TODO Auto-generated constructor stub
         super(name);
     }
-    
+
     DateArgument(String[] strs) {
         super(strs);
         // TODO Auto-generated constructor stub
@@ -314,7 +317,7 @@ class TypeArgument extends BaseArgument {
         // TODO Auto-generated constructor stub
         super(name);
     }
-    
+
     TypeArgument(String[] strs) {
         super(strs);
         // TODO Auto-generated constructor stub
@@ -369,7 +372,7 @@ class ProvinceArgument extends BaseArgument {
         // TODO Auto-generated constructor stub
         super(name);
     }
-    
+
     ProvinceArgument(String[] strs) {
         super(strs);
         // TODO Auto-generated constructor stub
@@ -380,16 +383,16 @@ class ProvinceArgument extends BaseArgument {
         }
     }
 
-    boolean checkError(){
+    boolean checkError() {
         return true;
     }
-    
+
     boolean checkError(Statistic sta) {
-        //输入的省份存在，若不存在则列出所有
-        for(int i=0;i<valueList.length;++i) {
-            if(!sta.data.containsKey(valueList[i])) {
-                value="all";
-                valueList=new String[0];
+        // 输入的省份存在，若不存在则列出所有
+        for (int i = 0; i < valueList.length; ++i) {
+            if (!sta.data.containsKey(valueList[i])) {
+                value = "all";
+                valueList = new String[0];
                 System.out.println("-province参数输入有误，默认列出所有省份数据");
             }
         }
@@ -399,25 +402,160 @@ class ProvinceArgument extends BaseArgument {
 
 class LogFiles {
     String lastDate;
-    File[] files;
+    TreeSet<File> files;
 
     LogFiles(String path) {
         File logFile = new File(path);
-        files = logFile.listFiles();
+        File[] temp = logFile.listFiles();
+        files = new TreeSet<File>(new Comparator<File>() {
+            @Override
+            // 文件按日期排序 重写匿名内部类Comparator的compare()
+            public int compare(File f0, File f1) {
+                // TODO Auto-generated method stub
+                String name0 = f0.getName();
+                String name1 = f1.getName();
+                // 按年份月份日期依次比较时间前后
+                if (Integer.parseInt(name0.substring(0, 4)) < Integer.parseInt(name1.substring(0, 4))) {
+                    return -1;
+                }
+                if (Integer.parseInt(name0.substring(0, 4)) > Integer.parseInt(name1.substring(0, 4))) {
+                    return 1;
+                }
+                if (Integer.parseInt(name0.substring(5, 7)) < Integer.parseInt(name1.substring(5, 7))) {
+                    return -1;
+                }
+                if (Integer.parseInt(name0.substring(5, 7)) > Integer.parseInt(name1.substring(5, 7))) {
+                    return 1;
+                }
+                if (Integer.parseInt(name0.substring(8, 10)) < Integer.parseInt(name1.substring(8, 10))) {
+                    return -1;
+                }
+                if (Integer.parseInt(name0.substring(8, 10)) > Integer.parseInt(name1.substring(8, 10))) {
+                    return 1;
+                }
+                return 0;
+            }
+
+        });
+        for (int i = 0; i < temp.length; ++i) {
+            files.add(temp[i]);
+        }
+
+        lastDate = files.last().getName().substring(0, 10);
     }
 
-    void readFiles(String str) {
-
+    void readFiles(String date, Statistic sta) {
+        // 默认最新日期
+        if (date.equals("lastdate")) {
+            for (File f : files) {
+                LogFiles.statisFile(f, sta);
+            }
+            return;
+        }
+        // 非默认日期
+        for (File f : files) {
+            if (LogFiles.dateCompare(date, f.getName().substring(0, 10))) {
+                LogFiles.statisFile(f, sta);
+                continue;
+            }
+            break;
+        }
     }
 
-    // 统计第i个文件的数据
-    void statisFile(int i) {
-
+    // 统计某个日志文件的数据
+    static void statisFile(File f, Statistic sta) {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("/")) {
+                    continue;
+                }
+                LogFiles.statisLine(line, sta);
+            }
+            br.close();
+        } catch (Exception e) {
+            System.err.println(e);
+        }
     }
 
-    // 处理日志文件中的一行 被statisFile()调用
-    static void statisLine(String s) {
+    // 处理日志文件中的一行
+    /**
+     * @param line
+     * @param sta
+     */
+    static void statisLine(String line, Statistic sta) {
+        String[] strs = line.split(" ");
+        // 省份存在
+        if (!sta.data.containsKey(strs[0])) {
+            return;
+        }
+        // 8类日志项
+        switch (strs[1]) {
+        case "新增":
+            if (strs[2].equals("感染患者")) {
+                sta.data.get(strs[0])[0] += Integer.parseInt(strs[3].replace("人", ""));
+                break;
+            }
+            if (strs[2].equals("疑似患者")) {
+                sta.data.get(strs[0])[1] += Integer.parseInt(strs[3].replace("人", ""));
+            }
+            break;
+        case "死亡":
+            sta.data.get(strs[0])[0] -= Integer.parseInt(strs[2].replace("人", ""));
+            sta.data.get(strs[0])[3] += Integer.parseInt(strs[2].replace("人", ""));
+            break;
+        case "治愈":
+            sta.data.get(strs[0])[0] -= Integer.parseInt(strs[2].replace("人", ""));
+            sta.data.get(strs[0])[2] += Integer.parseInt(strs[2].replace("人", ""));
+            break;
+        case "排除":
+            sta.data.get(strs[0])[1] -= Integer.parseInt(strs[3].replace("人", ""));
+            break;
+        case "疑似患者":
+            if (strs[2].equals("流入")) {
+                sta.data.get(strs[0])[1] -= Integer.parseInt(strs[4].replace("人", ""));
+                sta.data.get(strs[3])[1] += Integer.parseInt(strs[4].replace("人", ""));
+                break;
+            }
+            if (strs[2].equals("确诊感染")) {
+                sta.data.get(strs[0])[1] -= Integer.parseInt(strs[3].replace("人", ""));
+                sta.data.get(strs[0])[0] += Integer.parseInt(strs[3].replace("人", ""));
+            }
+            break;
+        case "感染患者":
+            if (strs[2].equals("流入")) {
+                sta.data.get(strs[0])[0] -= Integer.parseInt(strs[4].replace("人", ""));
+                sta.data.get(strs[3])[0] += Integer.parseInt(strs[4].replace("人", ""));
+            }
+            break;
+        default:
+            break;
+        }
+    }
 
+    // 比较两个YYYY-MM-DD日期字符串 若date0大于等于date1 则返回true
+    static boolean dateCompare(String date0, String date1) {
+        // 按年份月份日期依次比较时间前后
+        if (Integer.parseInt(date0.substring(0, 4)) < Integer.parseInt(date0.substring(0, 4))) {
+            return false;
+        }
+        if (Integer.parseInt(date0.substring(0, 4)) > Integer.parseInt(date1.substring(0, 4))) {
+            return true;
+        }
+        if (Integer.parseInt(date0.substring(5, 7)) < Integer.parseInt(date1.substring(5, 7))) {
+            return false;
+        }
+        if (Integer.parseInt(date0.substring(5, 7)) > Integer.parseInt(date1.substring(5, 7))) {
+            return true;
+        }
+        if (Integer.parseInt(date0.substring(8, 10)) < Integer.parseInt(date1.substring(8, 10))) {
+            return true;
+        }
+        if (Integer.parseInt(date0.substring(8, 10)) > Integer.parseInt(date1.substring(8, 10))) {
+            return true;
+        }
+        return true;
     }
 }
 

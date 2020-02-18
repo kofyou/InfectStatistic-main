@@ -326,16 +326,15 @@ public class InfectStatistic {
 	/*  
 	 * 该方法用于保存-type的参数值
 	 */
-	{
-		typePeople = new String[4];
+	{		
 		if(cmdCount == str.length - 1 || str[cmdCount+1].substring(0,1).equals("-"))
 		{
-			typePeople[0] = "all";
-			typeCount++;
+			return;
 		}
 		
 		else
 		{
+			typePeople = new String[4];
 			cmdCount++;			
 			typeCount = 0;
 			for(  ; cmdCount < str.length ; cmdCount++)
@@ -357,15 +356,14 @@ public class InfectStatistic {
 	 * 该方法用于保存-province的参数值
 	 */
 	{
-		province = new String[31];
 		if(cmdCount == str.length - 1 || str[cmdCount+1].substring(0,1).equals("-"))
 		{
-			province[0] = "全国";
-		    provinceCount++;
+			return;
 		}
 		
 		else
 		{
+			province = new String[31];
 			cmdCount++;			
 			provinceCount = 0;
 			for(  ; cmdCount < str.length ; cmdCount++)
@@ -435,7 +433,7 @@ public class InfectStatistic {
         
         fileWritter = new FileWriter(file);
         
-        if(province == null || province[0].equals("全国"))  //用户没有指定省份信息，就按默认输出，且省份按拼音顺序排序
+        if(province == null)  //用户没有指定省份信息，就按默认输出，且省份按拼音顺序排序
         {
         	outputByType("全国");  //先将全国数据输出
         	fileWritter.write("\n");
@@ -446,7 +444,12 @@ public class InfectStatistic {
         {
         	for(int i=0 ;i < provinceCount ;i++)
         	{
-        		outputByType(province[provinceCount]);
+        		if(!statistic.containsKey(province[i] + "感染患者"))  //检查哈希表中是否已经存在该省份的数据了
+        		{
+        			initStatistic(province[i]);
+        		}
+        		outputByType(province[i]);
+        		if(i != provinceCount - 1)fileWritter.write("\n");
         	}
         }
         fileWritter.close();
@@ -476,7 +479,7 @@ public class InfectStatistic {
 	 * 该方法用于按照规定的类型进行输出
 	 */
 	{
-		if(typePeople == null || typePeople[0].equalsIgnoreCase("all"))
+		if(typePeople == null)
 		{
 			fileWritter.write(province + " " + "感染患者" + statistic.get(province + "感染患者") + "人" + " "
                     + "疑似患者" + statistic.get(province + "疑似患者") + "人" + " "
@@ -486,10 +489,11 @@ public class InfectStatistic {
 		}
 		else
 		{			
+			fileWritter.write(province + " ");
 			for(int i = 0; i < typeCount ; i++)
 			{
 				String type = typeMap.get(typePeople[i]);
-				fileWritter.write(province + " " + type + statistic.get(province + type) + "人");
+				fileWritter.write(type + statistic.get(province + type) + "人");
 				if(i != typeCount - 1)  fileWritter.write(" "); //避免在最后多出一个空格
 				fileWritter.flush();
 			}

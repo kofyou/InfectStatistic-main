@@ -6,7 +6,7 @@
 #  TODO
 #  读取文件，列出全国和各省在某日的感染情况，输出到输出文件中
 #  @author 091700410 傅少华
-#  @version 1.0
+#  @version 1.1
 #  @since 2020-2-18
 #  
 
@@ -82,14 +82,19 @@ class InfectStatistic:
         
     def read_file(self):
         
-        f = open(self.input_path + self.file_date + '.log.txt','r',encoding='utf-8')
-        for line in f:
-            if line[0:2] == '//':
-                pass
-            else:
-                content = line.split()
-                print(str(content))
-                InfectStatistic.file_data(self,content)
+        date_of_file = datetime.datetime.strptime(self.file_date,'%Y-%m-%d')
+        
+        for root,dirs,files in os.walk(r'..\\log\\'):
+            for file in files:
+                if date_of_file >= datetime.datetime.strptime(file.replace('.log.txt', ''),'%Y-%m-%d'):
+                    f = open(self.input_path + file,'r',encoding='utf-8')
+                    for line in f:
+                        if line[0:2] == '//':
+                            pass
+                        else:
+                            content = line.split()
+                            print(str(content))
+                            InfectStatistic.file_data(self,content)
                 
         print(InfectStatistic.data_dict)
         

@@ -126,23 +126,95 @@ class InfectStatistic
 	public static void getProvincialInformation(String oneLineOfFile)
 	{
 		String[] splitString = oneLineOfFile.split(" ");
-		int countOfSplitString = splitString.length;
 		int countOfPeople = getStringNumber(splitString[splitString.length - 1]); 
-		boolean isExist = false;  //用于标志动态数组中是否有记录某省
 		
-		//检验动态数组中是否有该省份，
-        for (int i = 0;i < allProvince.size();i++)
-        {
-        	if (allProvince.get(i).provinceName.equals(splitString[0]) == true)
-        	{
-        		isExist = true;
-        	    break;
-        	}
-        }
-        if (isExist == false)//无该省则把该省份加到动态数组中
-        {
-        	allProvince.add(new Province(splitString[0]));
-        }
+		isExistProvince(splitString[0]);  //检验动态数组中是否有该省份信息，无则加入
+		
+		if (splitString.length == 3)
+		{
+			for (int i = 0;i < allProvince.size();i++)
+			{
+				if (allProvince.get(i).provinceName.equals(splitString[0]))
+				{
+					if (splitString[1].equals("死亡"))
+					{
+						allProvince.get(i).dead += countOfPeople;
+						allProvince.get(i).ip -= countOfPeople;
+						break;
+					}
+					else if (splitString[1].equals("治愈"))
+					{
+						allProvince.get(i).cure += countOfPeople;
+						allProvince.get(i).ip -= countOfPeople;
+						break;
+					}
+				}
+			}
+		}
+		else if (splitString.length == 4)
+		{
+			for (int i = 0;i < allProvince.size();i++)
+			{
+				if (allProvince.get(i).provinceName.equals(splitString[0]))
+				{
+					if (splitString[1].equals("新增")
+						&& splitString[2].equals("感染患者"))
+					{	
+						allProvince.get(i).ip += countOfPeople;
+						break;
+					}
+					else if (splitString[1].equals("新增")
+						&& splitString[2].equals("疑似患者"))
+					{
+						allProvince.get(i).sp += countOfPeople;
+						break;
+					}
+					else if (splitString[1].equals("疑似患者")
+						&& splitString[2].equals("确诊感染"))
+					{
+						allProvince.get(i).sp -= countOfPeople;
+						allProvince.get(i).ip += countOfPeople;
+						break;
+					}
+					else if (splitString[1].equals("排除")
+						&& splitString[2].equals("疑似患者"))
+					{
+						allProvince.get(i).sp -= countOfPeople;
+						break;
+					}
+				}
+			}
+		}
+		else if (splitString.length == 5)
+		{
+			isExistProvince(splitString[3]);
+			
+			for (int i = 0;i < allProvince.size();i++)
+			{
+				if (allProvince.get(i).provinceName.equals(splitString[0]))
+				{
+					if (splitString[1].equals("感染患者"))
+					{
+						allProvince.get(i).ip -= countOfPeople;
+					}
+					else if (splitString[1].equals("疑似患者"))
+					{
+						allProvince.get(i).sp -= countOfPeople;
+					}
+				}
+				else if (allProvince.get(i).provinceName.equals(splitString[3]))
+				{
+					if (splitString[1].equals("感染患者"))
+					{
+						allProvince.get(i).ip += countOfPeople;
+					}
+					else if (splitString[1].equals("疑似患者"))
+					{
+						allProvince.get(i).sp += countOfPeople;
+					}
+				}
+			}
+		}
 	} 
 	
 	/*
@@ -169,6 +241,31 @@ class InfectStatistic
 		
 		return Integer.parseInt(numString);
 	} 
+	
+	/*
+	* Description:检验省份是否已存储在动态数组中，如果不存在，则加入
+	* Input:记录省份名的字符串
+	* Return:无
+	* Others:无
+	*/ 
+	public static void isExistProvince(String provinceName)
+	{
+		boolean isExist = false;
+		
+		//检验动态数组中是否有该省份，
+        for (int i = 0;i < allProvince.size();i++)
+        {
+        	if (allProvince.get(i).provinceName.equals(provinceName) == true)
+        	{
+        		isExist = true;
+        	    break;
+        	}
+        }
+        if (isExist == false)//无该省则把该省份加到动态数组中
+        {
+        	allProvince.add(new Province(provinceName));
+        }
+	}
 	
     public static void main(String[] args) throws IOException 
     {
@@ -205,7 +302,7 @@ class InfectStatistic
     		    			&& oneLineOfFile.length() != 0  //不读取空行
     		    			&& oneLineOfFile.startsWith("//") == false)  //不读取注释行
     		    		{
-    		    			//System.out.println(oneLineOfFile);
+    		    			System.out.println(oneLineOfFile);
     		    			getProvincialInformation(oneLineOfFile);
     		    			
     		    		}
@@ -216,12 +313,15 @@ class InfectStatistic
     			}
     		}
     		
-    		
+    		for (int i = 0;i < allProvince.size();i++)
+    		{
+    			System.out.println(allProvince.get(i).provinceName
+    				+" 感染患者"+allProvince.get(i).ip+"人"
+    				+" 疑似患者"+allProvince.get(i).sp+"人"
+    				+" 治愈"+allProvince.get(i).cure+"人"
+    				+" 死亡"+allProvince.get(i).dead+"人");
+    		}
     	}
-    	
-    	
-
-
     }
 }
 
@@ -241,5 +341,4 @@ class Province
     	cure=0;
     	dead=0;
     }
-	
 }

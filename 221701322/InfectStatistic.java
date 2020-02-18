@@ -3,21 +3,46 @@ package com.xzy;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-public class InfectStatistic {
+import java.util.*;
 
+public class InfectStatistic {
 	public static void main(String[] args) throws ParseException, IOException {
         Map<String, ArrayList<String>> map=get_params(args);
         String front_path=map.get("-log").get(0);
         ArrayList<String> filenames=get_input_data(map);//获得所有需要统计的数据的文件名称
         Map<String, Province> map1=init_date(filenames,front_path);//初始化map，并将数据写入
-        String out_path=map.get("-out").get(0);
 
-        //out_put(map,map1);
+        out_put(map,map1);
 	}
+
+    private static void out_put(Map<String, ArrayList<String>> map, Map<String, Province> map1) {
+        ArrayList<String> types=new ArrayList<String>(
+                Arrays.asList("ip","sp","cure","dead")
+        );
+        String out_path=map.get("-out").get(0);
+        ArrayList<String> type=map.get("-type");
+        ArrayList<String> province=map.get("-province");
+        if(province==null){
+            out_put_as_type(map1,type,province);//按province顺序输出，若province为空，按默认顺序输出
+        }
+        else{
+            Map<String,Province> map2=new HashMap<String, Province>();
+            for (String pro:province
+                 ) {
+                map2.put(pro,map1.get(pro));
+            }
+            out_put_as_type(map2,type,province);
+        }
+        if(type!=null){
+            for (String type1:type
+                 ) {
+                if(types.contains(type1))
+            }
+
+        }
+        System.out.println(province);
+
+    }
 
     private static Map<String, Province> init_date(ArrayList<String> filenames,String front_path) throws IOException {
 	    String province_name[]={"全国","安徽","北京", "重庆", "福建","甘肃","广东" ,"贵州" ,"海南" ,"河北" ,"湖北","湖南" ,"吉林" ,"辽宁" ,
@@ -153,7 +178,7 @@ public class InfectStatistic {
                     j++;
                 }
                 map.put(param,values);
-                //System.out.println(values.length);
+                //System.out.println(map);
             } else
                 i++;
         }

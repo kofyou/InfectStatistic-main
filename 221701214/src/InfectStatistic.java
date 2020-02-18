@@ -1,5 +1,6 @@
 
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-public class Homework2 
+public class InfectStatistic 
 {
 	public String[] allTypes = {"sp","ip","cure","dead"};
 	public String[] allType = {"感染患者","疑似患者","治愈","死亡患者"};
@@ -29,6 +30,8 @@ public class Homework2
 	
 	/*
 	 * 命令行处理
+	 * 输出参数：控制台命令行参数
+	 * 返回值：无
 	 */
 	public void orderHandle(String[] inputOrder) throws IOException
 	{
@@ -133,6 +136,8 @@ public class Homework2
 	
 	/*
 	 * 判断日志文件目录路径名是否合法
+	 * 输入参数：日志文件路径
+	 * 返回值：合法返回true，否则返回false
 	 */
 	public boolean isValidLogAddress(String address)
 	{
@@ -145,10 +150,12 @@ public class Homework2
 	
 	/*
 	 * 判断输出文件路径是否合法
+	 * 输入参数：输出文件路径
+	 * 返回值：合法返回true，否则返回false
 	 */
 	public boolean isValidOutAddress(String address)
 	{
-		if(address.matches("^[A-z]:\\\\(.+?\\\\)*(.+?.txt)$"))
+		if(address.matches("^[A-z]:\\\\(.+?\\\\)*(.+?.txt)$"))//判断输出文件是否是文本文件
 		{
 			return true;
 		}
@@ -157,6 +164,8 @@ public class Homework2
 	
 	/*
 	 * 判断日期是否合法
+	 * 输入参数：日期参数值
+	 * 返回值：不合法返回false，否则返回true
 	 */
 	public boolean isValidDate(String inputDate)
 	{
@@ -183,6 +192,8 @@ public class Homework2
 	
 	/*
 	 * 判断日期是否超出范围
+	 * 输入参数：日志文件名
+	 * 返回值：超出范围返回false，否则返回true
 	 */
 	public boolean isDateOutOfRange(String inputDate)
 	{
@@ -198,8 +209,11 @@ public class Homework2
 		}
 		return true;
 	}
+	
 	/*
 	 * 获得指定目录的所有文件
+	 * 输入参数：目录地址
+	 * 返回值：一个动态数组
 	 */
 	public static ArrayList<String> queryFileNames(String filePath)
 	{
@@ -216,7 +230,6 @@ public class Homework2
 		}
 		return es;
 	}
-	
 	
 	/*
 	 * 读取日志文件的内容
@@ -308,6 +321,8 @@ public class Homework2
 	
 	/*
 	 * 新增感染患者
+	 * 输入参数：日志文件行
+	 * 返回值：无
 	 */
 	public void addIp(String line)
 	{
@@ -333,6 +348,8 @@ public class Homework2
 	
 	/*
 	 * 新增疑似患者
+	 * 输入参数：日志文件行
+	 * 返回值：无
 	 */
 	public void addSp(String line)
 	{
@@ -358,6 +375,8 @@ public class Homework2
 	
 	/*
 	 * 感染患者流入
+	 * 输入参数：日志文件行
+	 * 返回值：无
 	 */
 	public void inflowIp(String line)
 	{
@@ -383,8 +402,11 @@ public class Homework2
 			}
 		}
 	}
+	
 	/*
 	 * 疑似患者流入
+	 * 输入参数：日志文件行
+	 * 返回值：无
 	 */
 	public void inflowSp(String line)
 	{
@@ -410,8 +432,11 @@ public class Homework2
 			}
 		}
 	}
+	
 	/*
 	 * 患者治愈
+	 * 输入参数：日志文件行
+	 * 返回值：无
 	 */
 	public void cureIp(String line)
 	{
@@ -436,8 +461,11 @@ public class Homework2
 			}
 		}
 	}
+	
 	/*
 	 * 患者死亡
+	 * 输入参数：日志文件行
+	 * 返回值：无
 	 */
 	public void deadIp(String line)
 	{
@@ -462,8 +490,11 @@ public class Homework2
 			}
 		}
 	}
+	
 	/*
 	 * 疑似患者确诊
+	 * 输入参数：日志文件行
+	 * 返回值：无
 	 */
 	public void diagnoseSp(String line)
 	{
@@ -488,8 +519,11 @@ public class Homework2
 			}
 		}
 	}
+	
 	/*
 	 * 排除疑似患者
+	 * 输入参数：日志文件行
+	 * 返回值：无
 	 */
 	public void removeSp(String line)
 	{
@@ -512,6 +546,7 @@ public class Homework2
 			}
 		}
 	}
+	
 	/*
 	 * 输出文件
 	 * 输入参数：文件路径
@@ -574,6 +609,7 @@ public class Homework2
             }
         }
 	}
+	
 	public static void main(String args[]) throws IOException
 	{
 		if(args.length == 0)
@@ -581,7 +617,20 @@ public class Homework2
 			System.out.println("未输入命令行参数");
 			return ;
 		}
-		Homework2 hw2 = new Homework2();
+		for(int i = 0;i < args.length;i++)
+		{
+			if(!(args[i].equals("-log")))
+			{
+				System.out.println("缺少必要的-log参数");
+				return ;
+			}
+			else if(!(args[i].equals("-out")))
+			{
+				System.out.println("缺少必要的-out参数");
+				return ;
+			}
+		}
+		InfectStatistic hw2 = new InfectStatistic();
 		hw2.orderHandle(args);
 		
 	}

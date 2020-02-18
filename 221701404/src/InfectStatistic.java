@@ -161,10 +161,28 @@ public class InfectStatistic {
                                                 map2.put(arr[2], map2.get(arr[2])-tempNum);
                                             }
                                         }
+                                    } else if(arr.length==5) {
+                                        //此种情况就是给省1减去对应的人给省二加上对应的人,对于全国来说没有变化
+                                        //（1）对省一的操作
+                                        String tempNumStr = arr[4].substring(0,arr[4].length()-1);
+                                        int tempNum = Integer.parseInt(tempNumStr);
+                                        map.put(arr[1], map.get(arr[1])-tempNum);
+                                        String city2 = arr[3];
+                                        if(mapMap.containsKey(city2)){
+                                            map = mapMap.get(city2);
+                                        } else {
+                                            map = new LinkedHashMap<String,Integer>();
+                                            map.put(Lib.str1, 0);
+                                            map.put(Lib.str2, 0);
+                                            map.put(Lib.str3, 0);
+                                            map.put(Lib.str4,0);
+                                            mapMap.put(city2, map);
+                                        }
+                                        //（2）对省二的操作
+                                        map.put(arr[1], map.get(arr[1])+tempNum);
                                     }
                                 }
                             }
-
                         }
                         //到这里一个文件处理完毕
 

@@ -3,10 +3,10 @@ import sys
 import os
 import argparse
 # from pypinyin import lazy_pinyin
-from Lib import parse_output_line
+from Lib import parse_output_line, str_to_date
 
 SORTED_PROVENCE_NAME = ["安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"]
-EMPTY_DATA = {'infected': 0, 'suspect': 0, 'death': 0, 'cure': 0}
+EMPTY_DATA = {'infected': 0, 'suspect': 0, 'cure': 0, 'death': 0}
 
 
 class Statistic:
@@ -48,7 +48,7 @@ class Statistic:
 
     def get_total(self):
         def total(key): return sum(map(lambda x: x[key], self.data.values()))
-        return {key: total(key) for key in ['infected', 'suspect', 'death', 'cure']}
+        return {key: total(key) for key in ['infected', 'suspect', 'cure', 'death']}
 
 
 def map_info_type(s: str) -> int:
@@ -89,10 +89,6 @@ parser.add_argument('-province', type=str, nargs='*', help='which province(s) to
 option = parser.parse_args()
 
 # ======= 检查命令行参数 =======
-# check -date
-if option.date and not re.match(r'\d{4}-\d{2}-\d{2}', option.date):
-    sys.stderr.write('argument DATE is invalid: ' + option.date + '\nformat must be YYYY-mm-DD')
-    exit(1)
 # check -log
 try:
     if option.log and len(os.listdir(option.log)) == 0:
@@ -101,12 +97,16 @@ try:
 except FileNotFoundError as e:
     sys.stderr.write('cannot find log directory {0}'.format(option.log))
     exit(1)
+# check -date
+if option.date and not re.match(r'^\d{4}-\d{2}-\d{2}$', option.date):
+    sys.stderr.write('argument -date is invalid: ' + option.date + '\nformat must be YYYY-mm-DD')
+    exit(1)
 # check -province
-# if option.province and option.province not in PROVENCE_NAME + ['全国']:
-# if option.province and len([x for x in (PROVENCE_NAME + ['全国']) if x in option.province]) == len(option.province):
-#     sys.stderr.write('province name invalid: {0}'.format(option.province))
-#     exit(1)
-
+# if option.province and len(set(SORTED_PROVENCE_NAME + ['全国'] - set(option.province)):  # 集合方法求差集
+wrongInputProvinces = [x for x in (option.province or []) if x not in SORTED_PROVENCE_NAME + ['全国']]
+if option.province and len(wrongInputProvinces):
+    sys.stderr.write('province name invalid: {0}'.format(wrongInputProvinces))
+    exit(1)
 # check -type
 if option.type and len(option.type) != len(set(option.type)):
     sys.stderr.write('type repeat!')
@@ -118,6 +118,10 @@ filesTuple = os.walk(option.log).__next__()
 basePath = filesTuple[0] + '\\'
 # 扫描目录下的所有文件
 for filename in filesTuple[2]:
+    # 若指定日期，则按参数中止循环，否则处理完所有文件
+    # if option.date and filename.find(option.date) > -1:
+    if option.date and str_to_date(filename[:10]) > str_to_date(option.date):
+        break
     with open(basePath + filename, encoding='utf8') as fr:
         # 处理文件的每一行
         for line in fr:
@@ -126,9 +130,8 @@ for filename in filesTuple[2]:
             if line[len(line) - 1] == '\n':
                 line = line[:-1]
             stat.parse_record_line(line)
-    # 若指定日期，则按参数中止循环，否则处理完所有文件
-    if option.date and filename.find(option.date) > -1:
-        break
+if option.date and str_to_date(filename[:10]) < str_to_date(option.date):
+    sys.stderr.write('warning: 日期超出范围\n')
 stat.data['全国'] = stat.get_total()
 
 # ======== 输出数据处理 ========
@@ -163,6 +166,8 @@ if not option.province or '全国' in option.province:
     output += parse_output_line('全国', data)
 for province in SORTED_PROVENCE_NAME:
     output += parse_output_line(province, data)
+output += '// 该文档并非真实数据，仅供测试使用\n' \
+          '// 命令：' + ' '.join(sys.argv) + '\n'
 # 写入out参数指定的文件
 option.out.write(output)
 print(output)

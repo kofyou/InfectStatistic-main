@@ -1,17 +1,19 @@
 /**
- * InfectStatistic
- * TODO
- *
+ * 
  * @author wzzzq
- * @version 1.0
- * @since 2020/2/16
+ *
  */
-
 import java.io.File;
+
 import java.io.*;
 import java.util.regex.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.text.SimpleDateFormat;
 
@@ -27,15 +29,32 @@ public class InfectStatistic {
 			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
 			"江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海",
 			"四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};	//保存省份
-	Map<String,String> ip = new HashMap<String,String>();	//保存各省的感染患者人数
-	Map<String,String> sp = new HashMap<String,String>(); 	//保存各省的疑似患者人数
-	Map<String,String> cure = new HashMap<String,String>();	//保存各省的治愈人数
-	Map<String,String> dead = new HashMap<String,String>();	//保存各省的死亡人数
+	public LinkedHashMap<String,Integer> ip = new LinkedHashMap<String,Integer>();	//保存各省的感染患者人数
+	public LinkedHashMap<String,Integer> sp = new LinkedHashMap<String,Integer>(); 	//保存各省的疑似患者人数
+	public LinkedHashMap<String,Integer> cure = new LinkedHashMap<String,Integer>();	//保存各省的治愈人数
+	public LinkedHashMap<String,Integer> dead = new LinkedHashMap<String,Integer>();	//保存各省的死亡人数
+	 // 定义正则表达式，表达式内的空格不可随意修该，否则会影响读取处理
+    String s1 = "\\s*\\S+ 新增 感染患者 \\d+人\\s*";
+    String s2 = "\\s*\\S+ 新增 疑似患者 \\d+人\\s*";
+    String s3 = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
+    String s4 = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
+    String s5 = "\\s*\\S+ 死亡 \\d+人\\s*";
+    String s6 = "\\s*\\S+ 治愈 \\d+人\\s*";
+    String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
+    String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
 	//设定日期格式
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
 	Date d = new Date(System.currentTimeMillis());
 	public String date = dateFormat.format(d);
 	
+	public InfectStatistic() {
+		for(int i = 0;i < provinceStr.length;i++) {
+			ip.put(provinceStr[i], 0);
+			sp.put(provinceStr[i], 0);
+			cure.put(provinceStr[i], 0);
+			dead.put(provinceStr[i], 0);
+		}
+	}
 	//检验参数函数
 	public boolean inspectParameter(String [] argsStr) {
 		int j;
@@ -212,12 +231,65 @@ public class InfectStatistic {
         return true;
     }
 	
-	//读取数据进行统计并输出
-	public void execCalcAndWrite() {
+	//获取日志文件
+	public void execLog() throws Exception{
 		File f = new File(logPath);
-		
+		String[] logFiles = f.list();
+		int l = logFiles.length;
+		List<String> legalFiles = new ArrayList<String>();
+		for(int i = 0;i < l;i++) {
+			if(logFiles[i].matches("\\\\d{4}-\\\\d{2}-\\\\d{2}\\\\.log\\\\.txt"))
+				legalFiles.add(logFiles[i]);
+		}
+		l = legalFiles.size();
+		if(l == 0)
+			throw new IllegalException("Error, no legal log file exists in the log directory");
+		logFiles = new String[1];
+		legalFiles.toArray(logFiles);
+		Arrays.sort(logFiles);
+		for(int i = 0;i < l;i++) {
+		execFile(logPath + "/" + logFiles[i]);
+		}
+		int ipSum = 0;
+		int spSum = 0;
+		int cureSum = 0;
+		int deadSum = 0;
+		for(Integer i : ip.values())
+			ipSum += i;
+		for(Integer i : sp.values())
+			spSum += i;
+		for(Integer i : cure.values())
+			cureSum += i;
+		for(Integer i : dead.values())
+			deadSum += i;
 	}
 	
+	//处理日志文件
+	public void execFile(String path) throws Exception{
+		FileInputStream fs = new FileInputStream(new File(path));
+		BufferedReader br = new BufferedReader(new InputStreamReader(fs));
+		String strLine;
+		while((strLine = br.readLine()) != null) {
+			if(strLine.matches(s1)) {
+				String[] strArr = strLine.split(" ");
+				int j;
+				int m = Integer.valueOf(strArr[3].replace("人", " "));
+				
+				
+			}
+		}
+	}
+	
+	class IllegalException extends Exception{
+		private String message;
+		public  IllegalException(String tMessage) {
+			message =tMessage;
+		}
+		public String toString() {
+			return message;
+		}
+		
+	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		if(args.length == 0) {

@@ -245,8 +245,20 @@ class InfectStatistic {
         		}
         		if(date.equals(tempList[i].getName().toString().substring(0,10)))
         		break;
-        	}
-        	
+        	}     	
+
+        	File fr=new File(out);    
+			if(!fr.exists())    
+			{    
+				try {    
+    				file.createNewFile();    
+    			} catch (IOException e) {    
+    				// TODO Auto-generated catch block    
+    			e.printStackTrace();    
+    			}    
+			}  
+			FileWriter fw = new FileWriter(out);
+			BufferedWriter fout = new BufferedWriter(fw);
         	if(province.size()>0) {
 				if(type.size()>0) {
 					for(int k=0;k<province.size();k++) {
@@ -254,19 +266,46 @@ class InfectStatistic {
 						t.province=province.get(k);
         				if(list.contains(t)) {
         					System.out.print(list.get(list.indexOf(t)).province+" ");
+        					String string=list.get(list.indexOf(t)).province+" ";
         					if(type.contains("¸ÐÈ¾")) {
         						System.out.print("¸ÐÈ¾»¼Õß:"+list.get(list.indexOf(t)).infected+" ");
+        						string+="¸ÐÈ¾»¼Õß:"+list.get(list.indexOf(t)).infected+" ";
         					}
         					if(type.contains("ÒÉËÆ")) {
         						System.out.print("ÒÉËÆ»¼Õß:"+list.get(list.indexOf(t)).suspected+" ");
+        						string+="ÒÉËÆ»¼Õß:"+list.get(list.indexOf(t)).suspected+" ";
         					}
         					if(type.contains("ÖÎÓú")) {
         						System.out.print("ÖÎÓú»¼Õß:"+list.get(list.indexOf(t)).cured+" ");
+        						string+="ÖÎÓú»¼Õß:"+list.get(list.indexOf(t)).cured+" ";
         					}
         					if(type.contains("ËÀÍö")) {
         						System.out.print("ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"\n");
+        						string+="ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"\r\n";
         					}
-        				}		
+        					fout.write(string);
+        				}
+        				else {
+        					System.out.print(t.province+" ");
+        					String string="";
+        					if(type.contains("¸ÐÈ¾")) {
+        						System.out.print("¸ÐÈ¾»¼Õß:"+"0"+" ");
+        						string+="¸ÐÈ¾»¼Õß:"+"0"+" ";
+        					}
+        					if(type.contains("ÒÉËÆ")) {
+        						System.out.print("ÒÉËÆ»¼Õß:"+"0"+" ");
+        						string+="ÒÉËÆ»¼Õß:"+"0"+" ";
+        					}
+        					if(type.contains("ÖÎÓú")) {
+        						System.out.print("ÖÎÓú»¼Õß:"+"0"+" ");
+        						string+="ÖÎÓú»¼Õß:"+"0"+" ";
+        					}
+        					if(type.contains("ËÀÍö")) {
+        						System.out.print("ËÀÍö»¼Õß:"+"0"+"\n");
+        						string+="ËÀÍö»¼Õß:"+"0"+"\r\n";
+        					}
+        					fout.write(string);
+        				}
         			}
 				}
 				else {
@@ -275,6 +314,9 @@ class InfectStatistic {
     				System.out.print("ÒÉËÆ»¼Õß:"+all.suspected+" ");
     				System.out.print("ÖÎÓú»¼Õß:"+all.cured+" ");
     				System.out.print("ËÀÍö»¼Õß:"+all.dead+"\n");	
+    				String string=all.province+" "+"¸ÐÈ¾»¼Õß:"+all.infected+" "+"ÒÉËÆ»¼Õß:"+
+							all.suspected+" "+"ÖÎÓú»¼Õß:"+all.cured+" "+"ËÀÍö»¼Õß:"+all.dead+"\r\n";
+    				fout.write(string);
 					for(int k=0;k<province.size();k++) {
 						Info t=new Info();
 						t.province=province.get(k);
@@ -283,40 +325,61 @@ class InfectStatistic {
             				System.out.print("¸ÐÈ¾»¼Õß:"+list.get(list.indexOf(t)).infected+" ");
             				System.out.print("ÒÉËÆ»¼Õß:"+list.get(list.indexOf(t)).suspected+" ");
             				System.out.print("ÖÎÓú»¼Õß:"+list.get(list.indexOf(t)).cured+" ");
-            				System.out.print("ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"\n");		
+            				System.out.print("ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"\n");
+            				String strin=list.get(list.indexOf(t)).province+" "+"¸ÐÈ¾»¼Õß:"+list.get(list.indexOf(t)).infected+" "+"ÒÉËÆ»¼Õß:"+list.get(list.indexOf(t)).suspected+" "+
+            						"ÖÎÓú»¼Õß:"+list.get(list.indexOf(t)).cured+" "+"ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"\r\n";
+            				fout.write(strin);
         				}		
         			}
 				}
 			}
 			else {
 				if(type.size()>0) {
-					for(int k=0;k<list.size();k++) {
+					for(int k=0;k<list.size();k++) {				
         				System.out.print(list.get(k).province+" ");
+        				String string=list.get(k).province+" ";
         				if(type.contains("¸ÐÈ¾")) {
         					System.out.print("¸ÐÈ¾»¼Õß:"+list.get(k).infected+" ");
+        					string+="¸ÐÈ¾»¼Õß:"+list.get(k).infected+" ";
         				}
         				if(type.contains("ÒÉËÆ")) {
         					System.out.print("ÒÉËÆ»¼Õß:"+list.get(k).suspected+" ");
+        					string+="ÒÉËÆ»¼Õß:"+list.get(k).suspected+" ";
         				}
         				if(type.contains("ÖÎÓú")) {
         					System.out.print("ÖÎÓú»¼Õß:"+list.get(k).cured+" ");
+        					string+="ÖÎÓú»¼Õß:"+list.get(k).cured+" ";
         				}
         				if(type.contains("ËÀÍö")) {
         					System.out.print("ËÀÍö»¼Õß:"+list.get(k).dead+"\n");
+        					string+="ËÀÍö»¼Õß:"+list.get(k).dead+" ";
         				}
+        				fout.write(string);
         			}
 				}
 				else {
+					String string=all.province+" "+"¸ÐÈ¾»¼Õß:"+all.infected+" "+"ÒÉËÆ»¼Õß:"+
+							all.suspected+" "+"ÖÎÓú»¼Õß:"+all.cured+" "+"ËÀÍö»¼Õß:"+all.dead+"\r\n";
+					System.out.print(all.province+" ");
+    				System.out.print("¸ÐÈ¾»¼Õß:"+all.infected+" ");
+    				System.out.print("ÒÉËÆ»¼Õß:"+all.suspected+" ");
+    				System.out.print("ÖÎÓú»¼Õß:"+all.cured+" ");
+    				System.out.print("ËÀÍö»¼Õß:"+all.dead+"\n");	
+    				fout.write(string);
 					for(int k=0;k<list.size();k++) {
 	    				System.out.print(list.get(k).province+" ");
 	        			System.out.print("¸ÐÈ¾»¼Õß:"+list.get(k).infected+" ");
 	        			System.out.print("ÒÉËÆ»¼Õß:"+list.get(k).suspected+" ");
 	        			System.out.print("ÖÎÓú»¼Õß:"+list.get(k).cured+" ");
 	        			System.out.print("ËÀÍö»¼Õß:"+list.get(k).dead+"\n");		
+	        			string=list.get(k).province+" "+"¸ÐÈ¾»¼Õß:"+list.get(k).infected+" "+"ÒÉËÆ»¼Õß:"+list.get(k).suspected+" "+
+	        					"ÖÎÓú»¼Õß:"+list.get(k).cured+" "+"ËÀÍö»¼Õß:"+list.get(k).dead+"\r\n";
+	        			fout.write(string);
 	    			}
 				}
 				
 			}
+        	fout.close();
         }
     }
 }

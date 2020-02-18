@@ -21,11 +21,8 @@ InfectStatistic-221701215
     -type 可选择[ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]，使用缩写选择，如 -type ip 表示只列出感染患者的情况，-type sp cure则会按顺序【sp, cure】列出疑似患者和治愈患者的情况，不指定该项默认会列出所有情况。
     -province 指定列出的省，如-province 福建，则只列出福建，-province 全国 浙江则只会列出全国、浙江
 
-作业链接
-
-  https://edu.cnblogs.com/campus/fzu/2020SPRINGS/homework/10287
+作业链接:  [点我](https://edu.cnblogs.com/campus/fzu/2020SPRINGS/homework/10287)
 
 
-博客链接
 
-       https://www.cnblogs.com/yangmingwei969/p/12298734.html
+博客链接： [点我](https://www.cnblogs.com/yangmingwei969/p/12298734.html)

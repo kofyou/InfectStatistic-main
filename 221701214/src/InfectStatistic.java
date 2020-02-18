@@ -113,12 +113,12 @@ public class InfectStatistic
 				}
 			}
 		}
-		if(!(isValidDate(dateOrder)))
+		if(!(isValidDate(dateOrder)) && !(dateOrder.equals("")))
 		{
 			System.out.print("日期不合法，请重新输入。");
 			return ;
 		}
-		else if(!(isDateOutOfRange(date)))
+		else if(!(isDateOutOfRange(date)) && !(date.equals("")))
 		{
 			System.out.print("日期超出范围，请重新输入。");
 			return ;
@@ -126,7 +126,7 @@ public class InfectStatistic
 		for(int k = 0;k < allLog.size();k++)
 		{
 			String[] log = allLog.get(k).split("\\\\");
-			if((log[log.length - 1].compareTo(date)) <= 0)
+			if((log[log.length - 1].compareTo(date)) <= 0 || date.equals(""))
 			{
 				readLog(allLog.get(k));
 			}
@@ -612,13 +612,25 @@ public class InfectStatistic
 	
 	public static void main(String args[]) throws IOException
 	{
+		int flag = 0;//用于记录命令行是否有必带项-log，-out
 		if(args.length == 0)
 		{
 			System.out.println("未输入命令行参数");
 			return ;
 		}
+		for(int i = 0;i < args.length;i++)
+		{
+			if(args[i].equals("-log") || args[i].equals("-out"))
+			{
+				flag++;
+			}
+		}
+		if(flag < 2)
+		{
+			System.out.println("命令行缺少必带项，请仔细检查");
+			return ;
+		}
 		InfectStatistic hw2 = new InfectStatistic();
 		hw2.orderHandle(args);
-		
 	}
 }

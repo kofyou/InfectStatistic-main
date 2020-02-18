@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -21,6 +22,7 @@ public class Homework2
 	public int[] provinceFlag = new int[32];//根据参数-province确定输出内容
 	public int[] typeFlag = new int[4];//根据参数-type确定输出内容
 	String date = "";//根据参数date确定输出日期
+	String outOrder = "";//全局变量存储-out指令
 	String dateOrder = "";//全局变量存储-date指令
 	String provinceOrder = "";//全局变量存储-province指令
 	String typeOrder = "";//全局变量存储-type指令
@@ -49,17 +51,31 @@ public class Homework2
 			{
 				if(isValidLogAddress(inputOrder[i + 1]))
 				{
-					
+					allLog = queryFileNames(inputOrder[i + 1]);
 				}
-				allLog = queryFileNames(inputOrder[i + 1]);
+				else 
+				{
+					System.out.print("日志目录位置有误，请重新输入。");
+					return ;
+				}
 			}
 			else if(inputOrder[i].equals("-out"))//指定输出文件路径和文件名
 			{
-				dateOrder = inputOrder[i + 1];
+				if(isValidOutAddress(inputOrder[i + 1]))
+				{
+					outOrder = inputOrder[i + 1];
+				}
+				else 
+				{
+					System.out.print("输出文件路径有误，请重新输入。");
+					return ;
+				}
+				
 			}
 			else if(inputOrder[i].equals("-date"))//指定日志日期
 			{
-				date = inputOrder[i+1] + ".log.txt";
+				dateOrder = inputOrder[i + 1];
+				date = inputOrder[i + 1] + ".log.txt";
 			}
 			else if(inputOrder[i].equals("-type"))//指定列出患者类型
 			{
@@ -94,6 +110,16 @@ public class Homework2
 				}
 			}
 		}
+		if(!(isValidDate(dateOrder)))
+		{
+			System.out.print("日期不合法，请重新输入。");
+			return ;
+		}
+		else if(!(isDateOutOfRange(dateOrder)))
+		{
+			System.out.print("日期超出范围，请重新输入。");
+			return ;
+		}
 		for(int k = 0;k < allLog.size();k++)
 		{
 			readLog(allLog.get(k));
@@ -103,9 +129,76 @@ public class Homework2
 				break;
 			}
 		}
-		writeOut(dateOrder);
+		writeOut(outOrder);
 	}
 	
+	/*
+	 * 判断日志文件目录路径名是否合法
+	 */
+	public boolean isValidLogAddress(String address)
+	{
+		if(address.matches("^[A-z]:\\\\(.+?\\\\)*$"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	/*
+	 * 判断输出文件路径是否合法
+	 */
+	public boolean isValidOutAddress(String address)
+	{
+		if(address.matches("^[A-z]:\\\\(.+?\\\\)*(.+?.txt)$"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	/*
+	 * 判断日期是否合法
+	 */
+	public boolean isValidDate(String inputDate)
+	{
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        try 
+        {
+            format.setLenient(false);//此处指定日期/时间解析是否不严格，在true是不严格，false时为严格
+            format.parse(inputDate);//从给定字符串的开始解析文本，以生成一个日期
+            
+            String[] sArray = inputDate.split("-");
+            for (String s : sArray) 
+            {
+                boolean isNum = s.matches("[0-9]+");
+                if (!isNum)
+                    return false;
+            }
+        } 
+        catch (Exception e) 
+        {
+            return false;
+        }
+        return true;
+	}
+	
+	/*
+	 * 判断日期是否超出范围
+	 */
+	public boolean isDateOutOfRange(String inputDate)
+	{
+		String[] endLog = allLog.get(allLog.size() - 1).split("\\\\");
+		String[] beginLog = allLog.get(0).split("\\\\");
+		if((inputDate.compareTo(endLog[endLog.length - 1])) == 1)
+		{
+			return false;
+		}
+		else if((inputDate.compareTo(beginLog[endLog.length - 1])) == -1)
+		{
+			return false;
+		}
+		return true;
+	}
 	/*
 	 * 获得指定目录的所有文件
 	 */
@@ -465,15 +558,22 @@ public class Homework2
 	        }
 	        writer.write("// 该文档并非真实数据，仅供测试使用");
 	    } 
-	    catch (IOException e) 
+	    catch (Exception e) 
 	    {
 	        e.printStackTrace();
 	    } 
 	    finally 
 	    {
-	    	writer.flush();
-	        writer.close();
-	    }
+            try 
+            {
+                writer.flush();
+                writer.close();
+            } 
+            catch(IOException ex) 
+            {
+                ex.printStackTrace();
+            }
+        }
 	}
 	public static void main(String args[]) throws IOException
 	{

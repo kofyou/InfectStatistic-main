@@ -18,19 +18,13 @@ def parse_output_line(province, data):
     return ''
 
 
-def date_str_cmp_less(date1, date2, split='-', equal=True):
-    d1 = date1.split(split)
-    d2 = date2.spilt(split)
-    map(lambda x: int(x), d1)
-    map(lambda x: int(x), d2)
-    dateObj1 = date(d1[0], d1[1], d1[2])
-    dateObj2 = date(d2[0], d2[1], d2[2])
-    if equal:
-        return dateObj1 <= dateObj2
-    return dateObj1 < dateObj2
-
-
 def str_to_date(s, separator='-'):
+    """
+    字符串转date对象
+    :param s: 日期字符串，分隔符由separator指定
+    :param separator: 日期的分隔符
+    :return: date对象
+    """
     d = s.split(separator)
     d = list(map(lambda x: int(x), d))
     return date(d[0], d[1], d[2])

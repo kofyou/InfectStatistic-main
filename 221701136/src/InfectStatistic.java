@@ -228,18 +228,10 @@ class InfectStatistic {
 		System.out.println("日期超出范围");
 	}
 	
-	
-	
-	
-	
-	
 	//获取所有小于commandDate的日志,并读取内容
 	for(int j=0;j<tempList.length;j++) {
 		fileName = tempList[j].getName();
 		Date fileDay = format.parse(fileName);
-		
-		
-		
 		if(fileDay.before(commandDay)||fileDay.equals(commandDay)) {
 			
 				readFile(inputAddress+fileName);
@@ -354,7 +346,6 @@ class InfectStatistic {
 						Set<String> typeKeys = thisMap.keySet();
 						for(String strTwo:typeKeys) {		
 							if(strTwo.equals(type)) {
-								
 								previousNum = thisMap.get(type);
 							}
 						}
@@ -389,7 +380,7 @@ class InfectStatistic {
 		countryPreviousNum = searchProvinceToTypeNum("全国","感染患者");
 	
 		
-		currentNum = num + previousNum;
+		currentNum = num+previousNum;
 		countryCurrentNum = num+countryPreviousNum;
 		
 	    ProvinceToNumMap.get(province).replace("感染患者",currentNum);
@@ -527,14 +518,6 @@ class InfectStatistic {
   		currentInfectionNum = previousInfectionNum-num;
    		countryCurrentInfectionNum = countryPreviousInfectionNum-num;
   		
-  		System.out.println("**********5");
- 		System.out.println(num);
- 		System.out.println(previousNum);
-		System.out.println(countryPreviousNum);
-		System.out.println(currentNum);
-		System.out.println(countryCurrentNum);
-		System.out.println("**********");
-		
   	    ProvinceToNumMap.get(province).replace("死亡",currentNum);
   	    ProvinceToNumMap.get("全国").replace("死亡",countryCurrentNum);
   	  ProvinceToNumMap.get(province).replace("感染患者",currentInfectionNum);
@@ -613,8 +596,8 @@ class InfectStatistic {
            
                	    ProvinceToNumMap.get(province).replace("疑似患者",currentSuspectedNum);
                	 ProvinceToNumMap.get(province).replace("感染患者",currentInfectionNum);
-               	 ProvinceToNumMap.get("全国").replace("感染患者",countryCurrentSuspectedNum);
-               	 ProvinceToNumMap.get("全国").replace("疑似患者",countryCurrentInfectionNum);
+               	 ProvinceToNumMap.get("全国").replace("疑似患者",countryCurrentSuspectedNum);
+               	 ProvinceToNumMap.get("全国").replace("感染患者",countryCurrentInfectionNum);
                	}
                     
      
@@ -644,8 +627,6 @@ class InfectStatistic {
         		currentSuspectedNum = previousSuspectedNum-num;
         		countryCurrentSuspectedNum = countryPreviousSuspectedNum-num;
         				
-        		
-  
         	    ProvinceToNumMap.get(province).replace("疑似患者",currentSuspectedNum);
         	 ProvinceToNumMap.get("全国").replace("疑似患者",countryCurrentSuspectedNum);
     	}
@@ -766,7 +747,7 @@ class InfectStatistic {
 				"D:\\ListOut1.txt","-date","2020-01-22"};
        String[] str2= {"list","-log","D:\\221701136\\log\\","-out",
 				"D:\\ListOut1.txt","-date","2020-01-22","-province","福建","河北"};
-       infectStatistic.analyseCommandLine(str3);
+       infectStatistic.analyseCommandLine(str2);
       // System.out.println("你好"+"111");
        System.out.println(inputAddress);
        System.out.println(outputAddress);

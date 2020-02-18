@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.*;
 import java.lang.String;
 
 
@@ -37,7 +36,7 @@ public class InfectStatistic {
 				count=count+1;
 				addYesterday();
 				//读文件
-				readFileByLines(log+"\\"+fileName,count-1);         
+				readFileByLines(log+"\\"+fileName,libs[count-1]);         
 			} 
 			if (fileList[i].isDirectory())
 			{
@@ -48,65 +47,62 @@ public class InfectStatistic {
 	    }
 	}
 	//按行读取文件
-	public static void readFileByLines(String fileName,int order) 
+	public static void readFileByLines(String fileName,Lib lib)
 	{  
-        File file = new File(fileName);  
-        BufferedReader reader = null;  
-        try {    
-            reader = new BufferedReader(new FileReader(file));  
-            String tempString = null;  
-            //读行  
-            while ((tempString = reader.readLine()) != null)
-            {  
-                //System.out.println(tempString);
-            	//处理文件中的数据
-                OpData(tempString,order);
-            }
-            reader.close();  
-        } 
-        catch (IOException e)
-        {  
-            e.printStackTrace();  
-        }
-        finally
-        {  
-            if (reader != null)
-            {  
-                try {  
-                    reader.close();  
-                } 
-                catch (IOException e1) {}  
-            }  
-        }  
+		
+		BufferedReader reader=null;
+		try {
+			InputStreamReader read = new InputStreamReader(new FileInputStream(fileName), "UTF-8");
+			reader = new BufferedReader(read);
+			String line=null;
+						
+			while((line =reader.readLine()) != null){
+				OpData(line,lib);						
+			}			
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {			
+			e.printStackTrace();
+		}finally {
+			if (reader !=null) {
+				try {
+					reader.close();
+				} catch (IOException e) {					
+					e.printStackTrace();
+				}
+			}
+		}
+        
     }  
 	//处理数据的函数
-	public static void OpData(String data,int x)
+	public static void OpData(String data,Lib lib)
 	{
 		String[] strarray=data.split(" |人");
 		if(strarray.length==5)
 		{
 			//人员流动的情况
-			Flow(x,strarray);
+			Flow(lib,strarray);
 		}
 		else if(strarray.length==4)
 		{
 			//确诊或者增长或者排除的情况
-			SureOrIncreaseOrMove(x,strarray);
+			SureOrIncreaseOrMove(lib,strarray);
 		}
 		else if(strarray.length==3)
 		{
 			//治愈或者死亡的情况
-			CureOrDead(x,strarray);
+			CureOrDead(lib,strarray);
 		}
 	}
 	
-	//在全国的省份中找到对应省份的函数
-	public static int Find(int x,String[] strarray,int y)
+	//在全国的省份中找到对应省份的函数,lib是日期，y是省
+	public static int Find(Lib lib,String[] strarray,int y)
 	{
-		int i=0;
-		for (;i<libs[x].provinces.size();i++)
+		for (int i=0;i<lib.provinces.size();i++)
 		{
-			Province temp=libs[x].provinces.get(i);
+			Province temp=lib.provinces.get(i);
 			if(temp.getName().contentEquals(strarray[y])==true)
 			{
 				//如果找到就返回下标,并标识出它是当天改变的省份
@@ -118,18 +114,14 @@ public class InfectStatistic {
 		return -1;
 	}
 	//处理人口流动情况的函数
-	public static void Flow(int x,String[] strarray)
+	public static void Flow(Lib lib,String[] strarray)
 	{
 		Province temp1,temp2;
-		int i=Find(x,strarray,0),j=Find(x,strarray,3);
-		if(i==-1||j==-1)
+		int i=Find(lib,strarray,0),j=Find(lib,strarray,3);
+		if(i!=-1&&j!=-1)
 		{
-			System.out.println("发生错误");
-		}
-		else
-		{	
-			temp1=libs[x].provinces.get(i);
-			temp2=libs[x].provinces.get(j);
+			temp1=lib.provinces.get(i);
+			temp2=lib.provinces.get(j);
 			if(strarray[1].contentEquals("感染患者")==true)
 			{
 				temp1.moveIp(Integer.parseInt(strarray[4]));
@@ -140,24 +132,24 @@ public class InfectStatistic {
 				temp1.moveSp(Integer.parseInt(strarray[4]));
 				temp2.addSp(Integer.parseInt(strarray[4]));
 			}
-			libs[x].provinces.remove(i);
-			libs[x].provinces.insertElementAt(temp1,i);
-			libs[x].provinces.remove(j);
-			libs[x].provinces.insertElementAt(temp2,j);
-		}
-	}
-	//处理死亡或者治愈情况的函数
-	public static void CureOrDead(int x,String[] strarray)
-	{
-		int i=Find(x,strarray,0);
-		if(i==-1)
-		{
-			System.out.println("发生错误");
+			lib.provinces.remove(i);
+			lib.provinces.insertElementAt(temp1,i);
+			lib.provinces.remove(j);
+			lib.provinces.insertElementAt(temp2,j);
 		}
 		else
 		{	
-			Province temp1=libs[x].provinces.get(i);
-			Province temp2=libs[x].provinces.get(0);
+			System.out.println("流入发生错误");
+		}
+	}
+	//处理死亡或者治愈情况的函数
+	public static void CureOrDead(Lib lib,String[] strarray)
+	{
+		int i=Find(lib,strarray,0);
+		if(i!=-1)
+		{
+			Province temp1=lib.provinces.get(i);
+			Province temp2=lib.provinces.get(0);
 			if(strarray[1].contentEquals("死亡")==true)
 			{
 				temp1.moveIp(Integer.parseInt(strarray[2]));
@@ -172,24 +164,25 @@ public class InfectStatistic {
 				temp2.moveIp(Integer.parseInt(strarray[2]));
 				temp2.addCure(Integer.parseInt(strarray[2]));
 			}
-			libs[x].provinces.remove(i);
-			libs[x].provinces.insertElementAt(temp1,i);
-			libs[x].provinces.remove(0);
-			libs[x].provinces.insertElementAt(temp2,0);
-		}
-	}
-	//处理确诊排除或者增长情况的函数
-	public static void SureOrIncreaseOrMove(int x,String[] strarray)
-	{
-		int i=Find(x,strarray,0);
-		if(i==-1)
-		{
-			System.out.println("发生错误");
+			lib.provinces.remove(i);
+			lib.provinces.insertElementAt(temp1,i);
+			lib.provinces.remove(0);
+			lib.provinces.insertElementAt(temp2,0);
+			
 		}
 		else
 		{	
-			Province temp1=libs[x].provinces.get(i);
-			Province temp2=libs[x].provinces.get(0);
+			System.out.println("治愈死亡发生错误");
+		}
+	}
+	//处理确诊排除或者增长情况的函数
+	public static void SureOrIncreaseOrMove(Lib lib,String[] strarray)
+	{
+		int i=Find(lib,strarray,0);
+		if(i!=-1)
+		{
+			Province temp1=lib.provinces.get(i);
+			Province temp2=lib.provinces.get(0);
 			if(strarray[1].contentEquals("新增")==true)
 			{
 				if(strarray[2].contentEquals("感染患者")==true)
@@ -215,10 +208,15 @@ public class InfectStatistic {
 				temp2.moveSp(Integer.parseInt(strarray[3]));
 				temp2.addIp(Integer.parseInt(strarray[3]));
 			}
-			libs[x].provinces.remove(i);
-			libs[x].provinces.insertElementAt(temp1,i);
-			libs[x].provinces.remove(0);
-			libs[x].provinces.insertElementAt(temp2,0);
+			lib.provinces.remove(i);
+			lib.provinces.insertElementAt(temp1,i);
+			lib.provinces.remove(0);
+			lib.provinces.insertElementAt(temp2,0);
+			
+		}
+		else
+		{	
+			System.out.println("确诊排除增加发生错误");
 		}
 	}
 	//把昨天的数据加到今天的函数
@@ -288,7 +286,7 @@ public class InfectStatistic {
 		}
 		return -1;
 	}
-	
+	//把数据输出到控制台的函数，没什么用，要删除的
 	public static void outList(String type,String date,String province)
 	{
 		int x=findDate(date);
@@ -365,18 +363,7 @@ public class InfectStatistic {
 			String date,String province)
 	{
 		 try {
-	            //创建文件路径
-	            File writename = new File(out);
-	            //判断是否存在
-	            if(!writename.exists())
-	            {
-	                //不存在就创建
-	                writename.mkdirs();
-	            }
-	    		File[] fileList = writename.listFiles();
-	            //创建文件路径
-	    		String filename=out+"\\listOut"+(fileList.length+1)+".txt";
-	            File writename1 = new File(filename);
+			    File writename1 = new File(out);
 	            //判断是否存在
 	            if(!writename1.exists()) 
 	            {
@@ -384,13 +371,21 @@ public class InfectStatistic {
 	                writename1.createNewFile();
 	            }
 	            //创建写入文件方式，true为追加写入，原内容不覆盖
-	            FileWriter fw = new FileWriter(writename1,true);
+	            //FileWriter fw = new FileWriter(writename1,true);
+	            
+	            FileWriter fileWriter = new FileWriter(writename1.getAbsoluteFile());
+
+				BufferedWriter bw = new BufferedWriter(fileWriter);
+
+				
 	            
 	            int x=findDate(date);
 	            if(x==-1)
 	            {
-	            	fw.append("日期超出范围\n");
-	            	fw.close();
+	            	//fw.append("日期超出范围\n");
+	            	//fw.close();
+	            	bw.write("日期超出范围\n");
+	            	bw.close();
 	            	return;
 	            }
 	    		if(province.contentEquals(" ")==true)
@@ -404,16 +399,18 @@ public class InfectStatistic {
 	    					if(type.contentEquals(" ")==true)
 	    					{
 	    						//追加写入
-	    	    				fw.append(temp.ToString());
+	    	    				//fw.append(temp.ToString());
+	    						bw.write(temp.ToString());
 	    					}
 	    					else
 	    					{
 	    						//追加写入
-	    	    				fw.append(outType(type,temp));
+	    	    				//fw.append(outType(type,temp));
+	    						bw.write(outType(type,temp));
 	    					}
 	    				}
 	    				//刷新
-	    	            fw.flush();
+	    	            //fw.flush();
 	    			}
 	    		}
 	    		else
@@ -427,49 +424,77 @@ public class InfectStatistic {
 	    					if(type.contentEquals(" ")==true)
 	    					{
 	    						//追加写入
-	    	    				fw.append(temp.ToString());
+	    	    				//fw.append(temp.ToString());
+	    						bw.write(temp.ToString());
 	    					}
 	    					else
 	    					{
 	    						//追加写入
-	    	    				fw.append(outType(type,temp));
+	    	    				//fw.append(outType(type,temp));
+	    						bw.write(outType(type,temp));
 	    					}
 	    				}
 	    				//刷新
-	    	            fw.flush();
+	    	            //fw.flush();
 	    			}
 	    		}
 	            
 	            //关闭资源
-	            fw.close();
+	            //fw.close();
+	    		bw.close();
 	        }
 		 catch (Exception e) {
 	            e.printStackTrace();
 	        }
 	}
 	
-	public static void main(String[] args) {
-		//System.out.println("hello world");
-//		for(int i=0;i<args.length;i++)
-//		{
-//			System.out.println(args[i]);
-//		}
-		
-		Scanner s = new Scanner(System.in); 
-		
-		System.out.print("输入log\n");
-		String log="E:\\log";
-		System.out.print("输入out\n");
-		String out="E:\\result";
-		System.out.print("输入date\n");
-		String date=" ";
-		System.out.print("输入type\n");
-		String type=" ";
-		System.out.print("输入province\n");
-		String province=" ";
-		
-		list(log,out,date,type,province);
-		System.out.println("去看文件");
+	public static String getParaments(String parament,String[] args)
+	{
+		int i=1;
+		String result="";
+		for(;i<args.length;i++)
+		{
+			if(args[i].contentEquals(parament)==true)
+			{
+				for(int j=i+1;j<args.length;j++)
+				{
+					if(result.contentEquals("")==true)
+						result=args[j];
+					else result=result+" "+args[j];
+					if(j+1>=args.length)
+					{
+						break;
+					}
+					else if(args[j+1].contentEquals("-log")||
+							args[j+1].contentEquals("-out")||
+							args[j+1].contentEquals("-date")||
+							args[j+1].contentEquals("-type")||
+							args[j+1].contentEquals("-province"))
+					{
+						break;
+					}
+				}
+			}
+		}
+		if(result.contentEquals("")==true)
+		{
+			return " ";
+		}
+		return result;
+	}
+	
+	public static void main(String[] args){
+		String log=getParaments("-log",args);
+		log=log.substring(0,getParaments("-log",args).length()-1);
+		String out=getParaments("-out",args);
+		String date=getParaments("-date",args);
+		String type=getParaments("-type",args);
+		String province=getParaments("-province",args);
+		if(log.contentEquals(" ")==false&&out.contentEquals(" ")==false)
+		{
+			list(log,out,date,type,province);
+		}
+		else System.out.println("指令错误");
 	}
 
 }

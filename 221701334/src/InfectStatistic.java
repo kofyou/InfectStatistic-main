@@ -264,6 +264,30 @@ class InfectStatistic {
 					for(int k=0;k<province.size();k++) {
 						Info t=new Info();
 						t.province=province.get(k);
+						if(t.province.equals("È«¹ú")) {
+		    				System.out.print(all.province+" ");
+        					String string=all.province+" ";
+        					if(type.contains("¸ÐÈ¾")) {
+        						System.out.print("¸ÐÈ¾»¼Õß:"+all.infected+" ");
+        						string+="¸ÐÈ¾»¼Õß:"+all.infected+" ";
+        					}
+        					if(type.contains("ÒÉËÆ")) {
+        						System.out.print("ÒÉËÆ»¼Õß:"+all.suspected+" ");
+        						string+="ÒÉËÆ»¼Õß:"+all.suspected+" ";
+        					}
+        					if(type.contains("ÖÎÓú")) {
+        						System.out.print("ÖÎÓú»¼Õß:"+all.cured+" ");
+        						string+="ÖÎÓú»¼Õß:"+all.cured+" ";
+        					}
+        					if(type.contains("ËÀÍö")) {
+        						System.out.print("ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"");
+        						string+="ËÀÍö»¼Õß:"+all.dead+"";
+        					}
+        					System.out.print("\n");
+        					string+="\r\n";
+        					fout.write(string);
+		    				continue;
+						}
         				if(list.contains(t)) {
         					System.out.print(list.get(list.indexOf(t)).province+" ");
         					String string=list.get(list.indexOf(t)).province+" ";
@@ -280,9 +304,11 @@ class InfectStatistic {
         						string+="ÖÎÓú»¼Õß:"+list.get(list.indexOf(t)).cured+" ";
         					}
         					if(type.contains("ËÀÍö")) {
-        						System.out.print("ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"\n");
-        						string+="ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"\r\n";
+        						System.out.print("ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"");
+        						string+="ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"";
         					}
+        					System.out.print("\n");
+        					string+="\r\n";
         					fout.write(string);
         				}
         				else {
@@ -301,35 +327,49 @@ class InfectStatistic {
         						string+="ÖÎÓú»¼Õß:"+"0"+" ";
         					}
         					if(type.contains("ËÀÍö")) {
-        						System.out.print("ËÀÍö»¼Õß:"+"0"+"\n");
-        						string+="ËÀÍö»¼Õß:"+"0"+"\r\n";
+        						System.out.print("ËÀÍö»¼Õß:"+"0"+"");
+        						string+="ËÀÍö»¼Õß:"+"0"+"";
         					}
+        					System.out.print("\n");
+        					string+="\r\n";
         					fout.write(string);
         				}
         			}
 				}
 				else {
-					System.out.print(all.province+" ");
-    				System.out.print("¸ÐÈ¾»¼Õß:"+all.infected+" ");
-    				System.out.print("ÒÉËÆ»¼Õß:"+all.suspected+" ");
-    				System.out.print("ÖÎÓú»¼Õß:"+all.cured+" ");
-    				System.out.print("ËÀÍö»¼Õß:"+all.dead+"\n");	
-    				String string=all.province+" "+"¸ÐÈ¾»¼Õß:"+all.infected+" "+"ÒÉËÆ»¼Õß:"+
-							all.suspected+" "+"ÖÎÓú»¼Õß:"+all.cured+" "+"ËÀÍö»¼Õß:"+all.dead+"\r\n";
-    				fout.write(string);
 					for(int k=0;k<province.size();k++) {
 						Info t=new Info();
 						t.province=province.get(k);
+						if(t.province.equals("È«¹ú")) {
+							System.out.print(all.province+" ");
+		    				System.out.print("¸ÐÈ¾»¼Õß:"+all.infected+" ");
+		    				System.out.print("ÒÉËÆ»¼Õß:"+all.suspected+" ");
+		    				System.out.print("ÖÎÓú»¼Õß:"+all.cured+" ");
+		    				System.out.print("ËÀÍö»¼Õß:"+all.dead+"\n");	
+		    				String string=all.province+" "+"¸ÐÈ¾»¼Õß:"+all.infected+" "+"ÒÉËÆ»¼Õß:"+
+									all.suspected+" "+"ÖÎÓú»¼Õß:"+all.cured+" "+"ËÀÍö»¼Õß:"+all.dead+"\r\n";
+		    				fout.write(string);
+		    				continue;
+						}
         				if(list.contains(t)) {
         					System.out.print(list.get(list.indexOf(t)).province+" ");
             				System.out.print("¸ÐÈ¾»¼Õß:"+list.get(list.indexOf(t)).infected+" ");
             				System.out.print("ÒÉËÆ»¼Õß:"+list.get(list.indexOf(t)).suspected+" ");
             				System.out.print("ÖÎÓú»¼Õß:"+list.get(list.indexOf(t)).cured+" ");
             				System.out.print("ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"\n");
-            				String strin=list.get(list.indexOf(t)).province+" "+"¸ÐÈ¾»¼Õß:"+list.get(list.indexOf(t)).infected+" "+"ÒÉËÆ»¼Õß:"+list.get(list.indexOf(t)).suspected+" "+
+            				String string=list.get(list.indexOf(t)).province+" "+"¸ÐÈ¾»¼Õß:"+list.get(list.indexOf(t)).infected+" "+"ÒÉËÆ»¼Õß:"+list.get(list.indexOf(t)).suspected+" "+
             						"ÖÎÓú»¼Õß:"+list.get(list.indexOf(t)).cured+" "+"ËÀÍö»¼Õß:"+list.get(list.indexOf(t)).dead+"\r\n";
-            				fout.write(strin);
-        				}		
+            				fout.write(string);
+        				}
+        				else {
+        					System.out.print(t.province+" ");
+        					System.out.print("¸ÐÈ¾»¼Õß:"+"0"+" ");
+        					System.out.print("ÒÉËÆ»¼Õß:"+"0"+" ");
+        					System.out.print("ÖÎÓú»¼Õß:"+"0"+" ");
+        					System.out.print("ËÀÍö»¼Õß:"+"0"+"\n");
+        					String string=t.province+" "+"¸ÐÈ¾»¼Õß:"+"0"+" "+"ÒÉËÆ»¼Õß:"+"0"+" "+"ÖÎÓú»¼Õß:"+"0"+" "+"ËÀÍö»¼Õß:"+"0"+"\r\n";
+        					fout.write(string);
+        				}
         			}
 				}
 			}

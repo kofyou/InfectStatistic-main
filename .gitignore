@@ -11,5 +11,7 @@
 *.exe
 out
 gen
+test
+result
 .idea/
 InfectStatistic-example.iml

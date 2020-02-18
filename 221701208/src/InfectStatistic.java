@@ -1,6 +1,4 @@
 import java.io.*;
-import java.text.Collator;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 class Record{
@@ -74,9 +72,6 @@ class MapKeyComparator implements Comparator<String> {
         str1=Lib.toPinyin(str1);
         str2=Lib.toPinyin(str2);
         return str1.compareTo(str2);
-       // Collator collator = Collator.getInstance();
-        //return collator.getCollationKey(str1).compareTo(collator.getCollationKey(str2));
-
     }
 }
 
@@ -277,9 +272,7 @@ class InfectStatistic {
         else {
             System.out.println("此条记录包含无法处理部分");
         }
-
     }
-
 
     /**
      * @param info 一行数据
@@ -327,7 +320,6 @@ class InfectStatistic {
                 System.out.print(str);
             System.out.print("\n");
         }
-
     }
 
 
@@ -367,10 +359,8 @@ class InfectStatistic {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                 }
             }
-
     }
 
 
@@ -383,7 +373,6 @@ class InfectStatistic {
             totalCountryNumber.countDead(value.getDeadNumber());
         }
         return  totalCountryNumber;
-
     }
 
 
@@ -405,8 +394,6 @@ class InfectStatistic {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
 
@@ -444,7 +431,6 @@ class InfectStatistic {
     void partProvinceAllType(Record totalCountryNumber , Vector<String> province , FileOutputStream outFile){
         result.put("全国",totalCountryNumber);
         String record;
-
         for(String item : province){
             if(!result.containsKey(item)){//查询无记录的省份则创建一个数据为空的记录
                 Record newRecord = new Record();
@@ -466,7 +452,6 @@ class InfectStatistic {
         }
 
 
-
         for(String key : result.keySet()){
             for(int k=0;k<province.size();k++){
                 if(province.get(k).equals(key) && !key.equals("全国")){//若不是全国，则写入
@@ -481,7 +466,6 @@ class InfectStatistic {
                         e.printStackTrace();
                     }
                 }
-
             }
         }
 
@@ -496,7 +480,6 @@ class InfectStatistic {
                 result.put(item,newRecord);
             }
         }
-
         if(province.contains("全国")){
             record = "全国" + " ";
             for(String j : type){
@@ -513,7 +496,6 @@ class InfectStatistic {
                 e.printStackTrace();
             }
         }
-
 
 
         for(String key : result.keySet()){
@@ -537,8 +519,6 @@ class InfectStatistic {
 
            }
         }
-
-
 
     }
 
@@ -583,9 +563,13 @@ class InfectStatistic {
     }
 
 
-
     public static void main(String[] args) {
        // String[] args = {"list","-log","E:/log/","-out","E:/out/output.txt","-date","2020-01-29","-type","cure","dead","ip","-province","全国","福建","河北"};
+        /*String[] args = {"list","-log","E:/log/",
+                "-out","E:/out/output.txt",
+                "-date","2020-01-23",
+                "-type","cure","dead","ip",
+                "-province","全国","浙江","福建"};//*/
         InfectStatistic statistic = new InfectStatistic();
         int index=1; //args[0]=list,只会出现一个命令，所以不用处理
         int startIndex,endIndex;
@@ -620,7 +604,6 @@ class InfectStatistic {
             }
             index++;
         }
-
         //....如果参数中没有日期则设为当前日期
         if(statistic.strDate == null)
             Lib.setDate(statistic);
@@ -630,9 +613,7 @@ class InfectStatistic {
         statistic.statisticData(statistic.logLocate,statistic.strDate,fileList,statistic.result);
         //......保存结果..........
         statistic.saveResult(statistic.result,statistic.outLocate,args,statistic.province,statistic.type);
-
     }
-
 
 }
 

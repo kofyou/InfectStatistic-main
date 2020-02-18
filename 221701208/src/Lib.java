@@ -1,12 +1,8 @@
 import net.sourceforge.pinyin4j.PinyinHelper;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
-
 
 public class Lib {
     static  String[] allType ={"ip","sp","cure","dead"};
@@ -50,9 +46,7 @@ public class Lib {
            else {
                tmpStr += pinyin[0];
            }
-
        }
-
         return tmpStr;
     }
 
@@ -66,7 +60,6 @@ public class Lib {
             return "治愈";
         else
             return "死亡";
-
     }
 
 
@@ -91,6 +84,5 @@ public class Lib {
         String dateNowStr = sdf.format(d);
         statistic.strDate = dateNowStr;
     }
-
 
 }

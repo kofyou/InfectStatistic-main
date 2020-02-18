@@ -412,7 +412,7 @@ public class InfectStatistic {
 		statistic.put("全国死亡", String.valueOf(dead));
 	}
 	
-	public static void outPut() throws IOException
+	public static void outPut(String args[]) throws IOException
 	/*
 	 * 该方法根据命令行的要求，进行输出
 	 */
@@ -451,6 +451,12 @@ public class InfectStatistic {
         		outputByType(province[i]);
         		if(i != provinceCount - 1)fileWritter.write("\n");
         	}
+        }
+        fileWritter.write("\n" + "// 该文档并非真实数据，仅供测试使用");
+        fileWritter.write("\n"+ "// 命令：");
+        for(int i = 0 ; i < args.length ; i++)
+        {
+        	fileWritter.write(args[i] + " ");
         }
         fileWritter.close();
         System.out.println("已将数据输出到指定文件中");
@@ -527,7 +533,7 @@ public class InfectStatistic {
 		}
 		
 		readDirect();  //开始查询日志文件
-		outPut();
+		outPut(args);
 		
     	return;
     }

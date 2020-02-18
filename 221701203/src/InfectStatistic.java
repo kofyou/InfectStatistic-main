@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,11 +35,11 @@ public class InfectStatistic {
             "贵州" ,"海南" ,"河北" ,"河南" ,"黑龙江" ,"湖北" ,"湖南",
             "吉林" ,"江苏" ,"江西", "辽宁", "内蒙古", "宁夏", "青海" ,"山东" ,"山西" ,
             "陕西" ,"上海" ,"四川" ,"天津" ,"西藏" ,"新疆" ,"云南" ,"浙江"};
+     boolean []discovery= new boolean[31];
     String []type2={"感染患者","疑似患者","治愈","死亡"};
     String person="人";
     /**人数*/
-    int [][]number=new int[31][8];
-    int [][][]people=new int[31][8][31];
+    int [][]number=new int[31][4];
 
     boolean flag1 = false;
     boolean flag2 = false;
@@ -51,6 +50,7 @@ public class InfectStatistic {
         {
             int flag=0;
             int flag1=0;
+            int flag2=0;
             Pattern r=Pattern.compile(pattern[i]);
             Matcher m=r.matcher(line);
             if(m.find()){
@@ -58,42 +58,64 @@ public class InfectStatistic {
                 for (int i1=0;i1<province.length;i1++){
                     if (province[i1].equals(m.group(1))) {
                         flag=i1;
+                        discovery[i1]=true;
                     }
                     boolean status=(num==2||num==3)&&province[i1].equals(m.group(2));
                     if(status){
+                        discovery[i1]=true;
                         flag1=i1;
                     }
+                    boolean status1=(num==2||num==3)&&province[i1].equals(m.group(1));
+                    if(status1){
+                        discovery[i1]=true;
+                        flag2=i1;
+                    }
                 }
-                if(num==2||num==3) {
-                    number[flag][num-2]-=Integer.parseInt(m.group(3));
-                    people[flag][num][flag1] += Integer.parseInt(m.group(3));
-               }
+                if(num==2) {
+                    //流入流出
+                    number[flag1][0]+=Integer.parseInt(m.group(3));
+                    number[flag2][0]-=Integer.parseInt(m.group(3));
+                }
+                else if(num==3){
+                    number[flag1][1]+=Integer.parseInt(m.group(3));
+                    number[flag2][1]-=Integer.parseInt(m.group(3));
+                }
                 else if (num==7){
+                    //排除类型
                     number[flag][1]-=Integer.parseInt(m.group(2));
-                    number[flag][num] +=Integer.parseInt(m.group(2));
                 }
                 else if (num==5){
+                    //治愈和死亡类型
                     number[flag][0]-=Integer.parseInt(m.group(2));
-                    number[flag][num] +=Integer.parseInt(m.group(2));
+                    number[flag][2] +=Integer.parseInt(m.group(2));
+                }
+                else if (num==4){
+                    number[flag][0]-=Integer.parseInt(m.group(2));
+                    number[flag][3] +=Integer.parseInt(m.group(2));
+                }
+                else if (num==6){
+                    //疑似->确认
+                    number[flag][0]+=Integer.parseInt(m.group(2));
+                    number[flag][1]-=Integer.parseInt(m.group(2));
                 }
                 else {
-                        number[flag][num] +=Integer.parseInt(m.group(2));
-                    }
+                    number[flag][num] +=Integer.parseInt(m.group(2));
                 }
             }
         }
 
+    }
+
 
     public void outputFile(String outfile, String dictionary, String date) throws IOException {
-
-
         List<File> fileList = getFiles(dictionary);
         File fout = new File(outfile);
         FileWriter fw = new FileWriter(fout);
         for (File f : fileList) {
             String filename;
             filename = f.getName().substring(0, f.getName().indexOf("."));
-            if (date.compareTo(filename) != -1) {
+
+            if (date.compareTo(filename) >= 0) {
                 FileReader fr = new FileReader(f);
                 BufferedReader br = new BufferedReader(fr);
                 String line = br.readLine();
@@ -101,17 +123,18 @@ public class InfectStatistic {
                     dealLine(line);
                     line = br.readLine();
                 }
-
                 fr.close();
             }
         }
         String lines=getAllProvince();
-           fw.append(lines).append("\n");
-        for(int i=0;i<number.length;i++) {
-            String theline = province[i] + " " + type2[0] +number[i][0]+person+ " "
-                    +type2[1] +number[i][1]+person+ " " +type2[2]+number[i][4]+
-                    person+" " +type2[3]+number[i][5]+person;
-            fw.append(theline).append("\n");
+        fw.append(lines).append("\n");
+        for(int i = 0; i<number.length; i++) {
+            if (discovery[i]) {
+                String theline = province[i] + " " + type2[0] + number[i][0] + person + " "
+                        + type2[1] + number[i][1] + person + " " + type2[2] + number[i][2] +
+                        person + " " + type2[3] + number[i][3] + person;
+                fw.append(theline).append("\n");
+            }
         }
         fw.append("// 该文档并非真实数据，仅供测试使用\n");
         fw.close();
@@ -123,11 +146,11 @@ public class InfectStatistic {
         for (int[] ints : number) {
             allIp += ints[0];
             allSp += ints[1];
-            allCure += ints[4];
-            allDead += ints[5];
-
+            allCure += ints[2];
+            allDead += ints[3];
         }
-        return "全国" + " " + type2[0] +allIp+person+ " " +type2[1] + allSp+person+ " " +type2[2]+ allCure+person+" "+type2[3]+ allDead+person;
+        return "全国" + " " + type2[0] +allIp+person+ " " +type2[1] + allSp+person+ " "
+                +type2[2]+ allCure+person+" "+type2[3]+ allDead+person;
     }
 
     public static List<File> getFiles(String path) {
@@ -187,7 +210,7 @@ public class InfectStatistic {
                     break;
             }
         }
-         if(isValidDate(date) && isValidProvince(provinces)||!flag2&&isValidDate(date)) {
+        if(isValidDate(date) && isValidProvince(provinces)||!flag2&&isValidDate(date)) {
             outputFile(path, dic, date);
             dealFlag(path, type, provinces);
             System.out.println("// 该文档并非真实数据，仅供测试使用\n");
@@ -204,22 +227,22 @@ public class InfectStatistic {
     }
 
     public static boolean isValidDate(String ymd) {
-            if (ymd == null || ymd.length() == 0) {
+        if (ymd == null || ymd.length() == 0) {
+            return false;
+        }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date = format.parse(ymd);
+            if (!format.format(date).equals(ymd)) {
                 return false;
             }
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            try {
-                Date date = format.parse(ymd);
-                if (!format.format(date).equals(ymd)) {
-                    return false;
-                }
-                if(format.format(new Date()).compareTo(ymd) < 0){
-                    return false;
-                }
-            } catch (ParseException e) {
+            if(format.format(new Date()).compareTo(ymd) < 0){
                 return false;
             }
-            return true;
+        } catch (ParseException e) {
+            return false;
+        }
+        return true;
 
     }
     public static boolean isValidType(String[] type){
@@ -239,7 +262,7 @@ public class InfectStatistic {
         provinces=deleteArrayNull(provinces);
         for (String s : provinces) {
 
-                flag = Arrays.asList(province).contains(s) || "全国".equals(s);
+            flag = Arrays.asList(province).contains(s) || "全国".equals(s);
 
 
         }
@@ -256,12 +279,8 @@ public class InfectStatistic {
         Collections.addAll(strList, string);
 
         // step2: 删除list列表中所有的空值
-        while (strList.remove(null)) {
-
-        }
-        while (strList.remove("")) {
-
-        }
+        while (strList.remove(null)) { }
+        while (strList.remove("")) { }
 
         // step3: 把list列表转换给一个新定义的中间数组，并赋值给它
 
@@ -272,9 +291,13 @@ public class InfectStatistic {
         Pattern r=Pattern.compile(patterns);
         Matcher m=r.matcher(line);
         if (m.find()&&isValidProvince(provinces)) {
-            for (String s : provinces) {
+            for (String s : province) {
                 if (m.group(1).equals(s)) {
                     System.out.println(line);
+                }
+                else {
+                    System.out.println(s+" "+type2[0]+person+" "+type2[1]+person+" "
+                            +type2[2]+person+" "+type2[3]+person);
                 }
 
             }
@@ -290,18 +313,18 @@ public class InfectStatistic {
         BufferedReader br = new BufferedReader(fr);
         String line = br.readLine();
         while (line != null&&!line.contains("/")) {
-                if (flag1 && flag2) {
-                     dealTypeAndProvince(line, type, provinces);
-                 }
-                else if (flag2) {
-                   dealProvince(line, provinces);
-                 }
+            if (flag1 && flag2) {
+                dealTypeAndProvince(line, type, provinces);
+            }
+            else if (flag2) {
+                dealProvince(line, provinces);
+            }
             if (flag1 && !flag2) {
                 dealType(line,type);
             }
             else if(!flag2){
-              System.out.println(line);
-             }
+                System.out.println(line);
+            }
             line = br.readLine();
         }
 
@@ -364,7 +387,6 @@ public class InfectStatistic {
                                 default:
                                     System.out.print("无该患者类型，请重新选择！");
                                     break;
-
                             }
                         }
                     }
@@ -372,14 +394,13 @@ public class InfectStatistic {
                 }
             }
         }
-
-
-
     }
 
 
 
     public static void main(String[] args) throws Exception {
+        args = new String[]{"-log", "D:\\log\\", "-out", "D:/log/out.txt", "-date","2020-01-23"};
+
         InfectStatistic t = new InfectStatistic();
         t.init(args);
     }

@@ -728,7 +728,7 @@ public class InfectStatistic
 /**********************************************
  * 作用:定义类存储各省疫情信息
  **********************************************/
-class J_Province
+class Province
 {
 	private String name;
 	private int infected;//感染

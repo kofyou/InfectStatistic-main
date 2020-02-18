@@ -1,5 +1,4 @@
 package com.xzy;
-
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,14 +15,12 @@ public class InfectStatistic {
 	}
 
     private static void out_put(Map<String, ArrayList<String>> map, Map<String, Province> map1) {
-        ArrayList<String> types=new ArrayList<String>(
-                Arrays.asList("ip","sp","cure","dead")
-        );
+
         String out_path=map.get("-out").get(0);
         ArrayList<String> type=map.get("-type");
         ArrayList<String> province=map.get("-province");
         if(province==null){
-            out_put_as_type(map1,type,province);//按province顺序输出，若province为空，按默认顺序输出
+            out_put_as_type(map1,type,province,out_path);//按province顺序输出，若province为空，按默认顺序输出
         }
         else{
             Map<String,Province> map2=new HashMap<String, Province>();
@@ -31,16 +28,71 @@ public class InfectStatistic {
                  ) {
                 map2.put(pro,map1.get(pro));
             }
-            out_put_as_type(map2,type,province);
+            out_put_as_type(map2,type,province,out_path);
         }
-        if(type!=null){
-            for (String type1:type
-                 ) {
-                if(types.contains(type1))
-            }
 
+        //System.out.println(province);
+
+    }
+
+    private static void out_put_as_type(Map<String, Province> map, ArrayList<String> type, ArrayList<String> province,String out_path) {
+
+	    if(province!=null){
+            for (String pro:province
+            ) {
+                //System.out.println(pro);
+                Province province1=map.get(pro);
+                //province1.show_data();
+                String result=province1.name+' ';
+                if(type!=null){
+
+                    for (String type1:type
+                    ) {
+                        result+=province1.get_result(type1);
+                    }
+                }
+                else{
+                    ArrayList<String> types=new ArrayList<String>(
+                            Arrays.asList("ip","sp","cure","dead")
+                    );
+                    for (String str:types
+                         ) {
+                        result+=province1.get_result(str);
+                    }
+                }
+                //System.out.println(result);
+            }
         }
-        System.out.println(province);
+
+	    else{
+            String province_name[]={"全国","安徽","北京", "重庆", "福建","甘肃","广东" ,"贵州" ,"海南" ,"河北" ,"湖北","湖南" ,"吉林" ,"辽宁" ,
+                    "内蒙古", "宁夏", "山东", "山西" ,"陕西" ,"上海" ,"四川" ,"天津" ,"西藏" ,"新疆", "云南", "浙江"};
+            for (String pro:province_name
+            ) {
+                //System.out.println(pro);
+                Province province1=map.get(pro);
+                //province1.show_data();
+                String result=province1.name+' ';
+                if(type!=null){
+
+                    for (String type1:type
+                    ) {
+                        result+=province1.get_result(type1);
+                    }
+                }
+                else{
+                    ArrayList<String> types=new ArrayList<String>(
+                            Arrays.asList("ip","sp","cure","dead")
+                    );
+                    for (String str:types
+                    ) {
+                        result+=province1.get_result(str);
+                    }
+                }
+                //System.out.println(result);
+            }
+        }
+
 
     }
 
@@ -87,9 +139,7 @@ public class InfectStatistic {
             pro.setCure(provinces[j].cure);
             pro.setDead(provinces[j].dead);
         }
-        map.get("湖北").show_data();
-        map.get("福建").show_data();
-        map.get("全国").show_data();
+
 
         //System.out.println(map.entrySet());
 	    return map;
@@ -264,6 +314,20 @@ public class InfectStatistic {
         }
         public void show_data(){
             System.out.println("感染"+ip+"疑似"+sp+"治愈"+cure+"死亡"+dead);
+        }
+        public String get_result(String type){
+	        String result="";
+	        if(type!=null){
+	            if(type.equals("ip"))
+	                result += "感染患者" + " " + ip + "人" + " ";
+	            else if(type.equals("sp"))
+	                result += "疑似患者" + " " + sp + "人" + " ";
+	            else if(type.equals("cure"))
+	                result +="治愈" + " " + cure + "人" + " ";
+	            else
+	                result+= "死亡" + " " + dead + "人" + " ";
+            }
+	        return result;
         }
     }
 }

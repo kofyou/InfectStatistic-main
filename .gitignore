@@ -9,3 +9,12 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+
+/bin/
+
+.project
+221701134/.classpath 
+221701134/.project
+221701134/.gitignore
+221701134/result/
+221701134/src/*.class

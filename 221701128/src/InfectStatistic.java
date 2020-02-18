@@ -15,8 +15,9 @@ public class InfectStatistic {
 	public static ArrayList<String> fileContent;    //保存从文件中读取的内容
 	public static Map<String , String> statistic;    //保存统计的结果
 	public static Map<String, Object> sortMap;  //用于保存经过排序的统计结果
+	public static Map<String , String> typeMap; //用于保存sp ip对应的类型关系
 	public static File fileArray[];          //保存所有日志文件的路径
-	
+	public static FileWriter fileWritter; //用于输出流
 	public static boolean judgeList (String str)
 	/*  
 	 * 该方法判定args数组元素是否是命令行参数 
@@ -79,9 +80,14 @@ public class InfectStatistic {
 	 * 该方法用于读取目录下的日志文件并保存 
 	 */
 	{
+		if(fileDirect == null) 
+		{
+			System.out.println("请检查日志路径");
+			System.exit(0);
+		}
 
 		File file = new File(fileDirect);
-		fileArray = file.listFiles();		
+		fileArray = file.listFiles();
 		statistic = new HashMap<String,String>();
 	    
 		for(int i=0; i < fileArray.length; i++)
@@ -109,27 +115,7 @@ public class InfectStatistic {
 					break;
 				
 				else fileContent.add(str);
-			}
-			
-			
-			for(int i=0;i <fileContent.size();i++)
-			{
-				System.out.println(fileContent.get(i));
-			}
-			
-			File file =new File(outputFilepath);
-			
-            if(!file.exists())
-            {
-	        	file.createNewFile();
-	        }
-            
-            FileWriter fileWritter = new FileWriter(file);
-            for(int i=0;i <fileContent.size();i++)
-			{
-            	fileWritter.write(fileContent.get(i));
-			}
-            fileWritter.close();
+			}					      
 			sc.close();
 		} 
 		
@@ -298,8 +284,11 @@ public class InfectStatistic {
 			cmdCount++; //读取-out地址
 			outputFilepath = str[cmdCount]; //保存路径
 		}
-		
-		System.out.print(outputFilepath);
+		if(outputFilepath == null) 
+		{
+			System.out.println("请检查输出路径");
+			System.exit(0);
+		}
 	}
 	
 	public static void readLog (String str[])
@@ -312,8 +301,7 @@ public class InfectStatistic {
 			cmdCount++; //读取-log地址
 			fileDirect = str[cmdCount]; //保存路径
 		}
-		
-		System.out.print(fileDirect);
+
 	}
 	
 	public static void readDateTime (String str[])
@@ -331,8 +319,7 @@ public class InfectStatistic {
 			cmdCount++;
 			dateTime = str[cmdCount];
 		}
-		
-		System.out.print(dateTime);
+
 	}
 	
 	public static void readType (String str[])
@@ -362,12 +349,10 @@ public class InfectStatistic {
 				if(cmdCount == str.length - 1 || str[cmdCount+1].substring(0,1).equals("-"))  break;
 			}
 		}
-		
-		for(int k=0;k<typeCount;k++)
-		System.out.println(typePeople[k]);
+
 	}
 	
-	public static void readProvince (String str[])
+	public static void readProvince (String str[])	
 	/*  
 	 * 该方法用于保存-province的参数值
 	 */
@@ -390,30 +375,156 @@ public class InfectStatistic {
 				if(cmdCount == str.length - 1 || str[cmdCount+1].substring(0,1).equals("-"))  break;
 			}
 		}
-		
-		for(int k=0;k<provinceCount;k++)
-		System.out.println(province[k]);
+
 	}
 	
+	public static void countryStatic()
+    /*
+     *  该方法用来统计全国的疫情数据
+     */
+	{
+		int infect = 0;
+		int unknownInfect = 0;
+		int cure = 0;
+		int dead = 0;
+		for (String key : sortMap.keySet()) 
+		{
+			int num = Integer.parseInt(sortMap.get(key).toString());
+			if(key.substring(key.length()- 4, key.length()).equals("感染患者"))
+			{
+				infect += num;
+			}
+			else if(key.substring(key.length()- 4, key.length()).equals("疑似患者"))
+			{
+				unknownInfect += num;
+			}
+			else if(key.substring(key.length()- 2, key.length()).equals("治愈"))
+			{
+				cure += num;
+			}
+			else if(key.substring(key.length()- 2, key.length()).equals("死亡"))
+			{
+				dead += num;
+			}			
+		}
+		
+		statistic.put("全国感染患者", String.valueOf(infect));
+		statistic.put("全国疑似患者", String.valueOf(unknownInfect));
+		statistic.put("全国治愈", String.valueOf(cure));
+		statistic.put("全国死亡", String.valueOf(dead));
+	}
 	
-	public static void main(String args[])
+	public static void outPut() throws IOException
+	/*
+	 * 该方法根据命令行的要求，进行输出
+	 */
+	{
+		sortMap = sortHashkey(); //按key值排序
+		countryStatic();  //统计全国数据
+		typeMap = new HashMap<String , String>(); //存储缩写对应的数据类型
+		typeMap.put("sp", "疑似患者");
+		typeMap.put("ip", "感染患者");
+		typeMap.put("cure", "治愈");
+		typeMap.put("dead", "死亡");
+		File file =new File(outputFilepath);
+		
+        if(!file.exists())
+        {
+        	file.createNewFile();
+        }
+        
+        fileWritter = new FileWriter(file);
+        
+        if(province == null || province[0].equals("全国"))  //用户没有指定省份信息，就按默认输出，且省份按拼音顺序排序
+        {
+        	outputByType("全国");  //先将全国数据输出
+        	fileWritter.write("\n");
+        	outputAllProvince();
+        }
+        
+        else
+        {
+        	for(int i=0 ;i < provinceCount ;i++)
+        	{
+        		outputByType(province[provinceCount]);
+        	}
+        }
+        fileWritter.close();
+        System.out.println("已将数据输出到指定文件中");
+	}
+	
+	public static void outputAllProvince() throws IOException
+	/*
+	 * 该方法用于输出全国加所有日志中出现的省的情况
+	 */
+	{
+		int i = 0;
+		for(String key : sortMap.keySet())
+		{
+			if(i % 4 == 0) //每4个记录是一个省份的内容
+			{
+				String province = key.substring(0 , key.length() - 4); //将排序后的省份提取出来
+				outputByType(province);
+				if(i + 4 != sortMap.size()) fileWritter.write("\n");  //避免在最后多出一行
+			}
+			i++;			
+		}
+	}
+	
+	public static void outputByType(String province) throws IOException
+	/*
+	 * 该方法用于按照规定的类型进行输出
+	 */
+	{
+		if(typePeople == null || typePeople[0].equalsIgnoreCase("all"))
+		{
+			fileWritter.write(province + " " + "感染患者" + statistic.get(province + "感染患者") + "人" + " "
+                    + "疑似患者" + statistic.get(province + "疑似患者") + "人" + " "
+			          + "治愈" + statistic.get(province + "治愈") + "人" + " "
+                    + "死亡" + statistic.get(province + "死亡") + "人");
+			fileWritter.flush();
+		}
+		else
+		{			
+			for(int i = 0; i < typeCount ; i++)
+			{
+				String type = typeMap.get(typePeople[i]);
+				fileWritter.write(province + " " + type + statistic.get(province + type) + "人");
+				if(i != typeCount - 1)  fileWritter.write(" "); //避免在最后多出一个空格
+				fileWritter.flush();
+			}
+		}
+	}
+	
+	public static void main(String args[]) throws IOException
     {
 		cmdCount = 0;
-		if(args[cmdCount].equalsIgnoreCase("list"))
-    	for(cmdCount = 0;cmdCount < args.length; cmdCount++)
-    	{
-    		if(judgeList(args[cmdCount]))
-    		{
-    			judgeType(args);
-    		}
-    	}
 		
-		readDirect();
-		sortMap = sortHashkey();
-		for (String key : sortMap.keySet()) {  //通过foreach方法来遍历
-		       System.out.println("key= "+ key + " and value= " + sortMap.get(key));
-		      }
-
+		try
+		{
+			if(args[cmdCount].equalsIgnoreCase("list"))  //list的命令
+		    	for(cmdCount = 0;cmdCount < args.length; cmdCount++)
+		    	{
+		    		if(judgeList(args[cmdCount]))
+		    		{
+		    			judgeType(args);
+		    		}
+		    	}
+			else
+			{
+				System.out.println("请检查是否输入了合理的命令");
+				return;
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("请检查是否输入了合理的命令");
+			return;
+		}
+		
+		readDirect();  //开始查询日志文件
+		outPut();
+		
     	return;
     }
 

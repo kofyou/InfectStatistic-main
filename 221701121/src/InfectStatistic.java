@@ -30,27 +30,6 @@ class InfectStatistic
 		logPath = "G:/log/";
 		this.init();
 	}
-	//处理"-date"命令
-	public void init()
-	{
-		for(int i=0;i<arg.length;i++)
-		{			
-			switch(arg[i])
-			{
-			    case "-date":
-				    date = new String(arg[i+1]);
-				    isRead = false;	
-				    break;
-			    case "-log":
-				    logPath = new String(arg[i+1]);
-				    break;
-			    case "-out":
-				    outputPath = new String(arg[i+1]);
-				    break;
-			    default:					
-			}			
-		}
-	}
 
 	//处理日志文件
 	public void deal()
@@ -77,6 +56,27 @@ class InfectStatistic
 	    }
 	}
 
+	//处理"-date"命令
+	public void init()
+	{
+		for(int i=0;i<arg.length;i++)
+		{			
+			switch(arg[i])
+			{
+			    case "-date":
+				    date = new String(arg[i+1]);
+				    isRead = false;	
+				    break;
+			    case "-log":
+				    logPath = new String(arg[i+1]);
+				    break;
+			    case "-out":
+				    outputPath = new String(arg[i+1]);
+				    break;
+			    default:					
+			}			
+		}
+	}
 
     public static void main(String[] args) 
     {

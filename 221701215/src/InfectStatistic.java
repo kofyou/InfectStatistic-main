@@ -21,14 +21,36 @@ import java.util.Locale;
 import java.io.*;
 public class InfectStatistic {
     public static void main(String[] args) {
-    	DocFormatter doc=new DocFormatter(args);  
-    	Excute excute=new Excute(doc);           
-    	excute.run();							
+    	DocFormatter doc=new DocFormatter(args);  //»ñÈ¡ÃüÁîµÄ×Ö·û´®²»Í¬²ÎÊıµÄÖµµÄÀà¡£
+    	Excute excute=new Excute(doc);            //Ö´ĞĞÃüÁîµÄÀà£¬·â×°¸ù¾İdocÀà¶ÁĞ´ÎÄ¼şµÄ·½·¨
+    	excute.run();							//µ÷ÓÃ¶ÁĞ´µÄº¯Êı¡£
     }
-
+	/* ÓÃÓÚµ¥Ôª²âÊÔ
+	 * public static Set<String> SortSet(Set<String> set){
+		 Set<String> sortSet = new TreeSet<String>(new MapKeyComparator());
+		 sortSet.addAll(set);
+		 return sortSet;
+	}
+	public static  Vector<String> getFiles(String date,String source){
+		Vector<String> vec =new Vector<>();
+		String basePath=source;
+		String[] list=new File(basePath).list();
+		Vector<String> dates=new Vector<>();
+		for(int i=0;i<list.length;i++) dates.add(list[i]);
+		dates.add(date+".log.txt");
+		Collections.sort(dates);
+		int index=dates.lastIndexOf(date+".log.txt");
+		if(index==dates.size() - 1&&!(dates.get(index).equals(dates.get(index -1)))) {
+			return vec;
+		}
+		for(int i=0;i<dates.lastIndexOf(date+".log.txt");i++) {
+			vec.add(source+dates.get(i));
+		}
+		return vec;
+	}*/
 
 }
-
+/*½ÓÊÕÃüÁî×Ö·û´®Êı×é£¬Í¨¹ı²»Í¬µÄº¯Êı½Ó¿Ú·µ»Ø²»Í¬µÄ²ÎÊıÖµ£¬±£´æ²»Í¬²ÎÊıµÄË÷ÒıºÅ*/
 class DocFormatter{
 	private String[] cmd;
 	private int logPathInd;
@@ -43,7 +65,7 @@ class DocFormatter{
 		cmd=arg;
         exchange();
 	}
-	
+	/*»ñÈ¡-log£¬-typeÔÚ×Ö·û´®Êı×éÖĞµÄË÷ÒıÎ»ÖÃ*/
 	public void exchange() {           
 		dateInd=-1;
 		typeInd=-1;
@@ -57,28 +79,28 @@ class DocFormatter{
 		}
 	}
 	private void init_pro(Vector<String> vec) {                      
-		String[] pros= {"åŒ—äº¬","å¤©æ´¥","ä¸Šæµ·","é‡åº†","æ²³åŒ—","å±±è¥¿","è¾½å®","å‰æ—","é»‘é¾™æ±Ÿ"
-				,"æ±Ÿè‹","æµ™æ±Ÿ","å®‰å¾½","ç¦å»º","æ±Ÿè¥¿","å±±ä¸œ","æ²³å—","æ¹–åŒ—","æ¹–å—","å¹¿ä¸œ"
-				,"æµ·å—","å››å·","è´µå·","äº‘å—","é™•è¥¿","ç”˜è‚ƒ","é’æµ·","å°æ¹¾","å†…è’™å¤","å¹¿è¥¿"
-				,"è¥¿è—","å®å¤","æ–°ç–†","é¦™æ¸¯","æ¾³é—¨","å…¨å›½"};
+		String[] pros= {"±±¾©","Ìì½ò","ÉÏº£","ÖØÇì","ºÓ±±","É½Î÷","ÁÉÄş","¼ªÁÖ","ºÚÁú½­"
+				,"½­ËÕ","Õã½­","°²»Õ","¸£½¨","½­Î÷","É½¶«","ºÓÄÏ","ºş±±","ºşÄÏ","¹ã¶«"
+				,"º£ÄÏ","ËÄ´¨","¹óÖİ","ÔÆÄÏ","ÉÂÎ÷","¸ÊËà","Çàº£","Ì¨Íå","ÄÚÃÉ¹Å","¹ãÎ÷"
+				,"Î÷²Ø","ÄşÏÄ","ĞÂ½®","Ïã¸Û","°ÄÃÅ","È«¹ú"};
 		for(int i=0;i<35;i++) {
 			vec.add(pros[i]);
 		}
 	}
-	
+	/*»ñÈ¡logÎÄ¼şÎ»ÖÃ*/
 	public String getlogPath() {							
 		return cmd[logPathInd];
 	}
-	
+	/*»ñÈ¡Êä³öÎÄ¼şÎ»ÖÃ*/
 	public String getoutPath() {						
 		return cmd[outPathInd];
 	}
-	/*è·å–æ—¥æœŸ*/
+	/*»ñÈ¡ÈÕÆÚ*/
 	public String getDate() {               
 		if(dateInd==-1) return "Latest";
 		return cmd[dateInd];
 	}
-	/*è·å–-typeçš„å‚æ•°å€¼*/
+	/*»ñÈ¡-typeµÄ²ÎÊıÖµ*/
 	public Vector<String> getType() {						
 		Vector<String> type= new Vector<String>();
 		Vector<String> vec =new Vector<>();
@@ -93,7 +115,7 @@ class DocFormatter{
 		}
 		return type;
 	}
-	/*è·å–-provinceçš„å‚æ•°å€¼,å¹¶æ£€éªŒçœä»½çš„è¾“å…¥æ˜¯å¦åˆæ³•*/
+	/*»ñÈ¡-provinceµÄ²ÎÊıÖµ,²¢¼ìÑéÊ¡·İµÄÊäÈëÊÇ·ñºÏ·¨*/
 	public Vector<String> getPro() {				
 		Vector<String> vec= new Vector<String>();
 		Vector<String> vecs =new Vector<>();
@@ -103,7 +125,7 @@ class DocFormatter{
 			int i=provinceInd;
 			while( i<cmd.length &&(!vecs.contains(cmd[i]))) {	
 				if(!pros.contains(cmd[i]))  {
-					System.out.println("çœä»½è¾“å…¥é”™è¯¯ï¼Œä¸ºé»˜è®¤è¾“å‡º!");
+					System.out.println("Ê¡·İÊäÈë´íÎó£¬ÎªÄ¬ÈÏÊä³ö!");
 					vec.clear();
 					return vec;
 				}
@@ -114,9 +136,9 @@ class DocFormatter{
 		return vec;
 	}	
 }
-
+/*±£´æ¸÷¸öÊ¡·İµÄÒßÇéĞÅÏ¢£¬±£´æDocFormatterÀà£¬·â×°Ö´ĞĞ¶ÁĞ´ÎÄ¼şº¯ÊıºÍÏà¹ØµÄµ÷ÓÃº¯Êı¡£*/
  class Excute{
-	/*ä½¿ç”¨mapä¿å­˜ç–«æƒ…ä¿¡æ¯ï¼Œkeä¸ºçœä»½åç§°ï¼Œvalueä¸ºStatusè®°å½•äººæ•°*/
+	/*Ê¹ÓÃmap±£´æÒßÇéĞÅÏ¢£¬keÎªÊ¡·İÃû³Æ£¬valueÎªStatus¼ÇÂ¼ÈËÊı*/
 	private Map<String,Status> map;						
 	private DocFormatter Formatter;
 	private String[] tyChecked;
@@ -129,21 +151,21 @@ class DocFormatter{
 		ProChecked=false;
 		TyChecked=false;
 		tyChecked= new String[]{"","","",""};
-		Total =new Status("å…¨å›½");		
+		Total =new Status("È«¹ú");		
 		pro=new Vector<>();
 		map=new HashMap<String,Status>();
-		map.put("å…¨å›½",Total);
+		map.put("È«¹ú",Total);
 	}
 	public void run() {                                    
-		for(int i=0;i<Formatter.getType().size();i++) {                   //æŒ‰-typeå‚æ•°åˆå§‹åŒ–è¾“å‡ºæ ¼å¼ï¼Œå¹¶æ£€éªŒ-typeå‚æ•°çš„åˆæ³•æ€§
+		for(int i=0;i<Formatter.getType().size();i++) {                   //°´-type²ÎÊı³õÊ¼»¯Êä³ö¸ñÊ½£¬²¢¼ìÑé-type²ÎÊıµÄºÏ·¨ĞÔ
 			TyChecked=true;
-			if(Formatter.getType().get(i).equals("ip")) tyChecked[i]="æ„ŸæŸ“æ‚£è€…";
-			else if(Formatter.getType().get(i).equals("sp")) tyChecked[i]="ç–‘ä¼¼æ‚£è€…";
-			else if(Formatter.getType().get(i).equals("dead")) tyChecked[i]="æ­»äº¡";
-			else if(Formatter.getType().get(i).equals("cure")) tyChecked[i]="æ²»æ„ˆ";
+			if(Formatter.getType().get(i).equals("ip")) tyChecked[i]="¸ĞÈ¾»¼Õß";
+			else if(Formatter.getType().get(i).equals("sp")) tyChecked[i]="ÒÉËÆ»¼Õß";
+			else if(Formatter.getType().get(i).equals("dead")) tyChecked[i]="ËÀÍö";
+			else if(Formatter.getType().get(i).equals("cure")) tyChecked[i]="ÖÎÓú";
 			else {
-				System.out.println("æµ‹è¯•"+Formatter.getType().get(i));
-				System.out.println("-typeå‚æ•°é”™è¯¯ï¼Œè¯·è¾“å…¥ipã€spã€deadæˆ–è€…cureï¼");
+				System.out.println("²âÊÔ"+Formatter.getType().get(i));
+				System.out.println("-type²ÎÊı´íÎó£¬ÇëÊäÈëip¡¢sp¡¢dead»òÕßcure£¡");
 				return ;
 			}
 		
@@ -154,11 +176,11 @@ class DocFormatter{
 			
 		}
 		try{
-			String date=Formatter.getDate();                                     //è¯»å–æ–‡ä»¶
+			String date=Formatter.getDate();                                     //¶ÁÈ¡ÎÄ¼ş
 			String source=Formatter.getlogPath();
-			Vector<String> vec =getFiles(date,source);							//æ ¹æ®æ—¥æœŸè¿”å›è¦æ‰“å¼€çš„æ–‡ä»¶
+			Vector<String> vec =getFiles(date,source);							//¸ù¾İÈÕÆÚ·µ»ØÒª´ò¿ªµÄÎÄ¼ş
 			if(vec.size()<=0) { 
-					System.out.println("æ‰“å¼€æ–‡ä»¶é”™è¯¯ï¼Œè¯·æ£€æŸ¥å…¥æ˜¯å¦æ­£ç¡®ï¼");
+					System.out.println("´ò¿ªÎÄ¼ş´íÎó£¬Çë¼ì²éÈëÊÇ·ñÕıÈ·£¡");
 					return ;
 				}
 			for(int i=0;i<vec.size();i++) {
@@ -167,41 +189,41 @@ class DocFormatter{
 			
 		}
 		catch(IOException e) {
-			System.out.println("æ‰“å¼€æ–‡ä»¶é”™è¯¯ï¼Œè¯·æ£€æŸ¥å…¥æ˜¯å¦æ­£ç¡®ï¼");
+			System.out.println("´ò¿ªÎÄ¼ş´íÎó£¬Çë¼ì²éÈëÊÇ·ñÕıÈ·£¡");
 			return ;
 		}
 		try {
 			String dest=Formatter.getoutPath();
-			WriteFile(dest);                                       //å†™å…¥æ–‡ä»¶
+			WriteFile(dest);                                       //Ğ´ÈëÎÄ¼ş
 		}
 		catch(IOException e) {
-			System.out.println("å†™å…¥æ–‡ä»¶é”™è¯¯ï¼Œè¯·æ£€æŸ¥è¾“å…¥æ˜¯å¦æ­£ç¡®ï¼");
+			System.out.println("Ğ´ÈëÎÄ¼ş´íÎó£¬Çë¼ì²éÊäÈëÊÇ·ñÕıÈ·£¡");
 		}
 	}
 	private String openFile(String path) throws IOException  {
 		BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path),"UTF-8"));
 		String line=null;
-		while((line=br.readLine())!=null) {								//æŒ‰è¡Œè¯»å–æ–‡ä»¶
-			String[] arr = line.split(" "); 							// ç”¨  åˆ†å‰²æ–‡ä»¶çš„æ¯ä¸€è¡Œï¼Œå¹¶ä¿å­˜åœ¨arræ•°ç»„ä¸­
+		while((line=br.readLine())!=null) {								//°´ĞĞ¶ÁÈ¡ÎÄ¼ş
+			String[] arr = line.split(" "); 							// ÓÃ  ·Ö¸îÎÄ¼şµÄÃ¿Ò»ĞĞ£¬²¢±£´æÔÚarrÊı×éÖĞ
 				if(!map.containsKey(arr[0]) ) {
-					map.put(arr[0],new Status(arr[0]));					//æ ¹æ®æ¯è¡Œå¼€å¤´çš„çœä»½åˆ›å»ºStatusç±»å¹¶æ”¾å…¥mapä¸­
+					map.put(arr[0],new Status(arr[0]));					//¸ù¾İÃ¿ĞĞ¿ªÍ·µÄÊ¡·İ´´½¨StatusÀà²¢·ÅÈëmapÖĞ
 				}
-				Status s=map.get(arr[0]);								//è¯»å–arrï¼Œæ£€æŸ¥æ˜¯å¦åŒ¹é…â€œæ–°å¢â€ï¼Œâ€œæ­»äº¡â€ç­‰æƒ…å†µï¼Œä¿®æ”¹Statusç›¸åº”å˜é‡
-				if(arr[1].equals("æ–°å¢")) {
-					if(arr[2].equals("æ„ŸæŸ“æ‚£è€…"))  addIP(s,arr[3]);
+				Status s=map.get(arr[0]);								//¶ÁÈ¡arr£¬¼ì²éÊÇ·ñÆ¥Åä¡°ĞÂÔö¡±£¬¡°ËÀÍö¡±µÈÇé¿ö£¬ĞŞ¸ÄStatusÏàÓ¦±äÁ¿
+				if(arr[1].equals("ĞÂÔö")) {
+					if(arr[2].equals("¸ĞÈ¾»¼Õß"))  addIP(s,arr[3]);
 					else  addSP(s,arr[3]);
 				}
-				else if(arr[1].equals("æ­»äº¡")) {
+				else if(arr[1].equals("ËÀÍö")) {
 					addDead(s,arr[2]);
 				}
-				else if(arr[1].equals("æ²»æ„ˆ")) {
+				else if(arr[1].equals("ÖÎÓú")) {
 					addCure(s,arr[2]);
 				}
-				else if(arr[1].equals("æ’é™¤")) {
+				else if(arr[1].equals("ÅÅ³ı")) {
 					delSp(s,arr[3]);
 				}
-				else if(arr[1].equals("ç–‘ä¼¼æ‚£è€…")) {
-					if(arr[2].equals("ç¡®è¯Šæ„ŸæŸ“"))  spToip(s,arr[3]);
+				else if(arr[1].equals("ÒÉËÆ»¼Õß")) {
+					if(arr[2].equals("È·Õï¸ĞÈ¾"))  spToip(s,arr[3]);
 					else {
 						if(!map.containsKey(arr[3]) ) {
 							map.put(arr[3],new Status(arr[3]));
@@ -210,7 +232,7 @@ class DocFormatter{
 						spRunTo(s,t,arr[4]);
 					} 
 				}
-				else if(arr[1].equals("æ„ŸæŸ“æ‚£è€…")){   
+				else if(arr[1].equals("¸ĞÈ¾»¼Õß")){   
 					if(!map.containsKey(arr[3]) ) {
 						map.put(arr[3],new Status(arr[3]));
 					}
@@ -220,15 +242,15 @@ class DocFormatter{
 			
 		}
 		MakeSumUp();
-		br.close();					//å…³é—­æ–‡ä»¶
+		br.close();					//¹Ø±ÕÎÄ¼ş
         return "";
 	};
-	/*å°†mapå†™å…¥æ–‡ä»¶,æ ¹æ®docformatterå‚æ•°ï¼Œå†™å…¥æŒ‡å®šæ–‡ä»¶ä¸­*/
+	/*½«mapĞ´ÈëÎÄ¼ş,¸ù¾İdocformatter²ÎÊı£¬Ğ´ÈëÖ¸¶¨ÎÄ¼şÖĞ*/
 	private void WriteFile(String dest) throws IOException{			
 		OutputStream os = new FileOutputStream(dest);
 		PrintWriter pw=new PrintWriter(os);
-		if(ProChecked) {                        			  //æ£€æŸ¥æ˜¯å¦æœ‰æŒ‡å®šèº«ä»½
-			for(int i=0;i<pro.size();i++) {        			 //è¡¥å……ç¼ºæ¼
+		if(ProChecked) {                        			  //¼ì²éÊÇ·ñÓĞÖ¸¶¨Éí·İ
+			for(int i=0;i<pro.size();i++) {        			 //²¹³äÈ±Â©
 				String s=pro.get(i);
 				if(!map.containsKey(s))
 					map.put(s, new Status(s));
@@ -238,17 +260,17 @@ class DocFormatter{
 		for(String key : set){
 			Status status=map.get(key);
 			if(key.equals("//")) continue;
-			if(ProChecked) {                        			//æ£€æŸ¥æ˜¯å¦æœ‰æŒ‡å®šèº«ä»½
-				if(!pro.contains(key)) continue;        		 //éæŒ‡å®šèº«ä»½ï¼Œcontinue
+			if(ProChecked) {                        			//¼ì²éÊÇ·ñÓĞÖ¸¶¨Éí·İ
+				if(!pro.contains(key)) continue;        		 //·ÇÖ¸¶¨Éí·İ£¬continue
 			}
 			
 			if(TyChecked) {
 				pw.print(key);
 				for(int i=0;i<4;i++) {
-					if(tyChecked[i].equals("æ„ŸæŸ“æ‚£è€…")) pw.print(" æ„ŸæŸ“æ‚£è€…"+status.ip +"äºº");
-					else if(tyChecked[i].equals("ç–‘ä¼¼æ‚£è€…"))   pw.print(" ç–‘ä¼¼æ‚£è€…"+status.sp +"äºº");
-					else if(tyChecked[i].equals("æ²»æ„ˆ"))   pw.print(" æ²»æ„ˆ"+status.cure +"äºº");
-					else if(tyChecked[i].equals("æ­»äº¡"))   pw.print(" æ­»äº¡"+status.dead +"äºº");
+					if(tyChecked[i].equals("¸ĞÈ¾»¼Õß")) pw.print(" ¸ĞÈ¾»¼Õß"+status.ip +"ÈË");
+					else if(tyChecked[i].equals("ÒÉËÆ»¼Õß"))   pw.print(" ÒÉËÆ»¼Õß"+status.sp +"ÈË");
+					else if(tyChecked[i].equals("ÖÎÓú"))   pw.print(" ÖÎÓú"+status.cure +"ÈË");
+					else if(tyChecked[i].equals("ËÀÍö"))   pw.print(" ËÀÍö"+status.dead +"ÈË");
 					else 					{}
 					
 				};
@@ -256,8 +278,8 @@ class DocFormatter{
 			    pw.print("\n");
 			}
 			else
-		        pw.print(key +" æ„ŸæŸ“æ‚£è€…"+status.ip+"äºº ç–‘ä¼¼æ‚£è€…"+status.sp+
-		 		   "äºº æ²»æ„ˆ"+status.cure+"äºº æ­»äº¡"+status.dead+"äºº \n");
+		        pw.print(key +" ¸ĞÈ¾»¼Õß"+status.ip+"ÈË ÒÉËÆ»¼Õß"+status.sp+
+		 		   "ÈË ÖÎÓú"+status.cure+"ÈË ËÀÍö"+status.dead+"ÈË \n");
 		}
 		pw.close();
 	}
@@ -323,14 +345,14 @@ class DocFormatter{
 		s.dead+=t.dead;
 		s.cure+=t.cure;
 	}
-	private void MakeSumUp() {				//ç»Ÿè®¡å…¨å›½
-		map.get("å…¨å›½").cure=0;
-		map.get("å…¨å›½").ip=0;
-		map.get("å…¨å›½").sp=0;
-		map.get("å…¨å›½").dead=0;
+	private void MakeSumUp() {				//Í³¼ÆÈ«¹ú
+		map.get("È«¹ú").cure=0;
+		map.get("È«¹ú").ip=0;
+		map.get("È«¹ú").sp=0;
+		map.get("È«¹ú").dead=0;
 		
 		for(String key : map.keySet()) {
-			if(key.equals("å…¨å›½")) continue;
+			if(key.equals("È«¹ú")) continue;
 				add(Total,map.get(key));
 		}
 	}
@@ -349,7 +371,7 @@ class DocFormatter{
 			sortMap.putAll(map);
 			return sortMap;
 			}
-	/*å°è£…ipï¼Œspï¼Œcureï¼Œdeadï¼Œçœä»½åã€‚*/
+	/*·â×°ip£¬sp£¬cure£¬dead£¬Ê¡·İÃû¡£*/
 	class Status{					
 		private String pro;
 		private int ip;
@@ -362,11 +384,11 @@ class DocFormatter{
 		}
 	}
 }
-/*æ¯”è¾ƒå™¨ï¼ŒæŒ‰æ‹¼éŸ³é¡ºåºè¿”å›ï¼Œâ€œå…¨å›½â€ä¸ºæœ€ä¼˜å…ˆå€¼*/
+/*±È½ÏÆ÷£¬°´Æ´ÒôË³Ğò·µ»Ø£¬¡°È«¹ú¡±Îª×îÓÅÏÈÖµ*/
 class MapKeyComparator implements Comparator<String>{
 		public int compare(String str1, String str2) {
-			if(str1.equals("å…¨å›½")) return -99;
-			if(str2.equals("å…¨å›½")) return 99;	
+			if(str1.equals("È«¹ú")) return -99;
+			if(str2.equals("È«¹ú")) return 99;	
 			Collator instance = Collator.getInstance(Locale.CHINA);
 			return instance.compare(str1,str2);
         

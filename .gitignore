@@ -9,3 +9,5 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+*.class
+#忽略所有class结尾的文件

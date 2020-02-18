@@ -63,43 +63,74 @@ private:
 class BaseData {
 public:
     ///省份键值映射
-    static unordered_map<string, InfectInfo> province_keys;
+    static unordered_map<string, InfectInfo> province_map;
+
+    ///log文件夹下的全部文件名，届时将通过此数组进行读取
+    static vector<string> files;
+    
+    ///需要展示的省份
+    static vector<string> provinces;
+
+    ///需要展示的数据类型
+    static vector<Action> types;
 
     ///数据初始化
     static void init() {
-        BaseData::province_keys.insert(make_pair("安徽", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("北京", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("福建", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("甘肃", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("广东", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("广西", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("贵州", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("海南", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("河北", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("河南", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("黑龙江", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("湖北", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("湖南", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("江西", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("吉林", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("江苏", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("辽宁", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("内蒙古", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("宁夏", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("山西", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("山东", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("陕西", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("上海", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("四川", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("天津", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("新疆", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("云南", InfectInfo()));
-        BaseData::province_keys.insert(make_pair("浙江", InfectInfo()));
+        BaseData::province_map.insert(make_pair("安徽", InfectInfo()));
+        BaseData::province_map.insert(make_pair("北京", InfectInfo()));
+        BaseData::province_map.insert(make_pair("福建", InfectInfo()));
+        BaseData::province_map.insert(make_pair("甘肃", InfectInfo()));
+        BaseData::province_map.insert(make_pair("广东", InfectInfo()));
+        BaseData::province_map.insert(make_pair("广西", InfectInfo()));
+        BaseData::province_map.insert(make_pair("贵州", InfectInfo()));
+        BaseData::province_map.insert(make_pair("海南", InfectInfo()));
+        BaseData::province_map.insert(make_pair("河北", InfectInfo()));
+        BaseData::province_map.insert(make_pair("河南", InfectInfo()));
+        BaseData::province_map.insert(make_pair("黑龙江", InfectInfo()));
+        BaseData::province_map.insert(make_pair("湖北", InfectInfo()));
+        BaseData::province_map.insert(make_pair("湖南", InfectInfo()));
+        BaseData::province_map.insert(make_pair("江西", InfectInfo()));
+        BaseData::province_map.insert(make_pair("吉林", InfectInfo()));
+        BaseData::province_map.insert(make_pair("江苏", InfectInfo()));
+        BaseData::province_map.insert(make_pair("辽宁", InfectInfo()));
+        BaseData::province_map.insert(make_pair("内蒙古", InfectInfo()));
+        BaseData::province_map.insert(make_pair("宁夏", InfectInfo()));
+        BaseData::province_map.insert(make_pair("山西", InfectInfo()));
+        BaseData::province_map.insert(make_pair("山东", InfectInfo()));
+        BaseData::province_map.insert(make_pair("陕西", InfectInfo()));
+        BaseData::province_map.insert(make_pair("上海", InfectInfo()));
+        BaseData::province_map.insert(make_pair("四川", InfectInfo()));
+        BaseData::province_map.insert(make_pair("天津", InfectInfo()));
+        BaseData::province_map.insert(make_pair("新疆", InfectInfo()));
+        BaseData::province_map.insert(make_pair("云南", InfectInfo()));
+        BaseData::province_map.insert(make_pair("浙江", InfectInfo()));
+    }
+
+    static bool contains(string province) {
+        for(int i = 0 ; i < BaseData::provinces.size() ; i++) {
+            if (BaseData::provinces[i] == province) return true;
+        }
+
+        return false;
+    }
+
+    static bool contains(Action type) {
+        for(int i = 0 ; i < BaseData::types.size() ; i++) {
+            if (BaseData::types[i] == type) return true;
+        }
+
+        return false;
     }
 };
 
 ///静态数据成员的初始化 应在类外进行 需特别注意
-unordered_map<string, InfectInfo> BaseData::province_keys {};
+unordered_map<string, InfectInfo> BaseData::province_map {};
+
+vector<string> BaseData::files {};
+
+vector<string> BaseData::provinces {};
+
+vector<Action> BaseData::types {};
 
 ///工程操作类
 class Command {
@@ -107,24 +138,24 @@ public:
     static void ActionWith(Action action, int count, string province) {
         switch (action) {
             case dead:
-                BaseData::province_keys[province].dead_count += count;
-                BaseData::province_keys[province].sure_count -= count;
+                BaseData::province_map[province].dead_count += count;
+                BaseData::province_map[province].sure_count -= count;
                 break;
             case cure:
-                BaseData::province_keys[province].cure_count += count;
-                BaseData::province_keys[province].sure_count -= count;
+                BaseData::province_map[province].cure_count += count;
+                BaseData::province_map[province].sure_count -= count;
                 break;
             case decrease_sure:
-                BaseData::province_keys[province].sure_count -= count;
+                BaseData::province_map[province].sure_count -= count;
                 break;
             case decrease_doubt:
-                BaseData::province_keys[province].doubt_count -= count;
+                BaseData::province_map[province].doubt_count -= count;
                 break;
             case increase_sure:
-                BaseData::province_keys[province].sure_count += count;
+                BaseData::province_map[province].sure_count += count;
                 break;
             case increase_doubt:
-                BaseData::province_keys[province].doubt_count += count;
+                BaseData::province_map[province].doubt_count += count;
                 break;
         }
     }
@@ -141,6 +172,8 @@ public:
 
         input_stream.open("/Users/vegetablefriend/Desktop/InfectStatistic-main/example/log/2020-01-22.log.txt");
 
+        //readFilesByDate();
+
         while(getline(input_stream, data)) {
             if (data.find("//") != -1) break;
             getInfoFromString(data);
@@ -151,10 +184,11 @@ public:
     static void outputResult() {
         unordered_map<string, InfectInfo>::iterator it;
 
-        for(it = BaseData::province_keys.begin(); it != BaseData::province_keys.end() ; it++) {
-            if (it->second.exist) {
-                cout << it->first + " 感染患者" + to_string(it->second.sure_count) + "人 疑似患者" + to_string(it->second.doubt_count) +
-                "人 治愈" + to_string(it->second.cure_count) + "人 死亡" + to_string(it->second.dead_count) + "人" << endl;
+        string output_res;
+
+        for(it = BaseData::province_map.begin(); it != BaseData::province_map.end() ; it++) {
+            if (it->second.exist && BaseData::contains(it->first)) {
+
             }
         }
 
@@ -171,7 +205,7 @@ private:
         data = data.substr(space_index + 1, data.size());
 
         ///注册该省信息
-        BaseData::province_keys[province].exist = true;
+        BaseData::province_map[province].exist = true;
 
         ///此处获取该行信息的人数
         int last_space = data.find_last_of(' ');
@@ -235,6 +269,25 @@ private:
         cout << "--------------------------------------" << endl;
         outputResult();
     }
+
+    ///根据 -type 参数 读取需要展示的数据类型
+    static Action* readParameterOfType() {
+
+        Action actions[5];
+
+        return actions;
+    }
+
+    ///根据 -province 参数 读取出需要展示的省份字符串数组
+    static vector<string> readParameterOfProvince() {
+        
+    }
+
+    ///获取文件夹下的全部文件 并根据 -date 参数来返回需要读的文件集的字符串数组
+    static vector<string> readFilesByDate() {
+        vector<string> result;
+        cout << result[3] << endl;
+    }
 };
 
 //MARK: 程序运行主类
@@ -258,4 +311,3 @@ public:
 int main(int argc, char* argv[]) {
     Application::run(argc, argv);
 }
-

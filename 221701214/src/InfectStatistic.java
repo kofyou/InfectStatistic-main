@@ -115,18 +115,17 @@ public class Homework2
 			System.out.print("日期不合法，请重新输入。");
 			return ;
 		}
-		else if(!(isDateOutOfRange(dateOrder)))
+		else if(!(isDateOutOfRange(date)))
 		{
 			System.out.print("日期超出范围，请重新输入。");
 			return ;
 		}
 		for(int k = 0;k < allLog.size();k++)
 		{
-			readLog(allLog.get(k));
 			String[] log = allLog.get(k).split("\\\\");
-			if(log[log.length - 1].equals(date))
+			if((log[log.length - 1].compareTo(date)) <= 0)
 			{
-				break;
+				readLog(allLog.get(k));
 			}
 		}
 		writeOut(outOrder);
@@ -189,11 +188,11 @@ public class Homework2
 	{
 		String[] endLog = allLog.get(allLog.size() - 1).split("\\\\");
 		String[] beginLog = allLog.get(0).split("\\\\");
-		if((inputDate.compareTo(endLog[endLog.length - 1])) == 1)
+		if((inputDate.compareTo(endLog[endLog.length - 1])) > 0)
 		{
 			return false;
 		}
-		else if((inputDate.compareTo(beginLog[endLog.length - 1])) == -1)
+		else if((inputDate.compareTo(beginLog[beginLog.length - 1])) < 0)
 		{
 			return false;
 		}

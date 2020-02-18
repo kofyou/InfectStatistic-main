@@ -28,7 +28,7 @@ class InfectStatistic
     public static String[] allLogFilesName;  //记录所有日志文件的文件名
     public static String maxDate=null; //日志目录下的最大日期
     
-    public static ArrayList allProvince = new ArrayList();
+    public static ArrayList<Province> allProvince = new ArrayList<Province>();
     
     /*
     * Description:分析命令行穿给主函数的命令
@@ -117,6 +117,59 @@ class InfectStatistic
 		return theMaxDate;
 	}
 	
+	/*
+	* Description:统计各个省份的感染人数，疑似人数，治愈人数和死亡人数
+	* Input:从日志文件读取出的一行信息，该行信息保存为字符串
+	* Return:无
+	* Others:无
+	*/ 
+	public static void getProvincialInformation(String oneLineOfFile)
+	{
+		String[] splitString = oneLineOfFile.split(" ");
+		int countOfSplitString = splitString.length;
+		int countOfPeople = getStringNumber(splitString[splitString.length - 1]); 
+		boolean isExist = false;  //用于标志动态数组中是否有记录某省
+		
+		//检验动态数组中是否有该省份，
+        for (int i = 0;i < allProvince.size();i++)
+        {
+        	if (allProvince.get(i).provinceName.equals(splitString[0]) == true)
+        	{
+        		isExist = true;
+        	    break;
+        	}
+        }
+        if (isExist == false)//无该省则把该省份加到动态数组中
+        {
+        	allProvince.add(new Province(splitString[0]));
+        }
+	} 
+	
+	/*
+	* Description:提取传入的字符串当中的数字并转换成整数返回
+	* Input:一个包含了数字字符的字符串
+	* Return:一个整数
+	* Others:无
+	*/ 
+	public static int getStringNumber(String str)
+	{
+		str = str.trim();
+		String numString = "";
+		
+		if(str != null && !"".equals(str))
+		{
+			for(int i = 0;i < str.length();i++)
+			{
+				if(str.charAt(i) >= 48 && str.charAt(i) <= 57)
+				{
+					numString += str.charAt(i);
+				}
+			}
+		}
+		
+		return Integer.parseInt(numString);
+	} 
+	
     public static void main(String[] args) throws IOException 
     {
     	analysisOfCommand(args);
@@ -152,7 +205,9 @@ class InfectStatistic
     		    			&& oneLineOfFile.length() != 0  //不读取空行
     		    			&& oneLineOfFile.startsWith("//") == false)  //不读取注释行
     		    		{
-    		    			System.out.println(oneLineOfFile);
+    		    			//System.out.println(oneLineOfFile);
+    		    			getProvincialInformation(oneLineOfFile);
+    		    			
     		    		}
     		    	} 
     		    	catch (FileNotFoundException e) {
@@ -168,4 +223,23 @@ class InfectStatistic
 
 
     }
+}
+
+class Province
+{
+	String provinceName;  //省份名字
+	int ip;  //感染患者数目
+    int sp;  //疑似患者数目
+    int cure;  //治愈数目
+    int dead;  //死亡数目
+    
+    Province(String provinceName)
+    {
+    	this.provinceName=provinceName;
+    	ip=0;
+    	sp=0;
+    	cure=0;
+    	dead=0;
+    }
+	
 }

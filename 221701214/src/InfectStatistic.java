@@ -617,19 +617,6 @@ public class InfectStatistic
 			System.out.println("未输入命令行参数");
 			return ;
 		}
-		for(int i = 0;i < args.length;i++)
-		{
-			if(!(args[i].equals("-log")))
-			{
-				System.out.println("缺少必要的-log参数");
-				return ;
-			}
-			else if(!(args[i].equals("-out")))
-			{
-				System.out.println("缺少必要的-out参数");
-				return ;
-			}
-		}
 		InfectStatistic hw2 = new InfectStatistic();
 		hw2.orderHandle(args);
 		

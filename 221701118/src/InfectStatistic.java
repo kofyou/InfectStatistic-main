@@ -5,8 +5,8 @@ import java.util.TreeSet;
  * InfectStatistic TODO
  *
  * @author 张嘉伟
- * @version 2.0
- * @since 2020-02-18 01:37
+ * @version 2.1
+ * @since 2020-02-19 02:08
  */
 class InfectStatistic
 {

@@ -15,7 +15,8 @@ import java.util.*;
 
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toMap;
-class InfectStatistic {
+class InfectStatistic
+{
     private CmdArgs cmdArgs;
     private Map<String  , File> LogsMap;
     private Container container;
@@ -98,5 +99,93 @@ class InfectStatistic {
             FromRecord.DownSpNum(num);
             InfectedRecord.UpSpNum(num);
         }
+    }
+}
+class Container {
+
+    Map<String, Record> recordMap;
+
+    public Container() {
+        recordMap = new HashMap<>();
+    }
+
+    public Map<String, Record> GetRecordMap() {
+        return recordMap;
+    }
+
+    public Record GetRecord(String Province) {
+        return recordMap.get(Province);
+    }
+
+    public void AddRecord(Record record) {
+        recordMap.put(record.GetProvinceName(), record);
+    }
+}
+class Record
+{
+    private String ProvinceName;
+    private int IpNum;
+    private int SpNum;
+    private int CureNum;
+    private int DeadNum;
+
+    public String GetProvinceName() {
+        return ProvinceName;
+    }
+
+    public void SetProvinceName(String ProvinceName) {
+        this.ProvinceName = ProvinceName;
+    }
+
+    public int GetIpNum() {
+        return IpNum;
+    }
+
+    public void SetIpNum(int IpNum) {
+        this.IpNum = IpNum;
+    }
+
+    public void UpIpNum(int num) {
+        this.IpNum += num;
+    }
+
+    public void DownIpNum(int num) {
+        this.IpNum -= num;
+    }
+
+    public int GetSpNum() {
+        return SpNum;
+    }
+
+    public void SetSpNum(int SpNum) {
+        this.SpNum = SpNum;
+    }
+
+    public void UpSpNum(int num) {
+        this.SpNum += num;
+    }
+
+    public void DownSpNum(int num) {
+        this.SpNum -= num;
+    }
+
+    public int GetCureNum() {
+        return CureNum;
+    }
+
+    public void SetCureNum(int CureNum) {
+        this.CureNum = CureNum;
+    }
+
+    public void UpCureNum(int num) {
+        this.CureNum += num;
+    }
+
+    public int GetDeadNum() {
+        return DeadNum;
+    }
+
+    public void SetDeadNum(int DeadNum) {
+        this.DeadNum = DeadNum;
     }
 }

@@ -11,6 +11,17 @@ import java.lang.String;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 class InfectStatistic {
+	public String[] province= {
+			"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南",
+			"河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁",
+			"内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津",
+			"西藏","新疆","云南","浙江"
+	};
+	public int[] illnessarray=new int[32];			//用于存放各省感染患者人数
+	public int[] doubtfulillnessarray=new int[32];	//用于存放各省疑似患者人数
+	public int[] secureillnessarray=new int[32];	//用于存放各省治愈患者人数
+	public int[] deadillnessarray=new int[32];		//用于存放各省死亡人数
+	String outputarray;					//用于存放处理过后需要输出的字符串数组
     public static void main(String args[]) throws IOException {
     	for (int i=0;i<args.length;i++) {		//循环读取命令行参数
     		//System.out.println(args[i]);
@@ -27,7 +38,7 @@ class InfectStatistic {
 			}
 		}
     }
-    public static void LogContentHandle(String lineText) {
+    public void LogContentHandle(String lineText) {
     	String match1="(\\S+) 新增 感染患者 (\\d+)人";		//匹配<省> 新增 感染患者 n人
     	String match2="(\\S+) 新增 疑似患者 (\\d+)人";		//匹配<省> 新增 疑似患者 n人
     	String match3="(\\S+) 感染患者 流入 (\\S+) (\\d+)人";	//匹配<省1> 感染患者 流入 <省2> n人
@@ -62,7 +73,7 @@ class InfectStatistic {
     		RemoveDoutbfulIllness(lineText);
     	}
     }
-    public static void LogProcess(String logpath) throws IOException {
+    public void LogProcess(String logpath) throws IOException {
     	File logfilepath=new File(logpath);
 		File list[]=logfilepath.listFiles();		//获取日志文件列表
 		for (int logi=0;logi<list.length;logi++) {	//循环获得日志文件夹中的每一个日志文件
@@ -78,10 +89,11 @@ class InfectStatistic {
 			buff.close();
 		}
     }
-    public static void OutProcess(String outpath) throws IOException {		//输出到指定文件中
-    	File outfilepath=new File(outpath);
+    public void OutProcess(String outpath) throws IOException {		//输出到指定文件中
+    	FileWriter fw=new FileWriter(outpath);
+    	fw.write(outputarray);								//将最终字符串数组输出到指定文件中
     }
-    public static void AddIllness(String lineText) {
+    public void AddIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[3].replace("人",""));	//将n人从字符串类型转化为int类型
     	for (int i=0;i<province.length;i++) {
@@ -92,7 +104,7 @@ class InfectStatistic {
     		}
     	}
     }
-    public static void AddDoubtfulIllness(String lineText) {
+    public void AddDoubtfulIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[3].replace("人",""));	//将n人从字符串类型转化为int类型
     	for (int i=0;i<province.length;i++) {
@@ -103,7 +115,7 @@ class InfectStatistic {
     		}
     	}
     }
-    public static void ChangeIllness(String lineText) {
+    public void ChangeIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[4].replace("人",""));	//将n人从字符串类型转化为int类型
     	for (int i=0;i<province.length;i++) {
@@ -119,7 +131,7 @@ class InfectStatistic {
     		}
     	}
     }
-    public static void ChangeDoubtfulIllness(String lineText) {
+    public void ChangeDoubtfulIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[4].replace("人",""));	//将n人从字符串类型转化为int类型
     	for (int i=0;i<province.length;i++) {
@@ -135,7 +147,7 @@ class InfectStatistic {
     		}
     	}
     }
-    public static void DeadIllness(String lineText) {
+    public void DeadIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[2].replace("人",""));	//将n人从字符串类型转化为int类型
     	for (int i=0;i<province.length;i++) {
@@ -147,7 +159,7 @@ class InfectStatistic {
     		}
     	}
     }
-    public static void SecureIllness(String lineText) {
+    public void SecureIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[2].replace("人",""));	//将n人从字符串类型转化为int类型
     	for (int i=0;i<province.length;i++) {
@@ -159,7 +171,7 @@ class InfectStatistic {
     		}
     	}
     }
-    public static void DiagnoseDoutbfulIllness(String lineText) {
+    public void DiagnoseDoutbfulIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[3].replace("人",""));	//将n人从字符串类型转化为int类型
     	for (int i=0;i<province.length;i++) {
@@ -172,7 +184,7 @@ class InfectStatistic {
     		}
     	}
     }
-    public static void RemoveDoutbfulIllness(String lineText) {
+    public void RemoveDoutbfulIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[3].replace("人",""));	//将n人从字符串类型转化为int类型
     	for (int i=0;i<province.length;i++) {

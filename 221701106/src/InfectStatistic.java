@@ -21,7 +21,7 @@ class InfectStatistic {
 	public int[] doubtfulillnessarray=new int[32];	//用于存放各省疑似患者人数
 	public int[] secureillnessarray=new int[32];	//用于存放各省治愈患者人数
 	public int[] deadillnessarray=new int[32];		//用于存放各省死亡人数
-	String outputarray;					//用于存放处理过后需要输出的字符串数组
+	String outputarray;								//用于存放处理过后需要输出的字符串数组
     public static void main(String args[]) throws IOException {
     	for (int i=0;i<args.length;i++) {		//循环读取命令行参数
     		//System.out.println(args[i]);
@@ -37,6 +37,10 @@ class InfectStatistic {
 				outProcess(outpath);			//对-out参数进行处理
 			}
 		}
+    }
+    public void OutProcess(String outpath) throws IOException {		//输出到指定文件中
+    	FileWriter fw=new FileWriter(outpath);
+    	fw.write(outputarray);								//将最终字符串数组输出到指定文件中
     }
     public void LogContentHandle(String lineText) {
     	String match1="(\\S+) 新增 感染患者 (\\d+)人";		//匹配<省> 新增 感染患者 n人
@@ -73,7 +77,7 @@ class InfectStatistic {
     		RemoveDoutbfulIllness(lineText);
     	}
     }
-    public void LogProcess(String logpath) throws IOException {
+    public String LogProcess(String logpath) throws IOException {
     	File logfilepath=new File(logpath);
 		File list[]=logfilepath.listFiles();		//获取日志文件列表
 		for (int logi=0;logi<list.length;logi++) {	//循环获得日志文件夹中的每一个日志文件
@@ -88,10 +92,6 @@ class InfectStatistic {
 			}
 			buff.close();
 		}
-    }
-    public void OutProcess(String outpath) throws IOException {		//输出到指定文件中
-    	FileWriter fw=new FileWriter(outpath);
-    	fw.write(outputarray);								//将最终字符串数组输出到指定文件中
     }
     public void AddIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
@@ -194,5 +194,18 @@ class InfectStatistic {
     			break;
     		}
     	}
+    }
+    public static void DateHandle(String concretedate,String logpath) throws IOException {//处理-date参数所输入的具体日期
+    	File logfilepath=new File(logpath);
+		File list[]=logfilepath.listFiles();					//获取日志文件列表
+    	for (int i=0;i<list.length;i++) {						//循环获得日志文件夹中的每一个日志文件
+			String logsname=list[i].getName();					//获得日志文件名
+			String cutlineText[]=logsname.split("\\.");			//按"."分割
+			//System.out.println(cutlineText[0]);				//输出分割后的日志文件名，测试用
+			if (!(logsname.compareTo(concretedate)>0)) {		//如果在指定的日期内则处理该文本的信息
+				//LogContentHandle(LogProcess(list[i].getAbsolutePath()));
+				System.out.println(logsname);					//输出指定日期内的日志文件名，测试用
+			}
+		}
     }
 }

@@ -105,6 +105,9 @@ public:
     }
 };
 
+///静态数据成员的初始化 应在类外进行 需特别注意 
+unordered_map<string, InfectInfo> BaseData::province_keys {};
+
 ///工程工具类
 class Tool {
 public:

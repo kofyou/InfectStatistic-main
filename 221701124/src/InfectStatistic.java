@@ -70,13 +70,13 @@ class InfectStatistic {
     	 * 判断命令行参数是否有误
     	 */
     	public boolean JudgeParameter(){
-    		if (args[0] != "list") {
+    		int i = 0 ;
+    		if (!args[0].equals("list")) {
     			System.out.println("未输入命令");
     			return false;
     		}
-    		int i = 0;
     		for (i = 1 ; i < args.length ; i++) {
-    			if (args[i] == "-log") {
+    			if (args[i].equals("-log")) {
     				if (GetOriginPath(++i) == false) {
     					System.out.println("日志目录路径格式错误");
     					return false;
@@ -85,15 +85,15 @@ class InfectStatistic {
     			}
     		}
     		for (i = 1 ; i < args.length ; i++) {
-    			if (args[i] == "-log")
+    			if (args[i].equals("-log"))
     				i++;
-    			else if (args[i] == "-out") {
+    			else if (args[i].equals("-out")) {
     				if (GetTargetPath(++i) == false) {
     					System.out.println("输出文件路径格式错误");
     					return false;
     				}
     			}
-    			else if (args[i] == "-date") {
+    			else if (args[i].equals("-date")) {
     				if (GetDate(++i) == false) {
     					System.out.println("日期超出范围");
     					return false;
@@ -115,7 +115,7 @@ class InfectStatistic {
     					i = i + var - 1;
     				}
     			}
-    			else if (args[i] == "-province") {
+    			else if (args[i].equals("-province")) {
     				var = 0;
     				preMark = 1;
     				area[0] = 0;
@@ -595,6 +595,10 @@ class InfectStatistic {
     }
     
     public static void main(String[] args) {
+    	if (args.length == 0) {  
+            System.out.println("命令行格式有误——未输入参数");  
+            return;
+        }
         InfectStatistic infectstatistic = new InfectStatistic();
         InfectStatistic.Analysis cla = infectstatistic.new Analysis(args); 
         boolean b = cla.JudgeParameter();

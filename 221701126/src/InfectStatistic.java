@@ -263,8 +263,6 @@ class InfectStatistic {
 	 * 处理待处理文件的每一个文件
 	 */
 	public static void solveEveryFile(Vector<String> toHandleDate) {
-		
-		
 		StringBuffer sb = new StringBuffer();
 		for(String dateFile : toHandleDate) {
 			dateFile = inputPath + dateFile + ".log.txt";
@@ -303,6 +301,13 @@ class InfectStatistic {
 								anotherProvince.infect += number;
 								p.infect -= number;
 							}
+							else {
+								Province province2 = new Province();
+								province2.name = p2;
+								province2.infect += number;
+								p.infect -= number;
+								map.put(p2, province2);
+							}
 							break;
 						case "疑似患者":
 							//判断是流入还是确诊
@@ -312,6 +317,13 @@ class InfectStatistic {
 									Province anotherProvince = map.get(p3);
 									anotherProvince.seeming += number;
 									p.seeming -= number;
+								}
+								else {
+									Province province3 = new Province();
+									province3.name = p3;
+									province3.infect += number;
+									p.infect -= number;
+									map.put(p3, province3);
 								}
 							}
 							else {//确诊
@@ -363,6 +375,13 @@ class InfectStatistic {
 								anotherProvince.infect += number;
 								p.infect -= number;
 							}
+							else {
+								Province province2 = new Province();
+								province2.name = p2;
+								province2.infect += number;
+								p.infect -= number;
+								map.put(p2, province2);
+							}
 							break;
 						case "疑似患者":
 							//判断是流入还是确诊
@@ -372,6 +391,13 @@ class InfectStatistic {
 									Province anotherProvince = map.get(p3);
 									anotherProvince.seeming += number;
 									p.seeming -= number;
+								}
+								else {
+									Province province3 = new Province();
+									province3.name = p3;
+									province3.infect += number;
+									p.infect -= number;
+									map.put(p3, province3);
 								}
 							}
 							else {//确诊
@@ -427,8 +453,8 @@ class InfectStatistic {
 		if(file.isDirectory()) {
 			Vector<String> toHandleDate = new Vector<String>();//获取符合要求待处理的日期文件
 			String[] fileNames = file.list(); // 获得目录下的所有文件的文件名
-			for(String fileName : fileNames) {//截断后缀名
-				fileName = fileName.substring(0, fileName.indexOf('.'));
+			for(String fileName : fileNames) {
+				fileName = fileName.substring(0, fileName.indexOf('.'));//截断后缀名
 				//日期比较
 				if(fileName.compareTo(targetDate) <= 0) {
 					toHandleDate.add(fileName);

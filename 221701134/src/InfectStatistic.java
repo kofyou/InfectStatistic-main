@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 
 /**
  * InfectStatistic
@@ -7,17 +8,32 @@
  * @version 0.1
  * @since 2020/2/17
  */
-class InfectStatistic {	
+class InfectStatistic {
+				
     public static void main(String[] args) {
-        System.out.println("helloworld");
-        
+    	
+        //创建命令行参数解析器 启动程序
+    	new InfectStatistic().getArgsParser().parse(args);
     }
-    
+       
+    /**
+     * description：常量类，储存所有全局常量
+     * @author VisionWong
+     */
+    public static class Constants{
+    	private static final String NAME_NATION = "全国";
+        private static final String CMD_LOG = "log";
+        private static final String CMD_OUT = "out";
+        private static final String CMD_DATE = "date";
+        private static final String CMD_TYPE = "type";
+        private static final String CMD_PROVINCE = "province";
+    }
+       
     /**
      * description：储存省份信息，提供修改数据的方法
      * @author VisionWong
      */
-    public class Province{
+     public class Province{
     	
     	/** 省份名字 */
     	private String name;
@@ -126,4 +142,41 @@ class InfectStatistic {
 			return res;
 		}
     }
+     
+     /**
+      * description：命令函参数解析类，负责解析和执行命令行参数数组
+      * @author VisionWong
+      */
+     public class ArgsParser{
+    	 
+    	 private String date;
+    	 private String logPath;
+    	 private String outputPath;
+    	 private ArrayList<String> typeList;
+    	 private ArrayList<String> provinceList;
+    	 
+    	 
+    	 public ArgsParser() {
+			date = "";
+			logPath = "";
+			outputPath = "";
+			typeList = new ArrayList<String>();
+			provinceList = new ArrayList<String>();
+		}
+    	 
+    	 /**
+    	  * description：解析传入的命令行参数列表并执行
+    	  * @param args  命令行参数数组
+    	  */
+    	 public void parse(String[] args) {
+    		 
+    	 }
+    	       	
+    	 
+     }
+     
+     /** 获取命令行参数解析器 */
+     private ArgsParser getArgsParser() {
+		 return new ArgsParser();
+	 }
 }

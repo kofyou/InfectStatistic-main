@@ -56,6 +56,13 @@ public class infectStatistic {
 	boolean isExistParameterProvince=true;
 	//命令行
 	String args[];
+
+		
+	//默认构造函数
+	public infectStatistic() {
+		// TODO Auto-generated constructor stub
+	}
+	
 	
 	//构造函数
 	infectStatistic(String args[]){
@@ -169,11 +176,11 @@ public class infectStatistic {
 					for (int j = 0; j < provinceNumber; j++) {
 						count += StatisticsNumber[j][outTypeIndex[i]];
 					}
-					if (i == typeNumber - 1) {
-						allString = allString + count + "人";
-					} 
+					if(i==typeNumber-1||outTypeIndex[i+1]==-1) {
+						allString+="人";
+					}
 					else {
-						allString = allString + count + "人 ";
+						allString+="人 ";
 					}
 				}
 			}
@@ -190,11 +197,11 @@ public class infectStatistic {
 					if (outTypeIndex[j] != -1) {
 						allString += typeName[outTypeIndex[j]];
 						allString += StatisticsNumber[i][outTypeIndex[j]];
-						if (j == typeNumber - 1) {
-							allString += "人";
-						} 
+						if(j==typeNumber-1||outTypeIndex[j+1]==-1) {
+							allString+="人";
+						}
 						else {
-							allString += "人 ";
+							allString+="人 ";
 						}
 					}
 				}

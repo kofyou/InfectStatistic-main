@@ -19,13 +19,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;  
-import infectstatistic_yjchen.J_Province;
+import java.util.Date;
 
 public class InfectStatistic
 {
-	static J_Province allCountry = new J_Province();
-	static Vector<J_Province> provinces = new Vector<J_Province>();
+	static Province allCountry = new Province();
+	static Vector<Province> provinces = new Vector<Province>();
 	static String[] arrayProvinces={"安徽","澳门","北京","重庆","福建","甘肃","广东","广西","贵州","海南",
 			"河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏",
 			"青海","山东","山西","陕西","上海","四川","台湾","天津","西藏","香港","新疆","云南","浙江"};
@@ -39,47 +38,24 @@ public class InfectStatistic
 	static Vector<Integer> interval = new Vector<Integer>();
 	static Vector<String> temp=new Vector<String>();
 	static Vector<String> vector=new Vector<String>();
-	static boolean isOutCountry = false;//是否输出全国感染信息
+	static Vector<String> junitTest = new Vector<String>();
 	static int countryPos = 0;//”全国“所处的下标
 	static int countList = 0;//记录输出列个个数
+	static boolean isOutCountry = false;//是否输出全国感染信息
 	static boolean IsOutputDefautList = true;//参数选项是否有-type
 	static boolean IsOutputDefautProvince = true;//参数选项是否有-province
 	static boolean IsOutputDefautDate = true;//参数选项是否有-date
+	static boolean isOutputCmd = true;//是否在cmd输出
+	static boolean isNormalQuit = true;//是否正常退出
+	static boolean isBeforeLatestDate = true;//是否日期在最新日期前
 	
 	
     public static void main(String args[ ]) throws IOException
     {
+    	
     	//接收命令行参数
     	for(String temp : args)vector.add(temp);
     	//测试函数dealParameter
-    	
-    	
-    		vector.add("list");
-    		vector.add("-log");
-    		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\infectstatistic_yjchen\\");
-    		vector.add("-out");
-    		vector.add("G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt");
-    		
-    		vector.add("-date");
-    		vector.add("2020-01-31");
-    		
-    		/*
-    		vector.add("-type");
-    		vector.add("sp");
-    		vector.add("ip");
-    		vector.add("dead");
-    		*/
-    		/*
-    		vector.add("-province");
-    		vector.add("重庆");
-    		vector.add("福建");
-    		vector.add("全国");
-    		vector.add("湖南");
-    		vector.add("广东");
-    		vector.add("安徽"); 
-    		*/
-    	
-    	
     	//保存全国的感染情况
     	allCountry.setName("全国");
     	//保存各省市的感染情况
@@ -96,18 +72,33 @@ public class InfectStatistic
     	//先前用Vector实现，发现排序麻烦    	
     	//将各省份感染信息加入到Vector中，方便管理
     	for(int i = 0;i < 34;i++) {
-    		J_Province temp = new J_Province();
-    		temp.setName(arrayProvinces[i]);
-    		provinces.add(temp);    		
+    		Province tempProvince = new Province();
+    		tempProvince.setName(arrayProvinces[i]);
+    		provinces.add(tempProvince);    		
     	}
     	//初始化vector
     	initialVector();
 		//判断参数类型
     	dealParameter(vector);
+    	if(!isNormalQuit)
+    	{
+    		Vector<String> tempVec = new Vector<String>();
+    		tempVec.add("-date参数错误:日期应在日志最晚日期及之前!");
+    		System.out.println("-date参数错误:日期应在日志最晚日期及之前!");
+    		return;
+    	}
     	//处理log文件
     	processLogFile();
+    	if(!isBeforeLatestDate && !IsOutputDefautDate)
+    	{
+    		Vector<String> tempVec = new Vector<String>();
+    		tempVec.add("-date参数错误:日期应在日志最晚日期及之前!");
+    		System.out.println("-date参数错误:日期应在日志最晚日期及之前!");
+    		return;
+    	}
     	//输出
-		ListProvince(temp);
+    	ListProvince(isOutputCmd);
+		return;
     }
     
     
@@ -195,7 +186,8 @@ public class InfectStatistic
         					if(!checkDate(inputEndDate)||dateNowStr.compareTo(inputEndDate) < 0)
         					{
         						System.out.println("日期有误!");
-        						System.exit(0);
+        						isNormalQuit = false;
+        						//System.exit(0);
         					}
         				}
         				i += interval.elementAt(pos);
@@ -232,19 +224,22 @@ public class InfectStatistic
         			if(vector.get(i).equals("-province"))
         			{
         				IsOutputDefautProvince = false;
+        				//System.out.println("interval.elementAt(pos)=" + interval.elementAt(pos));
         				for(int j = 0;j < interval.elementAt(pos);j ++ )
         				{
         					if(vector.get(i+j+1).equals("全国"))
         					{
         						isOutCountry = true;
         					}
-        					if(i+j+1 >= countryPos)
+        					if(i+j+1 >= countryPos && isOutCountry)
         					{
         						temp.add(vector.get(i+j+2));//跳过“全国”
+        						//System.out.println(vector.get(i+j+2));
         					}
         					else
         					{
         						temp.add(vector.get(i+j+1));
+        						//System.out.println(vector.get(i+j+2));
         					}
         				}
         				i += interval.elementAt(pos);
@@ -295,6 +290,7 @@ public class InfectStatistic
 		Calendar calEnd = Calendar.getInstance();
 		calEnd.setTime(dEnd);
 		//在选择的日期内循环。
+		String LatestDate = null;
 		while(dEnd.after(calBegin.getTime()))
 		{
 			 //加一天
@@ -308,6 +304,7 @@ public class InfectStatistic
 			 }
 			 else 
 			 {
+				 LatestDate = sdf.format(calBegin.getTime());
 				 String[] ss ;
 				 String st;
 				 dataFile = FileReadLine(fileName);
@@ -455,6 +452,10 @@ public class InfectStatistic
 			     }
 			 }	  
 		}
+		if(inputEndDate.compareTo(LatestDate) > 0)
+		{
+			isBeforeLatestDate = false;
+		}
     }
     
     
@@ -462,11 +463,17 @@ public class InfectStatistic
      * 作用:输出结果到指定文件
      * 参数:存放需要输出的省份
      ********************************/
-    private static void ListProvince(Vector<String> temp) throws IOException {
-		// TODO Auto-generated method stub
+    @SuppressWarnings("unused")
+	private static Vector<String> ListProvince(boolean isOutputCmd) throws IOException {
+    	String tempJunitString = null;
 		File outFile = new File(outputFileAddress);
+		File outFileParent = outFile.getParentFile();
+		if(!outFileParent.exists()){
+			outFileParent.mkdirs();
+		}
+		outFile.createNewFile();
 		Writer out = new FileWriter(outFile);
-		Vector<J_Province> limitProvince = new Vector<J_Province>();	
+		Vector<Province> limitProvince = new Vector<Province>();	
 		int arrayPos[] = new int [temp.size()];
 		int provincePos = 0;//好神奇，如果变量在函数内，则循环体内赋值失败。
 		for(String s:temp) //需要列出的省份的数组下标组成新数组
@@ -497,12 +504,14 @@ public class InfectStatistic
 			countList = 4;
 		}
 		//是否输出默认省份疫情信息		
-		//是否输出全国感染信息		
+		//是否输出全国感染信息	
+		tempJunitString = null;
 		if(isOutCountry || IsOutputDefautProvince) 
 		{
-			J_Province s = allCountry;
+			Province s = allCountry;
 			out.write(s.getName() + " " );
 			System.out.print(s.getName() + " " );
+			tempJunitString = s.getName() + " ";
 			for(int j = 1;j < countList + 1;j ++ )
 			{
 				for(int i = 0;i < 4;i ++ )
@@ -515,34 +524,69 @@ public class InfectStatistic
 					{
 						if(i == 0)
 						{
-							out.write("感染患者" + s.Infected() + "人" + " ");
-							System.out.print("感染患者" + s.Infected() + "人" + " ");
+							out.write("感染患者" + s.Infected() + "人" );
+							System.out.print("感染患者" + s.Infected() + "人" );
+							tempJunitString = tempJunitString + "感染患者" + s.Infected() + "人" ;	
+							if(j != countList)
+							{
+								out.write(" ");
+								System.out.print(" ");
+								tempJunitString += " ";
+							}
 						}
 						if(i == 1)
 						{
-							out.write("疑似患者" +  s.Suspected() + "人" + " " );
-							System.out.print("疑似患者" +  s.Suspected() + "人" + " " );
+							out.write("疑似患者" +  s.Suspected() + "人" );
+							System.out.print("疑似患者" +  s.Suspected() + "人" );
+							tempJunitString = tempJunitString + "疑似患者" +  s.Suspected() + "人" ;
+							if(j != countList)
+							{
+								out.write(" ");
+								System.out.print(" ");
+								tempJunitString += " ";
+							}
 						}
 						if(i == 2)
 						{
-							out.write("治愈" + s.Cured() + "人" + " ");
-							System.out.print("治愈" + s.Cured() + "人" + " ");
+							out.write("治愈" + s.Cured() + "人" );
+							System.out.print("治愈" + s.Cured() + "人" );
+							tempJunitString = tempJunitString + "治愈" + s.Cured() + "人" ;
+							if(j != countList)
+							{
+								out.write(" ");
+								System.out.print(" ");
+								tempJunitString += " ";
+							}
 						}
 						if(i == 3)
 						{
-							out.write("死亡" + s.Died() + "人" + " ");
-							System.out.print( "死亡" + s.Died() + "人" + " ");
+							out.write("死亡" + s.Died() + "人" );
+							System.out.print( "死亡" + s.Died() + "人" );
+							tempJunitString = tempJunitString + "死亡" + s.Died() + "人" ;
+							if(j != countList)
+							{
+								out.write(" ");
+								System.out.print(" ");
+								tempJunitString += " ";
+							}
 						}
 					}
 				}
 			}			
 			out.write("\n");
 			System.out.println();
+			tempJunitString = tempJunitString + "\n";
+			junitTest.add(tempJunitString);
 		}
-		for(J_Province s:limitProvince) 
+		//System.out.print(tempJunitString);
+		tempJunitString = null;
+		int numProvince = 0;
+		for(Province s:limitProvince) 
 		{
+			numProvince ++;
 			out.write(s.getName() + " " );
 			System.out.print(s.getName() + " " );
+			tempJunitString = s.getName() + " ";
 			for(int j = 1;j < countList + 1;j ++ )
 			{
 				for(int i = 0;i < 4;i ++ )
@@ -555,31 +599,81 @@ public class InfectStatistic
 					{
 						if(i == 0)
 						{
-							out.write("感染患者" + s.Infected() + "人" + " ");
-							System.out.print("感染患者" + s.Infected() + "人" + " ");
+							out.write("感染患者" + s.Infected() + "人" );
+							System.out.print("感染患者" + s.Infected() + "人" );
+							tempJunitString = tempJunitString + "感染患者" + s.Infected() + "人" ;
+							if(j != countList)
+							{
+								out.write(" ");
+								System.out.print(" ");
+								tempJunitString += " ";
+							}
 						}
 						if(i == 1)
 						{
-							out.write("疑似患者" +  s.Suspected() + "人" + " " );
-							System.out.print("疑似患者" +  s.Suspected() + "人" + " " );
+							out.write("疑似患者" +  s.Suspected() + "人" );
+							System.out.print("疑似患者" +  s.Suspected() + "人" );
+							tempJunitString = tempJunitString + "疑似患者" +  s.Suspected() + "人" ;
+							if(j != countList)
+							{
+								out.write(" ");
+								System.out.print(" ");
+								tempJunitString += " ";
+							}
 						}
 						if(i == 2)
 						{
-							out.write("治愈" + s.Cured() + "人" + " ");
-							System.out.print("治愈" + s.Cured() + "人" + " ");
+							out.write("治愈" + s.Cured() + "人" );
+							System.out.print("治愈" + s.Cured() + "人" );
+							tempJunitString = tempJunitString + "治愈" + s.Cured() + "人" ;
+							if(j != countList)
+							{
+								out.write(" ");
+								System.out.print(" ");
+								tempJunitString += " ";
+							}
 						}
 						if(i == 3)
 						{
-							out.write("死亡" + s.Died() + "人" + " ");
-							System.out.print( "死亡" + s.Died() + "人" + " ");
+							out.write("死亡" + s.Died() + "人" );
+							System.out.print( "死亡" + s.Died() + "人" );
+							tempJunitString = tempJunitString + "死亡" + s.Died() + "人" ;
+							if(j != countList)
+							{
+								out.write(" ");
+								System.out.print(" ");
+								tempJunitString += " ";
+							}
 						}
 					}
 				}
 			}
+			/*
+			if(numProvince < limitProvince.size())
+			{
+				out.write("\n");
+				System.out.println();
+				tempJunitString = tempJunitString + "\n";
+				//System.out.print(tempJunitString);
+			}
+			*///最后一行是否有\n		
 			out.write("\n");
 			System.out.println();
-		}
+			tempJunitString = tempJunitString + "\n";
+			//System.out.print(tempJunitString);
+			junitTest.add(tempJunitString);
+		}// 该文档并非真实数据，仅供测试使用
+		out.write("// 该文档并非真实数据，仅供测试使用");
+		System.out.print("// 该文档并非真实数据，仅供测试使用");
+		junitTest.add("// 该文档并非真实数据，仅供测试使用");
 		out.close();
+		/*
+		for(String tt:junitTest)
+		{
+			System.out.print(tt);
+		}
+		*/
+		return junitTest;
 	}
     
     
@@ -629,4 +723,75 @@ public class InfectStatistic
 		}
 		return true;
     }
+    
+    
 }
+
+
+/**********************************************
+ * 作用:定义类存储各省疫情信息
+ **********************************************/
+class J_Province
+{
+	private String name;
+	private int infected;//感染
+	private int suspected;//疑似	
+	private int cured;//治愈	
+	private int died;//死亡
+	public void Serialization()
+	{
+		infected = 0;
+		suspected = 0;
+		cured = 0;
+		died = 0;
+	}
+	public int Infected() 
+	{
+		return infected;
+	}
+	public int Suspected()
+	{
+		return suspected;
+	}
+	public int Cured()
+	{
+		return cured;
+	}
+	public int Died()
+	{
+		return died;
+	}
+	public void AddInfected(int num) 
+	{
+		infected += num;
+	}
+	public void DecInfected(int num) 
+	{
+		infected -= num;
+	}
+	public void AddSuspected(int num)
+	{
+		suspected += num;
+	}
+	public void DecSuspected(int num)
+	{
+		suspected -= num;
+	}
+	public void AddCured(int num)
+	{
+		cured += num;
+	}
+	public void AddDied(int num)
+	{
+		died += num;
+	}
+	public void setName(String name)
+	{
+		this.name=name;
+	}
+	public String getName()
+	{
+		return name;
+	}
+}
+

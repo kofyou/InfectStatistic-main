@@ -13,43 +13,71 @@ class Record{
         deadNumber = 0;
     }
 
+    /**
+     * @param number 累加数据
+     */
     void countInfection(int number){
         infectionNumber += number;
     }
 
 
+    /**
+     * @param number 累加数据
+     */
     void countSuspected(int number){
         suspectedNumber += number;
     }
 
 
+    /**
+     * @param number 累加数据
+     */
     void countCure(int number){
         cureNumber += number;
     }
 
 
+    /**
+     * @param number 累加数据
+     */
     void countDead(int number){
         deadNumber += number;
     }
 
+    /**
+     * @return 返回infectionNumber
+     */
     int getInfectionNumber(){
         return  infectionNumber;
     }
 
 
+    /**
+     * @return 返回suspectedNumber
+     */
     int getSuspectedNumber(){
         return suspectedNumber;
     }
 
-    int getCureNumber(){
+    /**
+     * @return 返回cureNumber
+     */
+    int getCureNumber() {
         return  cureNumber;
     }
 
 
+    /**
+     * @return  返回deadNumber
+     */
     int getDeadNumber(){
         return deadNumber;
     }
 
+    /**
+     * @param name 类型
+     * @return 返回类型所对应的数据
+     */
     int getNumber(String name){
         if(name.equals("ip"))
             return infectionNumber;
@@ -64,8 +92,9 @@ class Record{
 }
 
 
-
-
+/**
+ * 用于实现map键值比较的功能
+ */
 class MapKeyComparator implements Comparator<String> {
     @Override
     public int compare(String str1, String str2) {
@@ -149,6 +178,10 @@ class InfectStatistic {
     }
 
 
+    /**
+     * @param path 文件夹路径
+     * @return
+     */
     String[] getFileList(String path){
         File file = new File(path);
         String[] list = file.list(); //获取文件夹内的所有文件名
@@ -212,38 +245,15 @@ class InfectStatistic {
     void countIpAndSp(String[] info,Map<String,Record> result){
         String tmp = info[info.length-1];
         String strNumber=tmp.substring(0,tmp.length()-1);
-
-        //int number =  Integer.valueOf(strNumber);//获得人数
         int number = Lib.getNumber(strNumber);
-
         String province = info[0];
         String ip="感染患者",sp="疑似患者";
         if(info[1].equals("新增") && info[2].equals(ip)){//新增感染
-            if(!result.containsKey(province)){//result 中还未出现过这个省的记录
-                Record newRecord = new Record();
-                newRecord.countInfection(number);
-                result.put(province,newRecord);
-            }
-            else{
-                Record aRecord = result.get(province);//获得这个省的数据记录
-                aRecord.countInfection(number);
-                result.put(province,aRecord);
-            }
-
+            infectProvince(province,number,result);
         }
 
         else if(info[1].equals("新增") && info[2].equals(sp)){//新增疑似
-            if(!result.containsKey(province)){//result 中还未出现过这个省的记录
-                Record newRecord = new Record();
-                newRecord.countSuspected(number);
-                result.put(province,newRecord);
-            }
-            else{
-                Record aRecord = result.get(province);//获得这个省的数据记录
-                aRecord.countSuspected(number);
-                result.put(province,aRecord);
-            }
-
+            suspectedProvince(province,number,result);
         }
 
         else if(info[1].equals("排除")){//排除疑似
@@ -274,6 +284,48 @@ class InfectStatistic {
         }
     }
 
+
+    /**
+     * @param province 省份
+     * @param number 数量
+     * @param result 结果集
+     */
+    void infectProvince(String province,int number,Map<String,Record> result){
+        if(!result.containsKey(province)){//未出现过的省份
+            Record newRecord = new Record();//加上数据
+            newRecord.countInfection(number);
+            result.put(province,newRecord);
+        }
+        else {
+            Record tmpRecord = result.get(province);//加上数据
+            tmpRecord.countInfection(number);
+            result.put(province,tmpRecord);
+        }
+
+    }
+
+
+    /**
+     * @param province 省份
+     * @param number 数量
+     * @param result 结果集
+     */
+    void suspectedProvince(String province,int number,Map<String,Record> result){
+        if(!result.containsKey(province)){//未出现过的省份
+            Record newRecord = new Record();//加上数据
+            newRecord.countInfection(number);
+            result.put(province,newRecord);
+        }
+        else {
+            Record tmpRecord = result.get(province);//加上数据
+            tmpRecord.countSuspected(number);
+            result.put(province,tmpRecord);
+        }
+    }
+
+
+
+
     /**
      * @param info 一行数据
      * @param result 结果集
@@ -284,32 +336,13 @@ class InfectStatistic {
         String aimProvince = info[3];
         String ip = "感染患者",sp = "疑似患者";
         if(info[1].equals(ip)){//感染患者流入
-            if(!result.containsKey(aimProvince)){//未出现过的省份
-                Record newRecord = new Record();//加上数据
-                newRecord.countInfection(number);
-                result.put(aimProvince,newRecord);
-            }
-            else {
-                Record tmpRecord = result.get(aimProvince);//加上数据
-                tmpRecord.countInfection(number);
-                result.put(aimProvince,tmpRecord);
-            }
+            infectProvince(aimProvince,number,result);
             Record aRecord = result.get(sourceProvince);//减去数据
             aRecord.countInfection(-number);
             result.put(sourceProvince,aRecord);
-
         }
         else if(info[1].equals(sp)){//疑似患者流入
-            if(!result.containsKey(aimProvince)){//未出现过的省份
-                Record newRecord = new Record();//加上数据
-                newRecord.countSuspected(number);
-                result.put(aimProvince,newRecord);
-            }
-            else {
-                Record tmpRecord = result.get(aimProvince);//加上数据
-                tmpRecord.countSuspected(number);
-                result.put(aimProvince,tmpRecord);
-            }
+            suspectedProvince(aimProvince,number,result);
             Record aRecord = result.get(sourceProvince);//减去数据
             aRecord.countSuspected(-number);
             result.put(sourceProvince,aRecord);
@@ -330,40 +363,44 @@ class InfectStatistic {
      * @param result 结果集
      */
     void statisticData(String path,String date,String[] fileList,Map<String,Record> result){
-            date = path + date + ".log.txt";
-            for(String fileName : fileList){
-                if(date.compareTo(fileName) >= 0){//只统计date之前的数据
-                    try {
-                        FileReader fr = new FileReader(fileName);
-                        BufferedReader bf = new BufferedReader(fr);
-                        String line;
-                        while ((line = bf.readLine()) != null) { // 按行读取字符串并统计信息
-                            if(line.startsWith("//"))//忽略文件里的注释
-                                continue;
-                            String info[] = line.split(" "); //以空格将一行分割
-                            switch (info.length){
-                                case 3:{
-                                    countDeadAndCure(info,result);//统计治愈和死亡
-                                };break;
-                                case 4:{
-                                    countIpAndSp(info,result);//统计新增加的感染患者和疑似患者，确诊的，排除的患者
-                                };break;
-                                case 5:{
-                                    countMovedIpAndSp(info,result);//统计流动的感染患者和疑似患者
-                                };break;
-                                default:System.out.println(line+"： 存在格式错误，此条记录无法处理");
-                            }
+        date = path + date + ".log.txt";
+        for(String fileName : fileList){
+            if(date.compareTo(fileName) >= 0){//只统计date之前的数据
+                try {
+                    FileReader fr = new FileReader(fileName);
+                    BufferedReader bf = new BufferedReader(fr);
+                    String line;
+                    while ((line = bf.readLine()) != null) { // 按行读取字符串并统计信息
+                        if(line.startsWith("//"))//忽略文件里的注释
+                            continue;
+                        String info[] = line.split(" "); //以空格将一行分割
+                        switch (info.length){
+                            case 3:{
+                                countDeadAndCure(info,result);//统计治愈和死亡
+                            };break;
+                            case 4:{
+                                countIpAndSp(info,result);//统计新增加的感染患者和疑似患者，确诊的，排除的患者
+                            };break;
+                            case 5:{
+                                countMovedIpAndSp(info,result);//统计流动的感染患者和疑似患者
+                            };break;
+                            default:System.out.println(line+"： 存在格式错误，此条记录无法处理");
                         }
-                        bf.close();
-                        fr.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
+                    bf.close();
+                    fr.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
+        }
     }
 
 
+    /**
+     * @param result 全部数据的集合
+     * @return 总的数据——全国数据
+     */
     Record statisticTotalNumber(Map<String,Record> result){
         Record totalCountryNumber = new Record();
         for (Record value:result.values()){//统计全国数据相加
@@ -376,6 +413,10 @@ class InfectStatistic {
     }
 
 
+    /**
+     * @param totalCountryNumber 全国数据
+     * @param outFile 输出流
+     */
     void allProvinceAllType(Record totalCountryNumber , FileOutputStream outFile){
         String record = "全国 " + Lib.toChinese(Lib.allType[0])+ totalCountryNumber.getInfectionNumber() + Lib.unit +
                 Lib.toChinese(Lib.allType[1]) + totalCountryNumber.getSuspectedNumber() + Lib.unit +
@@ -397,6 +438,11 @@ class InfectStatistic {
     }
 
 
+    /**
+     * @param totalCountryNumber 全国数据
+     * @param outFile 输出流
+     * @param type type数组
+     */
     void allProvincePartType(Record totalCountryNumber , FileOutputStream outFile,Vector<String> type){
         String record = "全国 ";
         for(String i : Lib.allType){
@@ -428,9 +474,15 @@ class InfectStatistic {
     }
 
 
+    /**
+     * @param totalCountryNumber 全国数据
+     * @param province 省份数组
+     * @param outFile 输出流
+     */
     void partProvinceAllType(Record totalCountryNumber , Vector<String> province , FileOutputStream outFile){
         result.put("全国",totalCountryNumber);
         String record;
+
         for(String item : province){
             if(!result.containsKey(item)){//查询无记录的省份则创建一个数据为空的记录
                 Record newRecord = new Record();
@@ -471,6 +523,13 @@ class InfectStatistic {
 
     }
 
+
+    /**
+     * @param totalCountryNumber 全国数据
+     * @param province 省份数组
+     * @param outFile 输出流
+     * @param type type 数组
+     */
     void partProvincePartType(Record totalCountryNumber , Vector<String> province , FileOutputStream outFile,Vector<String> type){
         result.put("全国",totalCountryNumber);
         String record;
@@ -499,29 +558,36 @@ class InfectStatistic {
 
 
         for(String key : result.keySet()){
-           for(int k=0;k<province.size();k++){
-               if(province.get(k).equals(key) && !key.equals("全国")){//若不是全国，则写入
-                   record = key +" ";
-                   for(String j : type){
-                       for(String i : Lib.allType){
-                           if(i.equals(j)){
-                               record +=  Lib.toChinese(j) + result.get(key).getNumber(j) + Lib.unit;
-                           }
-                       }
-                   }
-                   record += "\n";
-                   try {
-                       outFile.write(record.getBytes());
-                   } catch (IOException e) {
-                       e.printStackTrace();
-                   }
-               }
+            for(int k=0;k<province.size();k++){
+                if(province.get(k).equals(key) && !key.equals("全国")){//若不是全国，则写入
+                    record = key +" ";
+                    for(String j : type){
+                        for(String i : Lib.allType){
+                            if(i.equals(j)){
+                                record +=  Lib.toChinese(j) + result.get(key).getNumber(j) + Lib.unit;
+                            }
+                        }
+                    }
+                    record += "\n";
+                    try {
+                        outFile.write(record.getBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-           }
+            }
         }
 
     }
 
+    /**
+     * @param result 结果集
+     * @param outLocate 输出文件路径
+     * @param command 此次命令行给出的命令
+     * @param province 省份数组
+     * @param type type数组
+     */
     void saveResult(Map<String,Record> result,String outLocate,String[] command,Vector<String> province,Vector<String> type){
         Record totalCountryNumber = statisticTotalNumber(result);
         String record;
@@ -564,7 +630,6 @@ class InfectStatistic {
 
 
     public static void main(String[] args) {
-       // String[] args = {"list","-log","E:/log/","-out","E:/out/output.txt","-date","2020-01-29","-type","cure","dead","ip","-province","全国","福建","河北"};
         /*String[] args = {"list","-log","E:/log/",
                 "-out","E:/out/output.txt",
                 "-date","2020-01-23",

@@ -46,7 +46,6 @@ string UTF8ToGB(const char* str)
 	return result;
 }
 
-
 //往map中插入一个pair
 void insert_province(string province_name)
 {
@@ -56,6 +55,7 @@ void insert_province(string province_name)
 		list.push_back(0);
 	m_province.insert(make_pair(province_name, list));
 }
+
 //从字符串中提取数字
 int draw_number(string temp)
 {
@@ -64,6 +64,40 @@ int draw_number(string temp)
 	s1 >> itemp;
 	return itemp;
 }
+
+//该函数实现了对命令行信息的处理
+void process_cmd(int num, char* cmd_i[])
+{
+	int i;
+	string temp;   //中转字符串
+	for (i = 3; i < num; i++)
+	{
+		if (strcmp(cmd_i[i], "-province") == 0 || strcmp(cmd_i[i], "-type") == 0)
+		{
+			vector<string> list_temp;
+			string m_name = cmd_i[i];//记录命令行参数名称
+			temp = cmd_i[i];
+			while (temp.compare("-") != 0)
+			{
+				temp = cmd_i[++i];
+				list_temp.push_back(temp);
+				cout << cmd_i[i] << "\n";
+				if (i >= num - 1)
+					break;
+				temp = temp.substr(0, 1);
+			}
+			m_many.insert(make_pair(m_name, list_temp));
+		}
+		else
+		{
+			string temp1, temp2;
+			temp1 = cmd_i[i];
+			temp2 = cmd_i[++i];
+			m_single.insert(make_pair(temp1, temp2));
+		}
+	}
+}
+
 //处理新增的情况
 void process_xin_zeng(fstream& file, string province_name)
 {
@@ -85,6 +119,7 @@ void process_xin_zeng(fstream& file, string province_name)
 		(m_province[province_name])[1] += num;
 	}
 }
+
 //处理治愈的情况
 void process_zhi_yu(fstream& file, string province_name)
 {
@@ -96,6 +131,7 @@ void process_zhi_yu(fstream& file, string province_name)
 	(m_province["全国"])[0] -= num;
 	(m_province[province_name])[0] -= num;
 }
+
 //处理死亡的情况
 void process_pass_away(fstream& file, string province_name)
 {
@@ -107,6 +143,7 @@ void process_pass_away(fstream& file, string province_name)
 	(m_province["全国"])[0] -= num;
 	(m_province[province_name])[0] -= num;
 }
+
 //处理流入的情况
 void process_liu_ru(fstream& file, string province_name, string type_name)
 {
@@ -127,6 +164,7 @@ void process_liu_ru(fstream& file, string province_name, string type_name)
 		(m_province[liu_ru_province])[1] += num;
 	}
 }
+
 //处理确诊感染的情况
 void process_que_zhen(fstream& file, string province_name)
 {
@@ -138,6 +176,7 @@ void process_que_zhen(fstream& file, string province_name)
 	(m_province[province_name])[0] += num;
 	(m_province[province_name])[1] -= num;
 }
+
 //处理排除的情况
 void process_pai_chu(fstream& file, string province_name)
 {
@@ -149,15 +188,15 @@ void process_pai_chu(fstream& file, string province_name)
 	(m_province[province_name])[1] -= num;
 
 }
+
 //按字符串读取并处理文件
-void process_file(vector<string> file_list)
+void process_file(string log_file)
 {
 	int num;   //测试用的
 			   //6种情况,新增(感染患者,疑似患者),感染患者,疑似患者(流入,确诊),死亡,治愈,排除(疑似患者).
 	int i;
-	insert_province("全国");
 	//首先加入全国的情况
-	fstream fei_yan_log(file_list[0]);
+	fstream fei_yan_log(log_file);
 	string temp;
 	string temp_past;   //用于存储之前一次的读取
 	string province_name;
@@ -209,42 +248,78 @@ void process_file(vector<string> file_list)
 		}
 
 	}
+}
 
-
+//将string日期转化为int数组日期
+vector<int> transform_date(string date)
+{
+	int i;
+	vector<int> int_temp;
+	string temp=date;
+	int itemp;
+	for (i = 0; i < date.length(); i++)
+	{
+		if (date[i] == '-')
+		{
+			stringstream s(temp);
+			s >> itemp;
+			int_temp.push_back(itemp);
+			temp = date.substr(++i, date.length());
+		}
+	}
+	stringstream s(temp);
+	s >> itemp;
+	int_temp.push_back(itemp);
+	return int_temp;
+	
 
 }
 
+//比较两个日期大小
+bool compare_date(vector<int> date1, vector<int> date2)
+{	
+	if(date1[0]<date2[0])
+		return false;
+	if (date1[0] == date2[0] && date1[1] < date2[1])
+		return false;
+	if (date1[0] == date2[0] && date1[1] == date2[1] && date1[2] < date2[2])
+		return false;
+	return true;
+}
 
-//该函数实现了对命令行信息的处理
-void process_cmd(int num, char* cmd_i[])
+//得到路径的文件名对应的日期
+vector<int> get_path_name_date(string file_path)
 {
 	int i;
-	string temp;   //中转字符串
-	for (i = 3; i < num; i++)
+	vector<int> file_date;
+	for (i = file_path.length(); file_path[i] != '\\'; i--)
 	{
-		if (strcmp(cmd_i[i], "-province") == 0 || strcmp(cmd_i[i], "-type") == 0)
-		{
-			vector<string> list_temp;
-			string m_name = cmd_i[i];//记录命令行参数名称
-			temp = cmd_i[i];
-			while (temp.compare("-") != 0)
-			{
-				temp = cmd_i[++i];
-				list_temp.push_back(temp);
-				cout << cmd_i[i] << "\n";
-				if (i >= num - 1)
-					break;
-				temp = temp.substr(0, 1);
-			}
-			m_many.insert(make_pair(m_name, list_temp));
-		}
+		continue;
+	}
+	file_path = file_path.substr(++i, file_path.length()-8);
+	file_date = transform_date(file_path);
+	return file_date;
+}
+
+//根据-date参数选出应该处理的文件
+void pick_log_file(vector<string> file_list)
+{
+	int i;
+	bool process_sign = false;   //用于处理没有设置date参数的情况
+	string temp = "";
+	if (m_single.find("date") != m_single.end())
+		string temp = m_single["-date"];
+	else
+		process_sign = true;
+	vector<int> time = transform_date(temp);
+	int left, right;
+	for (int i = 0; i < file_list.size(); i++)
+	{
+		vector<int> file_date = get_path_name_date(file_list[i]);
+		if (compare_date(time, file_date)||process_sign)
+			process_file(file_list[i]);
 		else
-		{
-			string temp1, temp2;
-			temp1 = cmd_i[i];
-			temp2 = cmd_i[++i];
-			m_single.insert(make_pair(temp1, temp2));
-		}
+			break;
 	}
 }
 
@@ -279,9 +354,8 @@ void getFiles(const std::string & path, std::vector<std::string> & files)
 
 int main(int argc, char* argv[])
 {
-
-
 	process_cmd(argc, argv);
+
 	int i;
 	cout << argc;
 	for (i = 0; i < argc; i++)
@@ -289,12 +363,13 @@ int main(int argc, char* argv[])
 		cout << argv[i] << "\n";      //命令行测试
 	}
 	vector<string> file_list;
-	getFiles("D:\\肺炎代码\\InfectStatistic-main\\221701239\\log", file_list);
+	insert_province("全国");
+	getFiles(m_single["-log"], file_list);
+	pick_log_file(file_list);
 	for (i = 0; i < file_list.size(); i++)
 	{
 		//cout << file_list[i] << "\n" ;
 	}
-	process_file(file_list);
 	system("pause");
 
 }

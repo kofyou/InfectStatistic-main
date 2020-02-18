@@ -51,8 +51,7 @@ public class InfectStatistic
 	
 	
     public static void main(String args[ ]) throws IOException
-    {
-    	
+    {  	
     	//接收命令行参数
     	for(String temp : args)vector.add(temp);
     	//测试函数dealParameter
@@ -722,9 +721,7 @@ public class InfectStatistic
 			return false;
 		}
 		return true;
-    }
-    
-    
+    }  
 }
 
 

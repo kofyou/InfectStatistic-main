@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.sql.Date;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -43,15 +44,15 @@ public class InfectStatistic {
 		String cmd=args[0];
 		String[] type = new String[]{" "," "," "," "};
 		
-		String local = "D:/log/",date = null,output = "D:/output.txt"; //默认位置(如果用户未指定位置)
+		String local = "D:/log/",nowDate = null,output = "D:/output.txt",date = null; //默认位置(如果用户未指定位置)
 		//默认时间为当前时间
 		Calendar calendar = Calendar.getInstance();
-    	int t1 = calendar.get(Calendar.MONTH)+1;
-    	int t2 = calendar.get(Calendar.DATE);
-    	String s1= ""+t1+"",s2=""+t2+"";
+		int t1 = calendar.get(Calendar.MONTH)+1;
+		int t2 = calendar.get(Calendar.DATE);
+		String s1= ""+t1+"",s2=""+t2+"";
     	if(t1<10) s1 = "0"+t1+"";
     	if(t2<10) s1 = "0"+t2+"";
-		date = ""+calendar.get(Calendar.YEAR)+"-"+s1+"-"+s2+""; //默认当前时间
+		nowDate = ""+calendar.get(Calendar.YEAR)+"-"+s1+"-"+s2+""; //默认当前时间
 		if(cmd.equals("list")){
 		for(int i=1;i<args.length;i++){
 			if(args[i].equals("-date")){
@@ -82,19 +83,24 @@ public class InfectStatistic {
 	      }
 		}
 		else System.out.println("input right cmd.");
+		
 		int num=0,lines=0;
 		//提取输入目录下的所有文件名
 		String basePath=local;
-		String[] list=new File(basePath).list();
-		
+		String[] List=new File(basePath).list();
+		if (date.compareTo(List[List.length-1])>0) {
+			System.err.println("日期超出范围");
+			System.exit(0);
+		}
 		date = date+".log.txt";
-		int res=list[list.length-1].compareTo(date);
-		if(list[0].equals(null)) System.out.println("选定目录下无文件,请重新选择!");
+		int res=List[List.length-1].compareTo(date);
+		if(List[0].equals(null)) System.out.println("选定目录下无文件,请重新选择!");
+	
 		else{
-		if(res<0) num = list.length;
+		if(res<0) num = List.length;
 		else {
-			for(int i=list.length-1;i>0;i--){
-				if(list[i].compareTo(date)<=0){
+			for(int i=List.length-1;i>0;i--){
+				if(List[i].compareTo(date)<=0){
 					num = i+1;
 					i=0;
 				}
@@ -103,7 +109,7 @@ public class InfectStatistic {
 		for(int j=0;j<num;j++){
 		try {
 			/*读取文件*/
-			FileInputStream f = new FileInputStream(local+list[j]);
+			FileInputStream f = new FileInputStream(local+List[j]);
 			InputStreamReader reader = new InputStreamReader(f, "UTF-8");
 			BufferedReader bf = new BufferedReader(reader);
 

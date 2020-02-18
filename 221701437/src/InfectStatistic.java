@@ -1,5 +1,4 @@
 import java.io.*;
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -47,20 +46,15 @@ class ProvinceData{
 
     public String logProcess(ArrayList<String> allData, ArrayList<String>typeList){
         String data = new String();
-        int count = 0;
-        for(int i = 0; i < AllData.size(); i++){
-            if(allData.get(count).equals(Constant.initStr[i])) {
-                int[] dataValue = AllData.get(Constant.initStr[i]);
-                data = data + Constant.initStr[i] + " ";
+        int[] dataValue = new int[] {};
+        for(int i = 0; i < allData.size(); i++){
+            if(AllData.containsKey(allData.get(i))){
+                dataValue = AllData.get(allData.get(i));
+                data = data + allData.get(i) + " ";
                 for (int j = 0; j < typeList.size(); j++) {
                     data = data + Constant.STATUSCHINESE.get(typeList.get(j)) + dataValue[Constant.STATUS.get(typeList.get(j))] + "人 ";
                 }
                 data += "\n";
-                if(count < allData.size() - 1) {
-                    count++;
-                }else{
-                    break;
-                }
             }
         }
         return data;
@@ -319,7 +313,7 @@ class FileProcess{
         return fileProcess;
     }
 
-    public void FileInit(String in, String out){
+    public void FileInit(String in, String out) throws IOException {
         file = new File(in);
         outfile = new File(out);
     }
@@ -383,13 +377,14 @@ class CmdArgs{
 
     private void argsProcess(){
         ArrayList<String> tempValue = new ArrayList<>();
-        String tempKey = new String();
+        ArrayList<String> tempForValue = new ArrayList<>();
+        String tempKey = "";
         int index = 0;
         for(int i = 1; i < args.length; i++){
             if(args[i].contains("-") && !HasDigit(args[i]) && index == 0){
                 tempKey = args[i];
             }else if(args[i].contains("-") && index == 1){
-                ArrayList<String> tempForValue = (ArrayList<String>) tempValue.clone();
+                tempForValue.addAll(tempValue);
                 paramToValue.put(tempKey,tempForValue);
                 tempKey = args[i];
                 tempValue.clear();
@@ -402,6 +397,14 @@ class CmdArgs{
     }
 
     private void argsProcess2(){
+        if(!hasParam("-log") || paramToValue.get("-log") == null){
+            ArrayList<String> log = new ArrayList<>(Arrays.asList(Constant.DEFAULTLOG));
+            paramToValue.put("-log",log);
+        }
+        if(!hasParam("-out") || paramToValue.get("-out") == null){
+            ArrayList<String> out = new ArrayList<>(Arrays.asList(Constant.DEFAULTOUT));
+            paramToValue.put("-out",out);
+        }
         if(!hasParam("-date")){
             ArrayList<String> value = new ArrayList<>(Arrays.asList(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
             paramToValue.put("-date",value);
@@ -453,7 +456,8 @@ class Constant{
     public final static String s8 = "^[\\u4e00-\\u9fa5]*\\s(疑似患者)\\s(流入)\\s[\\u4e00-\\u9fa5]*\\s(\\d+)人?";
     public final static String PICKUPDIGIT = "[^0-9]";
     public final static String TYPE = "ip,sp,cure,dead";
-
+    public final static String DEFAULTLOG = "../log";
+    public final static String DEFAULTOUT = "../result/out.txt";
 
     public final static HashMap<String,Integer> STATUS = new HashMap<>();
 

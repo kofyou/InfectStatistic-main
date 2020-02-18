@@ -19,7 +19,6 @@ class InfectStatistic {
         ProvinceData pd = ProvinceData.getInstance();
         AbstractDataHandle dataHandle = AbstractDataHandle.getChainOfDataHandle();
         FileProcess fileProcess = FileProcess.getInstance();
-        fileProcess.FileInit(cmdArgs.argVals("-log").get(0),cmdArgs.argVals("-out").get(0));
         ArrayList<File> fileList = fileProcess.InputFileData();
         for(int i = 0; i < fileList.size(); i++) {
             if (fileList.get(i).getName().substring(0,10).compareTo(cmdArgs.argVals("-date").get(0)) <= 0) {
@@ -363,28 +362,46 @@ class FileProcess{
         String data = provinceData.logProcess(provinceList,typeList);
         stream.print(data);
     }
+
+    public String maxFileName(ArrayList<File> files){
+        String max = "";
+        for(int i = 0; i < files.size(); i++){
+            if(max.compareTo(files.get(i).getName().substring(0,10)) < 0){
+                max = files.get(i).getName();
+            }
+        }
+        return max;
+    }
 }
 
 class CmdArgs{
     private String[] args;
     private HashMap<String, ArrayList<String>> paramToValue = new HashMap<>();
+    private FileProcess fileProcess = FileProcess.getInstance();
 
-    CmdArgs(String[] args){
+    CmdArgs(String[] args) throws IOException {
         this.args = args;
         argsProcess();
         argsProcess2();
+        try{
+            if(!JudgeDate()){
+                throw new Exception("日期错误,请重试");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     private void argsProcess(){
         ArrayList<String> tempValue = new ArrayList<>();
-        ArrayList<String> tempForValue = new ArrayList<>();
         String tempKey = "";
         int index = 0;
         for(int i = 1; i < args.length; i++){
             if(args[i].contains("-") && !HasDigit(args[i]) && index == 0){
                 tempKey = args[i];
-            }else if(args[i].contains("-") && index == 1){
-                tempForValue.addAll(tempValue);
+            }else if(args[i].contains("-") && !HasDigit(args[i]) && index == 1){
+                ArrayList<String> tempForValue = new ArrayList<>(tempValue);
                 paramToValue.put(tempKey,tempForValue);
                 tempKey = args[i];
                 tempValue.clear();
@@ -396,24 +413,18 @@ class CmdArgs{
         paramToValue.put(tempKey,tempValue);
     }
 
-    private void argsProcess2(){
-        if(!hasParam("-log") || paramToValue.get("-log") == null){
-            ArrayList<String> log = new ArrayList<>(Arrays.asList(Constant.DEFAULTLOG));
-            paramToValue.put("-log",log);
+    private void argsProcess2() throws IOException {
+        fileProcess.FileInit(argVals("-log").get(0), argVals("-out").get(0));
+        if(!hasParam("-date") || argVals("-date") == null){
+            ArrayList<File> fileList = fileProcess.InputFileData();
+            ArrayList<String> max = new ArrayList<>(Collections.singleton(fileProcess.maxFileName(fileList).substring(0,10)));
+            paramToValue.put("-date", max);
         }
-        if(!hasParam("-out") || paramToValue.get("-out") == null){
-            ArrayList<String> out = new ArrayList<>(Arrays.asList(Constant.DEFAULTOUT));
-            paramToValue.put("-out",out);
-        }
-        if(!hasParam("-date")){
-            ArrayList<String> value = new ArrayList<>(Arrays.asList(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
-            paramToValue.put("-date",value);
-        }
-        if(!hasParam("-type")){
+        if(!hasParam("-type")|| argVals("type") == null){
             ArrayList<String> typeList = new ArrayList<>(Arrays.asList(Constant.TYPE.split(",")));
             paramToValue.put("-type",typeList);
         }
-        if(!hasParam("-province")){
+        if(!hasParam("-province") || argVals("-province") == null){
             ArrayList<String> provinceList = new ArrayList<>(Arrays.asList(Constant.initStr));
             paramToValue.put("-province",provinceList);
         }
@@ -435,6 +446,10 @@ class CmdArgs{
 
     private boolean hasParam(String key){
         return paramToValue.containsKey(key);
+    }
+
+    private boolean JudgeDate(){
+        return fileProcess.maxFileName(fileProcess.InputFileData()).substring(0, 10).compareTo(argVals("-date").get(0)) >= 0;
     }
 }
 

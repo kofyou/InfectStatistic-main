@@ -451,7 +451,7 @@ void output_fei_yan_log(int argc,char* argv[])
 	}
 	output_file << "// 该文档并非真实数据，仅供测试使用" << "\n";   //输出文件尾数据
 	output_file << "// 命令：";
-	for (i = 0; i < argc; i++)
+	for (i = 2; i < argc; i++)
 	{
 		output_file << argv[i] << " ";
 	}

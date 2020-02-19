@@ -1,4 +1,5 @@
 import java.awt.List;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -135,7 +136,15 @@ class InfectStatistic {
     		String logPath = new String("");
     		String outPath = new String("");
     		String date = new String("");
-    		int[] type = new int[] {1,1,1,1};//默认输出四种人群
+    		//int[] type = new int[] {1,1,1,1};//默认输出四种人群。更新：难以按指定顺序输出。已修改
+    		
+    		//默认依ip,sp,cure,dead顺序输出四种人群
+    		ArrayList<String> type = new ArrayList<String>();
+    		type.add("ip");
+    		type.add("sp");
+    		type.add("cure");
+    		type.add("dead");
+    		
     		boolean isProvinceSpecified = false;//该项为false，输出所有日志中提到的省份，为true输出指定的省份
     		
     		for(int index = 1;index<args.length;index++) {
@@ -153,15 +162,12 @@ class InfectStatistic {
     					index++;
     					break;
     				case "-type":
-    					//若指定人群，则先把type所有元素置0，在把特定元素置1
-    					for(int i=0;i<type.length;i++) {
-    						type[i]=0;
-    					}
+    					type.clear();
     					while(index+1<args.length && args[index+1].charAt(0)!='-') {
-    						if(args[index+1].equals("ip")) type[0]=1;
-    						else if(args[index+1].equals("sp")) type[1]=1;
-    						else if(args[index+1].equals("cure")) type[2]=1;
-    						else if(args[index+1].equals("dead")) type[3]=1;
+    						if(args[index+1].equals("ip")||args[index+1].equals("sp")
+    								||args[index+1].equals("cure")||args[index+1].equals("dead")) {
+    							type.add(args[index+1]);
+    						}
     						index++;
     					}
     					break;
@@ -179,7 +185,7 @@ class InfectStatistic {
     }
     
     //执行输入的命令
-    public void excuteCmd(String logPath,String outPath,String date,int[] type,boolean isProvinceSpecified) {
+    public void excuteCmd(String logPath,String outPath,String date,ArrayList<String> type,boolean isProvinceSpecified) {
     	
     	/*
     	System.out.println("-----In excuteCmd-----");
@@ -187,27 +193,125 @@ class InfectStatistic {
     	System.out.println(outPath);
     	System.out.println(date);
     	
-    	System.out.print("type.length=");
-    	System.out.println(type.length);
-    	for(int i=0;i<type.length;i++) {
-    		System.out.print(type[i]);
+    	System.out.print("type.size=");
+    	System.out.println(type.size());
+    	for(int i=0;i<type.size();i++) {
+    		System.out.print(type.get(i));
     	}
     	
     	System.out.println();
     	System.out.println(isProvinceSpecified);
 		*/
     	
+    	if(logPath.equals("")||outPath.equals("")) {
+    		System.out.println("输入、输出路径均不能为空！");
+    		System.exit(0);
+    	}
     	
-    	
+    	readLogs(logPath,date);//读取指定日期以及之前的所有log文件
+    	writeLog(outPath,type,isProvinceSpecified);//带格式输出到指定文件
     }
 	
+    //读取指定日期以及之前的所有log文件
+    public void readLogs(String logPath,String date) {
+    	
+        ArrayList<String> files = new ArrayList<String>();
+        File file = new File(logPath);
+        File[] tempList = file.listFiles();
+        
+        //isDateAllowed，默认为日期超出范围（false），直到出现不早于date的日期时，置为true
+        boolean isDateAllowed = false;
+        
+        //将所有不晚于date的.log.txt文件的绝对路径添加到files，并判断日期是否超出范围
+        for (int i = 0; i < tempList.length; i++) {
+            if (tempList[i].isFile()) {
+            	
+                //fileName，不包含路径、后缀（也就是说只有日期yyyy-mm-dd）
+                String fileName = tempList[i].getName().substring(0,10);
+                
+                //当d1早于d2，dateCompare返回-1，files只记录所有不晚于date的日期
+            	if(dateCompare(date,fileName) != -1) {
+            		files.add(tempList[i].toString());
+            	}
+        		if(dateCompare(date, fileName) != 1) {
+        			isDateAllowed = true;
+        		}
+            }
+        }
+        
+        //日期超出范围提示
+        if(!isDateAllowed) {
+    		System.out.println("日期超出范围！");
+    		System.exit(0);
+        }
+        
+        /*
+        for(int i=0;i<files.size();i++) {
+        	System.out.println(files.get(i));
+        }
+        */
+        
+        
+        
+    }
+    
+    //读取单个文件
+    public void readOneLog(String logPathName) {
+    	
+    }
+    
+    //带格式输出到指定文件
+    public void writeLog(String outPath,ArrayList<String> type,boolean isProvinceSpecified) {
+    	
+    }
+    
+    /*
+     * 当d1早于d2，dateCompare返回-1
+     * 当d1等于d2，dateCompare返回0
+     * 当d1晚于d2，dateCompare返回1
+     */
+    public int dateCompare(String date1,String date2) {
+    	
+    	//将yyyy-mm-dd分解成(int)year,(int)month,(int)day
+    	int y1 = Integer.parseInt(date1.substring(0,4));
+    	int y2 = Integer.parseInt(date2.substring(0,4));
+    	int m1 = Integer.parseInt(date1.substring(5,7));
+    	int m2 = Integer.parseInt(date2.substring(5,7));
+    	int d1 = Integer.parseInt(date1.substring(8,10));
+    	int d2 = Integer.parseInt(date2.substring(8,10));
+    	
+    	if(y1 > y2) {
+    		return 1;
+    	}
+    	else if(y1 == y2) {
+    		if(m1 > m2) {
+    			return 1;
+    		}
+    		else if(m1 == m2) {
+    			if(d1 > d2) {
+    				return 1;
+    			}
+    			else if(d1 == d2) {
+    				return 0;
+    			}
+    			else return -1;
+    		}
+    		else return -1;
+    	}
+    	else return -1;
+    }
+    
     public static void main(String[] args) {
     	InfectStatistic infectStatistic = new InfectStatistic();
     	infectStatistic.init();
+    	
+    	/*
     	for(String i:args) {
     		System.out.println(i);
     	}
     	System.out.println(args.length);
+    	*/
+    	
     	infectStatistic.processCmd(args);
     }
 }

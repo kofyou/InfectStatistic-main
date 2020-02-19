@@ -2,6 +2,7 @@ import java.io.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
+import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -40,7 +41,7 @@ public class InfectStatistic {
     String person="人";
     /**人数*/
     int [][]number=new int[31][4];
-
+    public static int people=0;
     boolean flag1 = false;
     boolean flag2 = false;
 
@@ -287,19 +288,22 @@ public class InfectStatistic {
         return strList.toArray(new String[strList.size()]);
     }
 
-    private void dealProvince(String line,String[] provinces) {
-        Pattern r=Pattern.compile(patterns);
-        Matcher m=r.matcher(line);
-        if (m.find()&&isValidProvince(provinces)) {
-            for (String s : province) {
-                if (m.group(1).equals(s)) {
-                    System.out.println(line);
+    private void dealProvince( String[] provinces) {
+        provinces=deleteArrayNull(provinces);
+        Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+        Arrays.sort(provinces, com);
+        if (isValidProvince(provinces)) {
+            for (String s : provinces) {
+                if (s.equals("全国")){
+                    System.out.println(getAllProvince());
                 }
-                else {
-                    System.out.println(s+" "+type2[0]+person+" "+type2[1]+person+" "
-                            +type2[2]+person+" "+type2[3]+person);
+                for (int j = 0; j < province.length; j++) {
+                    if (province[j].equals(s)) {
+                        System.out.println(province[j] + " " + type2[0] + number[j][0] + person + " " + type2[1] +
+                                number[j][1] + person + " "
+                                + type2[2] + number[j][2] + person + " " + type2[3] + number[j][3] + person + " ");
+                    }
                 }
-
             }
         }
         if(!isValidProvince(provinces)){
@@ -316,9 +320,6 @@ public class InfectStatistic {
             if (flag1 && flag2) {
                 dealTypeAndProvince(line, type, provinces);
             }
-            else if (flag2) {
-                dealProvince(line, provinces);
-            }
             if (flag1 && !flag2) {
                 dealType(line,type);
             }
@@ -327,6 +328,11 @@ public class InfectStatistic {
             }
             line = br.readLine();
         }
+        if (flag2) {
+            dealProvince( provinces);
+
+        }
+
 
     }
 
@@ -366,11 +372,11 @@ public class InfectStatistic {
         Pattern r=Pattern.compile(patterns);
         Matcher m=r.matcher(line);
         if(m.find() &&isValidType(type)) {
-            for (String s : provinces) {
-                if (Objects.equals(s, m.group(1))) {
+            for (int i=0;i<provinces.length;i++) {
+                if (Objects.equals(provinces[i], m.group(1))&&discovery[i]) {
                     System.out.print(m.group(1) + " ");
                     for (String t : type) {
-                        if (s != null&&t!=null) {
+                        if (provinces[i] != null&&t!=null) {
                             switch (t) {
                                 case "ip":
                                     System.out.print(type2[0] + m.group(3) + person + " ");
@@ -392,6 +398,13 @@ public class InfectStatistic {
                     }
                     System.out.print("\n");
                 }
+                else if (!discovery[i]){
+                    System.out.print(provinces[i]+" ");
+                    for (String s:type){
+                        System.out.print(s+" 人"+" ");
+                    }
+                    System.out.print("\n");
+                }
             }
         }
     }
@@ -399,7 +412,8 @@ public class InfectStatistic {
 
 
     public static void main(String[] args) throws Exception {
-        args = new String[]{"-log", "D:\\log\\", "-out", "D:/log/out.txt", "-date","2020-01-23"};
+        args = new String[]{"-log", "D:\\log\\", "-out", "D:/log/out.txt", "-date","2020-01-22"
+                ,"-province","北京","福建","全国"};
 
         InfectStatistic t = new InfectStatistic();
         t.init(args);

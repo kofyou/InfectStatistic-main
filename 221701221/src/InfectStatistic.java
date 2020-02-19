@@ -1,12 +1,3 @@
-/**
- * InfectStatistic
- * TODO
- *
- * @author Kvc
- * @version 1.1.0
- * @since xxx
- */
-
 import java.io.*;
 import java.text.Collator;
 import java.text.ParseException;
@@ -15,8 +6,9 @@ import java.util.*;
 
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toMap;
-class InfectStatistic
-{
+
+class InfectStatistic {
+
     private CmdArgs cmdArgs;
     private Map<String  , File> LogsMap;
     private Container container;
@@ -100,6 +92,7 @@ class InfectStatistic
             InfectedRecord.UpSpNum(num);
         }
     }
+
     //构造函数
     public InfectStatistic()
     {
@@ -177,6 +170,7 @@ class InfectStatistic
         }
         return true;
     }
+
     //读取日志文件
     public void ReadLogFile() throws IOException
     {
@@ -228,6 +222,7 @@ class InfectStatistic
             bw.close();
         }
     }
+
     public static void main(String[] args) throws ParseException , IOException
     {
         InfectStatistic inf = new InfectStatistic();
@@ -243,24 +238,29 @@ class InfectStatistic
         inf.OutputFile();
     }
 }
+
 class Container
 {
-    Map<String, Record> recordMap;
 
-    public Container() {
+    Map<String , Record> recordMap;
+    public Container()
+    {
         recordMap = new HashMap<>();
     }
 
-    public Map<String, Record> GetRecordMap() {
+    public Map<String , Record> GetRecordMap()
+    {
         return recordMap;
     }
 
-    public Record GetRecord(String Province) {
+    public Record GetRecord(String Province)
+    {
         return recordMap.get(Province);
     }
 
-    public void AddRecord(Record record) {
-        recordMap.put(record.GetProvinceName(), record);
+    public void AddRecord(Record record)
+    {
+        recordMap.put(record.GetProvinceName() , record);
     }
 
     public boolean CompareTo(Container c)
@@ -307,6 +307,7 @@ class Container
         }
     }
 }
+
 class Record
 {
     private String ProvinceName;
@@ -315,63 +316,78 @@ class Record
     private int CureNum;
     private int DeadNum;
 
-    public String GetProvinceName() {
+    public String GetProvinceName()
+    {
         return ProvinceName;
     }
 
-    public void SetProvinceName(String ProvinceName) {
+    public void SetProvinceName(String ProvinceName)
+    {
         this.ProvinceName = ProvinceName;
     }
 
-    public int GetIpNum() {
+    public int GetIpNum()
+    {
         return IpNum;
     }
 
-    public void SetIpNum(int IpNum) {
+    public void SetIpNum(int IpNum)
+    {
         this.IpNum = IpNum;
     }
 
-    public void UpIpNum(int num) {
+    public void UpIpNum(int num)
+    {
         this.IpNum += num;
     }
 
-    public void DownIpNum(int num) {
+    public void DownIpNum(int num)
+    {
         this.IpNum -= num;
     }
 
-    public int GetSpNum() {
+    public int GetSpNum()
+    {
         return SpNum;
     }
 
-    public void SetSpNum(int SpNum) {
+    public void SetSpNum(int SpNum)
+    {
         this.SpNum = SpNum;
     }
 
-    public void UpSpNum(int num) {
+    public void UpSpNum(int num)
+    {
         this.SpNum += num;
     }
 
-    public void DownSpNum(int num) {
+    public void DownSpNum(int num)
+    {
         this.SpNum -= num;
     }
 
-    public int GetCureNum() {
+    public int GetCureNum()
+    {
         return CureNum;
     }
 
-    public void SetCureNum(int CureNum) {
+    public void SetCureNum(int CureNum)
+    {
         this.CureNum = CureNum;
     }
 
-    public void UpCureNum(int num) {
+    public void UpCureNum(int num)
+    {
         this.CureNum += num;
     }
 
-    public int GetDeadNum() {
+    public int GetDeadNum()
+    {
         return DeadNum;
     }
 
-    public void SetDeadNum(int DeadNum) {
+    public void SetDeadNum(int DeadNum)
+    {
         this.DeadNum = DeadNum;
     }
 
@@ -388,6 +404,7 @@ class Record
         this.SetDeadNum(Dead);
         this.SetCureNum(Cure);
     }
+
     public boolean CompareTo(Record r2)
     {
         if (r2 == null)
@@ -481,4 +498,234 @@ class Record
         this.CureNum = 0;
     }
 }
+
+//@SUppressWarnings("ALL")
+class CmdArgs
+{
+    private String LogPath;
+    private String OutputPath;
+    private String date;
+    private Vector<String> types;
+    private Vector<String> Provinces;
+    private boolean showArgs;
+
+    public CmdArgs()
+    {
+        this.types = new Vector<String>();
+        this.Provinces = new Vector<String>();
+        this.LogPath = null;
+        this.OutputPath = null;
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        this.date = sdf.format(now);
+        this.showArgs = false;
+    }
+
+    public String GetLogPath()
+    {
+        return LogPath;
+    }
+
+    public void SetLogPath(String LogPath)
+    {
+        this.LogPath = LogPath;
+    }
+
+    public String GetOutputPath()
+    {
+        return OutputPath;
+    }
+
+    public void SetOutputPath(String OutputPath)
+    {
+        this.OutputPath = OutputPath;
+    }
+
+    public String GetDate()
+    {
+        return date;
+    }
+
+    public boolean SetDate(String date) throws ParseException
+    {
+        if (Common.stringToDate(date) == null)
+        {
+            // invalid date
+            return false;
+        }
+        this.date = date;
+        return true;
+    }
+
+    public Vector<String> GetTypes()
+    {
+        return types;
+    }
+
+    public int typeNumber()
+    {
+        return this.types.size();
+    }
+
+    public void AddType(String type)
+    {
+        this.types.add(type);
+    }
+
+
+    public Vector<String> GetProvinces()
+    {
+        return Provinces;
+    }
+
+    public void AddProvince(String Province)
+    {
+        this.Provinces.add(Province);
+    }
+
+    public boolean HasProvince()
+    {
+        return Provinces.size() > 0;
+    }
+
+    public int ProvinceNumber()
+    {
+        return this.Provinces.size();
+    }
+
+    public boolean ManageArgs(String[] args , InfectStatistic inf) throws ParseException
+    {
+        if (args == null)
+        {
+            return false;
+        }
+        int i = 0;
+        while (i < args.length)
+        {
+            if ("list".equals(args[i]))
+            {
+                i++;
+                break;
+            }
+            i++;
+        }
+        if (i >= args.length)
+        {
+            showRule();
+            return false;
+        }
+        for (; i < args.length; ++i)
+        {
+            if ("-log".equals(args[i]))
+            {
+                File file = new File(args[++i]);
+                if (file.isDirectory())
+                {
+                    this.SetLogPath(args[i]);
+                }
+                else
+                {
+                    System.out.println("你必须指定日志文件夹的正确全路径");
+                    return false;
+                }
+            }
+            else if ("-out".equals(args[i]))
+            {
+                this.SetOutputPath(args[++i]);
+            }
+            else if ("-date".equals(args[i]))
+            {
+                if (!this.SetDate(args[++i]))
+                {
+                    return false;
+                };
+            }
+            else if ("-type".equals(args[i]))
+            {
+                while (i < args.length)
+                {
+                    if ((i + 1) >= args.length || args[i + 1].charAt(0) == '-')
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        this.AddType(args[++i]);
+                    }
+                }
+            }
+            else if ("-Province".equals(args[i]))
+            {
+                while (i < args.length)
+                {
+                    if ((i + 1) >= args.length || args[i + 1].charAt(0) == '-')
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        this.AddProvince(args[++i]);
+                        if (!"全国".equals(args[i]))
+                        {
+                            Record record = new Record();
+                            record.SetProvinceName(args[i]);
+                            inf.GetContainer().AddRecord(record);
+                        }
+                    }
+                }
+            }
+            else if ("-show".equals(args[i]))
+            {
+                this.showArgs = true;
+            }
+            else
+            {
+                System.out.println("Unknow args " + args[i]);
+            }
+        }
+        if (this.LogPath == null || this.OutputPath == null)
+        {
+            showRule();
+            return false;
+        }
+        if (this.showArgs)
+        {
+            showArgs();
+        }
+        return true;
+    }
+
+    public void showRule()
+    {
+        System.out.println("command line example : java InfectStatistic list");
+        System.out.println("                    -log (LogPath , Must Specify)");
+        System.out.println("                    -out (OutputPath , Must Specify)");
+        System.out.println("                    -date (yyyy-MM-dd)");
+        System.out.println("                    -type (Ip , Sp , Cure , Dead)");
+        System.out.println("                    -Province (武汉 , 福建 , 北京 , ...)");
+        System.out.println("                    -show (print args)");
+    }
+
+    public void showArgs()
+    {
+        System.out.println("日志目录位置:" + this.GetLogPath());
+        System.out.println("输出文件位置:" + this.GetOutputPath());
+        System.out.println("统计的最新截至日期:" + this.GetDate());
+        if (this.GetTypes() != null && this.typeNumber() != 0)
+        {
+            System.out.println("选择统计的人员类型:");
+            for (String tem : this.GetTypes())
+            {
+                System.out.print(tem + " ");
+            }
+        }
+        if (this.GetProvinces() != null && this.ProvinceNumber() != 0)
+        {
+            System.out.println("选择统计的省份:");
+            for (String tem : this.GetProvinces())
+            {
+                System.out.print(tem + " ");
+            }
+        }
+    }
 }

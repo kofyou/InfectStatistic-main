@@ -18,7 +18,7 @@
 java InfectStatistic list -log G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\ -out G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt -date 2020-02-22 -type ip sp dead -province 福建 全国 湖南
 ```
 &emsp;&emsp;将在相应目录下生成output。txt输出结果。
-<div><img width="100%" src="https://images.cnblogs.com/cnblogs_com/yjchen/1645851/o_2002120421192.png"/></div>  
+<div><img width="100%" src="https://images.cnblogs.com/cnblogs_com/yjchen/1645851/o_200218091302%E6%96%87%E4%BB%B6.png"/></div>  
 
 ```
 全国	感染患者152人	疑似患者290人	死亡22人	

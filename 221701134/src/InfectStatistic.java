@@ -293,33 +293,38 @@ class InfectStatistic {
 		 try {
 			 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath), "UTF-8"));
 			 
-				//TODO： 判断是否统计全国数据
-				 if (isShowAllProvince == false) {
-					 //判断输出列表是否包含全国
-					 if (isOuputNationwide()) {
-						 //统计出全国数据
-						 Province nation = getNationStatResult();
-						 
-					 }
-					 else { //仅输出传入参数的省份列表
-						
-					}
-				 }
-				 else {
-					 //输出全国数据和所有省份数据
-					 Province nation = getNationStatResult();
-					 
+			//判断输出列表是否包含全国
+			 if (isShowAllProvince || isOuputNationwide()) {
+				//打印全国数据
+				 Province nation = getNationStatResult();
+				 bw.write(nation.getAllOuputResult());
+				 bw.newLine();
+			 }
+			 			 
+			 if (isShowAllProvince == false) { //输出参数传入的省份
+				 provinceArgsList.sort(new ProvinceCompartor());
+				 for (String name : provinceArgsList) {
+					 bw.write(provinceHashtable.get(name).getAllOuputResult());
+					 bw.newLine();
 				}
-				 
-				 bw.write("// 该文档并非真实数据，仅供测试使用");
-				 bw.close();
+			 }
+			 else {	//输出所有省份			 
+				 allProvinceList.sort(new ProvinceCompartor());
+				 for (String name : allProvinceList) {
+					bw.write(provinceHashtable.get(name).getAllOuputResult());
+					bw.newLine();
+				}					 			 					 
+			 }
+			 
+			 bw.write("// 该文档并非真实数据，仅供测试使用");
+			 bw.close();
 		} 
 		 catch (Exception e) {
 			e.printStackTrace();
 		}
 	 }
 	 
-	 /** 是否统计全国数据并输出 */
+	 /** 是否统计全国数据 */
 	 private boolean isOuputNationwide() {
 		//判断输出列表是否包含全国
 		for (String provName : provinceArgsList) {
@@ -484,25 +489,36 @@ class InfectStatistic {
 			sp -= changeNum;
 		}
 		
-		/** 
+		/**
 		 * description：获取要输出的统计数据
 		 * @return 要输出的字符串
 		 */
 		public String getOuputResult() {
+			if (isShowAllData) {
+				return getAllOuputResult();
+			}
+			return getOuputResultByTypes(typeList);
+		}
+		
+		/** 
+		 * description：获取要输出的全部统计数据
+		 * @return 要输出的字符串
+		 */
+		private String getAllOuputResult() {
 			String res = name + ' ' + "感染患者" + ip + "人" + ' ' + "疑似患者" + sp + "人" + ' ' + "治愈" + cure
                     + "人" + ' ' + "死亡" + dead + "人";
 			return res;
-		}
+		}		
 		
 		/**
 		 * description：通过命令行指令参数获取要输出的统计结果
 		 * @param types  命令行参数类型数组
 		 * @return 要输出的字符串
 		 */
-		public String getOuputResultByTypes(String[] types) {
+		private String getOuputResultByTypes(ArrayList<String> types) {
 			String res = name + "";
-			for (int i = 0; i < types.length; i++) {
-				switch (types[i]) {
+			for (int i = 0; i < types.size(); i++) {
+				switch (types.get(i)) {
 				case Constants.TYPE_IP:
 					res += "感染患者" + ip + "人 ";
 					break;

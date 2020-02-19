@@ -61,7 +61,7 @@ class InfectStatistic {
 			readLogName();
 			readLogContent();
 			// System.out.println(dateString);
-			System.out.println(provinceHashMap.get("全国").get("死亡") + "");
+			System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
 			// System.out.println(patientsHashMap.get("治愈") + "");
 		} catch (ParseException e) {
 			// TODO 自动生成的 catch 块
@@ -197,6 +197,20 @@ class InfectStatistic {
 				inputStrings[0] = "全国";
 				cureAndDead(inputStrings);
 			}
+		} else if (inputStrings.length == 4) {
+			int tem = -1;
+			if (inputStrings[1].equals(addAndExcludeAndDiagnosisStrings[0])) {
+				tem = 0;
+			} else if (inputStrings[1].equals(addAndExcludeAndDiagnosisStrings[1])) {
+				tem = 1;
+			} else if (inputStrings[2].equals(addAndExcludeAndDiagnosisStrings[2])) {
+				tem = 2;
+			}
+			addAndExcludeAndDiagnosis(inputStrings, tem);
+			inputStrings[0] = "全国";
+			addAndExcludeAndDiagnosis(inputStrings, tem);
+		} else if (inputStrings.length == 5) {
+			
 		}
 	}
 
@@ -210,5 +224,27 @@ class InfectStatistic {
 		originalLong = provinceHashMap.get(inputStrings[0]).get(inputStrings[1]);
 		originalLong += changesLong;
 		provinceHashMap.get(inputStrings[0]).put(inputStrings[1], originalLong);
+	}
+
+	private static void addAndExcludeAndDiagnosis(String[] inputStrings, int i) {
+		Long originalLong = new Long(0);
+		Long changesLong = new Long(0);
+		changesLong = Long.valueOf(inputStrings[3].substring(0, inputStrings[3].length() - 1));
+		if (i == 0 || i == 1) {
+			originalLong = provinceHashMap.get(inputStrings[0]).get(inputStrings[2]);
+			if (i == 0) {
+				originalLong += changesLong;
+			} else {
+				originalLong -= changesLong;
+			}
+			provinceHashMap.get(inputStrings[0]).put(inputStrings[2], originalLong);
+		} else if (i == 2) {
+			originalLong = provinceHashMap.get(inputStrings[0]).get(inputStrings[1]);
+			originalLong -= changesLong;
+			provinceHashMap.get(inputStrings[0]).put(inputStrings[1], originalLong);
+			originalLong = provinceHashMap.get(inputStrings[0]).get(typeCharCommondStrings[0]);
+			originalLong += changesLong;
+			provinceHashMap.get(inputStrings[0]).put(typeCharCommondStrings[0], originalLong);
+		}
 	}
 }

@@ -1,5 +1,8 @@
+import java.awt.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.IntPredicate;
 
 /**
  * InfectStatistic
@@ -15,15 +18,15 @@ class InfectStatistic {
 	
 	class MyProvince {
 		
-		private String provinceName;//“全国”，或省、直辖市的名称
+		public String provinceName;//“全国”，或省、直辖市的名称
 		
-		private int ip;//确诊患者数量
-		private int sp;//疑似患者数量
-		private int cure;//治愈患者数量
-		private int dead;//死亡患者数量
+		public int ip;//确诊患者数量
+		public int sp;//疑似患者数量
+		public int cure;//治愈患者数量
+		public int dead;//死亡患者数量
 		
-		private boolean isMentioned;//是否在日志中被提到过
-		private boolean isNeedPrint;//是否被操作员指明需要列出
+		public boolean isMentioned;//是否在日志中被提到过
+		public boolean isNeedPrint;//是否被操作员指明需要列出
 		
 		public MyProvince(String provinceName) {
 			this.provinceName = provinceName;
@@ -115,14 +118,7 @@ class InfectStatistic {
 		    "陕西","上海","四川","天津","西藏","新疆","云南","浙江",
 	};
 	
-    public static void main(String[] args) {
-    	InfectStatistic infectStatistic = new InfectStatistic();
-    	infectStatistic.init();
-    	for(String i:args) {
-    		System.out.println(i);
-    	}
-    }
-    
+	//初始化HashMap
     public void init() {
     	provinceMap.clear();
     	for(String strProvinceName:AllProvinceName) {
@@ -130,5 +126,88 @@ class InfectStatistic {
     		provinceMap.put(strProvinceName, myProvince);
     	}
     	
+    }
+    
+    //处理输入的命令
+    public void processCmd(String[] args) {
+    	if(args.length>1 && args[0].equals("list")) {
+    		
+    		String logPath = new String("");
+    		String outPath = new String("");
+    		String date = new String("");
+    		int[] type = new int[] {1,1,1,1};//默认输出四种人群
+    		boolean isProvinceSpecified = false;//该项为false，输出所有日志中提到的省份，为true输出指定的省份
+    		
+    		for(int index = 1;index<args.length;index++) {
+    			switch(args[index]) {
+    				case "-log":
+    					logPath = args[index+1];
+    					index++;
+    					break;
+    				case "-out":
+    					outPath = args[index+1];
+    					index++;
+    					break;
+    				case "-date":
+    					date=args[index+1];
+    					index++;
+    					break;
+    				case "-type":
+    					//若指定人群，则先把type所有元素置0，在把特定元素置1
+    					for(int i=0;i<type.length;i++) {
+    						type[i]=0;
+    					}
+    					while(index+1<args.length && args[index+1].charAt(0)!='-') {
+    						if(args[index+1].equals("ip")) type[0]=1;
+    						else if(args[index+1].equals("sp")) type[1]=1;
+    						else if(args[index+1].equals("cure")) type[2]=1;
+    						else if(args[index+1].equals("dead")) type[3]=1;
+    						index++;
+    					}
+    					break;
+    				case "-province":
+    					isProvinceSpecified = true;
+    					while(index+1<args.length && args[index+1].charAt(0)!='-') {
+    						provinceMap.get(args[index+1]).isNeedPrint = true;
+    						index++;
+    					}
+    					break;
+    			}
+    		}
+    		excuteCmd(logPath,outPath,date,type,isProvinceSpecified);
+    	}
+    }
+    
+    //执行输入的命令
+    public void excuteCmd(String logPath,String outPath,String date,int[] type,boolean isProvinceSpecified) {
+    	
+    	/*
+    	System.out.println("-----In excuteCmd-----");
+    	System.out.println(logPath);
+    	System.out.println(outPath);
+    	System.out.println(date);
+    	
+    	System.out.print("type.length=");
+    	System.out.println(type.length);
+    	for(int i=0;i<type.length;i++) {
+    		System.out.print(type[i]);
+    	}
+    	
+    	System.out.println();
+    	System.out.println(isProvinceSpecified);
+		*/
+    	
+    	
+    	
+    }
+	
+    public static void main(String[] args) {
+    	InfectStatistic infectStatistic = new InfectStatistic();
+    	infectStatistic.init();
+    	for(String i:args) {
+    		System.out.println(i);
+    	}
+    	System.out.println(args.length);
+    	infectStatistic.processCmd(args);
     }
 }

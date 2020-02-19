@@ -28,7 +28,7 @@ public class InfectStatistic {
         aListCommand.checkCommand(aStatistic);
         LogFiles aLogFiles = new LogFiles(aListCommand.arguments[0].value);
         aLogFiles.readFiles(aListCommand.arguments[2].value, aStatistic);
-        aStatistic.outPutFile(aListCommand.arguments[1].value);
+        aStatistic.outPutFile(aListCommand.arguments[1].value, (TypeArgument)aListCommand.arguments[3], (ProvinceArgument)aListCommand.arguments[4]);
         System.out.println("helloworld");
     }
 
@@ -395,7 +395,7 @@ class ProvinceArgument extends BaseArgument {
         // 输入的省份存在，若不存在则列出所有
         for (int i = 0; i < valueList.length; ++i) {
             if (!sta.data.containsKey(valueList[i])) {
-                value = "all";
+                value = "";
                 valueList = new String[0];
                 System.out.println("-province参数输入有误，默认列出所有省份数据");
             }
@@ -602,14 +602,80 @@ class Statistic {
         data.put("浙江", new int[] { 0, 0, 0, 0 });
     }
 
-    void outPutFile(String path) {
+    void outPutFile(String path, TypeArgument types, ProvinceArgument provinces) {
         try {
+            // 打开out文件
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8"));
-            for(String keytemp:data.keySet()) {
-                int[] valuetemp=data.get(keytemp);
-                String out=keytemp;
-                bw.write(keytemp+" 感染患者"+valuetemp[0]+"人 疑似患者"+valuetemp[1]+"人 治愈"+valuetemp[2]+"人 死亡"+valuetemp[3]+"人");
-                bw.newLine();
+            String outline;
+            // 处理type参数值 用boolean[]分别表示是否输出四种类型
+            boolean[] typetemp = { false, false, false, false };
+            if (types.value.equals("valuelist")) {
+                for (String temp : types.valueList) {
+                    switch (temp) {
+                    case "ip":
+                        typetemp[0] = true;
+                        break;
+                    case "sp":
+                        typetemp[1] = true;
+                        break;
+                    case "cure":
+                        typetemp[2] = true;
+                        break;
+                    case "dead":
+                        typetemp[3] = true;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
+            if (types.value.equals("")) {
+                typetemp[0] = true;
+                typetemp[1] = true;
+                typetemp[2] = true;
+                typetemp[3] = true;
+            }
+            // 若输出所有省份数据 遍历数据，并写入文件
+            if (provinces.value.equals("")) {
+                for (String keytemp : data.keySet()) {
+                    int[] valuetemp = data.get(keytemp);
+                    outline = keytemp;
+                    if (typetemp[0]) {
+                        outline = outline + " 感染患者" + valuetemp[0] + "人";
+                    }
+                    if (typetemp[1]) {
+                        outline = outline + " 疑似患者" + valuetemp[1] + "人";
+                    }
+                    if (typetemp[2]) {
+                        outline = outline + " 治愈" + valuetemp[2] + "人";
+                    }
+                    if (typetemp[3]) {
+                        outline = outline + " 死亡" + valuetemp[3] + "人";
+                    }
+                    bw.write(outline);
+                    bw.newLine();
+                }
+            }
+            //若只输出-province参数值省份数据
+            if(provinces.value.equals("valuelist")) {
+                for(String provincetemp:provinces.valueList) {
+                    int[] valuetemp = data.get(provincetemp);
+                    outline = provincetemp;
+                    if (typetemp[0]) {
+                        outline = outline + " 感染患者" + valuetemp[0] + "人";
+                    }
+                    if (typetemp[1]) {
+                        outline = outline + " 疑似患者" + valuetemp[1] + "人";
+                    }
+                    if (typetemp[2]) {
+                        outline = outline + " 治愈" + valuetemp[2] + "人";
+                    }
+                    if (typetemp[3]) {
+                        outline = outline + " 死亡" + valuetemp[3] + "人";
+                    }
+                    bw.write(outline);
+                    bw.newLine();
+                }
             }
             bw.write("// 该文档并非真实数据，仅供测试使用");
             bw.newLine();

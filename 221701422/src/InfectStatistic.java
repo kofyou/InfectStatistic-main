@@ -1,4 +1,7 @@
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -24,8 +27,6 @@ class InfectStatistic {
 	static String[] provinceCommandStrings = { "ip", "sp", "cure", "dead" };
 
 	// 存放输入信息
-	private static String[] inputStrings = { "", "", "", "", "" };
-
 	private static HashMap<String, String> inputHashMap = new HashMap<String, String>();
 
 	private static String logNameString = "";
@@ -34,6 +35,8 @@ class InfectStatistic {
 	private static String[] typeStrings;
 	private static String[] provinceStrings;
 
+	private static String[] logNameStrings;
+
 	public static void main(String[] args) {
 		init(args);
 		/*
@@ -41,7 +44,17 @@ class InfectStatistic {
 		 * for (String string : inputStrings) { if (string.length() != 0) { System.out.println(string); } }
 		 */
 		// System.out.println(typeStrings.length);
-		System.out.println(dateString);
+		try {
+			readLogName();
+		} catch (ParseException e) {
+			// TODO 自动生成的 catch 块
+			e.printStackTrace();
+		}
+		System.out.println(logNameStrings.length);
+		for (String string : logNameStrings) {
+			System.out.println(string);
+		}
+		// System.out.println(dateString);
 	}
 
 	private static void init(String[] args) {
@@ -76,4 +89,27 @@ class InfectStatistic {
 		System.arraycopy(temStrings, 1, provinceStrings, 0, provinceStrings.length);
 	}
 
+	private static void readLogName() throws ParseException {
+		File file = new File(logNameString);
+		String[] fileList = file.list();
+		String temString = "";
+		if (dateString.length() != 0) {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			Date inputDate = simpleDateFormat.parse(dateString);
+			for (int i = 0; i < fileList.length; i++) {
+				Date date = simpleDateFormat.parse(fileList[i].split("\\.")[0]);
+				if (inputDate.compareTo(date) > -1) {
+					temString += " " + fileList[i];
+					// System.out.println(simpleDateFormat.format(date));
+				}
+			}
+		} else {
+			for (int i = 0; i < fileList.length; i++) {
+				temString += " " + fileList[i];
+			}
+		}
+		String[] temStrings = temString.split(" ");
+		logNameStrings = new String[temStrings.length - 1];
+		System.arraycopy(temStrings, 1, logNameStrings, 0, logNameStrings.length);
+	}
 }

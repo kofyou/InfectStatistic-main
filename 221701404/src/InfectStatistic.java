@@ -56,23 +56,7 @@ public class InfectStatistic {
 
             //获取到文件夹中最大日期的文件名称。
             String maxDate = "";
-            String tempDate = "";
-            for(int i=0;i<files.length;i++){
-                String fileName = files[i].getName();
-                if(fileName.contains(".log.txt")){
-                    String fileNameDate = fileName.substring(0,fileName.indexOf(".log.txt"));
-                    if(i==1){
-                        maxDate = fileNameDate;
-                        tempDate = fileNameDate;
-                    }else{
-                        tempDate = fileNameDate;
-                        //两个日期格式的文件能直接这样比较大小
-                        if(tempDate.compareTo(maxDate)>0){
-                            maxDate = tempDate;
-                        }
-                    }
-                }
-            }
+            maxDate = getMaxDate(files);
 
             //如果date没有输入的话，默认成最新的日期
             if(date == "") {
@@ -199,9 +183,142 @@ public class InfectStatistic {
             //到这里文件夹处理完毕
 
             //下面的工作：处理文件输出
+            //写入out对应的文件中,先判断前面的文件夹是不是存在，不存在就创建
+            String dir = out.substring(0,out.lastIndexOf("/"));
+            File f = new File(dir);
+            if(!f.exists() || !f.isDirectory()) {
+                f.mkdirs();
+            }
 
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out)),
+                    "UTF-8"));
+
+            //遍历mapMap,按照特定的顺序排序
+            List<String> keys = new ArrayList<String>();
+            keys.addAll(mapMap.keySet());
+            keys = Lib.sortByAlphabet(keys);
+
+            //判断type
+            if(type.size()>0 && province.size()<1) {
+                //只有type
+                StringBuffer sbf = new StringBuffer();
+                for(int i=0; i<type.size(); i++) {
+                    sbf.append(Lib.getNamebyType(type.get(i)) + map2.get(Lib.getNamebyType(type.get(i)))+"人  ");
+                }
+                bw.write("全国  " + sbf.toString());
+                //先输出全国的
+
+                //换行
+                bw.newLine();
+
+                //根据排好续的keys依次输出到txt中
+                for(int i=0; i<keys.size(); i++) {
+                    Map<String,Integer> tempMap = mapMap.get(keys.get(i));
+                    StringBuffer sbf2 = new StringBuffer();
+                    for(int j=0; j<type.size(); j++) {
+                        sbf2.append(Lib.getNamebyType(type.get(j))+tempMap.get(Lib.getNamebyType(type.get(j)))+"人  ");
+                    }
+                    bw.write(keys.get(i)+"  "+sbf2.toString());
+                    bw.newLine();
+                }
+                bw.close();
+            } else if(type.size()>0 && province.size()>0) {
+                //既有type，也有province  //先输出全国的
+                if(province.contains("全国")) {
+                    StringBuffer sbf = new StringBuffer();
+                    for(int i=0; i<type.size(); i++) {
+                        sbf.append(Lib.getNamebyType(type.get(i))+map2.get(Lib.getNamebyType(type.get(i)))+"人  ");
+                    }
+                    bw.write("全国  "+sbf.toString());
+                    bw.newLine();
+                }
+
+                //全国输入进去以后，再看还有没有没输入的
+                province = Lib.sortByAlphabet(province);
+                for(String str: province) {
+                    if(str.equals("全国")) {
+                        continue;
+                    }
+                    Map<String,Integer> tempMap = mapMap.get(str);
+                    StringBuffer sbf2 = new StringBuffer();
+                    for(int j=0; j<type.size(); j++) {
+                        sbf2.append(Lib.getNamebyType(type.get(j))+(tempMap==null? 0:tempMap.get(Lib.getNamebyType(type.get(j))))+"人  ");//???
+                    }
+                    bw.write(str+"  "+sbf2.toString());
+                    bw.newLine();
+
+                }
+
+                bw.close();
+                //不指定type，则列出所有情况
+            } else if(type.size()<1 && province.size()>0) {
+                if(province.contains("全国")) {
+                    bw.write("全国  "+Lib.str1+map2.get(Lib.str1)+"人  "+Lib.str2+map2.get(Lib.str2)+"人  "
+                            +Lib.str3+map2.get(Lib.str3)+"人  "+Lib.str4+map2.get(Lib.str4)+"人");
+                    bw.newLine();
+                } else {
+                    province = Lib.sortByAlphabet(province);
+                    for(String str:province){
+                        int str1Num = 0;
+                        int str2Num = 0;
+                        int str3Num = 0;
+                        int str4Num = 0;
+                        if(mapMap.containsKey(str)) {
+                            Map<String,Integer> tempMap = mapMap.get(str);
+                            str1Num = tempMap.get(Lib.str1);
+                            str2Num = tempMap.get(Lib.str2);
+                            str3Num = tempMap.get(Lib.str3);
+                            str4Num = tempMap.get(Lib.str4);
+                        }
+                        bw.write( str+"  "+Lib.str1+str1Num+"人  "+Lib.str2+str2Num+"人  "+Lib.str3+str3Num+"人  "+Lib.str4+str4Num+"人");
+                        bw.newLine();
+                    }
+                }
+                bw.close();
+            } else {
+                //既没有type也没有province
+                //先输出全国的
+                bw.write("全国  "+Lib.str1+map2.get(Lib.str1)+"人  "+Lib.str2+map2.get(Lib.str2)+"人  "
+                        +Lib.str3+map2.get(Lib.str3)+"人  "+Lib.str4+map2.get(Lib.str4)+"人");
+                bw.newLine();
+
+                //根据排好续的keys依次输出到txt中
+                for(int i=0; i<keys.size(); i++) {
+                    Map<String,Integer> tempMap = mapMap.get(keys.get(i));
+                    bw.write( keys.get(i)+"  "+Lib.str1+tempMap.get(Lib.str1)+"人  "+Lib.str2+tempMap.get(Lib.str2)
+                            +"人  "+Lib.str3+tempMap.get(Lib.str3)+"人  "+Lib.str4+tempMap.get(Lib.str4)+"人");
+                    bw.newLine();
+                }
+                bw.close();
+            }
         }
 
+    }
+    /**
+     *获取到文件夹中最大日期的文件名称
+     * @param -log 参数下的目录文件
+     * @return 文件最大日期
+     */
+    public static String getMaxDate(File[] files) {
+        String maxDate = "";
+        String tempDate = "";
+        for(int i=0; i<files.length; i++) {
+            String fileName = files[i].getName();
+            if(fileName.contains(".log.txt")) {
+                String fileNameDate = fileName.substring(0, fileName.indexOf(".log.txt"));
+                if(i == 1) {
+                    maxDate = fileNameDate;
+                    tempDate = fileNameDate;
+                } else {
+                    tempDate = fileNameDate;
+                    //两个日期格式的文件能直接这样比较大小
+                    if(tempDate.compareTo(maxDate)>0) {
+                        maxDate = tempDate;
+                    }
+                }
+            }
+        }
+        return maxDate;
     }
 }
 

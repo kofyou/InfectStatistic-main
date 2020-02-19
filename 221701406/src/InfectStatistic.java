@@ -2,9 +2,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.security.PublicKey;
-
-import javafx.collections.ListChangeListener.Change;
 
 /**
  * InfectStatistic
@@ -16,7 +13,6 @@ import javafx.collections.ListChangeListener.Change;
  */
 class InfectStatistic {
     String[] args;  //接收命令行参数
-	int[][] allStatistic=new int[32][4];  //使用二维数组存储疫情数据，一维代表省份，二维代表各省份患者类型数据
 	
 	String logPath;  //日志文件路径
 	String resultPath;  //输出文件路径
@@ -37,6 +33,13 @@ class InfectStatistic {
 		"贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", 
 		"宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};  //具体省份
 	
+	/*
+	 * 使用二维数组存储疫情数据，一维代表省份，二维代表各省份患者类型数据
+	 * 省份和provinceStrings数组中省份顺序相对应
+	 * 患者类型按顺序分别为:ip,sp,cure,dead
+	 */
+	int[][] allStatistic=new int[32][4];
+	
 	/**
 	 * 主函数
 	 * @param args
@@ -44,6 +47,8 @@ class InfectStatistic {
 	public static void main(String[] args) {
 		InfectStatistic infectStatistic = new InfectStatistic();
 		infectStatistic.resolveCmd(args);
+		infectStatistic.getFiles();
+		
     }
 	
 	/**
@@ -119,6 +124,12 @@ class InfectStatistic {
         		 readFile(logPath+allFile[j].getName());
         	 }
          }
+         for (int i=0; i<32; i++) {
+ 			for (int j=0; j<4; j++) {
+ 				System.out.print(allStatistic[i][j]);
+ 			}
+ 			
+ 		}
 	 }
 	 
 	 /*
@@ -192,58 +203,118 @@ class InfectStatistic {
      * <省> 新增 感染患者 n人
      */
     public void addIp(String str1, String n) {
-    	
+    	n=n.substring(0, n.length()-1);  //去掉字符串n的最后一位字符“人”
+        for (int i=0; i<provinceStrings.length; i++) {  
+        	if (str1.equals(provinceStrings[i])) {  //匹配省份
+        		allStatistic[0][0]+=Integer.parseInt(n);  //全国感染患者增加
+        		allStatistic[i][0]+=Integer.parseInt(n);  //对应省份的感染患者增加
+        	}
+        }
     }
     
     /*
      * <省> 新增 疑似患者 n人
      */
     public void addSp(String str1, String n) {
-    	
+    	n=n.substring(0, n.length()-1);  //去掉字符串n的最后一位字符“人”
+        for (int i=0; i<provinceStrings.length; i++) {  
+        	if (str1.equals(provinceStrings[i])) {  //匹配省份
+        		allStatistic[0][1]+=Integer.parseInt(n);  //全国感染患者增加
+        		allStatistic[i][1]+=Integer.parseInt(n);  //对应省份的感染患者增加
+        	}
+        }
     }
     
     /*
      * <省1> 感染患者 流入 <省2> n人
      */
     public void moveIp(String str1, String str2, String n) {
-    	
+    	n=n.substring(0, n.length()-1);  //去掉字符串n的最后一位字符“人”
+        for (int i=0; i<provinceStrings.length; i++) {  
+        	if (str1.equals(provinceStrings[i])) {  //匹配省份一
+        		allStatistic[i][0]-=Integer.parseInt(n);  //对应省份的感染患者减少
+        	}
+        	if (str2.equals(provinceStrings[i])) {  //匹配省份二
+        	    allStatistic[i][0]+=Integer.parseInt(n);  //流入省份感染患者增加
+        	}
+        }
     }
 	 
     /*
      * <省1> 疑似患者 流入 <省2> n人
      */
     public void moveSp(String str1, String str2,String n) {
-    	
+    	n=n.substring(0, n.length()-1);  //去掉字符串n的最后一位字符“人”
+        for (int i=0; i<provinceStrings.length; i++) {  
+        	if (str1.equals(provinceStrings[i])) {  //匹配省份一
+        		allStatistic[i][1]-=Integer.parseInt(n);  //对应省份的疑似患者减少
+        	}
+        	if (str2.equals(provinceStrings[i])) {
+        	    allStatistic[i][1]+=Integer.parseInt(n);  //流入省份疑似患者增加
+        	}
+        }
     }
     
     /*
      * <省> 疑似患者 确诊感染 n人
      */
     public void changeToIp(String str1, String n) {
-    	
+    	n=n.substring(0, n.length()-1);  //去掉字符串n的最后一位字符“人”
+        for (int i=0; i<provinceStrings.length; i++) {  
+        	if (str1.equals(provinceStrings[i])) {  //匹配省份   		
+        		allStatistic[0][0]+=Integer.parseInt(n);  //全国感染患者增加
+        		allStatistic[i][0]+=Integer.parseInt(n);  //对应省份的感染患者增加
+        		
+        		allStatistic[0][1]-=Integer.parseInt(n);  //全国疑似患者减少
+        		allStatistic[i][1]-=Integer.parseInt(n);  //对应省份疑似患者减少
+        	}
+        }
     }
     
     /*
      * <省> 死亡 n人
      */
     public void addDead(String str1, String n) {
-    	
+    	n=n.substring(0, n.length()-1);  //去掉字符串n的最后一位字符“人”
+        for (int i=0; i<provinceStrings.length; i++) {  
+        	if (str1.equals(provinceStrings[i])) {  //匹配省份
+        		allStatistic[0][3]+=Integer.parseInt(n);  //全国死亡人数增加
+        		allStatistic[i][3]+=Integer.parseInt(n);  //对应省份的死亡人数增加
+        		
+        		allStatistic[0][0]-=Integer.parseInt(n);  //全国感染患者减少
+        		allStatistic[i][0]-=Integer.parseInt(n);  //对应省份的感染患者减少
+        	}
+        }
     }
 
     /*
      * <省> 治愈 n人
      */
 	public void addCure(String str1, String n) {
-		
+		n=n.substring(0, n.length()-1);  //去掉字符串n的最后一位字符“人”
+        for (int i=0; i<provinceStrings.length; i++) {  
+        	if (str1.equals(provinceStrings[i])) {  //匹配省份
+        		allStatistic[0][2]+=Integer.parseInt(n);  //全国治愈人数增加
+        		allStatistic[i][2]+=Integer.parseInt(n);  //对应省份的治愈人数增加
+        		
+        		allStatistic[0][0]-=Integer.parseInt(n);  //全国感染患者减少
+        		allStatistic[i][0]-=Integer.parseInt(n);  //对应省份的感染患者减少
+        	}
+        }
 	}
 
     /*
      * <省> 排除 疑似患者 n人
      */
 	public void removeSp(String str1, String n) {
-		
+		n=n.substring(0, n.length()-1);  //去掉字符串n的最后一位字符“人”
+        for (int i=0; i<provinceStrings.length; i++) {  
+        	if (str1.equals(provinceStrings[i])) {  //匹配省份       		
+        		allStatistic[0][1]-=Integer.parseInt(n);  //全国疑似患者减少
+        		allStatistic[i][1]-=Integer.parseInt(n);  //对应省份的疑似患者减少
+        	}
+        }
 	}
-
 
 }
 

@@ -73,18 +73,7 @@ class InfectStatistic {
 			// System.out.println(dateString);
 			// System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
 			// System.out.println(patientsHashMap.get("治愈") + "");
-			for (String string : provinceStrings) {
-				String temString = "";
-				// System.out.print(keyString + " ");
-				temString += string + " ";
-				HashMap<String, Long> patientsHashMap = provinceHashMap.get(string);
-				for (String string1 : typeStrings) {
-					temString += string1 + "" + patientsHashMap.get(string1) + "人 ";
-					// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
-				}
-				temString.substring(0, temString.length() - 1);
-				System.out.println(temString);
-			}
+			writeOutPut();
 		} catch (ParseException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();
@@ -329,5 +318,29 @@ class InfectStatistic {
 			}
 			provinceStrings = temString.split(" ");
 		}
+	}
+
+	private static void writeOutPut() throws IOException {
+		File file = new File(outNameString);
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+		BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
+		for (String string : provinceStrings) {
+			String temString = "";
+			// System.out.print(keyString + " ");
+			temString += string + " ";
+			HashMap<String, Long> patientsHashMap = provinceHashMap.get(string);
+			for (String string1 : typeStrings) {
+				temString += string1 + "" + patientsHashMap.get(string1) + "人 ";
+				// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
+			}
+			temString.substring(0, temString.length() - 1);
+			System.out.println(temString);
+			temString += "\n";
+			bufferedWriter.write(temString);
+		}
+		bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
+		bufferedWriter.close();
 	}
 }

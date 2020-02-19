@@ -79,6 +79,12 @@ public class InfectStatistic {
                 date = maxDate;
             }
 
+            //用date跟maxDate比较，看date参数是否正确
+            if((date.compareTo(maxDate)>0)) {
+                System.out.println("date参数有问题，不能大于文件的最大时间");
+                return;
+            }
+
             //定义最后返回时候的变量
             Map<String,Map<String,Integer>> mapMap = new HashMap<String, Map<String,Integer>>();
             Map<String,Integer> map = new LinkedHashMap<String,Integer>();

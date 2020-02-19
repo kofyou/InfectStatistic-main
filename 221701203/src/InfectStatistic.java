@@ -211,6 +211,7 @@ public class InfectStatistic {
                     break;
             }
         }
+        provinces=sortProvinces(provinces);
         if(isValidDate(date) && isValidProvince(provinces)||!flag2&&isValidDate(date)) {
             outputFile(path, dic, date);
             dealFlag(path, type, provinces);
@@ -225,6 +226,19 @@ public class InfectStatistic {
                 System.out.println("省份错误！");
             }
         }
+    }
+
+    private String[] sortProvinces(String[] provinces) {
+        provinces=deleteArrayNull(provinces);
+        Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
+        Arrays.sort(provinces, com);
+        for (int i=0;i<provinces.length;i++){
+            if ("全国".equals(provinces[i])){
+                System.arraycopy(provinces, 0, provinces, 1, i);
+                provinces[0]="全国";
+            }
+        }
+        return provinces;
     }
 
     public static boolean isValidDate(String ymd) {
@@ -289,9 +303,7 @@ public class InfectStatistic {
     }
 
     private void dealProvince( String[] provinces) {
-        provinces=deleteArrayNull(provinces);
-        Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
-        Arrays.sort(provinces, com);
+
         if (isValidProvince(provinces)) {
             for (String s : provinces) {
                 if (s.equals("全国")){
@@ -317,20 +329,21 @@ public class InfectStatistic {
         BufferedReader br = new BufferedReader(fr);
         String line = br.readLine();
         while (line != null&&!line.contains("/")) {
-            if (flag1 && flag2) {
-                dealTypeAndProvince(line, type, provinces);
-            }
-            if (flag1 && !flag2) {
-                dealType(line,type);
-            }
-            else if(!flag2){
-                System.out.println(line);
-            }
+
             line = br.readLine();
         }
-        if (flag2) {
+        if (!flag1&&flag2) {
             dealProvince( provinces);
 
+        }
+        else if (flag1 && flag2) {
+            dealTypeAndProvince( type, provinces);
+        }
+        if (flag1 && !flag2) {
+            dealType(line,type);
+        }
+        else if(!flag2){
+            System.out.println(line);
         }
 
 
@@ -368,27 +381,29 @@ public class InfectStatistic {
         }
     }
 
-    private void dealTypeAndProvince(String line,String[] type, String[] provinces) {
-        Pattern r=Pattern.compile(patterns);
-        Matcher m=r.matcher(line);
-        if(m.find() &&isValidType(type)) {
-            for (int i=0;i<provinces.length;i++) {
-                if (Objects.equals(provinces[i], m.group(1))&&discovery[i]) {
-                    System.out.print(m.group(1) + " ");
+    private void dealTypeAndProvince(String[] type, String[] provinces) {
+        provinces=deleteArrayNull(provinces);
+        for (String s : provinces) {
+            if (s.equals("全国") && isValidType(type)) {
+                System.out.println(getAllProvinceType(type));
+            }
+            for (int j = 0; j < province.length; j++) {
+                if (s.equals(province[j])) {
+                    System.out.print(province[j] + " ");
                     for (String t : type) {
-                        if (provinces[i] != null&&t!=null) {
+                        if (t != null) {
                             switch (t) {
                                 case "ip":
-                                    System.out.print(type2[0] + m.group(3) + person + " ");
+                                    System.out.print(type2[0] + number[j][0] + person + " ");
                                     break;
                                 case "sp":
-                                    System.out.print(type2[1] + m.group(5) + person + " ");
+                                    System.out.print(type2[1] + number[j][1] + person + " ");
                                     break;
                                 case "cure":
-                                    System.out.print(type2[2] + m.group(7) + person + " ");
+                                    System.out.print(type2[2] + number[j][2] + person + " ");
                                     break;
                                 case "dead":
-                                    System.out.print(type2[3] + m.group(9) + person + " ");
+                                    System.out.print(type2[3] + number[j][3] + person + " ");
                                     break;
                                 default:
                                     System.out.print("无该患者类型，请重新选择！");
@@ -398,22 +413,40 @@ public class InfectStatistic {
                     }
                     System.out.print("\n");
                 }
-                else if (!discovery[i]){
-                    System.out.print(provinces[i]+" ");
-                    for (String s:type){
-                        System.out.print(s+" 人"+" ");
-                    }
-                    System.out.print("\n");
-                }
             }
         }
-    }
+        }
 
+    private String getAllProvinceType(String[] type) {
+        int allIp, allSp, allCure, allDead;
+        String massage= "";
+        allSp = allIp = allCure = allDead = 0;
+        for (int[] ints : number) {
+            allIp += ints[0];
+            allSp += ints[1];
+            allCure += ints[2];
+            allDead += ints[3];
+        }
+        for (String s : type) {
+            if ("ip".equals(s)) {
+                massage +=  type2[0]+allIp+person+" ";
+            } else if ("sp".equals(s)) {
+                massage +=  type2[0]+allSp+person+" ";
+            } else if ("cure".equals(s)) {
+                massage +=  type2[0]+allCure+person+" ";
+            } else if ("dead".equals(s)) {
+                massage +=  type2[0]+allDead+person+" ";
+            }
+        }
+
+        return "全国"+" "+ massage;
+       // return
+    }
 
 
     public static void main(String[] args) throws Exception {
         args = new String[]{"-log", "D:\\log\\", "-out", "D:/log/out.txt", "-date","2020-01-22"
-                ,"-province","北京","福建","全国"};
+                ,"-type","ip","sp"};
 
         InfectStatistic t = new InfectStatistic();
         t.init(args);

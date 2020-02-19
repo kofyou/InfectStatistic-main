@@ -595,10 +595,6 @@ class InfectStatistic {
     }
     
     public static void main(String[] args) {
-    	if (args.length == 0) {  
-            System.out.println("命令行格式有误——未输入参数");  
-            return;
-        }
         InfectStatistic infectstatistic = new InfectStatistic();
         InfectStatistic.Analysis cla = infectstatistic.new Analysis(args); 
         boolean b = cla.JudgeParameter();

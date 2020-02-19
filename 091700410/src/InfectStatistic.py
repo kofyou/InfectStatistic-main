@@ -13,6 +13,7 @@
 import os
 import datetime
 import sys
+import time
 
 def sort_by_pinyin(str):
     
@@ -146,7 +147,64 @@ class InfectStatistic:
                         print(output_str,end='')
                         
         
-fi = InfectStatistic('..\\log\\','..\\result\\ListOut.txt','2020-01-27')
-fi.read_file()
-fi.write_file()
+class CommandLineParameters:
+    #  处理命令行参数
+    
+    input_date = time.strftime('%Y-%m-%d')
+    
+    input_path = ''
+    
+    output_path = ''
+    
+    type_list = []
+    
+    province_list = []
+    
+    def __init__(self,args):
+        
+        self.args = args
+    
+    def paras(self):
+        
+        index = 0
+        
+        for arg in self.args:
+            if arg == '-log':
+                self.input_path = self.args[index + 1]
+            if arg == '-out':
+                self.output_path = self.args[index + 1]
+            if arg == '-date':
+                self.input_date = self.args[index + 1]
+            if arg == '-type':
+                self.set_type_list(index)
+            if arg == '-province':
+                self.set_province_list(index)
+            
+            index += 1
+                
+        print(self.input_path + ' ' + self.output_path + ' ' + self.input_date + ' ' + str(self.type_list) + ' ' + str(self.province_list))
+                
+    def set_type_list(self,index):
+        
+        for i in range(index + 1,len(self.args)):
+            if self.args[i][0] != '-':
+                self.type_list.append(self.args[i])
+            else:
+                break
+            
+    def set_province_list(self,index):
+        
+        for i in range(index + 1,len(self.args)):
+            if self.args[i][0] != '-':
+                self.province_list.append(self.args[i])
+            else:
+                break
+            
+if __name__ == "__main__":
+    fi = InfectStatistic('..\\log\\','..\\result\\ListOut.txt','2020-01-27')
+    fi.read_file()
+    fi.write_file()
+    if sys.argv[1] == 'list':
+        cl = CommandLineParameters(sys.argv[2:])
+        cl.paras()
         

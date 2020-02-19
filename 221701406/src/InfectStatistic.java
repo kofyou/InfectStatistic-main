@@ -61,7 +61,7 @@ class InfectStatistic {
 		    return false;
 		}
 			
-		for (int i=1; i<args.length; i++) {
+		for (int i=0; i<args.length; i++) {
 			switch (args[i]) {
 				case "-log":
 					logPath =args[i+1];
@@ -116,6 +116,7 @@ class InfectStatistic {
          if (hasDate) {
         	 for (int i=0; i<allFile.length; i++) {
         		 if (allFile[i].getName().compareTo(date+".log.txt")<=0) {
+        			 //System.out.println(allFile[i].getName());
         			 readFile(logPath+allFile[i].getName());
         		 } 
         	 }
@@ -140,8 +141,9 @@ class InfectStatistic {
 		    String line=null;  //存储读取出的文件内容，按行读取日志文件
 		    BufferedReader br=new BufferedReader
 		        (new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
-		    while ((line=br.readLine())!=null) {  //按行读取
+		    while ((line=br.readLine())!=null) {  //按行读取	    	
 		        if (!line.substring(0,2).equals("//")) { //忽略注释行
+		        	//System.out.println(line);
 		            //按行处理文本
 		        	handleFile(line);
 		        } 
@@ -167,35 +169,41 @@ class InfectStatistic {
      */
     public void handleFile(String line) {
     	String[] array=line.split(" ");
+    	
+    	//test
+    	/*for (int i=0; i<array.length; i++) {
+    		System.out.println(array[i]);
+    	}*/
+  	
     	switch (array[1]) {
     	    case "新增":
-    		    if (array[2].equals("感染患者")) {
-    			    //array[0]所对应省ip+=n
-    		    	addIp(array[0],array[3]);
-    		    } else {
-    		    	//array[0]所对应的省sp+=n
-    		    	addSp(array[0],array[3]);
-    		    }
+    		    if (array[2].equals("感染患者")) {			    
+    		    	addIp(array[0],array[3]);  //array[0]所对应省ip+=n
+    		    } else {		    	
+    		    	addSp(array[0],array[3]);  //array[0]所对应的省sp+=n
+    		    }  
+    		    break;
     	    case "感染患者":
-    	    	//array[0]对应的省份ip-=n，array[3]对应的省ip+=n
-    	    	moveIp(array[0],array[3],array[4]);
+    	    	moveIp(array[0], array[3], array[4]);  //array[0]对应的省份ip-=n，array[3]对应的省ip+=n
+    	        break;
     	    case "疑似患者":
     	    	if (array[2].equals("流入")) {
-    	    		//array[0]对应的省份sp-=n，array[3]对应的省sp+=n
-    	    		moveSp(array[0],array[3],array[4]);
-    	    	} else {
-    	    		//sp-=n,ip+=n
-    	    		changeToIp(array[0],array[3]);
+    	    		moveSp(array[0],array[3],array[4]);  //array[0]对应的省份sp-=n，array[3]对应的省sp+=n
+    	    	} else { 	    		
+    	    		changeToIp(array[0],array[3]);  //sp-=n,ip+=n
     	    	}
-    	    case "死亡":
-    	    	//array[0]所对应省dead+=n,ip-=n
-    	    	addDead(array[0],array[2]);
-    	    case "治愈":
-    	    	//array[0] cure+=n，ip-=n
-    	    	addCure(array[0],array[2]);
-    	    case "排除":
-    	    	//sp-=n
-    	    	removeSp(array[0],array[3]);
+    	    	break;
+    	    case "死亡":    	    	
+    	    	addDead(array[0],array[2]);  //array[0]所对应省dead+=n,ip-=n
+    	        break;
+    	    case "治愈":    	    	
+    	    	addCure(array[0],array[2]);  //array[0] cure+=n，ip-=n
+    	        break;
+    	    case "排除":    	    
+    	    	removeSp(array[0],array[3]);  //sp-=n
+    	    	break;
+    	    default:
+    	    	break;
     	}
     }
 	

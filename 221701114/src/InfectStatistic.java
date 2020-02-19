@@ -60,6 +60,12 @@ class InfectStatistic
         	else if (args[i].equals("-type"))
             {
         		commandArgsFlag[3]++;
+        		
+        		for (int k = 0;k < paramentersOfType.length;k++)
+        		{
+        			paramentersOfType[k] = new String();
+        		}
+        		
                 int cnt = 0;
                 for (int j = i + 1;j < args.length && args[j].startsWith("-") == false;j++)
                 {
@@ -70,6 +76,12 @@ class InfectStatistic
         	else if (args[i].equals("-province"))
             {
                 commandArgsFlag[4]++;
+                
+                for (int k = 0;k < paramentersOfProvince.length;k++)
+        		{
+                	paramentersOfProvince[k] = new String();
+        		}
+                
                 int count = 0;
                 for (int j = i + 1;j < args.length && args[j].startsWith("-") == false;j++)
                 {
@@ -130,7 +142,7 @@ class InfectStatistic
 		String[] splitString = oneLineOfFile.split(" ");
 		int countOfPeople = getStringNumber(splitString[splitString.length - 1]); 
 		
-		isExistProvince(splitString[0]);  //检验动态数组中是否有该省份信息，无则加入
+		addToArrayList(splitString[0]);  //将省份加入动态数组
 		
 		if (splitString.length == 3)
 		{
@@ -189,7 +201,7 @@ class InfectStatistic
 		}
 		else if (splitString.length == 5)
 		{
-			isExistProvince(splitString[3]);
+			addToArrayList(splitString[3]);  //将省份加入动态数组
 			
 			for (int i = 0;i < allProvince.size();i++)
 			{
@@ -250,7 +262,7 @@ class InfectStatistic
 	* Return:无
 	* Others:无
 	*/ 
-	public static void isExistProvince(String provinceName)
+	public static void addToArrayList(String provinceName)
 	{
 		boolean isExist = false;
 		
@@ -323,7 +335,7 @@ class InfectStatistic
     		    			&& oneLineOfFile.length() != 0  //不读取空行
     		    			&& oneLineOfFile.startsWith("//") == false)  //不读取注释行
     		    		{
-    		    			System.out.println(oneLineOfFile);
+    		    			//System.out.println(oneLineOfFile);
     		    			
     		    			//统计省份的感染人数，疑似人数，治愈人数和死亡人数
     		    			getProvincialInformation(oneLineOfFile);
@@ -336,17 +348,178 @@ class InfectStatistic
     			}
     		}
     		
-    		getNationInformation();
+    		getNationInformation(); //统计全国的感染人数，疑似人数，治愈人数和死亡人数
     		
-    		//以下为测试输出
-    		for (int i = 0;i < allProvince.size();i++)
+    		String writeFileString = new String();  //用于记录写入输出文件的信息
+    		
+    		if (commandArgsFlag[4] == 1)  //命令中有带province参数
     		{
-    			System.out.println(allProvince.get(i).provinceName
-    				+" 感染患者"+allProvince.get(i).ip+"人"
-    				+" 疑似患者"+allProvince.get(i).sp+"人"
-    				+" 治愈"+allProvince.get(i).cure+"人"
-    				+" 死亡"+allProvince.get(i).dead+"人");
+    			
+    			for (int i = 0;i < paramentersOfProvince.length 
+    				&& paramentersOfProvince[i].equals("") == false;i++)
+    			{
+					addToArrayList(paramentersOfProvince[i]);  //将省份加入到动态数组中，如果已存在，则不加入
+					
+    				if (paramentersOfProvince[i].equals("全国"))  //province参数值中有全国
+    				{
+    					writeFileString += "全国";
+    					if (commandArgsFlag[3] == 1)  //命令中有带type参数
+    					{
+    						for (int j = 0;j < paramentersOfType.length 
+									&& paramentersOfType[j].equals("") == false;j++)
+							{
+								if (paramentersOfType[j].equals("ip")) 
+								{
+									writeFileString += " 感染患者" + nation.ip + "人";
+								}
+								else if (paramentersOfType[j].equals("sp"))
+								{
+									writeFileString += " 疑似患者" + nation.sp + "人";
+								}
+								else if (paramentersOfType[j].equals("cure"))
+								{
+									writeFileString += " 治愈" + nation.cure + "人";
+								}
+								else if (paramentersOfType[j].equals("dead"))
+								{
+									writeFileString += " 死亡" + nation.dead + "人";
+								}
+							}
+    						writeFileString += "\r\n";
+    					}
+    					else //命令中不带type参数
+    					{
+        					writeFileString += " 感染患者" + nation.ip + "人"
+    			    			+ " 疑似患者" + nation.sp + "人"
+    			    			+ " 治愈" + nation.cure + "人"
+    			    			+ " 死亡" + nation.dead + "人" + "\r\n";
+        				}
+    				}
+    				else  //province参数值中的省份
+    				{
+    					for (int j = 0;j < allProvince.size();j++)
+    					{
+    						if (paramentersOfProvince[i].equals(allProvince.get(j).provinceName))  //在动态数组中找到该省
+    						{
+    							writeFileString += paramentersOfProvince[i];
+    							
+    							if (commandArgsFlag[3] == 1)  //命令中有带type参数
+    							{
+    								for (int k = 0;k < paramentersOfType.length 
+    									&& paramentersOfType[k].equals("") == false;k++)
+    								{
+    									if (paramentersOfType[k].equals("ip")) 
+    									{
+    										writeFileString += " 感染患者" + allProvince.get(j).ip + "人";
+    									}
+    									else if (paramentersOfType[k].equals("sp"))
+    									{
+    										writeFileString += " 疑似患者" + allProvince.get(j).sp + "人";
+    									}
+    									else if (paramentersOfType[k].equals("cure"))
+    									{
+    										writeFileString += " 治愈" + allProvince.get(j).cure + "人";
+    									}
+    									else if (paramentersOfType[k].equals("dead"))
+    									{
+    										writeFileString += " 死亡" + allProvince.get(j).dead + "人";
+    									}
+    								}
+    								
+    								writeFileString += "\r\n";
+    							}
+    							else  //命令中没有带type参数
+    							{
+    								writeFileString += " 感染患者" + allProvince.get(j).ip + "人"
+    					    			+ " 疑似患者" + allProvince.get(j).sp + "人"
+    					    			+ " 治愈" + allProvince.get(j).cure + "人"
+    					    			+ " 死亡" + allProvince.get(j).dead + "人" + "\r\n";
+								}
+    							
+    							break;
+    						}
+    					}
+					}
+    			}
     		}
+    		else //命令中没带province参数
+    		{		
+				writeFileString += "全国";
+				
+    			if (commandArgsFlag[3] == 1)  //命令中有带type参数
+				{
+					for (int j = 0;j < paramentersOfType.length 
+							&& paramentersOfType[j].equals("") == false;j++)
+					{
+						if (paramentersOfType[j].equals("ip")) 
+						{
+							writeFileString += " 感染患者" + nation.ip + "人";
+						}
+						else if (paramentersOfType[j].equals("sp"))
+						{
+							writeFileString += " 疑似患者" + nation.sp + "人";
+						}
+						else if (paramentersOfType[j].equals("cure"))
+						{
+							writeFileString += " 治愈" + nation.cure + "人";
+						}
+						else if (paramentersOfType[j].equals("dead"))
+						{
+							writeFileString += " 死亡" + nation.dead + "人";
+						}
+					}
+					writeFileString += "\r\n";
+				}
+				else //命令中不带type参数
+				{
+					writeFileString += " 感染患者" + nation.ip + "人"
+		    			+ " 疑似患者" + nation.sp + "人"
+		    			+ " 治愈" + nation.cure + "人"
+		    			+ " 死亡" + nation.dead + "人" + "\r\n";
+				}
+    			
+    			for (int i = 0;i < allProvince.size();i++)
+    			{
+    				writeFileString += allProvince.get(i).provinceName;
+    				if (commandArgsFlag[3] == 1)  //命令中有带type参数
+					{
+						for (int j = 0;j < paramentersOfType.length 
+							&& paramentersOfType[j].equals("") == false;j++)
+						{
+							if (paramentersOfType[j].equals("ip")) 
+							{
+								writeFileString += " 感染患者" + allProvince.get(i).ip + "人";
+							}
+							else if (paramentersOfType[j].equals("sp"))
+							{
+								writeFileString += " 疑似患者" + allProvince.get(i).sp + "人";
+							}
+							else if (paramentersOfType[j].equals("cure"))
+							{
+								writeFileString += " 治愈" + allProvince.get(i).cure + "人";
+							}
+							else if (paramentersOfType[j].equals("dead"))
+							{
+								writeFileString += " 死亡" + allProvince.get(i).dead + "人";
+							}
+						}
+						
+						writeFileString += "\r\n";
+					}
+					else  //命令中没有带type参数
+					{
+						writeFileString += " 感染患者" + allProvince.get(i).ip + "人"
+			    			+ " 疑似患者" + allProvince.get(i).sp + "人"
+			    			+ " 治愈" + allProvince.get(i).cure + "人"
+			    			+ " 死亡" + allProvince.get(i).dead + "人" + "\r\n";
+					}
+    			}	
+			}
+    		
+    		writeFileString += "// 该文档并非真实数据，仅供测试使用";
+    		
+    		System.out.println(writeFileString);
+    		
     	}
     }
 }

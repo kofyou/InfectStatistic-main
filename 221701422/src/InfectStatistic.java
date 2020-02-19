@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -19,6 +20,7 @@ import java.util.HashMap;
  * @author xxx
  * @version xxx
  * @since xxx
+ * 注意排序及其他要求的功能
  */
 class InfectStatistic {
 	/**
@@ -29,13 +31,21 @@ class InfectStatistic {
 	 * -type 使用缩写选择如 -type ip 表示只列出感染患者的情况，-type sp cure则会按顺序[sp, cure]列出疑似患者和治愈患者的情况，不指定该项默认会列出所有情况。
 	 * -province 指定列出的省，如-province 福建，则只列出福建，-province 全国 浙江则只会列出全国、浙江
 	 */
-	static String[] commandStrings = { "-log", "-out", "-date", "-type", "-province" };
+	private static String[] commandStrings = { "-log", "-out", "-date", "-type", "-province" };
 
 	// 可选择[ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]，使用缩写选择
-	static String[] provinceCommandStrings = { "ip", "sp", "cure", "dead" };
+	private static String[] typeAbbreviationCommandStrings = { "ip", "sp", "cure", "dead" };
+	// 存放患者的类型
+	private static String[] typeCharCommondStrings = { "感染患者", "疑似患者", "治愈", "死亡" };
+
+	private static String[] cureAndDeadStrings = { "治愈", "死亡"};
+	private static String[] addAndExcludeAndDiagnosisStrings = { "新增", "排除", "确诊感染" };
+	private static String inflowsString = "流入";
 
 	// 存放输入信息
 	private static HashMap<String, String> inputHashMap = new HashMap<String, String>();
+	// 存放省份与患者
+	private static HashMap<String, HashMap<String, Long>> provinceHashMap = new HashMap<String, HashMap<String, Long>>();
 
 	private static String logNameString = "";
 	private static String outNameString = "";
@@ -49,21 +59,17 @@ class InfectStatistic {
 		init(args);
 		try {
 			readLogName();
+			readLogContent();
+			// System.out.println(dateString);
+			System.out.println(provinceHashMap.get("全国").get("死亡") + "");
+			// System.out.println(patientsHashMap.get("治愈") + "");
 		} catch (ParseException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();
-		}
-		//System.out.println(logNameStrings.length);
-		for (String string : logNameStrings) {
-			//System.out.println(string);
-		}
-		try {
-			readLogContent();
 		} catch (IOException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();
 		}
-		// System.out.println(dateString);
 	}
 
 	private static void init(String[] args) {
@@ -96,6 +102,13 @@ class InfectStatistic {
 		temStrings = inputHashMap.get(commandStrings[4]).split(" ");
 		provinceStrings = new String[temStrings.length - 1];
 		System.arraycopy(temStrings, 1, provinceStrings, 0, provinceStrings.length);
+
+		HashMap<String, Long> patientsHashMap = new HashMap<String, Long>();
+		Long temLong = new Long(0);
+		for (String string : typeCharCommondStrings) {
+			patientsHashMap.put(string, temLong);
+		}
+		provinceHashMap.put("全国", patientsHashMap);
 	}
 
 	private static void readLogName() throws ParseException {
@@ -124,16 +137,19 @@ class InfectStatistic {
 
 	private static void readLogContent() throws IOException {
 		Charset.defaultCharset();
-		for(String string:logNameStrings) {
+		for (String string : logNameStrings) {
 			String pathString = logNameString + string;
-			//String fileCharsetString = getFileCharset(pathString);
-			//System.out.println("编码格式为" + fileCharsetString);
-			File file=new File(pathString);
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
-			
+			// String fileCharsetString = getFileCharset(pathString);
+			// System.out.println("编码格式为" + fileCharsetString);
+			File file = new File(pathString);
+			BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(new FileInputStream(file), "UTF-8"));
+
 			String lineString;
 			while ((lineString = bufferedReader.readLine()) != null) {
-				if(!lineString.startsWith("//")) {
+				lineString = lineString.trim();
+				if (!lineString.startsWith("//")) {
+					dealLogContent(lineString);
 					System.out.println(lineString);
 				}
 			}
@@ -145,7 +161,7 @@ class InfectStatistic {
 		InputStream inputStream = new FileInputStream(pathNameString);
 		byte[] head = new byte[3];
 		inputStream.read(head);
-
+	
 		String charset = "GBK";// 或GB2312，即ANSI
 		if (head[0] == -1 && head[1] == -2) {// 0xFFFE
 			charset = "UTF-16";
@@ -156,11 +172,43 @@ class InfectStatistic {
 		} else if (head[0] == -17 && head[1] == -69 && head[2] == -65) {
 			charset = "UTF-8"; // UTF-8-BOM
 		}
-
+	
 		inputStream.close();
 		// System.out.println(code);
-
+	
 		return charset;
 	}
 	 */
+
+	private static void dealLogContent(String lineString) {
+		String[] inputStrings = lineString.split(" ");
+		if (!provinceHashMap.containsKey(inputStrings[0])) {
+			// System.out.println("不包含");
+			HashMap<String, Long> patientsHashMap = new HashMap<String, Long>();
+			Long temLong1 = new Long(0);
+			for (String string : typeCharCommondStrings) {
+				patientsHashMap.put(string, temLong1);
+			}
+			provinceHashMap.put(inputStrings[0], patientsHashMap);
+		}
+		if (inputStrings.length == 3) {
+			if(Arrays.asList(cureAndDeadStrings).contains(inputStrings[1])) {
+				cureAndDead(inputStrings);
+				inputStrings[0] = "全国";
+				cureAndDead(inputStrings);
+			}
+		}
+	}
+
+	private static void cureAndDead(String[] inputStrings) {
+		Long originalLong = new Long(0);
+		Long changesLong = new Long(0);
+		originalLong = provinceHashMap.get(inputStrings[0]).get(typeCharCommondStrings[0]);
+		changesLong = Long.valueOf(inputStrings[2].substring(0, inputStrings[2].length() - 1));
+		originalLong -= changesLong;
+		provinceHashMap.get(inputStrings[0]).put(typeCharCommondStrings[0], originalLong);
+		originalLong = provinceHashMap.get(inputStrings[0]).get(inputStrings[1]);
+		originalLong += changesLong;
+		provinceHashMap.get(inputStrings[0]).put(inputStrings[1], originalLong);
+	}
 }

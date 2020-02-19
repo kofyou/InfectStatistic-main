@@ -1,3 +1,8 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
 /**
  * InfectStatistic
  * TODO
@@ -12,6 +17,9 @@ class InfectStatistic {
 	
 	String logPath;  //日志文件路径
 	String resultPath;  //输出文件路径
+	
+	//-date参数相关
+	boolean hasDate=false; //记录是否记录-date参数
 	String date;  //指定日期
 	
 	//-type参数相关
@@ -54,6 +62,7 @@ class InfectStatistic {
 					resultPath=args[i+1];
 					break;
 				case "-date":
+					hasDate=true;
 					date=args[i+1];
 					break;
 				case "-type":  //将-type选项后面的参数存入type[]数组
@@ -90,8 +99,47 @@ class InfectStatistic {
 		return i;
 	}
 		
-		
-		
+	/*
+	 * 读取指定目录下文件
+	 */
+	 public void getFiles() {
+	     File file = new File(logPath);
+	     File[] allFile = file.listFiles();  //获取目录下的所有文件
+         if (hasDate) {
+        	 for (int i=0; i<allFile.length; i++) {
+        		 if (allFile[i].getName().compareTo(date+".log.txt")<=0) {
+        			 readFile(logPath+allFile[i].getName());
+        		 } 
+        	 }
+         } else {
+        	 for (int j=0; j<allFile.length; j++) {
+        		 readFile(logPath+allFile[j].getName());
+        	 }
+         }
+	 }
+	 
+	 /*
+	  * 读取文件具体内容
+	  */
+    public void readFile(String filePath) {
+	    try {
+		    String line=null;  //存储读取出的文件内容，按行读取日志文件
+		    BufferedReader br=new BufferedReader
+		        (new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
+		    while ((line=br.readLine())!=null) {  //按行读取
+		        if (line.substring(0,2).equals("//")) { //忽略注释行
+				    continue;
+		        } else {
+		            //按行读取处理文本   		
+		        }
+            }
+		    br.close();
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		    }
+    }
+	 
+	 
 }
 
 	    

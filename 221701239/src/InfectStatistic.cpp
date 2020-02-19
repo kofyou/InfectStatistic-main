@@ -214,7 +214,10 @@ void process_pai_chu(fstream& file, string province_name)
 //处理log中存放每天肺炎信息的文件
 void process_file(string log_file)
 {
+	int num;   //测试用的
+			   //6种情况,新增(感染患者,疑似患者),感染患者,疑似患者(流入,确诊),死亡,治愈,排除(疑似患者).
 	int i;
+	//首先加入全国的情况
 	fstream fei_yan_log(log_file);
 	string temp;
 	string temp_past;   //用于存储之前一次的读取
@@ -224,6 +227,7 @@ void process_file(string log_file)
 	{
 		temp_past = temp;
 		fei_yan_log >> temp;
+		num = draw_number(temp);
 		temp = UTF8ToGB(temp.c_str()).c_str();
 		if (temp.substr(0, 1).compare("/") == 0)
 			break;
@@ -376,7 +380,7 @@ void getFiles(const std::string & path, std::vector<std::string> & files)
 }
 
 //将统计结果输出
-void output_fei_yan_log()
+void output_fei_yan_log(int argc,char* argv[])
 {
 	int i;
 	vector<int> type;      //用于处理要输出的type
@@ -430,8 +434,8 @@ void output_fei_yan_log()
 	}
 	m_province.erase(m_province.find("全国"));
 	if(is_need_erase)
-		need_province.erase(find(need_province.begin(), need_province.end(), "全国"));
-	for (i = 0; i < need_province.size(); i++)
+		need_province.erase(find(need_province.begin(), need_province.end(), "全国"));    //全国输出完后删除,以免影响后续输出
+	for (i = 0; i < need_province.size(); i++)           //输出每个省份的数据
 	{
 		province_log.clear();
 		output_file << need_province[i];
@@ -445,8 +449,12 @@ void output_fei_yan_log()
 		}
 		output_file << "\n";
 	}
-
-	
+	output_file << "// 该文档并非真实数据，仅供测试使用" << "\n";   //输出文件尾数据
+	output_file << "// 命令：";
+	for (i = 0; i < argc; i++)
+	{
+		output_file << argv[i] << " ";
+	}
 }
 
 int main(int argc, char* argv[])
@@ -467,5 +475,5 @@ int main(int argc, char* argv[])
 	{
 		//cout << file_list[i] << "\n" ;
 	}
-	output_fei_yan_log();
+	output_fei_yan_log(argc,argv);
 }

@@ -16,10 +16,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-
-
-
 /**
  * InfectStatistic
  * TODO
@@ -35,7 +31,7 @@ class InfectStatistic {
 		public Command command;
 		public Arguments arguments;
 		
-		//测试用，之后记得删除！！！
+		//测试用
 		public void test() {
 			System.out.println("command:" + command.type );
 			System.out.println("arguments.log:" + arguments.log + "," + arguments.log_value);	
@@ -108,6 +104,7 @@ class InfectStatistic {
 			//先实例化一个commandline对象
 			CommandLine command_line = new CommandLine();
 			command_line.command = new CommandLine.Command();
+			command_line.command.type = commandline.get(0);
 			command_line.arguments = new CommandLine.Arguments();
 			command_line.arguments.type_value = new ArrayList<String>();
 			command_line.arguments.province_value = new ArrayList<String>();
@@ -167,9 +164,6 @@ class InfectStatistic {
 					break;
 				}
 			}
-			
-			//测试看看解析是否成功
-			//command_line.test();
 			return command_line;
 		}
 	}
@@ -190,7 +184,7 @@ class InfectStatistic {
 		public ArrayList<String> filename_list;
 		
 		public CommandLineRun(CommandLine cmdline) throws IOException {
-			if(!cmdline.command.type.equals("list")) {
+			if(!cmdline.command.is_list()) {
 				System.err.println("错误命令！");
 				System.exit(0);
 			}
@@ -210,15 +204,7 @@ class InfectStatistic {
 				}
 			}
 			country_total();
-			//测试输出！！！！！！！！！！！！！！！！！！！
 			print_file(cmdline);
-	        /*for(int i = 0;i<province_list.size();i++) {
-	        	System.out.println("省名：" + province_list.get(i).name + 
-	        			" ip:" + province_list.get(i).ip + 
-	        			" sp:" + province_list.get(i).sp + 
-	        			" cure:" + province_list.get(i).cure + 
-	        			" dead:" + province_list.get(i).dead);
-	        }*/
 		}
 		
 		//用于处理单个文件的
@@ -431,7 +417,7 @@ class InfectStatistic {
 				}
 			}
 			Collections.sort(filename_list);
-			System.out.println(filename_list);
+			//System.out.println(filename_list);
 		}
 		
 		//按要求输出到文件
@@ -518,20 +504,13 @@ class InfectStatistic {
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
     public static void main(String[] args) throws IOException {
-    	String command = "";   	
-    	//提取命令行
-        for(int i=3;i<args.length;i++){
-            command += args[i] + " ";
-        }
-        //以上也许没用，先写着
+//    	String command = "";   	
+//    	//提取命令行
+//        for(int i=3;i<args.length;i++){
+//            command += args[i] + " ";
+//        }
+//        //以上也许没用，先写着
         
         //测试用
         CommandLine commandline = new CommandLine();
@@ -557,10 +536,10 @@ class InfectStatistic {
         commandline_test.add("全国");
         commandline_test.add("福建");
         commandline_test.add("-date");
-        commandline_test.add("2020-02-04");
+        commandline_test.add("2020-01-27");
         
         CommandLineAnalysis commandline_analysis = new CommandLineAnalysis();
-        commandline = commandline_analysis.analysis(commandline_test);
+        commandline = commandline_analysis.analysis(cmd_line);
         
         //测试用
         CommandLineRun cmd_run = new CommandLineRun(commandline);

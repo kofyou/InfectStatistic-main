@@ -1,14 +1,16 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * InfectStatistic
  * TODO
  *
  * @author 221701231_朱鸿昊
- * @version 1.0.9
- * @since 2020/2/17 18:01
+ * @version 1.1.1
+ * @since 2020/2/19 17:25
  */
 class InfectStatistic {
     static class Controller{
@@ -22,7 +24,7 @@ class InfectStatistic {
 
         public static void GetParameters(String[] parameters){
             //获得输入信息
-            for (int i0 = 0;i0<parameters.length;i0++){
+            for (int i0 = 0,l = parameters.length;i0 < l;i0++){
                 switch (parameters[i0]){
                     case ("-out"):
                         i0++;
@@ -60,7 +62,7 @@ class InfectStatistic {
                         break;
                     default:
                         Controller.designatedProvince[numberOfDesignatedProvince]=parameters[i0];
-                        BasicInformation.KeyOfOutput[BasicInformation.GetIndexOfArea(parameters[i0])] = 1;
+                        Statistics.KeyOfOutput[Statistics.GetIndexOfArea(parameters[i0])] = 1;
                         numberOfDesignatedProvince++;
                 }
             }
@@ -75,21 +77,6 @@ class InfectStatistic {
             if (Controller.numberOfDesignatedProvince == 0){
                 Controller.numberOfDesignatedProvince = 1;
                 designatedProvince=new String[]{"全国"};
-            }
-        }
-
-        public static void OutputParameters() {
-            System.out.println("输入位置： " + Controller.inputLocation);
-            System.out.println("输出位置： " + Controller.outputLocation);
-            System.out.println("指定日期： " + Controller.designatedDate);
-            System.out.print("指定区域： ");
-            for (int i0 = 0;i0 < Controller.numberOfDesignatedProvince;i0++){
-                System.out.print(Controller.designatedProvince[i0]+" ");
-            }
-            System.out.println();
-            System.out.print("指定类型： ");
-            for (int i0 = 0;i0 < Controller.numberOfTypes;i0++){
-                System.out.print(Controller.designatedTypes[i0]+" ");
             }
         }
     }
@@ -122,9 +109,9 @@ class InfectStatistic {
             }
 
             //创建文件
-            BasicInformation.outputFile=new File(Controller.outputLocation);
+            Statistics.outputFile=new File(Controller.outputLocation);
             try {
-                BasicInformation.outputFile.createNewFile();
+                Statistics.outputFile.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -135,8 +122,8 @@ class InfectStatistic {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(Controller.outputLocation,true),"UTF-8"));
 
             for (int i0 = 0;i0 < 32;i0++){
-                if (BasicInformation.KeyOfOutput[i0] == 1){
-                    writer.write(BasicInformation.Areas[i0].OutputInformation()+"\r\n");
+                if (Statistics.KeyOfOutput[i0] == 1){
+                    writer.write(Statistics.Areas[i0].OutputInformation()+"\r\n");
                 }
             }
             writer.flush();//刷新内存，将内存中的数据立刻写出。
@@ -175,12 +162,12 @@ class InfectStatistic {
                 return false;   // 首先判断这行是不是注释内容
             }
 
-            indexOfArea = BasicInformation.GetIndexOfArea(words[0]);    // 获得地区索引
+            indexOfArea = Statistics.GetIndexOfArea(words[0]);    // 获得地区索引
 
-            BasicInformation.KeyOfOutput[indexOfArea] = 1;  // 把该地区的输出key设为1
+            Statistics.KeyOfOutput[indexOfArea] = 1;  // 把该地区的输出key设为1
 
             // 开始按照后面的输入操作地区类
-            for (int i0 = 1;i0 < words.length;i0++) {
+            for (int i0 = 1,l = words.length;i0 < l;i0++) {
                 switch (words[i0]){
                     case ("新增"):
                         i0++;
@@ -188,38 +175,38 @@ class InfectStatistic {
                             case ("感染患者"):
                                 i0++;
                                 num = FileProcessor.GetNumber(words[i0]);
-                                BasicInformation.AddInfectedPatients(num,indexOfArea);
+                                Statistics.AddInfectedPatients(num,indexOfArea);
                                 break;
                             case ("疑似患者"):
                                 i0++;
                                 num = FileProcessor.GetNumber(words[i0]);
-                                BasicInformation.AddSuspectedPatients(num,indexOfArea);
+                                Statistics.AddSuspectedPatients(num,indexOfArea);
                                 break;
                         }
                         break;
                     case ("治愈"):
                         i0++;
                         num = FileProcessor.GetNumber(words[i0]);
-                        BasicInformation.AddCured(num,indexOfArea);
+                        Statistics.AddCured(num,indexOfArea);
                         break;
                     case ("死亡"):
                         i0++;
                         num = FileProcessor.GetNumber(words[i0]);
-                        BasicInformation.AddDeaths(num,indexOfArea);
+                        Statistics.AddDeaths(num,indexOfArea);
                         break;
                     case ("排除"):
                         i0 += 2;
                         num = FileProcessor.GetNumber(words[i0]);
-                        BasicInformation.Areas[0].numberOfSuspectedPatients -= num;
-                        BasicInformation.Areas[indexOfArea].numberOfSuspectedPatients -= num;
+                        Statistics.Areas[0].numberOfSuspectedPatients -= num;
+                        Statistics.Areas[indexOfArea].numberOfSuspectedPatients -= num;
                         break;
                     case ("感染患者"):
                         i0 += 2;
-                        indexOfTarge = BasicInformation.GetIndexOfArea(words[i0]);
+                        indexOfTarge = Statistics.GetIndexOfArea(words[i0]);
                         i0++;
                         num = FileProcessor.GetNumber(words[i0]);
-                        BasicInformation.Areas[indexOfArea].numberOfInfectedPatients -= num;
-                        BasicInformation.Areas[indexOfTarge].numberOfInfectedPatients += num;
+                        Statistics.Areas[indexOfArea].numberOfInfectedPatients -= num;
+                        Statistics.Areas[indexOfTarge].numberOfInfectedPatients += num;
                         break;
                     case ("疑似患者"):
                         i0++;
@@ -227,17 +214,17 @@ class InfectStatistic {
                             case ("确诊感染"):
                                 i0++;
                                 num = FileProcessor.GetNumber(words[i0]);
-                                BasicInformation.AddInfectedPatients(num,indexOfArea);
-                                BasicInformation.Areas[0].numberOfSuspectedPatients -= num;
-                                BasicInformation.Areas[indexOfArea].numberOfSuspectedPatients -= num;
+                                Statistics.AddInfectedPatients(num,indexOfArea);
+                                Statistics.Areas[0].numberOfSuspectedPatients -= num;
+                                Statistics.Areas[indexOfArea].numberOfSuspectedPatients -= num;
                                 break;
                             case ("流入"):
                                 i0 ++;
-                                indexOfTarge = BasicInformation.GetIndexOfArea(words[i0]);
+                                indexOfTarge = Statistics.GetIndexOfArea(words[i0]);
                                 i0++;
                                 num = FileProcessor.GetNumber(words[i0]);
-                                BasicInformation.Areas[indexOfArea].numberOfSuspectedPatients -= num;
-                                BasicInformation.Areas[indexOfTarge].numberOfSuspectedPatients += num;
+                                Statistics.Areas[indexOfArea].numberOfSuspectedPatients -= num;
+                                Statistics.Areas[indexOfTarge].numberOfSuspectedPatients += num;
                         }
                 }
             }
@@ -262,13 +249,13 @@ class InfectStatistic {
             if(names != null){
                 String [] completNames = new String[names.length];
                 for(int i=0;i<names.length;i++){
-                completNames[i]=path+names[i];
+                    completNames[i]=path+names[i];
                 }
                 listFileName.addAll(Arrays.asList(completNames));
             }
             for(File a:files){
                 if(a.isDirectory()){//如果文件夹下有子文件夹，获取子文件夹下的所有文件全路径。
-                GetAllFileName(a.getAbsolutePath()+"\\",listFileName);
+                    GetAllFileName(a.getAbsolutePath()+"\\",listFileName);
                 }
             }
         }
@@ -303,47 +290,44 @@ class InfectStatistic {
         }
     }
 
-    static class BasicInformation{
+    static class Statistics {
         public static String[] nameOfAreas = {"全国","安徽", "北京","重庆","福建","甘肃", "广东", "广西", "贵州", "海南",
                 "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
                 "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};
+        public static Map<String,Integer> indexOfAreas=new HashMap<>();
         public static AreaInformation[] Areas = new AreaInformation[32];
         public static int[] KeyOfOutput = new int[32];
         public static File outputFile;  // 输出文件
 
         public static int GetIndexOfArea(String nameOfArea){
-            int res=0;
-            for(int i0 = 0;i0 < 32;i0++){
-                if (BasicInformation.nameOfAreas[i0].equals(nameOfArea)){
-                    res = i0;
-                    break;
-                }
+            if (!Statistics.indexOfAreas.containsKey(nameOfArea)){
+                return 0;
             }
-            return res;
+            return Statistics.indexOfAreas.get(nameOfArea);
         }
 
         public static void AddInfectedPatients(int num,int indexOfArea){
-            BasicInformation.Areas[0].numberOfInfectedPatients += num;
-            BasicInformation.Areas[indexOfArea].numberOfInfectedPatients += num;
+            Statistics.Areas[0].numberOfInfectedPatients += num;
+            Statistics.Areas[indexOfArea].numberOfInfectedPatients += num;
         }
 
         public static void AddSuspectedPatients(int num,int indexOfArea){
-            BasicInformation.Areas[0].numberOfSuspectedPatients += num;
-            BasicInformation.Areas[indexOfArea].numberOfSuspectedPatients += num;
+            Statistics.Areas[0].numberOfSuspectedPatients += num;
+            Statistics.Areas[indexOfArea].numberOfSuspectedPatients += num;
         }
 
         public static void AddCured(int num,int indexOfArea){
-            BasicInformation.Areas[0].numberOfPeopleCured += num;
-            BasicInformation.Areas[0].numberOfInfectedPatients -=num;
-            BasicInformation.Areas[indexOfArea].numberOfPeopleCured += num;
-            BasicInformation.Areas[indexOfArea].numberOfInfectedPatients -= num;
+            Statistics.Areas[0].numberOfPeopleCured += num;
+            Statistics.Areas[0].numberOfInfectedPatients -=num;
+            Statistics.Areas[indexOfArea].numberOfPeopleCured += num;
+            Statistics.Areas[indexOfArea].numberOfInfectedPatients -= num;
         }
 
         public static void AddDeaths(int num,int indexOfArea){
-            BasicInformation.Areas[0].numberOfDeaths += num;
-            BasicInformation.Areas[0].numberOfInfectedPatients -=num;
-            BasicInformation.Areas[indexOfArea].numberOfDeaths += num;
-            BasicInformation.Areas[indexOfArea].numberOfInfectedPatients -= num;
+            Statistics.Areas[0].numberOfDeaths += num;
+            Statistics.Areas[0].numberOfInfectedPatients -=num;
+            Statistics.Areas[indexOfArea].numberOfDeaths += num;
+            Statistics.Areas[indexOfArea].numberOfInfectedPatients -= num;
         }
     }
 
@@ -356,10 +340,6 @@ class InfectStatistic {
 
         public AreaInformation(String nameOfArea){
             this.nameOfArea = nameOfArea;
-            numberOfInfectedPatients = 0;
-            numberOfPeopleCured = 0;
-            numberOfSuspectedPatients = 0;
-            numberOfDeaths = 0;
         }
 
         public void SetTheNumberOfInfectedPatients(int numberOfInfectedPatients){
@@ -383,14 +363,17 @@ class InfectStatistic {
         }
     }
 
+
     public static void main(String[] args){
 
+        InfectStatistic  ret = new InfectStatistic();
+
         // 初始化区域类
-        for (int i0 = 0;i0 < BasicInformation.nameOfAreas.length;i0++){
-            BasicInformation.Areas[i0] = new AreaInformation(BasicInformation.nameOfAreas[i0]);
-            BasicInformation.KeyOfOutput[i0] = 0;
+        for (int i0 = 0,l=Statistics.nameOfAreas.length; i0 < l; i0++){
+            Statistics.Areas[i0] = new AreaInformation(Statistics.nameOfAreas[i0]);
+            Statistics.indexOfAreas.put(Statistics.nameOfAreas[i0],i0);
         }
-        BasicInformation.KeyOfOutput[0] = 1;
+        Statistics.KeyOfOutput[0] = 1;
 
         Controller.GetParameters(args); // 获取输入的参数
         FileProcessor.CreateOutputFile();   // 创建输出文件

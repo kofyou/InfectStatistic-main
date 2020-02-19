@@ -6,12 +6,15 @@
 */
 
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 class InfectStatistic 
@@ -300,6 +303,36 @@ class InfectStatistic
 		}
 	}
 	
+	/*
+	* Description:将统计结果输出到txt文件当中
+	* Input:统计结果所在字符串
+	* Return:无
+	* Others:无
+	*/ 
+	public static void outputToTxtFile(String resultString)
+	{
+		File txtFile = new File(pathOfOutput);
+		try 
+		{
+			if(txtFile.exists()) //如果有同名文件，先删除那个文件
+			{
+				txtFile.delete();
+			}
+			
+			txtFile.createNewFile();
+			FileOutputStream writerStream = new FileOutputStream(txtFile);
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(writerStream, "UTF-8"));
+
+			writer.write(resultString);
+			writer.close();
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		
+	}
+	
     public static void main(String[] args) throws IOException 
     {
     	analysisOfCommand(args);
@@ -517,6 +550,8 @@ class InfectStatistic
 			}
     		
     		writeFileString += "// 该文档并非真实数据，仅供测试使用";
+    		
+    		outputToTxtFile(writeFileString);  //将结果写入指定txt文件
     		
     		System.out.println(writeFileString);
     		

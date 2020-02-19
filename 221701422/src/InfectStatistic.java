@@ -10,12 +10,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * InfectStatistic
@@ -70,35 +73,17 @@ class InfectStatistic {
 			// System.out.println(dateString);
 			// System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
 			// System.out.println(patientsHashMap.get("治愈") + "");
-			if(provinceStrings.length==0) {
-				Iterator iterator = provinceHashMap.keySet().iterator();
-				while (iterator.hasNext()) {
-					String keyString = (String) iterator.next();
-					String temString = "";
-					// System.out.print(keyString + " ");
-					temString += keyString + " ";
-					HashMap<String, Long> patientsHashMap = provinceHashMap.get(keyString);
-					for (String string : typeStrings) {
-						temString += string + "" + patientsHashMap.get(string) + "人 ";
-						// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
-					}
-					temString.substring(0, temString.length() - 1);
-					System.out.println(temString);
+			for (String string : provinceStrings) {
+				String temString = "";
+				// System.out.print(keyString + " ");
+				temString += string + " ";
+				HashMap<String, Long> patientsHashMap = provinceHashMap.get(string);
+				for (String string1 : typeStrings) {
+					temString += string1 + "" + patientsHashMap.get(string1) + "人 ";
+					// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
 				}
-			}
-			else {
-				for(String string:provinceStrings) {
-					String temString = "";
-					// System.out.print(keyString + " ");
-					temString += string + " ";
-					HashMap<String, Long> patientsHashMap = provinceHashMap.get(string);
-					for (String string1 : typeStrings) {
-						temString += string1 + "" + patientsHashMap.get(string1) + "人 ";
-						// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
-					}
-					temString.substring(0, temString.length() - 1);
-					System.out.println(temString);
-				}
+				temString.substring(0, temString.length() - 1);
+				System.out.println(temString);
 			}
 		} catch (ParseException e) {
 			// TODO 自动生成的 catch 块
@@ -113,14 +98,14 @@ class InfectStatistic {
 		for (String string : commandStrings) {
 			inputHashMap.put(string, "");
 		}
-		String i = "";
+		String temString = "";
 		for (String string : args) {
 			// System.out.println(i+":"+string.charAt(0));
 			if (!string.equals("list")) {
 				if (string.charAt(0) == '-') {
-					i = string;
+					temString = string;
 				} else {
-					inputHashMap.put(i, inputHashMap.get(i) + " " + string);
+					inputHashMap.put(temString, inputHashMap.get(temString) + " " + string);
 				}
 			}
 		}
@@ -141,8 +126,8 @@ class InfectStatistic {
 		System.arraycopy(temStrings, 1, provinceStrings, 0, provinceStrings.length);
 
 		initProvinceHashMap("全国");
-		for (int j = 0; j < typeAbbreviationCommandStrings.length; j++) {
-			typeAbbreviationCommandHashMap.put(typeAbbreviationCommandStrings[j], j);
+		for (int i = 0; i < typeAbbreviationCommandStrings.length; i++) {
+			typeAbbreviationCommandHashMap.put(typeAbbreviationCommandStrings[i], i);
 		}
 	}
 
@@ -317,13 +302,32 @@ class InfectStatistic {
 	}
 
 	private static void provinceScreen() {
-		if(provinceStrings.length==0) {
-			
-		}else {
-			String[] temStrings = provinceStrings;
-			for (String string : temStrings) {
+		if (provinceStrings.length == 0) {
+			Set set = provinceHashMap.keySet();
+			Object[] temObject = set.toArray();
+			provinceStrings = new String[temObject.length];
+			for (int i = 0; i < temObject.length; i++) {
+				provinceStrings[i] = (String) temObject[i];
+			}
+		} else {
+			for (String string : provinceStrings) {
 				initProvinceHashMap(string);
 			}
+		}
+		sortProvinceStrings();
+	}
+
+	private static void sortProvinceStrings() {
+		Comparator<Object> comparator = Collator.getInstance(java.util.Locale.CHINA);
+		Arrays.sort(provinceStrings, comparator);
+		if (Arrays.asList(provinceStrings).contains("全国")) {
+			String temString = "全国";
+			for (String string : provinceStrings) {
+				if (!string.equals("全国")) {
+					temString += " " + string;
+				}
+			}
+			provinceStrings = temString.split(" ");
 		}
 	}
 }

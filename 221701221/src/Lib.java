@@ -74,4 +74,25 @@ class Common {
         }
         return date;
     }
+    public static Container readOutFile(String outFilePath) throws IOException
+    {
+        Container container = new Container();
+        File file = new File(outFilePath);
+        FileReader fr = new FileReader(file);
+        BufferedReader br = new BufferedReader(fr);
+        String line = null;
+        while((line = br.readLine()) != null)
+        {
+            Record record = new Record();
+            if (readOneLineOfOutFile(record, line))
+            {
+                container.AddRecord(record);
+            }
+            else
+            {
+                break;
+            }
+        }
+        return container;
+    }
 }

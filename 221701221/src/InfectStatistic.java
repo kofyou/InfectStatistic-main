@@ -100,6 +100,83 @@ class InfectStatistic
             InfectedRecord.UpSpNum(num);
         }
     }
+    //构造函数
+    public InfectStatistic()
+    {
+        cmdArgs = new CmdArgs();
+        nation = new Record();
+        nation.SetProvinceName("全国");
+        container = new Container();
+        LogsMap = new HashMap<>();
+    }
+
+    //处理文件中的一行
+    public boolean ManageLine(String line)
+    {
+        String[] data = line.split(" ");
+        String beginStr = data[0].substring(0 ,2);
+        if (beginStr.equals(Lib.Skip))
+        {
+            return false;
+        }
+        // Get Province record
+        Record record = container.GetRecord(data[0]);
+        if (record == null)
+        {
+            record = new Record();
+            record.SetProvinceName(data[0]);
+            container.AddRecord(record);
+        }
+        //获取数量
+        int num = Common.parserStringToInt(data[data.length - 1]);
+        int[] dataLength = {3 , 4 , 5};
+        // 处理数据
+        if (data.length == dataLength[0])
+        {
+            if (data[1].equals(Lib.Dead))
+            {
+                this.AddDeadNum(record , num);
+            }
+            else if (data[1].equals(Lib.Cure))
+            {
+                this.AddCureNum(record , num);
+            }
+        }
+        else if (data.length == dataLength[1])
+        {
+            if (data[1].equals(Lib.Increase))
+            {
+                if (data[2].equals(Lib.Ip))
+                {
+                    this.AddIpNum(record , num);
+                }
+                else if (data[2].equals(Lib.Sp))
+                {
+                    this.AddSpNum(record , num);
+                }
+            }
+            else if (data[1].equals(Lib.Sp))
+            {
+                this.Sp2Ip(record , num);
+            }
+            else if (data[1].equals(Lib.Exclude))
+            {
+                this.ExcludeSp(record , num);
+            }
+        }
+        else if (data.length == dataLength[2])
+        {
+            Record InfectedRecord = container.GetRecord(data[3]);
+            if (InfectedRecord == null)
+            {
+                InfectedRecord = new Record();
+                InfectedRecord.SetProvinceName(data[3]);
+                container.AddRecord(InfectedRecord);
+            }
+            this.Move(record , InfectedRecord , data[1] , num);
+        }
+        return true;
+    }
 }
 class Container {
 

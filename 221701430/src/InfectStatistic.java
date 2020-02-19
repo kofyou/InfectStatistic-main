@@ -190,7 +190,11 @@ class InfectStatistic {
 		public ArrayList<String> filename_list;
 		
 		public CommandLineRun(CommandLine cmdline) throws IOException {
-			cmdline.test();
+			if(!cmdline.command.type.equals("list")) {
+				System.err.println("错误命令！");
+				System.exit(0);
+			}
+			//cmdline.test();
 			//初始化全国总数据和各省总数据
 			ip = 0;
 			sp = 0;
@@ -377,11 +381,18 @@ class InfectStatistic {
 			public int sp;
 			public int cure;
 			public int dead;
+			//用于记录四项数据是否全是0
+			public boolean isblank() {
+				if(ip == 0 && sp == 0 && cure == 0 && dead == 0) {
+					return true;
+				}else {
+					return false;
+				}
+			}
 		}
 		
 		//创建需要读取的文件名列表
 		public void creat_filename_list(String path,String date) {
-			List<String> temp_list = new ArrayList<String>();
 			filename_list = new ArrayList<String>();
 			String []temp;
 			int index = -1;
@@ -420,6 +431,7 @@ class InfectStatistic {
 				}
 			}
 			Collections.sort(filename_list);
+			System.out.println(filename_list);
 		}
 		
 		//按要求输出到文件
@@ -466,6 +478,10 @@ class InfectStatistic {
 				}				
 			}else {//没有对省份进行要求
 				for(int i = 0;i < province_list.size();i++) {
+					//如果某省四种数据全为0就不做输出
+					if(province_list.get(i).isblank()) {
+						continue;
+					}
 					temp_province = province_list.get(i);
 					//打印这个省份需要的数据
 					//当没有要求type时
@@ -541,7 +557,7 @@ class InfectStatistic {
         commandline_test.add("全国");
         commandline_test.add("福建");
         commandline_test.add("-date");
-        commandline_test.add("2020-01-26");
+        commandline_test.add("2020-02-04");
         
         CommandLineAnalysis commandline_analysis = new CommandLineAnalysis();
         commandline = commandline_analysis.analysis(commandline_test);

@@ -1,1 +1,5 @@
 /bin/
+.classpath
+.project
+/src/.class
+

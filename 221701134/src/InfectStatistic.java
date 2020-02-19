@@ -15,20 +15,12 @@ import java.util.Hashtable;
  * TODO
  *
  * @author VisionWong
- * @version 0.1
+ * @version 1.0
  * @since 2020/2/17
  */
 class InfectStatistic {
 				
-    public static void main(String[] _args) {
-    	
-    	String[] args = {
-    			"list","-date","2020-01-22","-log",
-    			"D:\\GithubProjects\\InfectStatistic-main\\example\\log\\",
-    			"-out",
-    			"D:\\GithubProjects\\InfectStatistic-main\\example\\result\\output.txt",
-    			
-    	};
+    public static void main(String[] args) {
     	
     	if(args[0].equalsIgnoreCase("list")) {   		
     		//初始化统计类并启动
@@ -94,7 +86,7 @@ class InfectStatistic {
 	  * @param args  命令行参数数组
 	  */
 	 private void parse() {
-		 for (int i = 0; args[i] != null; i++) {
+		 for (int i = 1; i < args.length; i++) {
 			switch (args[i]) {
 			case Constants.CMD_DATE:
 				isReadAll = false;
@@ -176,10 +168,9 @@ class InfectStatistic {
 		 
 		 if (isReadAll == false) {
 			//比较输入日期与最新日期
-			 String lastestDate = logFiles[logFiles.length - 1].getName();
-			 //TODO： debug语句 后续删除
-			 System.out.println("当前最新的日期文件名为：" + lastestDate);
-			 lastestDate = lastestDate.split(".")[0];
+			 String lastestDate = logFiles[logFiles.length - 1].getName();	 
+			 lastestDate = lastestDate.split("\\.")[0];
+			 System.out.println("当前最新的日期为：" + lastestDate);
 			 if (date.compareTo(lastestDate) > 0) {
 				 System.out.println("日期超出范围，当前最新日期为：" + lastestDate);
 				 isEnd = true;
@@ -189,7 +180,7 @@ class InfectStatistic {
 		 
 		 //读取日志文件
 		 for (int i = 0; i < logFiles.length; i++) {
-			logDate = logFiles[i].getName().split(".")[0];
+			logDate = logFiles[i].getName().split("\\.")[0];
 			if (isReadAll || date.compareTo(logDate) >= 0) {
 				try {
 					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(logFiles[i]), "UTF-8"));;               
@@ -366,7 +357,7 @@ class InfectStatistic {
 
 		@Override
 		public int compare(String o1, String o2) {
-			return o1.compareTo(o2);
+			return o2.compareTo(o1);
 		}		
 	}
 	 

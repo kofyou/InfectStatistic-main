@@ -179,7 +179,7 @@ class InfectStatistic {
 		                
 		            while ((line = br.readLine()) != null){
 		                String[] datas = line.split(" ");
-		                //处理单行数据
+		                //读取并处理单行数据
 		                executeOneLine(datas);
 		            }          
 		            br.close();
@@ -202,16 +202,7 @@ class InfectStatistic {
 		 }
 		 
 		String provinceName = datas[0];
-		Province prov = null; 
-		
-		//判断省份是否已经缓存，没有则新建省份对象，并加入哈希表中
-		if (provinceHashtable.containsKey(provinceName) == false) {
-			prov = new Province(provinceName);
-			provinceHashtable.put(provinceName, prov);
-		}
-		else {
-			prov = provinceHashtable.get(provinceName);
-		}
+		Province prov = getProvinceByKey(provinceName); 
 		
 		//根据不同情况进行处理
 		switch (datas[1]) {
@@ -221,13 +212,54 @@ class InfectStatistic {
 		case "治愈":
 			prov.increaseCure(datas[2]);
 			break;
-		
-
-		default:
+		case "新增":
+			if (datas[2].equals("感染患者")) {
+				prov.increaseIp(datas[3]);
+			}
+			else { //新增疑似患者
+				prov.increaseSp(datas[3]);
+			}
 			break;
+		case "排除": //排除疑似患者
+			prov.decreaseSp(datas[3]);
+			break;
+		case "疑似患者": 
+			if (datas[2].equals("确诊感染")) { //疑似患者确诊
+				prov.increaseIpBySpConfirmed(datas[3]);
+			}
+			else { //疑似患者流入他省
+				Province prov2 = getProvinceByKey(datas[3]);
+				prov.decreaseSp(datas[4]);
+				prov2.increaseSp(datas[4]);
+			}
+			break;
+		case "感染患者": //感染患者流入他省
+			Province prov2 = getProvinceByKey(datas[3]);
+			prov.decreaseIp(datas[4]);
+			prov2.increaseIp(datas[4]);
+			break;
+		default:
+			System.out.println("日志格式可能出现错误！解析失败！");
+			break;
+		}		
+	}
+	 
+	 /**
+	  * description：判断省份是否已经缓存，没有则新建省份对象，并加入哈希表中
+	  * @param key  键值 即省名
+	  * @return
+	  */
+	 private Province getProvinceByKey(String key) {		 
+		 Province prov = null;
+		 if (provinceHashtable.containsKey(key) == false) {
+				prov = new Province(key);
+				provinceHashtable.put(key, prov);
 		}
-		
-	}	 
+		else {
+			prov = provinceHashtable.get(key);
+		}
+		return prov;	
+	}
 	 
 	 /**
 	  * description：将统计结果写入文件输出

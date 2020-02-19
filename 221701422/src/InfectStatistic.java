@@ -38,30 +38,30 @@ class InfectStatistic {
 	 * -type 使用缩写选择如 -type ip 表示只列出感染患者的情况，-type sp cure则会按顺序[sp, cure]列出疑似患者和治愈患者的情况，不指定该项默认会列出所有情况。
 	 * -province 指定列出的省，如-province 福建，则只列出福建，-province 全国 浙江则只会列出全国、浙江
 	 */
-	private static String[] commandStrings = { "-log", "-out", "-date", "-type", "-province" };
+	public static String[] commandStrings = { "-log", "-out", "-date", "-type", "-province" };
 
 	// 可选择[ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]，使用缩写选择
-	private static String[] typeAbbreviationCommandStrings = { "ip", "sp", "cure", "dead" };
-	private static HashMap<String, Integer> typeAbbreviationCommandHashMap = new HashMap<String, Integer>();
+	public static String[] typeAbbreviationCommandStrings = { "ip", "sp", "cure", "dead" };
+	public static HashMap<String, Integer> typeAbbreviationCommandHashMap = new HashMap<String, Integer>();
 	// 存放患者的类型
-	private static String[] typeCharCommondStrings = { "感染患者", "疑似患者", "治愈", "死亡" };
+	public static String[] typeCharCommondStrings = { "感染患者", "疑似患者", "治愈", "死亡" };
 
-	private static String[] cureAndDeadStrings = { "治愈", "死亡" };
-	private static String[] addAndExcludeAndDiagnosisStrings = { "新增", "排除", "确诊感染" };
-	private static String inflowString = "流入";
+	public static String[] cureAndDeadStrings = { "治愈", "死亡" };
+	public static String[] addAndExcludeAndDiagnosisStrings = { "新增", "排除", "确诊感染" };
+	public static String inflowString = "流入";
 
 	// 存放输入信息
-	private static HashMap<String, String> inputHashMap = new HashMap<String, String>();
+	public static HashMap<String, String> inputHashMap = new HashMap<String, String>();
 	// 存放省份与患者
-	private static HashMap<String, HashMap<String, Long>> provinceHashMap = new HashMap<String, HashMap<String, Long>>();
+	public static HashMap<String, HashMap<String, Long>> provinceHashMap = new HashMap<String, HashMap<String, Long>>();
 
-	private static String logNameString = "";
-	private static String outNameString = "";
-	private static String dateString = "";
-	private static String[] typeStrings;
-	private static String[] provinceStrings;
+	public static String logNameString = "";
+	public static String outNameString = "";
+	public static String dateString = "";
+	public static String[] typeStrings;
+	public static String[] provinceStrings;
 
-	private static String[] logNameStrings;
+	public static String[] logNameStrings;
 
 	public static void main(String[] args) {
 		init(args);
@@ -92,7 +92,7 @@ class InfectStatistic {
 		}
 	}
 
-	private static void init(String[] args) {
+	public static void init(String[] args) {
 		for (String string : commandStrings) {
 			inputHashMap.put(string, "");
 		}
@@ -129,7 +129,7 @@ class InfectStatistic {
 		}
 	}
 
-	private static void initProvinceHashMap(String provinceString) {
+	public static void initProvinceHashMap(String provinceString) {
 		if (!provinceHashMap.containsKey(provinceString)) {
 			// System.out.println("不包含");
 			HashMap<String, Long> patientsHashMap = new HashMap<String, Long>();
@@ -141,7 +141,7 @@ class InfectStatistic {
 		}
 	}
 
-	private static boolean readLogName() throws ParseException,NullPointerException {
+	public static boolean readLogName() throws ParseException,NullPointerException {
 		File file = new File(logNameString);
 		String[] fileList = file.list();
 		String temString = "";
@@ -173,7 +173,7 @@ class InfectStatistic {
 		return true;
 	}
 
-	private static void readLogContent() throws IOException {
+	public static void readLogContent() throws IOException {
 		Charset.defaultCharset();
 		for (String string : logNameStrings) {
 			String pathString = logNameString + string;
@@ -194,31 +194,7 @@ class InfectStatistic {
 		}
 	}
 
-	/**
-	 * private static String getFileCharset(String pathNameString) throws IOException {
-		InputStream inputStream = new FileInputStream(pathNameString);
-		byte[] head = new byte[3];
-		inputStream.read(head);
-	
-		String charset = "GBK";// 或GB2312，即ANSI
-		if (head[0] == -1 && head[1] == -2) {// 0xFFFE
-			charset = "UTF-16";
-		} else if (head[0] == -2 && head[1] == -1) {// 0xFEFF
-			charset = "Unicode";// 包含两种编码格式：UCS2-Big-Endian和UCS2-Little-Endian
-		} else if (head[0] == -27 && head[1] == -101 && head[2] == -98) {
-			charset = "UTF-8"; // UTF-8(不含BOM)
-		} else if (head[0] == -17 && head[1] == -69 && head[2] == -65) {
-			charset = "UTF-8"; // UTF-8-BOM
-		}
-	
-		inputStream.close();
-		// System.out.println(code);
-	
-		return charset;
-	}
-	 */
-
-	private static void dealLogContent(String lineString) {
+	public static void dealLogContent(String lineString) {
 		String[] inputStrings = lineString.split(" ");
 		initProvinceHashMap(inputStrings[0]);
 		if (inputStrings.length == 3) {
@@ -246,7 +222,7 @@ class InfectStatistic {
 		}
 	}
 
-	private static void cureAndDead(String[] inputStrings) {
+	public static void cureAndDead(String[] inputStrings) {
 		Long originalLong = new Long(0);
 		Long changesLong = new Long(0);
 		originalLong = provinceHashMap.get(inputStrings[0]).get(typeCharCommondStrings[0]);
@@ -258,7 +234,7 @@ class InfectStatistic {
 		provinceHashMap.get(inputStrings[0]).put(inputStrings[1], originalLong);
 	}
 
-	private static void addAndExcludeAndDiagnosis(String[] inputStrings, int i) {
+	public static void addAndExcludeAndDiagnosis(String[] inputStrings, int i) {
 		Long originalLong = new Long(0);
 		Long changesLong = new Long(0);
 		changesLong = Long.valueOf(inputStrings[3].substring(0, inputStrings[3].length() - 1));
@@ -280,7 +256,7 @@ class InfectStatistic {
 		}
 	}
 
-	private static void inflow(String[] inputStrings) {
+	public static void inflow(String[] inputStrings) {
 		initProvinceHashMap(inputStrings[3]);
 		Long originalLong = new Long(0);
 		Long changesLong = new Long(0);
@@ -293,7 +269,7 @@ class InfectStatistic {
 		provinceHashMap.get(inputStrings[3]).put(inputStrings[1], originalLong);
 	}
 
-	private static void typeScreen() {
+	public static void typeScreen() {
 		String[] temStrings = typeStrings;
 		if (temStrings.length == 0) {
 			typeStrings = new String[4];
@@ -307,7 +283,7 @@ class InfectStatistic {
 		}
 	}
 
-	private static void provinceScreen() {
+	public static void provinceScreen() {
 		if (provinceStrings.length == 0) {
 			Set set = provinceHashMap.keySet();
 			Object[] temObject = set.toArray();
@@ -323,7 +299,7 @@ class InfectStatistic {
 		sortProvinceStrings();
 	}
 
-	private static void sortProvinceStrings() {
+	public static void sortProvinceStrings() {
 		Comparator<Object> comparator = Collator.getInstance(java.util.Locale.CHINA);
 		Arrays.sort(provinceStrings, comparator);
 		if (Arrays.asList(provinceStrings).contains("全国")) {
@@ -337,7 +313,7 @@ class InfectStatistic {
 		}
 	}
 
-	private static void writeOutPut() throws IOException {
+	public static void writeOutPut() throws IOException {
 		File file = new File(outNameString);
 		if (!file.exists()) {
 			file.createNewFile();
@@ -359,5 +335,18 @@ class InfectStatistic {
 		}
 		bufferedWriter.write("// 该文档并非真实数据，仅供测试使用");
 		bufferedWriter.close();
+	}
+	
+	public static void returnToBegin() {
+		typeAbbreviationCommandHashMap = new HashMap<String, Integer>();
+		inputHashMap = new HashMap<String, String>();
+		provinceHashMap = new HashMap<String, HashMap<String, Long>>();
+		logNameString = "";
+		outNameString = "";
+		dateString = "";
+		String[] temStrings=new String[0];
+		typeStrings=temStrings;
+		provinceStrings=temStrings;
+		logNameStrings=temStrings;
 	}
 }

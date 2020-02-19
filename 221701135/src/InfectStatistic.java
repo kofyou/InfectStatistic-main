@@ -24,7 +24,7 @@ class InfectStatistic {
 	public static String date = "";//指定统计截至日期
 	public static List<String> type = new ArrayList<String>();//指定输出的患者类型
 	public static List<String> outputprovince = new ArrayList<String>();//指定输出的省份名称 
-	public static Hashtable<String, province> map =new Hashtable<String, InfectStatistic.province>();//存放省份的哈希表
+	public static Hashtable<String, Province> map =new Hashtable<String, InfectStatistic.Province>();//存放省份的哈希表
 	public static String[] provincename = {
 			"全国",
 			"安徽","北京","重庆","福建","甘肃",
@@ -35,14 +35,14 @@ class InfectStatistic {
 			"四川","天津","西藏","新疆","云南",
 			"浙江"};
 	
-	public static class province {
+	public static class Province {
 		private String name;//省份名称 
 		private long ip;//感染患者
 		private long sp;//疑似患者
 		private long cure;//治愈患者
 		private long dead;//死亡患者
 		/////////////////初始化相关变量///////////////////
-		province(String name, long ip, long sp, long cure, long dead) {
+		Province(String name, long ip, long sp, long cure, long dead) {
 			this.name = name;
 			this.ip = ip;
 			this.sp = sp;
@@ -64,26 +64,26 @@ class InfectStatistic {
 		public long getdead() {return dead;}
 	}
 	
-	public static void inithashmap() {//初始化省份哈希表
+	public static void inItHashMap() {//初始化省份哈希表
 		type.add("true");
 		outputprovince.add("ture");
 		for (int i = 0; i<provincename.length; i++) {
-			map.put(provincename[i], new province(provincename[i], 0, 0, 0, 0));
+			map.put(provincename[i], new Province(provincename[i], 0, 0, 0, 0));
 		}
 	}
 	
-	public static void getlogfile(String log) {//获取指定目录下的文件
+	public static void getLogFile(String log) {//获取指定目录下的文件
 		File logfile = new File(log);
 		List<String> fileprovince = new ArrayList<String>();//指定省份涉及的省份
 		if (logfile.isDirectory()) {
 			String list[] = logfile.list();//获取文件列表
-			if (!date.equals("") && !lastdatecheck(list)) {//如果date有参数，且超过最晚日期
+			if (!date.equals("") && !lastDateCheck(list)) {//如果date有参数，且超过最晚日期
 				System.out.println("超出最晚日期");
 				return ;
 			} else {
 				for (int i=0; i<list.length; i++) {
 					File file = new File(log + "/" +list[i]);//合成目标文件路径
-					if (file.isFile() && checkdate(file)) {//判断指定目录的文件下是否为标准文件，且日期是否不大于指定日期
+					if (file.isFile() && checkDate(file)) {//判断指定目录的文件下是否为标准文件，且日期是否不大于指定日期
 						try {
 							FileReader fr = new FileReader(file);
 							BufferedReader br = new BufferedReader(fr);
@@ -102,40 +102,40 @@ class InfectStatistic {
 									}
 									switch (arr[1]) {
 									case "感染患者" :
-										map.get(arr[3]).ipadd(getlongfromstr(arr[4]));//流入省增加
-										map.get(arr[0]).ipsub(getlongfromstr(arr[4]));//流出省减少
+										map.get(arr[3]).ipadd(getLongFromStr(arr[4]));//流入省增加
+										map.get(arr[0]).ipsub(getLongFromStr(arr[4]));//流出省减少
 										break;
 									case "疑似患者" :
-										map.get(arr[3]).spadd(getlongfromstr(arr[4]));//流入省增加
-										map.get(arr[0]).spsub(getlongfromstr(arr[4]));//流出省减少
+										map.get(arr[3]).spadd(getLongFromStr(arr[4]));//流入省增加
+										map.get(arr[0]).spsub(getLongFromStr(arr[4]));//流出省减少
 										break;
 									}
 								} else if (arr.length == 4) {//福建 新增 感染患者 2人//福建 新增 疑似患者 5人//湖北 排除 疑似患者 2人//湖北 疑似患者 确诊感染 3人
 									switch (arr[1]) {
 									case "新增" :
 										if (arr[2].equals("感染患者")) {
-											map.get(arr[0]).ipadd(getlongfromstr(arr[3]));//感染患者增加
+											map.get(arr[0]).ipadd(getLongFromStr(arr[3]));//感染患者增加
 										} else {
-											map.get(arr[0]).spadd(getlongfromstr(arr[3]));//疑似患者增加
+											map.get(arr[0]).spadd(getLongFromStr(arr[3]));//疑似患者增加
 										}
 										break;
 									case "排除" :
-										map.get(arr[0]).spsub(getlongfromstr(arr[3]));//疑似患者减少
+										map.get(arr[0]).spsub(getLongFromStr(arr[3]));//疑似患者减少
 										break;
 									case "疑似患者" :
-										map.get(arr[0]).spsub(getlongfromstr(arr[3]));//疑似患者减少
-										map.get(arr[0]).ipadd(getlongfromstr(arr[3]));//感染患者增加
+										map.get(arr[0]).spsub(getLongFromStr(arr[3]));//疑似患者减少
+										map.get(arr[0]).ipadd(getLongFromStr(arr[3]));//感染患者增加
 										break;
 									}
 								} else if (arr.length == 3) {//湖北 死亡 1人//湖北 治愈 2人		
 									switch (arr[1]) {
 									case "治愈" :
-										map.get(arr[0]).ipsub(getlongfromstr(arr[2]));//感染患者减少
-										map.get(arr[0]).cureadd(getlongfromstr(arr[2]));//治愈患者增加
+										map.get(arr[0]).ipsub(getLongFromStr(arr[2]));//感染患者减少
+										map.get(arr[0]).cureadd(getLongFromStr(arr[2]));//治愈患者增加
 										break;
 									case "死亡" :
-										map.get(arr[0]).ipsub(getlongfromstr(arr[2]));//感染患者减少
-										map.get(arr[0]).deadadd(getlongfromstr(arr[2]));//死亡患者增加
+										map.get(arr[0]).ipsub(getLongFromStr(arr[2]));//感染患者减少
+										map.get(arr[0]).deadadd(getLongFromStr(arr[2]));//死亡患者增加
 										break;
 									}
 								}
@@ -173,23 +173,17 @@ class InfectStatistic {
 		} else { System.out.println("输入的log地址不为目录。"); }
 	}
 	
-	public static String getfilename(String filepath) {//获取文件名
-		String temp[] = filepath.split("\\\\");
-        String filename = temp[temp.length-1];
-        return filename;
-	}
-	
-	public static String getfileprename(String filepath) {//获取文件前缀名
+	public static String getFilePreName(String filepath) {//获取文件前缀名
 		String temp[] = filepath.split("\\\\");
         String filename = temp[temp.length-1]; //包括后缀名
         String fileprename = filename.substring(0,filename.indexOf(".")); //获取前缀名
         return fileprename;
 	}
 	
-	public static boolean lastdatecheck(String[] list) {//检测命令行参数日期是否超过最晚日期
+	public static boolean lastDateCheck(String[] list) {//检测命令行参数日期是否超过最晚日期
 		int num = 0;
 		for (int i = 0; i<list.length; i++) {
-			String filedate = getfileprename(list[i]);
+			String filedate = getFilePreName(list[i]);
 			if (date.compareTo(filedate) >= 1)
 				num++;
 		}
@@ -198,20 +192,20 @@ class InfectStatistic {
 		else return true;
 	}
 	
-	public static boolean checkdate(File file) {
+	public static boolean checkDate(File file) {
 		if (date.equals("")) {
 			return true;
 		}
 		else {
 			String logfilename = file.getName();
-		    String filedate = getfileprename(logfilename);
+		    String filedate = getFilePreName(logfilename);
 		    if (filedate.compareTo(date) >= 1)
 		    	return false;
 	    	else return true;
 		}
 	}
 	
-	public static long getlongfromstr(String str) {//从字符串中获取long类型
+	public static long getLongFromStr(String str) {//从字符串中获取long类型
 		String num = "";
 		str = str.trim();
 		for (int i = 0; i<str.length(); i++) {
@@ -229,7 +223,7 @@ class InfectStatistic {
 		return false;
 	}
 	
-	public static void readargs(String[] args) {//读取命令行参数
+	public static void readArgs(String[] args) {//读取命令行参数
 		for (int i = 1; i<args.length; i++) {
 			switch (args[i]) {
 			case "-log":
@@ -274,7 +268,7 @@ class InfectStatistic {
 		return;
 	}
 	
-	public static void output() {
+	public static void outPut() {
 //		for (int i = 0; i<outputprovince.size(); i++)
 //			System.out.println("output开始：" + outputprovince.get(i));
 		String str = new String("");
@@ -328,12 +322,12 @@ class InfectStatistic {
 	
 	
     public static void main(String[] args) {
-    	inithashmap();
-        readargs(args);
-        getlogfile(log);
+    	inItHashMap();
+        readArgs(args);
+        getLogFile(log);
 //    	for (int i=0; i<args.length; i++)
 //    		System.out.println("arg[" + i + "] = " + args[i]);
-    	output();
+    	outPut();
         return;
     }
 }

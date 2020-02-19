@@ -162,5 +162,104 @@ class InfectStatistic
     	}    		
     }
 }
+class Province
+{ 
+    private String name;    //省份名称
 
+    private int cure;    //治愈人数
+
+    private int dead;    //死亡人数
+    
+    private int suspectedPatients;    //疑似人数
+
+    private int infectionPatients;    //感染人数  
+    
+    public Province(String n)
+    {
+        name = n;
+    }
+    //感染人数增长
+    public void addIp(String str)
+    {
+        str = str.substring(0, str.length()-1);
+        infectionPatients += Integer.parseInt(str);
+    }
+    //感染人数减少
+    public void removeIp(String str)
+    {
+        str = str.substring(0, str.length()-1);
+        infectionPatients -= Integer.parseInt(str);
+    }
+    //疑似人数增长
+    public void addSp(String str)
+    {
+        str = str.substring(0, str.length()-1);
+        suspectedPatients += Integer.parseInt(str);
+    }   
+    //疑似人数减少
+    public void removeSp(String str)
+    {
+        str = str.substring(0, str.length()-1);
+        suspectedPatients -= Integer.parseInt(str);
+    }
+    //治愈人数增长
+    public void cure(String str)
+    {
+        str = str.substring(0, str.length()-1);
+        cure += Integer.parseInt(str);
+        infectionPatients -= Integer.parseInt(str);
+    }   
+    //死亡人数增长
+    public void dead(String str)
+    {
+        str = str.substring(0, str.length()-1);
+        dead += Integer.parseInt(str);
+        infectionPatients -= Integer.parseInt(str);
+    }
+    //省份情况
+    public void output(boolean isOutput, String[] output, BufferedWriter bw) throws IOException
+    {
+        if (isOutput)
+        {
+            bw.write(name + " 感染患者 " + infectionPatients + "人 "
+                + "疑似患者 " + suspectedPatients + "人 "
+                + "治愈 " + cure + "人 "
+                + "死亡 " + dead + "人");
+            bw.newLine();
+        }        
+        else
+        {
+            bw.write(name);
+            for (int i = 0; i < 4; i ++ )
+            {
+                switch (output[i])
+                {
+                    case "ip":                  
+                        bw.write(" 感染患者 " + infectionPatients + "人");           
+                        break;
+                    case "sp":                  
+                        bw.write(" 疑似患者 " + suspectedPatients + "人");               
+                        break;
+                    case "cure":                    
+                        bw.write(" 治愈 " + cure + "人");                  
+                        break;
+                    case "dead":                    
+                        bw.write(" 死亡 " + dead + "人");          
+                        break;
+                    default:                
+                        break;
+                }
+            }
+            bw.newLine();
+        }       
+    }       
+    //全国的情况
+    public void allAdd(Province p)
+    {
+        this.infectionPatients += p.infectionPatients;
+        this.suspectedPatients += p.suspectedPatients;
+        this.cure += p.cure;
+        this.dead += p.dead;
+    }
+}
 

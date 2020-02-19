@@ -6,7 +6,7 @@
 #  TODO
 #  读取文件，列出全国和各省在某日的感染情况，输出到输出文件中
 #  @author 091700410 傅少华
-#  @version 1.1
+#  @version 1.4
 #  @since 2020-2-18
 #  
 
@@ -14,9 +14,11 @@ import os
 import datetime
 import sys
 import time
+import pathlib
 
 def sort_by_pinyin(str):
-    
+#  用于按拼音排序各省
+
     province_dict = {
         '全国':0,'澳门':1,'安徽':2,
         '北京':3,'重庆':4,'福建':5,
@@ -36,8 +38,10 @@ def sort_by_pinyin(str):
 
 
 class InfectStatistic:
-    
+#  从日志读取数据，处理后输出到目标文件
+
     data_dict = {'全国':{'感染患者':0,'疑似患者':0,'治愈':0,'死亡':0}}
+    #  用于存放数据的嵌套字典，字典的键为省份名，值为记录各类型对应人数的字典，其键为类型，其值为对应的人数
     
     def __init__(self,input_path,output_path,file_date):
         
@@ -46,13 +50,12 @@ class InfectStatistic:
         self.file_date = file_date
     
     def file_data(self,input_list):
+    #  处理文档中的数据
         
         province = input_list[0]
         
-        if province in InfectStatistic.data_dict:
-            pass
-        else:
-            InfectStatistic.data_dict.update({province:{'感染患者':0,'疑似患者':0,'治愈':0,'死亡':0}})
+        if province not in InfectStatistic.data_dict:
+            InfectStatistic.data_dict.update({province:{'感染患者':0,'疑似患者':0,'治愈':0,'死亡':0}})  #  若省份不在字典中，则以省份名为键新建元素并添加到字典中
             
         if input_list[1] == '新增' or input_list[1] == '排除':
             type = input_list[2]
@@ -85,11 +88,15 @@ class InfectStatistic:
             InfectStatistic.data_dict['全国']['疑似患者'] -= num
             
     def read_file(self):
-        #  读取文档
+    #  读取日志
         
         date_of_file = datetime.datetime.strptime(self.file_date,'%Y-%m-%d')
         
-        for root,dirs,files in os.walk(r'..\\log\\'):
+        if not pathlib.Path(self.input_path).exists():
+            print('错误：日志路径不存在！')
+            sys.exit()
+        
+        for root,dirs,files in os.walk(self.input_path):  #  按时间顺序读取日志，直到读取到指定日期的日志
             for file in files:
                 if date_of_file >= datetime.datetime.strptime(file.replace('.log.txt', ''),'%Y-%m-%d'):
                     f = open(self.input_path + file,'r',encoding='utf-8')
@@ -98,16 +105,10 @@ class InfectStatistic:
                             pass
                         else:
                             content = line.split()
-                            print(str(content))
                             InfectStatistic.file_data(self,content)
-                
-        # print(InfectStatistic.data_dict)
-        for m in InfectStatistic.data_dict:
-            print(InfectStatistic.data_dict[m])
-        print(len(InfectStatistic.data_dict))
     
     def write_file(self,type_list=[],province_list=[]):
-    #  写入文档
+    #  输出到文件
         
         f = open(self.output_path,'w+',encoding='utf-8')
         
@@ -124,8 +125,10 @@ class InfectStatistic:
             elif type_list[i] == 'dead':
                 type_list[i] = '死亡'
         
+        print(str(type_list))
+        
         if len(province_list) == 0:
-            for i in range(34):
+            for i in range(35):
                 for m in InfectStatistic.data_dict:
                     if sort_by_pinyin(m) == i:
                         output_str = str(m)
@@ -133,8 +136,6 @@ class InfectStatistic:
                             output_str = output_str + ' ' + n + str(InfectStatistic.data_dict[m][n]) + '人'
                         output_str += '\n'
                         f.writelines(output_str)
-                        print(output_str,end='')
-    
         else:
             for i in range(34):
                 for m in InfectStatistic.data_dict:
@@ -144,13 +145,13 @@ class InfectStatistic:
                             output_str = output_str + ' ' + n + str(InfectStatistic.data_dict[m][n]) + '人'
                         output_str += '\n'
                         f.writelines(output_str)
-                        print(output_str,end='')
-                        
         
+        f.writelines('// 该文档并非真实数据，仅供测试使用')
+                        
 class CommandLineParameters:
-    #  处理命令行参数
+#  处理命令行参数
     
-    input_date = time.strftime('%Y-%m-%d')
+    input_date = time.strftime('%Y-%m-%d')  #  设置默认日期为当前日期，与默认为所提供日志最新的一天的效果相同
     
     input_path = ''
     
@@ -165,7 +166,8 @@ class CommandLineParameters:
         self.args = args
     
     def paras(self):
-        
+    #  处理命令行参数
+      
         index = 0
         
         for arg in self.args:
@@ -179,15 +181,15 @@ class CommandLineParameters:
                 self.set_type_list(index)
             if arg == '-province':
                 self.set_province_list(index)
-            
             index += 1
-                
-        print(self.input_path + ' ' + self.output_path + ' ' + self.input_date + ' ' + str(self.type_list) + ' ' + str(self.province_list))
                 
     def set_type_list(self,index):
         
         for i in range(index + 1,len(self.args)):
             if self.args[i][0] != '-':
+                if self.args[i] not in ['ip','sp','cure','dead']:
+                    print('错误：输入的类型不存在!')
+                    sys.exit()
                 self.type_list.append(self.args[i])
             else:
                 break
@@ -196,15 +198,26 @@ class CommandLineParameters:
         
         for i in range(index + 1,len(self.args)):
             if self.args[i][0] != '-':
+                try:
+                    sort_by_pinyin(self.args[i])
+                except KeyError as identifier:
+                    print('输入的省份不存在!')
+                    sys.exit()
                 self.province_list.append(self.args[i])
             else:
                 break
             
 if __name__ == "__main__":
-    fi = InfectStatistic('..\\log\\','..\\result\\ListOut.txt','2020-01-27')
-    fi.read_file()
-    fi.write_file()
-    if sys.argv[1] == 'list':
-        cl = CommandLineParameters(sys.argv[2:])
-        cl.paras()
-        
+    if len(sys.argv) >= 2:
+        if sys.argv[1] == 'list':
+            if '-log' in sys.argv and '-out' in sys.argv:
+                cl = CommandLineParameters(sys.argv[2:])
+                cl.paras()
+                fi = InfectStatistic(cl.input_path,cl.output_path,cl.input_date)
+                fi.read_file()
+                fi.write_file(cl.type_list,cl.province_list)
+            else:
+                if '-log' not in sys.argv:
+                    print('未指定日志目录的位置')
+                if '-out' not in sys.argv:
+                    print('未指定输出文件的目录和文件名')

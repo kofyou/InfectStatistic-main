@@ -26,41 +26,41 @@ class CmdAndFile
     /*
      * type：感染类型列表
      */
-     public String[] type = {"感染患者", "疑似患者", "治愈", "死亡患者"};
+    public String[] type = {"感染患者", "疑似患者", "治愈", "死亡患者"};
 
-     /*
+    /*
      * typeOrder：确认-type输出顺序
      * ip：type[x]=0      sp：type[x]=1
      * cure：type[x]=2   dead：type[x]=3
      *
      */
-     public int[] typeOrder = {-1,-1,-1,-1};
-     public int checkType = 0;
+    public int[] typeOrder = {-1,-1,-1,-1};
+    public int checkType = 0;
 
 
-     /*
-      * province：各省份列表 除去港澳台 31个省份 + "全国"
-      * 全国0 , 安徽1 , 北京2 , 重庆3 , 福建4 , 甘肃5, 广东6 , 广西7 ,
-      * 贵州8 , 海南9 , 河北10 , 河南11 , 黑龙江12 , 湖北13 , 湖南14 , 吉林15 ,
-      * 江苏16 , 江西17 , 辽宁18 , 内蒙古19 , 宁夏20 , 青海21 , 山东22 , 山西23,
-      * 陕西24 , 上海25 , 四川26 , 天津27 , 西藏28 , 新疆29 , 云南30 , 浙江31
-      */
-     public String[] province = { "全国","安徽","北京","重庆","福建","甘肃","广东","广西",
-                "贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
-                "江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西",
-                "陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
+    /*
+     * province：各省份列表 除去港澳台 31个省份 + "全国"
+     * 全国0 , 安徽1 , 北京2 , 重庆3 , 福建4 , 甘肃5, 广东6 , 广西7 ,
+     * 贵州8 , 海南9 , 河北10 , 河南11 , 黑龙江12 , 湖北13 , 湖南14 , 吉林15 ,
+     * 江苏16 , 江西17 , 辽宁18 , 内蒙古19 , 宁夏20 , 青海21 , 山东22 , 山西23,
+     * 陕西24 , 上海25 , 四川26 , 天津27 , 西藏28 , 新疆29 , 云南30 , 浙江31
+     */
+    public String[] province = { "全国","安徽","北京","重庆","福建","甘肃","广东","广西",
+            "贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
+            "江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西",
+            "陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
 
-     /*
+    /*
      * statistics：各省份各感染类型统计列表
      * statistics[32][]：除去港澳台31个省份 + "全国"
      * statistics[][5]：-type四种可选值 + -provice查询确认位
      *
      */
-     public int[][] statistics = new int[32][5];
+    public int[][] statistics = new int[32][5];
 
-     public int checkProvince = 0;
+    public int checkProvince = 0;
 
-     public String[] strCmd;  //当前输入cmd命令
+    public String[] strCmd;  //当前输入cmd命令
 
     CmdAndFile(String[] arg)
     {
@@ -69,9 +69,9 @@ class CmdAndFile
 
     //解析命令
     /*
-    * getValidLog：获取有效日志文件路径
-    * itemLog：cmd命令中-log路径在arg[]的索引值
-    */
+     * getValidLog：获取有效日志文件路径
+     * itemLog：cmd命令中-log路径在arg[]的索引值
+     */
     public int getValidLog(int itemLog)
     {
         /*  if (strCmd[itemLog].matches("^[A-z]:\\\\(.+?s\\\\)*$"))
@@ -114,7 +114,7 @@ class CmdAndFile
     /*
      * isDate：判断输入日期格式正确
      * dateStr：cmd命令中-date的值
-    */
+     */
     public boolean isDate (String dateStr)
     {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -233,9 +233,9 @@ class CmdAndFile
     /*
      * validCmd：解析cmd命令并判断是否有效
      */
-    public String getMinLogName()
+    public String getMinLogName(String filepath)
     {
-        String filepath = log;
+        //String filepath = log;
         String minLogName;
         File logFile = new File(filepath);
         File[] logFileList = logFile.listFiles();
@@ -315,7 +315,7 @@ class CmdAndFile
                 return false;
             }
         }
-        if (dateCmd.compareTo(getMinLogName()) < 0)
+        if (dateCmd.compareTo(getMinLogName(log)) < 0)
         {
             System.out.println("该日暂无记录！请重新输入！");
             return false;

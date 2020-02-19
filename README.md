@@ -1,126 +1,26 @@
-## 代码风格
+# InfectStatistic
+疫情统计-作业完成流程：
 
-- 缩进
-> 缩进采用四个空格，禁止使用tab缩进，以防造成tab和空格的混用
 
-- 变量命名
-> 小写字母，单词之间使用'\_'分割，如  `lowercase_with_underscores`
+1. fork该仓库到你的仓库，在根目录新建目录，目录名为你的学号
 
-- 每行最多字符数
-> 根据PEP8规范，每行限制为79个字符，若超出则使用换行符'\\'换行
-```python
-示例：
-print('qwertyuiop...\
-    zxcvbnm')
-```
-> 换行符断行的位置应在操作符前
-```python
-示例：
-if color == 'white' or color == 'black'\
-    or color == 'red':
-    do_something(color)
-```
+2. 复制example下的目录结构到你新建的目录下：
+    - 如果你使用c/c++或python，修改src下的文件后缀和文件内容对应到你使用的语言
+    - src下源代码【仅】允许包括这`InfectStatistic、Lib`两个文件，Lib可以为空但必须存在，【c/c++或python可以修改后缀】，但确保文件名一致、区分大小写
 
-- 函数最大行数
-> 函数最大行数不超过200行
+3. 语言支持：
+    - Java：Java8，推荐使用Java开发
+    - c/c++：gcc/g++ 6.3，将`java InfectStatistic`替换为`InfectStatistic.exe`
+    - python：3.7，将`java InfectStatistic`替换为`python InfectStatistic.py`
+    - 换行使用'\n'，编码统一使用UTF-8
+    - 仅允许使用语言自带的库，不允许使用第三方库
 
-- 函数、类命名
-> **函数名** 小写字母及下划线'\_'，如  `lowercase_with_underscores`
-> **类名** 采用驼峰拼写法，首字母大写，如  `CamelCase`
+4. 请勿修改example下的文件
 
-- 常量
-> 大写字母及下划线'\_'，如  `UPPERCASE_WITH_UNDERSCORES`
+5. example/result下提供了三个测试用例的标准输出，对应的命令在文件尾部提供了，即对example/log下的日志，输入对应的命令应该会是相应的输出。
 
-- 空行规则
-> 输入空行时，一般遵循以下原则：
->（1）在import不同种类的模块间加空行；
->（2）顶层函数和类的定义之间加空行；
->（3）在类与类的定义之间加空行；
->（4）在函数与函数的定义之间加空行；
->（5）在class定义行和其第一个方法定义之间加空行；
->（6）在函数中的逻辑段落间加空行，即把相关的代码紧凑写在一起，作为一个逻辑段落，段落间以空行分隔
+6. 为了使测试文件和输出文件不产生诱导性，要在日志文件/输出文件末尾加上`// 该文档并非真实数据，仅供测试使用`，建议读取日志时直接忽略以`//`开始的行
 
-```python
-示例：
-def hello(name):
-    print 'Hello %s!' % name
-    
+7. 除了示例仓库的给出的文件，其它自己产生的文件都应该在`.gitignore`忽略，如编译器生成的项目文件、输出文件、class、jar包、exe等
 
-def goodbye(name):
-    print 'See you %s.' % name
-    
-    
-class MyClass(object):
-    'This is a simple docstring'
-    
-    def __init__(self,name):
-        self.name = name
-        
-    def get_annoy_name(self):
-        return self.name.upper()
-```
-- 注释规则
-> **单行注释** 在注释的开头使用#
-> **多行注释** 使用三个单引号" ''' "
-```python
-示例：
-
-#这是单行注释
-
-'''
-这是多行注释
-这是多行注释
-'''
-```
-
-- 操作符前后空格
-> 在二元运算符周围使用空格
-```python
-示例：
-
-是：
-
-i = i + 1
-sum += 1
-x = x*2 - 1
-sum = x*x + y*y
-c = (a+b) * (a-b)
-
-否：
-
-i=i+1
-sum +=1
-x = x * 2 - 1
-sum = x * x + y * y
-c = (a + b) * (a - b)
-```
-
-- 引号
-> 除特殊情况以外（如字符串中带有单引号），字符串统一使用单引号
-> 
-
-- 分支与循环
-> 各种分支与循环语句不要写成一行
-```python
-示例：
-
-是：
-
-if !flg:
-    pass
-for i in range(10):
-    print(i)
-
-否：
-
-if !flg: pass
-for i in range(10): print(10)
-
-```
-
-- 头部
-> 所有python文件头部需要标上如下语句
-```python
-#-*- coding:utf8 -*-
-#!/usr/bin/python
-```
+8. 代码每有更新就可以进行commit签入，然后push到github，至少进行10次以上的commit签入，并将最终程序以pr的方式提交到该仓库

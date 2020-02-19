@@ -66,14 +66,17 @@ class InfectStatistic {
 	public static void main(String[] args) {
 		init(args);
 		try {
-			readLogName();
-			readLogContent();
-			typeScreen();
-			provinceScreen();
+			if (readLogName()) {
+				readLogContent();
+				typeScreen();
+				provinceScreen();
+				writeOutPut();
+			} else {
+				System.out.println("日期超出范围");
+			}
 			// System.out.println(dateString);
 			// System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
 			// System.out.println(patientsHashMap.get("治愈") + "");
-			writeOutPut();
 		} catch (ParseException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();
@@ -132,19 +135,26 @@ class InfectStatistic {
 		}
 	}
 
-	private static void readLogName() throws ParseException {
+	private static boolean readLogName() throws ParseException {
 		File file = new File(logNameString);
 		String[] fileList = file.list();
 		String temString = "";
 		if (dateString.length() != 0) {
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			Date inputDate = simpleDateFormat.parse(dateString);
+			Date maxDate = simpleDateFormat.parse("0000-00-00");
 			for (int i = 0; i < fileList.length; i++) {
 				Date date = simpleDateFormat.parse(fileList[i].split("\\.")[0]);
-				if (inputDate.compareTo(date) > -1) {
+				if (inputDate.compareTo(date) >= 0) {
 					temString += " " + fileList[i];
 					// System.out.println(simpleDateFormat.format(date));
 				}
+				if (maxDate.compareTo(date) < 0) {
+					maxDate = date;
+				}
+			}
+			if (maxDate.compareTo(inputDate) < 0) {
+				return false;
 			}
 		} else {
 			for (int i = 0; i < fileList.length; i++) {
@@ -154,6 +164,7 @@ class InfectStatistic {
 		String[] temStrings = temString.split(" ");
 		logNameStrings = new String[temStrings.length - 1];
 		System.arraycopy(temStrings, 1, logNameStrings, 0, logNameStrings.length);
+		return true;
 	}
 
 	private static void readLogContent() throws IOException {

@@ -243,8 +243,8 @@ class InfectStatistic
         inf.OutputFile();
     }
 }
-class Container {
-
+class Container
+{
     Map<String, Record> recordMap;
 
     public Container() {
@@ -261,6 +261,50 @@ class Container {
 
     public void AddRecord(Record record) {
         recordMap.put(record.GetProvinceName(), record);
+    }
+
+    public boolean CompareTo(Container c)
+    {
+        Map<String , Record> rdMap = c.GetRecordMap();
+        if (recordMap.size() != rdMap.size())
+        {
+            return false;
+        }
+        for (Map.Entry<String , Record> entry : recordMap.entrySet())
+        {
+            Record record1 = entry.getValue();
+            Record record2 = c.GetRecord(record1.GetProvinceName());
+            if (!record1.CompareTo(record2))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void SortByProvince()
+    {
+        ChinaComparator mapKeyComparator = new ChinaComparator();
+        recordMap = Common.sortMapByKey(recordMap , mapKeyComparator);
+    }
+
+    //将容器内容输入文件
+    public void OutContainer(BufferedWriter bw  , Vector<String> types  , Vector<String> Provinces) throws IOException
+    {
+        SortByProvince();
+        for (Map.Entry<String , Record> entry : recordMap.entrySet())
+        {
+            Record record = entry.getValue();
+            if (Provinces != null && Provinces.size() > 0)
+            {
+                String Province = entry.getValue().GetProvinceName();
+                if (!Provinces.contains(Province))
+                {
+                    continue;
+                }
+            }
+            record.OutRecord(bw , types);
+        }
     }
 }
 class Record
@@ -329,5 +373,19 @@ class Record
 
     public void SetDeadNum(int DeadNum) {
         this.DeadNum = DeadNum;
+    }
+
+    public void UpDeadNum(int num)
+    {
+        this.DeadNum += num;
+    }
+
+    public void SetAll(String ProvinceName , int Sp , int Ip , int Dead , int Cure)
+    {
+        this.SetProvinceName(ProvinceName);
+        this.SetSpNum(Sp);
+        this.SetIpNum(Ip);
+        this.SetDeadNum(Dead);
+        this.SetCureNum(Cure);
     }
 }

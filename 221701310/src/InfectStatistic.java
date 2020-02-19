@@ -312,6 +312,11 @@ class InfectStatistic {
         				int num = getPeopleNum(wordString[3]);
         				provinceMap.get(wordString[0]).spAdd(num);
         			}
+        			/*
+        			System.out.println(provinceMap.get(wordString[0]).provinceName);
+        			System.out.println(provinceMap.get(wordString[0]).ip);
+        			System.out.println(provinceMap.get(wordString[0]).sp);
+        			*/
         		}
         		else if(wordString[2].equals("流入")) {
         			if(wordString[1].equals("感染患者")) {
@@ -331,7 +336,7 @@ class InfectStatistic {
         			int num = getPeopleNum(wordString[2]);
         			provinceMap.get(wordString[0]).peopleCured(num);
         		}
-        		else if(wordString[2].equals("确认感染")) {
+        		else if(wordString[2].equals("确诊感染")) {
         			int num = getPeopleNum(wordString[3]);
         			provinceMap.get(wordString[0]).spDiagnosed(num);
         		}
@@ -351,16 +356,26 @@ class InfectStatistic {
     	
     	String outStr = new String();
     	
-    	for(int i=0;i<AllProvinceName.length;i++) {
-    		MyProvince curProvince = provinceMap.get(AllProvinceName[i]);
-    		if(curProvince.isMentioned) {
-        		outStr += curProvince.provinceName 
-            			+ " " +String.valueOf(curProvince.ip) 
-            			+ " " +String.valueOf(curProvince.sp)
-            			+ " " +String.valueOf(curProvince.cure)
-            			+ " " +String.valueOf(curProvince.dead) + "\n";
-    		}
-    	}	
+    	//构建输出字符串
+    	//没有"-province"参数时，列出全国的数据，以及日志中涉及到的省的数据
+    	if(!isProvinceSpecified) {
+        	for(int i=0;i<AllProvinceName.length;i++) {
+        		if(provinceMap.get(AllProvinceName[i]).isMentioned) {
+        			outStr += getStrByType(type,provinceMap.get(AllProvinceName[i]));
+        		}
+        	}
+    	}
+    	//有"-province"参数时，指定的省必须列出
+    	else {
+        	for(int i=0;i<AllProvinceName.length;i++) {
+        		if(provinceMap.get(AllProvinceName[i]).isNeedPrint) {
+        			outStr += getStrByType(type,provinceMap.get(AllProvinceName[i]));
+        		}
+        	}
+    	}
+    	
+    	//加上注释
+    	outStr += "// 该文档并非真实数据，仅供测试使用";
     	
     	File file = new File(outPath);
 
@@ -375,6 +390,30 @@ class InfectStatistic {
     	writer.flush();
     	writer.close();
     	
+    }
+    
+    //按-type指定的顺序输出curProvince的防疫情况
+    public String getStrByType(ArrayList<String> type,MyProvince curProvince) {
+    	String str = new String();
+    	str += curProvince.provinceName;
+    	for(int i = 0;i<type.size();i++) {
+    		switch(type.get(i)){
+    			case "ip":
+    				str += " " + "感染患者" + curProvince.ip + "人";
+    				break;
+    			case "sp":
+    				str += " " + "疑似患者" + curProvince.sp + "人";
+    				break;
+    			case "cure":
+    				str += " " + "治愈" + curProvince.cure + "人";
+    				break;
+    			case "dead":
+    				str += " " + "死亡" + curProvince.dead + "人";
+    				break;
+    		}
+    	}
+    	str += "\n";
+    	return str;
     }
     
     /*

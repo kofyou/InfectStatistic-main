@@ -5,8 +5,8 @@ import java.util.TreeSet;
  * InfectStatistic TODO
  *
  * @author 张嘉伟
- * @version 2.1
- * @since 2020-02-19 02:08
+ * @version 3.0
+ * @since 2020-02-19 15:51
  */
 class InfectStatistic
 {
@@ -14,7 +14,7 @@ class InfectStatistic
     static int number = 0;
     static String log;
     static String out;
-    static String date = "";
+    static String date = null;
     static boolean ip = false;
     static boolean sp = false;
     static boolean cure = false;
@@ -24,8 +24,6 @@ class InfectStatistic
     static TreeSet<String> fileDate = new TreeSet<String>();
 
     public static void main(String[] args) {
-        //readFile("C:/Users/张嘉伟的电脑/Documents/GitHub/InfectStatistic-main/example/log/2020-01-22.log.txt");
-        //writeALLProvince();
         for(int i = 0; i < args.length; i++)
         {
             switch(args[i])
@@ -69,7 +67,6 @@ class InfectStatistic
         File list = new File(log);
         getFileName(list);
         writeALLProvince();
-        //writeFile("C:/Users/张嘉伟的电脑/Desktop/demo.txt", log + out + date + ip + sp + cure + dead + outputNumber);
     }
 
     public static void recordProcess(String string)
@@ -77,16 +74,17 @@ class InfectStatistic
         //处理每行记录，获取首个空格前的字符串也就是省名，并且获取字符串里的数字
         String provinceName=string.substring(0, string.indexOf(" "));
         int numberOfPeople = getNumber(string);
+        int itemOfProvinceList = exit(provinceName);
 
         if (string.contains("新增"))
         {
             if(string.contains("感染患者"))
             {
-                province[exit(provinceName)].add("感染患者", numberOfPeople);
+                province[itemOfProvinceList].add("感染患者", numberOfPeople);
             }
             else if(string.contains("疑似患者"))
             {
-                province[exit(provinceName)].add("疑似患者", numberOfPeople);
+                province[itemOfProvinceList].add("疑似患者", numberOfPeople);
             }
         }
         else if(string.contains("流入"))
@@ -99,42 +97,43 @@ class InfectStatistic
             aimProvince = aimProvince.replaceAll("\\d+", "");
             if(string.contains("感染患者"))
             {
-                province[exit(provinceName)].minus("感染患者", numberOfPeople);
+                province[itemOfProvinceList].minus("感染患者", numberOfPeople);
                 province[exit(aimProvince)].add("感染患者", numberOfPeople);
             }
             else if(string.contains("疑似患者"))
             {
-                province[exit(provinceName)].minus("疑似患者", numberOfPeople);
+                province[itemOfProvinceList].minus("疑似患者", numberOfPeople);
                 province[exit(aimProvince)].add("疑似患者", numberOfPeople);
             }
         }
         else if(string.contains("死亡"))
         {
-            province[exit(provinceName)].add("死亡", numberOfPeople);
-            province[exit(provinceName)].minus("感染患者", numberOfPeople);
+            province[itemOfProvinceList].add("死亡", numberOfPeople);
+            province[itemOfProvinceList].minus("感染患者", numberOfPeople);
         }
         else if(string.contains("治愈"))
         {
-            province[exit(provinceName)].add("治愈", numberOfPeople);
-            province[exit(provinceName)].minus("感染患者", numberOfPeople);
+            province[itemOfProvinceList].add("治愈", numberOfPeople);
+            province[itemOfProvinceList].minus("感染患者", numberOfPeople);
         }
         else if(string.contains("确诊"))
         {
-            province[exit(provinceName)].add("感染患者", numberOfPeople);
-            province[exit(provinceName)].minus("疑似患者", numberOfPeople);
+            province[itemOfProvinceList].add("感染患者", numberOfPeople);
+            province[itemOfProvinceList].minus("疑似患者", numberOfPeople);
         }
         else if(string.contains("排除"))
         {
-            province[exit(provinceName)].minus("疑似患者", numberOfPeople);
+            province[itemOfProvinceList].minus("疑似患者", numberOfPeople);
         }
     }
 
     /* 检查该省是否首次出现,返回其位置，没有则创建 */
-    public static int exit(String provinceName) {
-        for (int i = 0; i < number; i++) {
-            if (provinceName.equals(province[i].getName())) {
+    public static int exit(String provinceName)
+    {
+        for (int i = 0; i < number; i++)
+        {
+            if (provinceName.equals(province[i].getName()))
                 return i;
-            }
         }
         Province newProvince = new Province(provinceName);
         province[number] = newProvince;
@@ -155,13 +154,8 @@ class InfectStatistic
     {
         for(String string : fileDate)
         {
-            System.out.println(log + string + ".log.txt");
-            //here is bug
             if(dateCompare(string))
-            {
-                System.out.println(log + string + ".log.txt");
                 readFile(log + string + ".log.txt");
-            }
         }
         int infectNumber = 0;
         int suspectNumber = 0;
@@ -194,19 +188,21 @@ class InfectStatistic
 
     public static boolean dateCompare(String string)
     {
-        if(date.equals(""))
+        if(date == null)
+        {
             return true;
+        }
         String inputDate = date;
-        int inputYear = Integer.parseInt(string.substring(0, string.indexOf("-")));
-        int fileYear = Integer.parseInt(inputDate.substring(0, inputDate.indexOf("-")));
-        string = inputDate.substring(string.indexOf("-"), string.length());
-        inputDate = inputDate.substring(inputDate.indexOf("-"), inputDate.length());
-        int inputMonth = Integer.parseInt(string.substring(0, string.indexOf("-")));
-        int fileMonth = Integer.parseInt(inputDate.substring(0, inputDate.indexOf("-")));
-        string = inputDate.substring(string.indexOf("-"), string.length());
-        inputDate = inputDate.substring(inputDate.indexOf("-"), inputDate.length());
-        int inputDay = Integer.parseInt(string.substring(0, string.indexOf("-")));
-        int fileDay = Integer.parseInt(inputDate.substring(0, inputDate.indexOf("-")));
+        int inputYear = Integer.valueOf(string.substring(0, string.indexOf("-")));
+        int fileYear = Integer.valueOf(inputDate.substring(0, inputDate.indexOf("-")));
+        string = string.substring(string.indexOf("-") + 1, string.length());
+        inputDate = inputDate.substring(inputDate.indexOf("-") + 1, inputDate.length());
+        int inputMonth = Integer.valueOf(string.substring(0, string.indexOf("-")));
+        int fileMonth = Integer.valueOf(inputDate.substring(0, inputDate.indexOf("-")));
+        string = string.substring(string.indexOf("-") + 1, string.length());
+        inputDate = inputDate.substring(inputDate.indexOf("-") + 1, inputDate.length());
+        int inputDay = Integer.valueOf(string);
+        int fileDay = Integer.valueOf(inputDate);
         if(inputYear > fileYear)
             return true;
         else if(inputYear < fileYear)
@@ -219,7 +215,7 @@ class InfectStatistic
                 return false;
             else
             {
-                if(inputDay >= fileDay)
+                if(inputDay <= fileDay)
                     return true;
                 return false;
             }
@@ -228,13 +224,18 @@ class InfectStatistic
 
     public static void getFileName(File list)
     {
-        if(list != null){
+        if(list != null)
+        {
 			File[] file = list.listFiles();
-			if(file != null){
-				for(int i=0;i<file.length;i++){
+            if(file != null)
+            {
+                for(int i=0;i<file.length;i++)
+                {
 					getFileName(file[i]);
 				}
-			}else{
+            }
+            else
+            {
                 String time = list.toString();
                 time = time.substring(time.indexOf("log\\") + 4, time.indexOf(".log.txt"));
                 fileDate.add(time);
@@ -244,16 +245,12 @@ class InfectStatistic
 
     public static void readFile(String fileName)
     {
-        //File file = new File(fileName);
-        //BufferedReader reader = null;
         try 
         {
             FileInputStream file = new FileInputStream(fileName);   
             InputStreamReader isr = new InputStreamReader(file, "UTF-8");   
             BufferedReader reader = new BufferedReader(isr);  
-            //reader = new BufferedReader(new FileReader(file));
             String tempString = null;
-            // 一次读入一行，直到读入null为文件结束
             while ((tempString = reader.readLine()) != null)
             {
                 //读取文件里不以"//"开头的每行记录，传入recordProcess方法

@@ -1,11 +1,14 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,7 +24,7 @@ import java.util.Iterator;
  * @author xxx
  * @version xxx
  * @since xxx
- * 注意排序及其他要求的功能
+ * 注意排序及其他要求的功能  日期超出范围
  */
 class InfectStatistic {
 	/**
@@ -36,6 +39,7 @@ class InfectStatistic {
 
 	// 可选择[ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]，使用缩写选择
 	private static String[] typeAbbreviationCommandStrings = { "ip", "sp", "cure", "dead" };
+	private static HashMap<String, Integer> typeAbbreviationCommandHashMap = new HashMap<String, Integer>();
 	// 存放患者的类型
 	private static String[] typeCharCommondStrings = { "感染患者", "疑似患者", "治愈", "死亡" };
 
@@ -61,12 +65,23 @@ class InfectStatistic {
 		try {
 			readLogName();
 			readLogContent();
+			typeScreen();
 			// System.out.println(dateString);
-			//System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
+			// System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
 			// System.out.println(patientsHashMap.get("治愈") + "");
-			Iterator iterator=provinceHashMap.entrySet().iterator();
-			while(iterator.hasNext()) {
-				System.out.println(iterator.next());
+			Iterator iterator = provinceHashMap.keySet().iterator();
+			while (iterator.hasNext()) {
+				String keyString = (String) iterator.next();
+				String temString = "";
+				// System.out.print(keyString + " ");
+				temString += keyString + " ";
+				HashMap<String, Long> patientsHashMap = provinceHashMap.get(keyString);
+				for (String string : typeStrings) {
+					temString += string + "" + patientsHashMap.get(string) + "人 ";
+					// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
+				}
+				temString.substring(0, temString.length() - 1);
+				System.out.println(temString);
 			}
 		} catch (ParseException e) {
 			// TODO 自动生成的 catch 块
@@ -109,6 +124,9 @@ class InfectStatistic {
 		System.arraycopy(temStrings, 1, provinceStrings, 0, provinceStrings.length);
 
 		initProvinceHashMap("全国");
+		for (int j = 0; j < typeAbbreviationCommandStrings.length; j++) {
+			typeAbbreviationCommandHashMap.put(typeAbbreviationCommandStrings[j], j);
+		}
 	}
 
 	private static void initProvinceHashMap(String provinceString) {
@@ -162,7 +180,7 @@ class InfectStatistic {
 				lineString = lineString.trim();
 				if (!lineString.startsWith("//")) {
 					dealLogContent(lineString);
-					System.out.println(lineString);
+					//System.out.println(lineString);
 				}
 			}
 		}
@@ -265,5 +283,19 @@ class InfectStatistic {
 		originalLong = provinceHashMap.get(inputStrings[3]).get(inputStrings[1]);
 		originalLong += changesLong;
 		provinceHashMap.get(inputStrings[3]).put(inputStrings[1], originalLong);
+	}
+
+	private static void typeScreen() {
+		String[] temStrings = typeStrings;
+		if(temStrings.length==0) {
+			typeStrings=new String[4];
+			for (int i=0;i<typeAbbreviationCommandStrings.length;i++) {
+				typeStrings[i]=typeAbbreviationCommandStrings[i];
+			}
+			temStrings=typeStrings;
+		}
+		for (int i = 0; i < temStrings.length; i++) {
+			typeStrings[i] = typeCharCommondStrings[typeAbbreviationCommandHashMap.get(temStrings[i])];
+		}
 	}
 }

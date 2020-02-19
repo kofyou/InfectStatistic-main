@@ -202,6 +202,7 @@ public class InfectStatistic {
             }
         }
         provinces=sortProvinces(provinces);
+        type=deleteArrayNull(type);
         if(isValidDate(date) && isValidProvince(provinces)||!flag2&&isValidDate(date)) {
             outputFile(path, dic, date);
             dealFlag(path, type, provinces);
@@ -315,16 +316,8 @@ public class InfectStatistic {
 
 
     public void dealFlag( String path,  String[] type, String[] provinces)throws Exception {
-        FileReader fr = new FileReader(path);
-        BufferedReader br = new BufferedReader(fr);
-        String line = br.readLine();
-        while (line != null&&!line.contains("/")) {
-
-            line = br.readLine();
-        }
         if (!flag1&&flag2) {
             dealProvince( provinces);
-
         }
         else if (flag1 && flag2) {
             dealTypeAndProvince( type, provinces);
@@ -333,10 +326,19 @@ public class InfectStatistic {
             dealType(type);
         }
         else if(!flag2){
-            System.out.println(line);
+            dealNormal();
         }
+    }
 
-
+    private void dealNormal() {
+        System.out.println(getAllProvince());
+        for (int i=0;i<province.length;i++){
+            if (discovery[i]) {
+                System.out.print(province[i]+" ");
+                System.out.println(type2[0] + number[i][0] + person + " " + type2[1] + number[i][1] + person + " "
+                        + type2[2] + number[i][2] + person + " " + type2[3] + number[i][3] + person + " ");
+            }
+        }
     }
 
 
@@ -344,7 +346,7 @@ public class InfectStatistic {
         System.out.println(getAllProvinceType(type));
         for (int i = 0; i < province.length; i++) {
             if (discovery[i]) {
-                System.out.print(province[i] + " ");
+                System.out.print(province[i]+" " );
                 for (String s : type) {
                     if ("ip".equals(s)) {
                         System.out.print(type2[0] + number[i][0] + person + " ");
@@ -354,6 +356,9 @@ public class InfectStatistic {
                         System.out.print(type2[0] + number[i][2] + person + " ");
                     } else if ("dead".equals(s)) {
                         System.out.print(type2[0] + number[i][3] + person + " ");
+                    }
+                    else {
+                        System.out.print("该项是错误选项！");
                     }
                 }
                 System.out.print("\n");
@@ -372,22 +377,16 @@ public class InfectStatistic {
                     System.out.print(province[j] + " ");
                     for (String t : type) {
                         if (t != null) {
-                            switch (t) {
-                                case "ip":
-                                    System.out.print(type2[0] + number[j][0] + person + " ");
-                                    break;
-                                case "sp":
-                                    System.out.print(type2[1] + number[j][1] + person + " ");
-                                    break;
-                                case "cure":
-                                    System.out.print(type2[2] + number[j][2] + person + " ");
-                                    break;
-                                case "dead":
-                                    System.out.print(type2[3] + number[j][3] + person + " ");
-                                    break;
-                                default:
-                                    System.out.print("无该患者类型，请重新选择！");
-                                    break;
+                            if ("ip".equals(t)) {
+                                System.out.print(type2[0] + number[j][0] + person + " ");
+                            } else if ("sp".equals(t)) {
+                                System.out.print(type2[1] + number[j][1] + person + " ");
+                            } else if ("cure".equals(t)) {
+                                System.out.print(type2[2] + number[j][2] + person + " ");
+                            } else if ("dead".equals(t)) {
+                                System.out.print(type2[3] + number[j][3] + person + " ");
+                            } else {
+                                System.out.print("无该患者类型，请重新选择！");
                             }
                         }
                     }
@@ -395,7 +394,7 @@ public class InfectStatistic {
                 }
             }
         }
-        }
+    }
 
     private String getAllProvinceType(String[] type) {
         int allIp, allSp, allCure, allDead;
@@ -416,17 +415,17 @@ public class InfectStatistic {
                 massage +=  type2[0]+allCure+person+" ";
             } else if ("dead".equals(s)) {
                 massage +=  type2[0]+allDead+person+" ";
+            }else {
+                massage+="该项是错误选项";
             }
         }
-
         return "全国"+" "+ massage;
-       // return
     }
 
 
     public static void main(String[] args) throws Exception {
         args = new String[]{"-log", "D:\\log\\", "-out", "D:/log/out.txt", "-date","2020-01-22"
-                ,"-type","ip","sp"};
+                };
 
         InfectStatistic t = new InfectStatistic();
         t.init(args);

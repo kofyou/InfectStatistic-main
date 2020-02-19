@@ -1,3 +1,4 @@
+
 /*
 该代码功能:实现全国肺炎疫情情况的统计
 作者:何瑞晨 学号:221701239
@@ -16,13 +17,15 @@
 #include<sstream>
 
 using namespace std;
+vector<string> occur_province;   //创建一个存放log中所有出现省份的数组,以便后面输出用
+map<string, int> m_type;       //对面-type参数做映射处理
 map<string, string> m_single;      //存储命令行只有一个值的元素的信息
 map<string, vector<string>> m_many;   //存储命令行可能有多个值的元素的信息
 									  //每个省包括全国的肺炎信息类
 map<string, vector<int>> m_province;  //存储每个省的肺炎相关信息,(感染患者,疑似患者,治愈数,死亡数)
 
 
-									  //将字符转utf-8
+//将字符转utf-8
 string UTF8ToGB(const char* str)
 {
 	string result;
@@ -46,7 +49,7 @@ string UTF8ToGB(const char* str)
 	return result;
 }
 
-//往map中插入一个pair
+//往map中插入一个省份pair
 void insert_province(string province_name)
 {
 	int i;
@@ -65,27 +68,46 @@ int draw_number(string temp)
 	return itemp;
 }
 
+//初始化m_type
+void initialize_type()
+{
+	m_type.insert(make_pair("ip", 0));
+	m_type.insert(make_pair("sp", 1));
+	m_type.insert(make_pair("cure", 2));
+	m_type.insert(make_pair("dead", 3));
+
+}
+
 //该函数实现了对命令行信息的处理
 void process_cmd(int num, char* cmd_i[])
 {
 	int i;
 	string temp;   //中转字符串
-	for (i = 3; i < num; i++)
+	bool break_sign = false;
+	for (i = 3; i < num&&!break_sign; i++)
 	{
 		if (strcmp(cmd_i[i], "-province") == 0 || strcmp(cmd_i[i], "-type") == 0)
 		{
 			vector<string> list_temp;
 			string m_name = cmd_i[i];//记录命令行参数名称
 			temp = cmd_i[i];
-			while (temp.compare("-") != 0)
+			while (1)
 			{
+				string temp1;
 				temp = cmd_i[++i];
+				temp1 = temp.substr(0, 1);
+				if (temp1.compare("-") == 0)
+					break;
 				list_temp.push_back(temp);
 				cout << cmd_i[i] << "\n";
 				if (i >= num - 1)
+				{
+					break_sign = true;
 					break;
-				temp = temp.substr(0, 1);
+				}
+				
 			}
+		i--;
 			m_many.insert(make_pair(m_name, list_temp));
 		}
 		else
@@ -189,13 +211,10 @@ void process_pai_chu(fstream& file, string province_name)
 
 }
 
-//按字符串读取并处理文件
+//处理log中存放每天肺炎信息的文件
 void process_file(string log_file)
 {
-	int num;   //测试用的
-			   //6种情况,新增(感染患者,疑似患者),感染患者,疑似患者(流入,确诊),死亡,治愈,排除(疑似患者).
 	int i;
-	//首先加入全国的情况
 	fstream fei_yan_log(log_file);
 	string temp;
 	string temp_past;   //用于存储之前一次的读取
@@ -205,14 +224,16 @@ void process_file(string log_file)
 	{
 		temp_past = temp;
 		fei_yan_log >> temp;
-		num = draw_number(temp);
 		temp = UTF8ToGB(temp.c_str()).c_str();
 		if (temp.substr(0, 1).compare("/") == 0)
 			break;
 		if (is_province)
 		{
 			if (m_province.find(temp) == m_province.end())
+			{
 				insert_province(temp);
+				occur_province.push_back(temp);
+			}
 			is_province = false;
 			province_name = temp;
 		}
@@ -307,13 +328,13 @@ void pick_log_file(vector<string> file_list)
 	int i;
 	bool process_sign = false;   //用于处理没有设置date参数的情况
 	string temp = "";
-	if (m_single.find("date") != m_single.end())
-		string temp = m_single["-date"];
+	if (m_single.find("-date") != m_single.end())
+		temp = m_single["-date"];
 	else
 		process_sign = true;
 	vector<int> time = transform_date(temp);
 	int left, right;
-	for (int i = 0; i < file_list.size(); i++)
+	for (i = 0; i < file_list.size(); i++)
 	{
 		vector<int> file_date = get_path_name_date(file_list[i]);
 		if (compare_date(time, file_date)||process_sign)
@@ -321,6 +342,8 @@ void pick_log_file(vector<string> file_list)
 		else
 			break;
 	}
+	if (i == 0)
+		exit(0);
 }
 
 //该函数实现了将path路径文件夹下的所有文件读取到files里面
@@ -352,10 +375,84 @@ void getFiles(const std::string & path, std::vector<std::string> & files)
 	}
 }
 
+//将统计结果输出
+void output_fei_yan_log()
+{
+	int i;
+	vector<int> type;      //用于处理要输出的type
+	vector<string> need_province;    //需要的省份
+	bool is_need_quan_guo = true;     //是否需要输出全国,因为排序问题需要把全国单独列出
+	bool is_need_erase = true;
+	if (m_many.find("-type") != m_many.end())
+	{
+		for (i = 0; i < (m_many["-type"]).size(); i++)
+			type.push_back(m_type[(m_many["-type"])[i]]);
+
+	}
+	else
+	{
+		for (i = 0; i < 4; i++)
+			type.push_back(i);
+	}
+	if (m_many.find("-province") != m_many.end())
+	{
+		sort((m_many["-province"]).begin(), (m_many["-province"]).end());
+		need_province.insert(need_province.begin(), (m_many["-province"]).begin(), (m_many["-province"]).end());
+		if (find(need_province.begin(), need_province.end(), "全国") == need_province.end())
+			is_need_quan_guo = false;
+	}
+	else
+	{
+		sort(occur_province.begin(), occur_province.end());
+		need_province.insert(need_province.begin(), occur_province.begin(), occur_province.end());
+		is_need_erase = false;
+	}
+	string output_path = m_single["-out"];
+	fstream output_file(output_path, fstream::out);
+	vector<int> province_log;
+	vector<string> output_basic_string;
+	output_basic_string.push_back(" 感染患者");
+	output_basic_string.push_back(" 疑似患者");
+	output_basic_string.push_back(" 治愈");
+	output_basic_string.push_back(" 死亡");
+	if (is_need_quan_guo)
+	{
+		for (i = 0; i < 4; i++)
+		{
+			province_log.push_back((m_province["全国"])[i]);
+		}
+		output_file << "全国";
+		for (i = 0; i < type.size(); i++)
+		{
+			output_file << output_basic_string[type[i]] << province_log[type[i]] << "人";
+		}
+		output_file << "\n";
+	}
+	m_province.erase(m_province.find("全国"));
+	if(is_need_erase)
+		need_province.erase(find(need_province.begin(), need_province.end(), "全国"));
+	for (i = 0; i < need_province.size(); i++)
+	{
+		province_log.clear();
+		output_file << need_province[i];
+		for (int m = 0; m < 4; m++)
+		{
+			province_log.push_back((m_province[need_province[i]])[m]);
+		}
+		for (int n = 0; n < type.size(); n++)
+		{
+			output_file << output_basic_string[type[n]] << province_log[type[n]] << "人";
+		}
+		output_file << "\n";
+	}
+
+	
+}
+
 int main(int argc, char* argv[])
 {
+	initialize_type();
 	process_cmd(argc, argv);
-
 	int i;
 	cout << argc;
 	for (i = 0; i < argc; i++)
@@ -370,6 +467,5 @@ int main(int argc, char* argv[])
 	{
 		//cout << file_list[i] << "\n" ;
 	}
-	system("pause");
-
+	output_fei_yan_log();
 }

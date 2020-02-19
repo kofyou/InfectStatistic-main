@@ -44,15 +44,8 @@ public class InfectStatistic {
 		String cmd=args[0];
 		String[] type = new String[]{" "," "," "," "};
 		
-		String local = "D:/log/",nowDate = null,output = "D:/output.txt",date = null; //默认位置(如果用户未指定位置)
-		//默认时间为当前时间
-		Calendar calendar = Calendar.getInstance();
-		int t1 = calendar.get(Calendar.MONTH)+1;
-		int t2 = calendar.get(Calendar.DATE);
-		String s1= ""+t1+"",s2=""+t2+"";
-    	if(t1<10) s1 = "0"+t1+"";
-    	if(t2<10) s1 = "0"+t2+"";
-		nowDate = ""+calendar.get(Calendar.YEAR)+"-"+s1+"-"+s2+""; //默认当前时间
+		String local = "D:/log/",output = "D:/output.txt",date = " "; //默认位置(如果用户未指定位置)
+
 		if(cmd.equals("list")){
 		for(int i=1;i<args.length;i++){
 			if(args[i].equals("-date")){
@@ -67,32 +60,37 @@ public class InfectStatistic {
 			else if(args[i].equals("-type")){
 				for(int j=0;j<4;j++)
 				if((j+i+1)<args.length) type[j] = args[i+j+1];       //记录type
-				if(type[0].isEmpty()){
-					System.out.println("请指定type!");
+				if (!(type[0].equals("ip")||type[0].equals("sp")||type[0].equals("cure")||type[0].equals("dead"))) {
+					System.err.println("请指定正确的type");
 					System.exit(0);
-				}                 
+				}
 			}
 			else if(args[i].equals("-province")){
 				for(int j=0;j<args.length-i;j++)
 				if((j+i+1)<args.length) prs[j] = args[i+j+1];       //记录省
-				if(prs[0].isEmpty()){
-					System.out.println("请指定省份!");
+				if (prs[0].equals(" ")) {
+					System.err.println("请指定province");
 					System.exit(0);
 				}
 			}
 	      }
 		}
-		else System.out.println("input right cmd.");
 		
 		int num=0,lines=0;
 		//提取输入目录下的所有文件名
 		String basePath=local;
 		String[] List=new File(basePath).list();
-		if (date.compareTo(List[List.length-1])>0) {
+		if (date.equals(" ")) {
+			date = List[List.length-1];
+		}
+		else if (date.compareTo(List[List.length-1])>0) {
 			System.err.println("日期超出范围");
 			System.exit(0);
 		}
-		date = date+".log.txt";
+		else {
+			date = date+".log.txt";
+		}
+
 		int res=List[List.length-1].compareTo(date);
 		if(List[0].equals(null)) System.out.println("选定目录下无文件,请重新选择!");
 	
@@ -137,7 +135,7 @@ public class InfectStatistic {
 					}
 				}
 				/*3、4省流入省*/
-				if(line[2].equals("流入")){
+				else if(line[2].equals("流入")){
 					str0=line[4].substring(0,line[4].length()-1);
 			    	sum = Integer.parseInt(str0);
 			 
@@ -151,7 +149,7 @@ public class InfectStatistic {
 					}
 				}
 				/*5、6治愈或死亡*/
-				if(line[1].equals("死亡")||line[1].equals("治愈")){
+				else if(line[1].equals("死亡")||line[1].equals("治愈")){
 					str0=line[2].substring(0,line[2].length()-1);
 			    	sum = Integer.parseInt(str0);
 			    	if(line[1].equals("死亡")){
@@ -168,24 +166,21 @@ public class InfectStatistic {
 			    	}
 				}
 				/*7疑似确诊*/
-				if(line[1].equals("疑似患者")){
-					if(line[2].equals("确诊感染")){
+				else if(line[1].equals("疑似患者")&&line[2].equals("确诊感染")){
 						str0=line[3].substring(0,line[3].length()-1);
 				    	sum = Integer.parseInt(str0);
 						provinces[a].mayInfect -= sum;
 						provinces[a].infected += sum;
 						provinces[0].mayInfect -= sum;
 						provinces[0].infected += sum;
-					}
+					
 				}
 				/*8疑似排除*/
-				if(line[1].equals("排除")){
+				else if(line[1].equals("排除")&&line[2].equals("疑似患者")){
 					str0=line[3].substring(0,line[3].length()-1);
 			    	sum = Integer.parseInt(str0);
-					if(line[2].equals("疑似患者")){
-						provinces[a].mayInfect -= sum;
-						provinces[0].mayInfect -= sum;
-					}
+					provinces[a].mayInfect -= sum;
+					provinces[0].mayInfect -= sum;
 				}
 			}
 			bf.close();
@@ -222,23 +217,7 @@ public class InfectStatistic {
 								print[j] += " 死亡"+provinces[j].dead+"人\t";
 				}  
 			
-		}
-		/*-type*/
-		if(prs[0].equals(" ")&&!type[0].equals(" "))
-		for (int i = 0; i < 32; i++) { 
-			
-			  if(provinces[i].cure!=0||provinces[i].dead!=0
-				||provinces[i].infected!=0||provinces[i].mayInfect!=0)
-			  	writer.append(print[i]+"\n");
-			}
-		/*-type -province*/
-		else if(!type[0].equals(" ")){
-			for (int i = 0; i < 32; i++) {
-				String[] s0 = print[i].split("\t"); 
-				for(int j=0;j<prs.length;j++)
-			  	if(prs[j].equals(s0[0])) writer.append(print[i]+"\n");
-			}
-		}
+		}		
 		/*默认情况*/
 		if(type[0].equals(" ")&&prs[0].equals(" "))
 		for (int i = 0; i < 32; i++) {  
@@ -249,6 +228,32 @@ public class InfectStatistic {
 		   }
 		   
 		}
+		/*-type*/
+		if(prs[0].equals(" ")&&!type[0].equals(" "))
+		for (int i = 0; i < 32; i++) { 
+			
+			  if(provinces[i].cure!=0||provinces[i].dead!=0
+				||provinces[i].infected!=0||provinces[i].mayInfect!=0)
+			  	writer.append(print[i]+"\n");
+			}		
+		/*-type -province*/
+		if(!type[0].equals(" ")){
+			for (int i = 0; i < 32; i++) {
+				String[] s0 = print[i].split("\t"); 
+				for(int j=0;j<prs.length;j++)
+			  	if(prs[j].equals(s0[0])) writer.append(print[i]+"\n");
+			}
+		}
+		/*-province*/
+		if(type[0].equals(" ")&&!pros[0].equals(" ")){
+			for(int i=0;i<32;i++){
+				for(int j=0;j<prs.length;j++)
+				if (prs[j].equals(provinces[i].name)) {
+					writer.append(""+provinces[i].name+"\t感染患者"+provinces[i].infected+"人\t"
+					+ "疑似患者"+provinces[i].mayInfect+"人\t治愈"+provinces[i].cure+"人\t死亡"+provinces[i].dead+"人\n");
+				}
+			}
+		}
 		System.out.println("文件数据已保存至 "+output+"");
 		writer.append("//该文档并非真实数据，仅供测试使用");
 		writer.close();
@@ -257,3 +262,4 @@ public class InfectStatistic {
    }
 
 }
+

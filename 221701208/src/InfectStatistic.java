@@ -96,11 +96,46 @@ class Record{
  * 用于实现map键值比较的功能
  */
 class MapKeyComparator implements Comparator<String> {
+    static Map<String,Integer> provinceMap;
+
+    public MapKeyComparator(){
+        provinceMap = new TreeMap<String,Integer>();
+        provinceMap.put("全国",0);
+        provinceMap.put("安徽",1);
+        provinceMap.put("北京",2);
+        provinceMap.put("重庆",3);
+        provinceMap.put("福建",4);
+        provinceMap.put("甘肃",5);
+        provinceMap.put("广东",6);
+        provinceMap.put("广西",7);
+        provinceMap.put("贵州",8);
+        provinceMap.put("海南",9);
+        provinceMap.put("河北",10);
+        provinceMap.put("河南",11);
+        provinceMap.put("黑龙江",12);
+        provinceMap.put("湖北",13);
+        provinceMap.put("湖南",14);
+        provinceMap.put("吉林",15);
+        provinceMap.put("江苏",16);
+        provinceMap.put("江西",17);
+        provinceMap.put("辽宁",18);
+        provinceMap.put("内蒙古",19);
+        provinceMap.put("宁夏",20);
+        provinceMap.put("青海",21);
+        provinceMap.put("山东",22);
+        provinceMap.put("山西",23);
+        provinceMap.put("陕西",24);
+        provinceMap.put("上海",25);
+        provinceMap.put("四川",26);
+        provinceMap.put("天津",27);
+        provinceMap.put("西藏",28);
+        provinceMap.put("新疆",28);
+        provinceMap.put("云南",30);
+        provinceMap.put("浙江",31);
+    }
     @Override
     public int compare(String str1, String str2) {
-        str1=Lib.toPinyin(str1);
-        str2=Lib.toPinyin(str2);
-        return str1.compareTo(str2);
+        return provinceMap.get(str1).compareTo(provinceMap.get(str2));
     }
 }
 
@@ -632,7 +667,7 @@ class InfectStatistic {
     public static void main(String[] args) {
         /*String[] args = {"list","-log","E:/log/",
                 "-out","E:/out/output.txt",
-                "-date","2020-01-23",
+                "-date","2020-01-22",
                 "-type","cure","dead","ip",
                 "-province","全国","浙江","福建"};//*/
         InfectStatistic statistic = new InfectStatistic();
@@ -683,3 +718,4 @@ class InfectStatistic {
 }
 
 
+//嘿，终于写完

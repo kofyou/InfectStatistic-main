@@ -5,9 +5,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
+
+import java.io.File;
 
 
 /**
@@ -95,10 +99,7 @@ class InfectStatistic {
 	    	return name;
 	    }
 	    
-	    /*public void setIp(String ip) {
-	    	
-	    	this.ip=Integer.valueOf(ip);
-	    }*/
+	    
 	}
 
 	
@@ -250,15 +251,19 @@ class InfectStatistic {
     }
 
     //写文件
-    public void writeFile() throws IOException {
+    public void writeFile(String path,Hashtable<String,Province> proHash,String[] type,String[] province) throws IOException {
     	int number=1;
-		OutputStream os = new FileOutputStream("F:\\output.txt");
+		OutputStream os = new FileOutputStream(path);
 		PrintWriter pw=new PrintWriter(os);
-		System.out.println("当日情况：");
+		
+		//-province
+		if(province==null) {//不指定省份
+			
+		}
 		for(int i=0;i<10;i++) {
 			//String s=""+number;
 			System.out.println("全国 "+"感染患者"+"疑似患者"+"治愈"+"死亡");
-			pw.println(s);//每输入一个数据，自动换行，便于我们每一行每一行地进行读取
+			pw.println(os);//每输入一个数据，自动换行，便于我们每一行每一行地进行读取
 			//pw.print(s+",");//不会自动换行，必要时可以自己添加分隔符
 			number++;
 		}
@@ -279,7 +284,7 @@ class InfectStatistic {
             nation.sp += hashtable.get(keys).getSp();
             nation.cure += hashtable.get(keys).getCure();
             nation.dead += hashtable.get(keys).getDead();
-           // System.out.println(hashtable.get(keys).getName()+hashtable.get(keys).getIp()+" "+hashtable.get(keys).getSp()+" "+hashtable.get(keys).getCure()+hashtable.get(keys).getDead());
+            System.out.println(hashtable.get(keys).getName()+hashtable.get(keys).getIp()+" "+hashtable.get(keys).getSp()+" "+hashtable.get(keys).getCure()+hashtable.get(keys).getDead());
         }
     	hashtable.put("全国",nation);
     	
@@ -290,19 +295,92 @@ class InfectStatistic {
     	return  s.substring(0,s.length()-1);
     }
 
-	
+    //处理日期对象，比较日期大小，判断哪些文件需要处理
+    private void dealDate(String filepath,int deep,String date,Hashtable<String,Province> hashtable,boolean flag) throws IOException{   
+    	// 获得指定文件对象  
+        File file = new File(filepath);   
+        // 获得该文件夹内的所有文件   
+        File[] childFile = file.listFiles();  
+
+        for(int i=0;i<childFile.length;i++)
+        {   
+        	
+            if(childFile[i].isFile())//如果是文件
+            {   
+            	if(date.compareTo(childFile[childFile.length-1].getName().substring(0,10))>0&&flag==false) {
+            		System.out.println("超出日期范围！！！");
+            		break;
+            	}
+            	
+                //比较日期大小
+                String fileName=childFile[i].getName().substring(0,10);
+                if(date.compareTo(fileName)>=0) {
+                	System.out.println(childFile[i].getPath());
+                	dealStatistic(childFile[i].getPath(),hashtable);     
+                }
+                
+            }
+        }   
+    }   
+
+    //解析命令行
+    public void dealCmd(String[] test,Hashtable<String,Province> proHash) throws IOException {
+    	Hashtable<String,Integer> cmdHash=new Hashtable<String,Integer>();
+        for(int i=0;i<test.length;i++) {
+        	cmdHash.put(test[i], i);
+        }
+    	//将文件名的日期分割后存放于此
+    	String[] splitDate=new String[3];
+    	boolean flagDate=false;
+    	
+    	//处理-date
+        if(cmdHash.containsKey("-date")) {//如果给出-date
+        	splitDate=test[cmdHash.get("-date")].split("-");
+        	dealDate(test[cmdHash.get("-log")+1],0,test[cmdHash.get("-date")+1],proHash,flagDate); 
+        }
+        else {
+        	//如果没有给出具体日期,获取当前系统日期传给date
+        	flagDate=true;
+        	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String currentDate =   dateFormat.format(new Date());
+            dealDate(test[cmdHash.get("-log")+1],0,currentDate,proHash,flagDate); 
+        }
+        Sum(proHash);
+        System.out.println("ip:"+proHash.get("全国").ip+"   sp:"+proHash.get("全国").sp+"  cure:"+proHash.get("全国").cure+"  dead:"+proHash.get("全国").dead);
+        
+        //处理-type
+        
+        
+    }
+    
     public static void main(String[] args) throws IOException {
         
         InfectStatistic in = new InfectStatistic();
+        
+        String[] test= {"list","-date","2020-01-27","-log","F:\\InfectStatistic-main\\example\\log\\","-out","D:/output.txt"};
+        
+        
+        //args[1] -datae    args[2] xxxx-xx-xx  args[3] -log args[4] xxx args[5] -out  args[6] xxx
         Hashtable<String,Province> proHash = new Hashtable<String, Province>();//以省份汉字作为Key 以省类作为value
-        in.dealStatistic("F:\\InfectStatistic-main\\example\\log\\2020-01-23.log.txt",proHash);
-        in.Sum(proHash);
-        //System.out.println("ip:"+proHash.get("全国").ip+"   sp:"+proHash.get("全国").sp+"  cure:"+proHash.get("全国").cure+"  dead:"+proHash.get("全国").dead);
+        in.dealCmd(test, proHash);
+      
         
-    
-        	
         
-       // System.out.println(in.getProvinceName("新疆"));
+        //这是需要获取的文件夹路径  
+      //  String path ="F:\\InfectStatistic-main\\example\\log";   
+          
+        
+        
+        
+        //in.dealStatistic("F:\\InfectStatistic-main\\example\\log\\2020-01-23.log.txt",proHash);
+        
+        
+       /* for(int i=0;i<test.length;i++) {
+        	System.out.println(test[i]);
+        }*/
+        
+      
+        
       
     }
     

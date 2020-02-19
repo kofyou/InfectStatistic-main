@@ -69,39 +69,37 @@ public class InfectStatistic {
                         discovery[i1] = true;
                         flag2 = i1;
                     }
+                }if (num == 2) {
+                    //流入流出
+                    number[flag1][0] += Integer.parseInt(m.group(3));
+                    number[flag2][0] -= Integer.parseInt(m.group(3));
+                } else if (num == 3) {
+                    number[flag1][1] += Integer.parseInt(m.group(3));
+                    number[flag2][1] -= Integer.parseInt(m.group(3));
+                } else if (num == 7) {
+                    //排除类型
+                    number[flag][1] -= Integer.parseInt(m.group(2));
+                } else if (num == 5) {
+                    //治愈和死亡类型
+                    number[flag][0] -= Integer.parseInt(m.group(2));
+                    number[flag][2] += Integer.parseInt(m.group(2));
+                } else if (num == 4) {
+                    number[flag][0] -= Integer.parseInt(m.group(2));
+                    number[flag][3] += Integer.parseInt(m.group(2));
+                } else if (num == 6) {
+                    //疑似->确认
+                    number[flag][0] += Integer.parseInt(m.group(2));
+                    number[flag][1] -= Integer.parseInt(m.group(2));
+                } else {
+                    number[flag][num] += Integer.parseInt(m.group(2));
                 }
-                dealData(flag,flag1,flag2,num,m.group(3),m.group(2));
             }
         }
 
     }
 
-    private void dealData(int flag, int flag1, int flag2, int num, String group, String group1) {
-        if (num == 2) {
-            //流入流出
-            number[flag1][0] += Integer.parseInt(group);
-            number[flag2][0] -= Integer.parseInt(group);
-        } else if (num == 3) {
-            number[flag1][1] += Integer.parseInt(group);
-            number[flag2][1] -= Integer.parseInt(group);
-        } else if (num == 7) {
-            //排除类型
-            number[flag][1] -= Integer.parseInt(group1);
-        } else if (num == 5) {
-            //治愈和死亡类型
-            number[flag][0] -= Integer.parseInt(group1);
-            number[flag][2] += Integer.parseInt(group1);
-        } else if (num == 4) {
-            number[flag][0] -= Integer.parseInt(group1);
-            number[flag][3] += Integer.parseInt(group1);
-        } else if (num == 6) {
-            //疑似->确认
-            number[flag][0] += Integer.parseInt(group1);
-            number[flag][1] -= Integer.parseInt(group1);
-        } else {
-            number[flag][num] += Integer.parseInt(group1);
-        }
-    }
+
+
 
 
     public void outputFile(String outfile, String dictionary, String date) throws IOException {
@@ -184,10 +182,11 @@ public class InfectStatistic {
         char a = '-';
         String dic = null;
         String path = null ;
-        String date;
+        String date=null;
+        boolean status=false;
         String[] type = new String[4];
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        date=df.format(new Date());
+       // SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        //date=df.format(new Date());
         String[] provinces = new String[31];
         for (int i = 0; i < args.length; i++) {
             if ("-log".equals(args[i])) {
@@ -196,6 +195,7 @@ public class InfectStatistic {
                 path = args[i + 1];
             } else if ("-date".equals(args[i])) {
                 date = args[i + 1];
+                status=true;
             } else if ("-type".equals(args[i])) {
                 flag1 = true;
                 int k = 0;
@@ -210,7 +210,14 @@ public class InfectStatistic {
                 }
             }
         }
-        if (isExistFile(path)) {
+
+        if (isExistPath(path)) {
+
+            ArrayList<String> filenames=new ArrayList<>();
+            if(!status){
+                sortFilename(dic,filenames);
+                date=filenames.get(filenames.size()-2);
+            }
             provinces = sortProvinces(provinces);
             type = deleteArrayNull(type);
             if (isValidDate(date, dic) && isValidProvince(provinces) || !flag2 && isValidDate(date, dic)) {
@@ -243,15 +250,15 @@ public class InfectStatistic {
         return provinces;
     }
 
-    public static boolean isExistFile(String path) {
+    public static boolean isExistPath(String path) {
 
         if (null == path || "".equals(path.trim())) {
             System.out.println("创建文件路径错误！");
             return false;
         }
 
-        File targetFile = new File(path);
-        return targetFile.exists();
+
+        return true;
     }
 
     public boolean isValidDate(String ymd, String dic) {
@@ -260,7 +267,7 @@ public class InfectStatistic {
         if (ymd == null || ymd.length() == 0) {
             return false;
         }
-        if (ymd.compareTo(filenames.get(0)) < 0 || ymd.compareTo(filenames.get(filenames.size() - 1)) > 0) {
+        if (ymd.compareTo(filenames.get(0)) < 0 || ymd.compareTo(filenames.get(filenames.size() - 2)) > 0) {
             return false;
         }
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");

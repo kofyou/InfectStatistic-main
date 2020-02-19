@@ -6,24 +6,28 @@
  * @version 1.0
  * @since 2020.02.13
  */ 
-#include<algorithm>
-#include<iostream>
-#include<fstream>
-#include<cstring>
-#include<io.h>
-#include<unistd.h>
-#include<stdlib.h>
-#include<stdio.h>
-#include<malloc.h>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <io.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <malloc.h>
+#include <cassert>
 
 //cd C:\Users\鸟蛋花机\Desktop\软件工程\寒假第二次作业\InfectStatistic-main\221701336\src
-//InfectStatistic.exe list -date 2020-01-22 -type sp ip dead -out C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt 
-
+//InfectStatistic.exe list -date 2020-01-25 -type sp ip dead -out C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt 
+//-log C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/log/ 
+ 
 using namespace std;
 
 string province[32]={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江",
 "湖北","湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西"
 ,"陕西","上海","四川","天津","西藏","新疆","云南","浙江","全国"}; 
+
+string situation[8]={"新增 感染患者","新增 疑似患者","感染患者 流入","疑似患者 流入","死亡","治愈","疑似患者 确诊感染","排除 疑似患者"};
 
 typedef struct ListNode
 {
@@ -37,10 +41,9 @@ typedef struct ListNode
 	
 }Node,*PNode;
 
-
 void input(string path,Node p);
 void output(string path,Node p);
-void readDir(string date,string path);
+void readLog(string date,string path);
 
 PNode CreatList(void)
 {
@@ -125,7 +128,7 @@ string getLog(int argc, char *argv[])//获得命令行参数中的目录
 	return s2; 
 }
 
-string getOutPath(int argc, char *argv[])
+string getOutPath(int argc, char *argv[])//获得命令行参数中的输出路径 
 {
 	string s1;
     string s2="NULL";
@@ -140,7 +143,7 @@ string getOutPath(int argc, char *argv[])
 	return s2; 
 }
 
-void getType(int argc, char *argv[],string type[])
+void getType(int argc, char *argv[],string type[])//获得命令行参数中的操作种类 
 {
 	string s1;
 	string s2;
@@ -161,7 +164,7 @@ void getType(int argc, char *argv[],string type[])
     }
 }
 
-void getProvince(int argc,char *argv[],string province[])
+void getProvince(int argc,char *argv[],string province[])//获得命令行参数中的要求省份 
 {
 	string s1;
 	string s2;
@@ -182,15 +185,117 @@ void getProvince(int argc,char *argv[],string province[])
 	}
 }
 
-void readDir(string date,string path)
+void getOperation(char buffer[])//读取每行文件中的操作 
+{
+    string op_province[2];//存放操作省份 
+    int op;//存放操作数     
+    int number=0;//存放人数
+    
+    int count=0;//记录操作中省份个数 
+   
+    string buf_situation;
+    string buf_province;
+    
+	string operation=buffer; 	
+    string::size_type idx; 
+	
+	for(int i=0;i<8;i++)//读取指令 
+    {
+    	buf_situation=situation[i];
+	    idx=operation.find(buf_situation);//在a中查找b.
+	    if(idx != string::npos )
+	    {	
+	    	cout<<buf_situation<<endl;
+			op=i;			
+			for(int j=0;j<32;j++)//读取城市 
+		    {
+		    	buf_province=province[j];
+			    idx=operation.find(buf_province);//在a中查找b.
+			    if(idx != string::npos )
+			    {	
+			    	op_province[count]=buf_province;
+			    	cout<<"城市"<<count+1<<"为"<<op_province[count]<<endl;
+			    	count++;
+			    }
+			}			
+	    }
+	}	
+	for (int i = 0; buffer[i] != '\0'; ++i) //当a数组元素不为结束符时.遍历字符串a.
+    {
+        if (buffer[i] >= '0'&& buffer[i] <= '9') //如果是数字.
+        {
+            number*= 10;//先乘以10保证先检测到的数字存在高位，后检测的存在低位
+            number+= buffer[i] - '0'; //数字字符的ascii-字符'0'的ascii码就等于该数字.
+        }
+    }
+	   
+}
+
+void AddIP()
+{
+	
+}
+
+void operation(string op_province[],int op,int number,PNode p,PNode head)
+{
+	switch (op)
+	{
+		case 1:
+			//新增感染函数 
+			break;
+		case 2:
+			//新增疑似函数
+			break;
+		case 3:
+			//感染患者流入
+			break;
+		case 4: 
+			//疑似患者流入
+			break;
+		case 5:
+			//死亡
+			break;
+		case 6:
+			//治愈
+			break;
+		case 7:
+			//疑似患者确诊感染
+			break;
+		case 8:
+			//排除疑似
+			break;
+	}		
+}
+
+void readTxt(char fname[])//逐行读取文件的内容 
+{
+	char buffer[256];
+	string strLine;
+	string str;
+    ifstream outFile;
+    outFile.open(fname,ios::in);
+    while(getline(outFile,strLine))
+    {
+    	strcpy(buffer,strLine.c_str());
+		if(buffer[0]=='/'||buffer[0]==' ')
+		{
+            continue;
+        }
+        getOperation(buffer);		
+    }
+}
+
+void readLog(string date,string path)//读取对应目录下的文件 
 {
 	string s="*.txt";
+	string logPath=path;
 	path=path+s;
 	char dirPath[100];
 	strcpy(dirPath,path.c_str());
+	string latestLog;
+
 	long Handle;
-    struct _finddata_t FileInfo;
-    
+    struct _finddata_t FileInfo;    
     if((Handle=_findfirst(dirPath,&FileInfo))==-1L)
     {
         printf("没有找到相应目录\n");
@@ -199,20 +304,25 @@ void readDir(string date,string path)
     {   	
     	if(FileInfo.name<=date)
         {
-            printf("%s\n", FileInfo.name);
+        	logPath=logPath+FileInfo.name;
+        	char fname[100];
+			strcpy(fname,logPath.c_str());
+            cout<<"要打开的文件地址是:"<<fname<<endl;
+            readTxt(fname);          
         }
         while(_findnext(Handle,&FileInfo)==0)//成功返回0，失败返回-1
         {
             if(FileInfo.name<=date)
             {
-                printf("%s\n", FileInfo.name);
-                //读取函数 
+                logPath=logPath+FileInfo.name;
+            	//cout<<logPath<<endl;
             }
-            else
-            {
-				_findclose(Handle);
-			} 
-        }      
+            latestLog=FileInfo.name;
+        } 
+		if(latestLog<date)
+		{
+			cout<<"日期超出范围"<<endl;	
+		}     
     }
 }
 
@@ -340,7 +450,7 @@ int main(int argc,char *argv[])
 	
 	PNode head=CreatList();	
 	PNode p=head;	
-	//readDir(date,log);//读取目录 
+	readLog(date,log);//读取目录 
 	
 	//Node pp={"福建",6,3,15,20,NULL};
 	output(outPath,p,head,type,province);//输出 

@@ -28,7 +28,9 @@ class InfectStatistic
     public static String[] allLogFilesName;  //记录所有日志文件的文件名
     public static String maxDate=null; //日志目录下的最大日期
     
-    public static ArrayList<Province> allProvince = new ArrayList<Province>();
+    public static ArrayList<Province> allProvince = new ArrayList<Province>();  //用于记录省份类的实例对象
+    
+    public static Nation nation;  //nation的成员变量记录了全国感染人数，疑似人数，治愈人数和死亡人数
     
     /*
     * Description:分析命令行穿给主函数的命令
@@ -118,7 +120,7 @@ class InfectStatistic
 	}
 	
 	/*
-	* Description:统计各个省份的感染人数，疑似人数，治愈人数和死亡人数
+	* Description:统计省份的感染人数，疑似人数，治愈人数和死亡人数
 	* Input:从日志文件读取出的一行信息，该行信息保存为字符串
 	* Return:无
 	* Others:无
@@ -218,7 +220,7 @@ class InfectStatistic
 	} 
 	
 	/*
-	* Description:提取传入的字符串当中的数字并转换成整数返回
+	* Description:提取字符串当中的数字并转换成整数返回
 	* Input:一个包含了数字字符的字符串
 	* Return:一个整数
 	* Others:无
@@ -267,6 +269,25 @@ class InfectStatistic
         }
 	}
 	
+	/*
+	* Description:统计全国的感染人数，疑似人数，治愈人数和死亡人数
+	* Input:无
+	* Return:无
+	* Others:无
+	*/ 
+	public static void getNationInformation()
+	{
+		nation = new Nation();
+		
+		for (int i = 0;i < allProvince.size();i++)
+		{
+			nation.ip += allProvince.get(i).ip;
+			nation.sp += allProvince.get(i).sp;
+			nation.cure += allProvince.get(i).cure;
+			nation.dead += allProvince.get(i).dead;
+		}
+	}
+	
     public static void main(String[] args) throws IOException 
     {
     	analysisOfCommand(args);
@@ -303,6 +324,8 @@ class InfectStatistic
     		    			&& oneLineOfFile.startsWith("//") == false)  //不读取注释行
     		    		{
     		    			System.out.println(oneLineOfFile);
+    		    			
+    		    			//统计省份的感染人数，疑似人数，治愈人数和死亡人数
     		    			getProvincialInformation(oneLineOfFile);
     		    			
     		    		}
@@ -313,6 +336,9 @@ class InfectStatistic
     			}
     		}
     		
+    		getNationInformation();
+    		
+    		//以下为测试输出
     		for (int i = 0;i < allProvince.size();i++)
     		{
     			System.out.println(allProvince.get(i).provinceName
@@ -336,6 +362,22 @@ class Province
     Province(String provinceName)
     {
     	this.provinceName=provinceName;
+    	ip=0;
+    	sp=0;
+    	cure=0;
+    	dead=0;
+    }
+}
+
+class Nation
+{
+	int ip;  //感染患者数目
+    int sp;  //疑似患者数目
+    int cure;  //治愈数目
+    int dead;  //死亡数目
+    
+    Nation()
+    {
     	ip=0;
     	sp=0;
     	cure=0;

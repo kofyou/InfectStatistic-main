@@ -177,6 +177,71 @@ class InfectStatistic
         }
         return true;
     }
+    //读取日志文件
+    public void ReadLogFile() throws IOException
+    {
+        int index = 0;
+        for (Map.Entry<String , File> entry : LogsMap.entrySet())
+        {
+            index++;
+            System.out.println("Handle file : " + entry.getKey());
+            BufferedReader br = null;
+            try{
+                br = Common.newBufferReader(entry.getKey());
+                String line  = null;
+                while((line = br.readLine()) != null)
+                {
+                    if (!ManageLine(line))
+                    {
+                        break;
+                    }
+                }
+            }catch (IOException e)
+            {
+                e.printStackTrace();
+            }finally
+            {
+                br.close();
+            }
+        }
+    }
+
+    //输出文件
+    public void OutputFile() throws IOException
+    {
+        String OutputPath = cmdArgs.GetOutputPath();
+        BufferedWriter bw = null;
+        try
+        {
+            bw = Common.NBWriter(OutputPath);
+            if (!cmdArgs.HasProvince() || cmdArgs.GetProvinces().contains(Lib.National))
+            {
+                nation.OutRecord(bw , cmdArgs.GetTypes());
+            }
+            container.OutContainer(bw , cmdArgs.GetTypes() , cmdArgs.GetProvinces());
+            bw.close();
+        }catch (IOException e)
+        {
+            e.printStackTrace();
+        }finally
+        {
+            bw.close();
+        }
+    }
+    public static void main(String[] args) throws ParseException , IOException
+    {
+        InfectStatistic inf = new InfectStatistic();
+        CmdArgs cmdArgs =  inf.GetCmdArgs();
+        if (!cmdArgs.ManageArgs(args , inf))
+        {
+            System.out.println("处理命令行参数失败");
+            return;
+        }
+        inf.SetLogsMap(Common.GetFiles(cmdArgs.GetLogPath() ,cmdArgs.GetDate() ,
+                Lib.LogFileRegex));
+        inf.ReadLogFile();
+        inf.OutputFile();
+    }
 }
 class Container {
 

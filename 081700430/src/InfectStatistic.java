@@ -95,6 +95,10 @@ class InfectStatistic {
     }
 
     private void dealLogs() {
+        int k = 0;
+        while (province[k] != null) {
+            System.out.println(province[k++]);
+        }
      //   System.out.println(log + " " + out);/* dbg:调试查看读取文件是否正确 */
         File file = new File(log);
         if (file.isDirectory() && file.list() != null) {
@@ -244,17 +248,19 @@ class InfectStatistic {
             }
             else if (province != null && type == null) {
                 System.out.println("arrive solition1");
-                for (String provin : province) {
-                    System.out.println("test p:"+provin); //xxx
-                    int[] tempStatus = status.get(provin);
-                    dataLine = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", provin,
+                int i = 0;
+                while (province[i] != null) {
+                    System.out.println("test p:"+province[i]); //xxx
+                    int[] tempStatus = status.get(province[i]);
+                    dataLine = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", province[i],
                             tempStatus[ip], tempStatus[sp], tempStatus[cure], tempStatus[dead]);
                     bw.write(dataLine);
-                    System.out.println("test data:"+dataLine); //xxx
+                    i++;
                 }
+                System.out.println("test arrive here?"); //xxx
                 bw.close();
             }
-            if (province == null && type != null) {
+            else if (province == null) {
                 int needTypes = 0;
                 for (int tempType : type) {
                     if (tempType >= 0) {
@@ -288,7 +294,7 @@ class InfectStatistic {
                 }
                 bw.close();
             }
-            else if (province != null && type != null){
+            else {
                 int needTypes = 0;
                 for (int tempType : type) {
                     if (tempType >= 0) {
@@ -296,30 +302,32 @@ class InfectStatistic {
                     }
                 }
                 System.out.println("arrive solition3");
-                for (String provin : province) {
-                    System.out.println("test p:"+provin); //xxx
-                    int[] tempStatus = status.get(provin);
+                int i = 0;
+                while (province[i] != null) {
+                    System.out.println("test p:"+province[i]); //xxx
+                    int[] tempStatus = status.get(province[i]);
                     String[] intToSring = new String[]{"感染患者" + tempStatus[ip] + "人", "疑似患者" + tempStatus[sp]
                             + "人", "治愈" + tempStatus[cure] + "人", "死亡" + tempStatus[dead] + "人"};
                     if (needTypes == 1) {
-                        dataLine = String.format("%s %s\n", provin, intToSring[type[0]]);
+                        dataLine = String.format("%s %s\n", province[i], intToSring[type[0]]);
                     }
                     else if (needTypes == 2) {
-                        dataLine = String.format("%s %s %s\n", provin, intToSring[type[0]], intToSring[type[1]]);
+                        dataLine = String.format("%s %s %s\n", province[i], intToSring[type[0]], intToSring[type[1]]);
                     }
                     else if (needTypes == 3) {
-                        dataLine = String.format("%s %s %s %s\n", provin, intToSring[type[0]], intToSring[type[1]],
+                        dataLine = String.format("%s %s %s %s\n", province[i], intToSring[type[0]], intToSring[type[1]],
                                 intToSring[type[2]]);
                     }
                     else if (needTypes == 4) {
-                        dataLine = String.format("%s %s %s %s %s\n", provin, intToSring[type[0]], intToSring[type[1]],
+                        dataLine = String.format("%s %s %s %s %s\n", province[i], intToSring[type[0]], intToSring[type[1]],
                                 intToSring[type[2]], intToSring[type[3]]);
                     }
                     else {
                         dataLine = "";
                     }
                     bw.write(dataLine);
-                    System.out.println("test data:"+dataLine); //xxx
+                    i++;
+                   // System.out.println("test data:"+dataLine); //xxx
                 }
                 bw.close();
             }

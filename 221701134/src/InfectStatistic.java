@@ -20,7 +20,21 @@ import java.util.Hashtable;
  */
 class InfectStatistic {
 				
-    public static void main(String[] args) {
+    public static void main(String[] _args) {
+    	
+		
+		  String[] args = { "list","-log","D:\\log\\","-out",
+		  "D:\\ListOut4.txt", "-date",
+		  "2020-01-23",
+		  "-type",
+		  "cure",
+		  "dead",
+		  "ip",
+		  "-province",
+		  "全国",
+		  "福建",
+		  "浙江"
+		  };
     	
     	if(args[0].equalsIgnoreCase("list")) {   		
     		//初始化统计类并启动
@@ -145,7 +159,10 @@ class InfectStatistic {
 				return index;
 			}
 			else { //仍有省份参数
-				provinceArgsList.add(args[index]);
+				if (temp.equals("全国") == false) {
+					provinceArgsList.add(temp);
+					provinceHashtable.put(temp, new Province(temp));					
+				}
 				index++;
 			}			
 		} //到列表尾或者全部省份都加入完成
@@ -170,7 +187,6 @@ class InfectStatistic {
 			//比较输入日期与最新日期
 			 String lastestDate = logFiles[logFiles.length - 1].getName();	 
 			 lastestDate = lastestDate.split("\\.")[0];
-			 System.out.println("当前最新的日期为：" + lastestDate);
 			 if (date.compareTo(lastestDate) > 0) {
 				 System.out.println("日期超出范围，当前最新日期为：" + lastestDate);
 				 isEnd = true;
@@ -214,41 +230,41 @@ class InfectStatistic {
 		
 		//根据不同情况进行处理
 		switch (datas[1]) {
-		case "死亡":
-			prov.increaseDead(datas[2]);
-			break;
-		case "治愈":
-			prov.increaseCure(datas[2]);
-			break;
-		case "新增":
-			if (datas[2].equals("感染患者")) {
-				prov.increaseIp(datas[3]);
-			}
-			else { //新增疑似患者
-				prov.increaseSp(datas[3]);
-			}
-			break;
-		case "排除": //排除疑似患者
-			prov.decreaseSp(datas[3]);
-			break;
-		case "疑似患者": 
-			if (datas[2].equals("确诊感染")) { //疑似患者确诊
-				prov.increaseIpBySpConfirmed(datas[3]);
-			}
-			else { //疑似患者流入他省
+			case "死亡":
+				prov.increaseDead(datas[2]);
+				break;
+			case "治愈":
+				prov.increaseCure(datas[2]);
+				break;
+			case "新增":
+				if (datas[2].equals("感染患者")) {
+					prov.increaseIp(datas[3]);
+				}
+				else { //新增疑似患者
+					prov.increaseSp(datas[3]);
+				}
+				break;
+			case "排除": //排除疑似患者
+				prov.decreaseSp(datas[3]);
+				break;
+			case "疑似患者": 
+				if (datas[2].equals("确诊感染")) { //疑似患者确诊
+					prov.increaseIpBySpConfirmed(datas[3]);
+				}
+				else { //疑似患者流入他省
+					Province prov2 = getProvinceByKey(datas[3]);
+					prov.decreaseSp(datas[4]);
+					prov2.increaseSp(datas[4]);
+				}
+				break;
+			case "感染患者": //感染患者流入他省
 				Province prov2 = getProvinceByKey(datas[3]);
-				prov.decreaseSp(datas[4]);
-				prov2.increaseSp(datas[4]);
-			}
-			break;
-		case "感染患者": //感染患者流入他省
-			Province prov2 = getProvinceByKey(datas[3]);
-			prov.decreaseIp(datas[4]);
-			prov2.increaseIp(datas[4]);
-			break;
-		default:
-			System.out.println("日志格式可能出现错误！解析失败！");
-			break;
+				prov.decreaseIp(datas[4]);
+				prov2.increaseIp(datas[4]);
+				break;
+			default:
+				System.out.println("日志格式可能出现错误！解析失败！");
+				break;
 		}		
 	}
 	 
@@ -262,7 +278,7 @@ class InfectStatistic {
 		 if (provinceHashtable.containsKey(key) == false) {
 				prov = new Province(key);
 				provinceHashtable.put(key, prov);
-				
+				System.out.println(key);
 				//加入有数据列表
 				allProvinceList.add(key);
 		}
@@ -289,26 +305,27 @@ class InfectStatistic {
 				//打印全国数据
 				 Province nation = getNationStatResult();
 				 bw.write(nation.getAllOuputResult());
-				 bw.newLine();
+				 bw.newLine();				 
 			 }
 			 			 
-			 if (isShowAllProvince == false) { //输出参数传入的省份
+			 if (isShowAllProvince == false) { //输出参数传入的省份				 
 				 provinceArgsList.sort(new ProvinceCompartor());
 				 for (String name : provinceArgsList) {
 					 bw.write(provinceHashtable.get(name).getAllOuputResult());
-					 bw.newLine();
+					 bw.newLine();					
 				}
 			 }
 			 else {	//输出所有省份			 
 				 allProvinceList.sort(new ProvinceCompartor());
-				 for (String name : allProvinceList) {
-					bw.write(provinceHashtable.get(name).getAllOuputResult());
-					bw.newLine();
+				 for (String name : allProvinceList) {					 
+					 bw.write(provinceHashtable.get(name).getAllOuputResult());
+					 bw.newLine();
 				}					 			 					 
 			 }
 			 
 			 bw.write("// 该文档并非真实数据，仅供测试使用");
 			 bw.close();
+			 System.out.println("文件写入完毕.");
 		} 
 		 catch (Exception e) {
 			e.printStackTrace();

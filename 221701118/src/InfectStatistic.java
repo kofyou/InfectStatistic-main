@@ -5,8 +5,8 @@ import java.util.TreeSet;
  * InfectStatistic TODO
  *
  * @author 张嘉伟
- * @version 3.0
- * @since 2020-02-19 15:51
+ * @version 4.0
+ * @since 2020-02-19 17:32
  */
 class InfectStatistic
 {
@@ -176,13 +176,10 @@ class InfectStatistic
             + "人\n");
         for(int i = 0; i < number; i++)
         {
-            writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"), 
-                province[i].getName()
-                + " 感染患者" + province[i].getInfectNumber()
-                + "人 疑似患者" + province[i].getSuspectNumber()
-                + "人 治愈" + province[i].getCure()
-                + " 死亡"+ province[i].getDead()
-                + "人\n");
+            writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
+                getOutputTypeString(province[i].getName(), province[i].getInfectNumber(),
+                province[i].getSuspectNumber(),province[i].getCure(), province[i].getDead())
+            );
         }
     }
 
@@ -220,6 +217,21 @@ class InfectStatistic
                 return false;
             }
         }
+    }
+
+    public static String getOutputTypeString(String name, int infect, int suspect, int cured, int deaded)
+    {
+        String string = name;
+        if(ip)
+            string = string + " 感染患者" + infect + "人";
+        if(sp)
+            string = string + " 疑似患者" + suspect + "人";
+        if(cure)
+            string = string + " 治愈" + cured + "人";
+        if(dead)
+            string = string + " 死亡" + deaded + "人";
+        string = string + "\n";
+        return string;
     }
 
     public static void getFileName(File list)

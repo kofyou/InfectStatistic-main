@@ -18,6 +18,36 @@ public class InfectStatistic {
 	public static Map<String , String> typeMap; //用于保存sp ip对应的类型关系
 	public static File fileArray[];          //保存所有日志文件的路径
 	public static FileWriter fileWritter; //用于输出流
+	
+	public static void readList(String args[])
+	/*
+	 * 读取命令的方法，目前只有list命令
+	 */
+	{
+        cmdCount = 0;		
+		try
+		{
+			if(args[cmdCount].equalsIgnoreCase("list"))  //list的命令
+		    	for(cmdCount = 0;cmdCount < args.length; cmdCount++)
+		    	{
+		    		if(judgeList(args[cmdCount]))
+		    		{
+		    			judgeType(args);
+		    		}
+		    	}
+			else
+			{
+				System.out.println("请检查是否输入了合理的命令");
+				System.exit(0);
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("请检查是否输入了合理的命令");
+			System.exit(0);
+		}
+	}
+	
 	public static boolean judgeList (String str)
 	/*  
 	 * 该方法判定args数组元素是否是命令行参数 
@@ -88,6 +118,11 @@ public class InfectStatistic {
 
 		File file = new File(fileDirect);
 		fileArray = file.listFiles();
+		if(fileArray == null) 
+		{
+			System.out.println("日志文件路径有误");
+			System.exit(0);
+		}
 		statistic = new HashMap<String,String>();
 		if(dateTime != null && fileArray[fileArray.length - 1] .getName().compareTo(dateTime + ".log.txt") < 0) //如果超出比较范围
 		{
@@ -524,30 +559,7 @@ public class InfectStatistic {
 	
 	public static void main(String args[]) throws IOException
     {
-		cmdCount = 0;
-		
-		try
-		{
-			if(args[cmdCount].equalsIgnoreCase("list"))  //list的命令
-		    	for(cmdCount = 0;cmdCount < args.length; cmdCount++)
-		    	{
-		    		if(judgeList(args[cmdCount]))
-		    		{
-		    			judgeType(args);
-		    		}
-		    	}
-			else
-			{
-				System.out.println("请检查是否输入了合理的命令");
-				return;
-			}
-		}
-		catch(Exception e)
-		{
-			System.out.println("请检查是否输入了合理的命令");
-			return;
-		}
-		
+		readList(args);
 		readDirect();  //开始查询日志文件
 		outPut(args);
 		

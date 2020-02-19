@@ -8,21 +8,23 @@
  */
 import java.io.*;
 import java.lang.String;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 class InfectStatistic {
 	public String[] province= {
 			"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南",
 			"河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁",
 			"内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津",
-			"西藏","新疆","云南","浙江"
+			"西藏","新疆","云南","浙江","全国"
 	};
 	public int[] illnessarray=new int[32];			//用于存放各省感染患者人数
 	public int[] doubtfulillnessarray=new int[32];	//用于存放各省疑似患者人数
 	public int[] secureillnessarray=new int[32];	//用于存放各省治愈患者人数
 	public int[] deadillnessarray=new int[32];		//用于存放各省死亡人数
 	public int[] type={1,2,3,4};					//用于判断-type类型的输出顺序
-	String outputarray;					//用于存放处理过后需要输出的字符串数组
+	public int[] provinceflag=new int[32];			//用于存放输出省份的标准
+	String outputarray;								//用于存放处理过后需要输出的字符串数组
     public static void main(String args[]) throws IOException {
 		String[] argstring=args;
 		InfectStatistic useInfectStatistic=new InfectStatistic();
@@ -42,16 +44,93 @@ class InfectStatistic {
 				outpath=args[i+1];				//-out参数的下一个参数即为输出文件路径名
 				OutProcess(outpath);			//对-out参数进行处理
 			}
-			if (args[i]=="-date") {				
+			if (args[i].equals("-date")) {				
+				df=1;
+				datehandle.DateHandle("args[i+1]",logpath);	//日期处理
 				concretedate=args[i+1];			//-date参数的下一个参数即为需要输出的具体日期
 			}
-			if (args[i]=="-type") {				
+			if (args[i].equals("-type")) {				
+				tf=1;
 				typehandle.TypeHandle(argstring,i);			//处理-type参数
+			}
+			if (args[i].equals("-province")) {
+				pf=1;
+				provincehandle.ProvinceHandle(argstring,i);			//处理-type参数
 			}
 		}
     }
-    public class OutProcess {
-		public void OutProcess(String outpath) throws IOException {	//输出到指定文件中
+	public class OutProcess {
+		public void OutProcess(String logpath,String outpath,String[] typestr,int df,int tf,int pf) throws IOException {	//输出到指定文件中
+			if (df==0) {
+				LocalDate date = LocalDate.now();
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				//System.out.println(date.format(formatter)); //输出当前日期
+				InfectStatistic useInfectStatistic=new InfectStatistic();
+				DateHandle datehandle = useInfectStatistic.new DateHandle();
+				datehandle.DateHandle("date.format(formatter)",logpath);		//未指定日期即用当然日期进行处理
+			}
+			if (tf==0) {														//未指定输出类型即按顺序输出
+				for (int i=0;i<4;i++) {
+					type[i]=i+1;
+				}
+			}
+			if (pf==0) {														//未指定省份则输出全国和所有省份
+				for (int i=0;i<32;i++) {
+					provinceflag[i]=1;
+				}
+			}
+			for (int i=0;i<32;i++) {
+				if (provinceflag[(i+31%32)]==1&&tf==0) {
+					System.out.println(province[(i+31)%32]+" 感染患者"+illnessarray[(i+31)%32]+"人 "+"疑似患者"+
+						doubtfulillnessarray[(i+31)%32]+"人 "+"治愈"+secureillnessarray[(i+31)%32]+"人 "+"死亡"+
+						deadillnessarray[(i+31)%32]+"人");
+				}
+				if (provinceflag[(i+31%32)]==1&&tf==1) {
+					System.out.println(province[(i+31)%32]+" ");
+					for (int j=0;j<4;j++) {
+						if(type[j]==1) {
+							if (j==0)
+								System.out.println("感染患者"+illnessarray[(i+31)%32]+"人 ");
+							if (j==1)
+								System.out.println("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+							if (j==2)
+								System.out.println("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+							if (j==3)
+								System.out.println("死亡"+deadillnessarray[(i+31)%32]+"人");
+						}
+						if(type[j]==2) {
+							if (j==0)
+								System.out.println("感染患者"+illnessarray[(i+31)%32]+"人 ");
+							if (j==1)
+								System.out.println("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+							if (j==2)
+								System.out.println("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+							if (j==3)
+								System.out.println("死亡"+deadillnessarray[(i+31)%32]+"人");
+						}
+						if(type[j]==3) {
+							if (j==0)
+								System.out.println("感染患者"+illnessarray[(i+31)%32]+"人 ");
+							if (j==1)
+								System.out.println("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+							if (j==2)
+								System.out.println("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+							if (j==3)
+								System.out.println("死亡"+deadillnessarray[(i+31)%32]+"人");
+						}
+						if(type[j]==4) {
+							if (j==0)
+								System.out.println("感染患者"+illnessarray[(i+31)%32]+"人 ");
+							if (j==1)
+								System.out.println("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+							if (j==2)
+								System.out.println("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+							if (j==3)
+								System.out.println("死亡"+deadillnessarray[(i+31)%32]+"人");
+						}
+					}
+				}
+			}
     		FileWriter fw=new FileWriter(outpath);
     		fw.write(outputarray);									//将最终字符串数组输出到指定文件中
     	}
@@ -91,21 +170,26 @@ class InfectStatistic {
     		RemoveDoutbfulIllness(lineText);
     	}
     }
-    public String LogProcess(String logpath) throws IOException {
+    public void LogProcess(String logpath) throws IOException {
     	File logfilepath=new File(logpath);
-		File list[]=logfilepath.listFiles();		//获取日志文件列表
-		for (int logi=0;logi<list.length;logi++) {	//循环获得日志文件夹中的每一个日志文件
+		//File list[]=logfilepath.listFiles();		//获取日志文件列表
+		//for (int logi=0;logi<list.length;logi++) {	//循环获得日志文件夹中的每一个日志文件
 			//System.out.println(list[logi].getAbsolutePath());	//输出日志文件的绝对路径
-			File logfile=new File(list[logi].getAbsolutePath());	//新建日志文件对象获得文件路径logfile
+			//File logfile=new File(list[logi].getAbsolutePath());	//新建日志文件对象获得文件路径logfile
 			//采用字符流读取文件内容
-			BufferedReader buff = new BufferedReader(new InputStreamReader(new FileInputStream(logfile),"UTF-8"));
+			BufferedReader buff = new BufferedReader(new InputStreamReader(new FileInputStream(logfilepath),"UTF-8"));
 			String lineText=null;
 			while ((lineText=buff.readLine())!=null) {	//按行读取文本内容
-				if(!lineText.startsWith("//"))		//行开头是"//"则不读取
-					System.out.println(lineText);
+				if(!lineText.startsWith("//")) {		//行开头是"//"则不读取
+					//buff.close();
+					//System.out.println(lineText);
+					LogContentHandle(GetLineText(lineText));					//返回单行文本
+				}
 			}
-			buff.close();
-		}
+		//}
+    }
+    public String GetLineText (String lineText) {
+    	return lineText;
     }
     public void AddIllness(String lineText) {
     	String[] cutlineText=lineText.split(" ");
@@ -246,11 +330,22 @@ class InfectStatistic {
     			//System.out.println(cutlineText[0]);				//输出分割后的日志文件名，测试用
     			if (!(logsname.compareTo(concretedate)>0)) {		//如果在指定的日期内则处理该文本的信息
     				//LogContentHandle(LogProcess(list[i].getAbsolutePath()));
-    				LogProcess2(list[i].getAbsolutePath());
+    				LogProcess(list[i].getAbsolutePath());
     				//System.out.println(list[i].getAbsolutePath());	//测试用，输出指定日期的日志文件绝对路径
     				//System.out.println(logsname);					//输出指定日期内的日志文件名，测试用
 				}
 			}
+    	}
+    }
+    public class ProvinceHandle {
+    	public void ProvinceHandle(String[] args,int i) {
+    		for(;i<args.length;i++) {
+    			for (int j=0;j<province.length;j++) {
+    					if (args[i].equals(province[j])) {			//参数中的省份如果匹配的话，讲省份的标志置为1
+    						provinceflag[j]=1;			
+    				}
+    			}
+    		}
     	}
     }
 }

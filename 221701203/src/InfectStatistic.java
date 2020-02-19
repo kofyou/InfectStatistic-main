@@ -70,33 +70,37 @@ public class InfectStatistic {
                         flag2 = i1;
                     }
                 }
-                if (num == 2) {
-                    //流入流出
-                    number[flag1][0] += Integer.parseInt(m.group(3));
-                    number[flag2][0] -= Integer.parseInt(m.group(3));
-                } else if (num == 3) {
-                    number[flag1][1] += Integer.parseInt(m.group(3));
-                    number[flag2][1] -= Integer.parseInt(m.group(3));
-                } else if (num == 7) {
-                    //排除类型
-                    number[flag][1] -= Integer.parseInt(m.group(2));
-                } else if (num == 5) {
-                    //治愈和死亡类型
-                    number[flag][0] -= Integer.parseInt(m.group(2));
-                    number[flag][2] += Integer.parseInt(m.group(2));
-                } else if (num == 4) {
-                    number[flag][0] -= Integer.parseInt(m.group(2));
-                    number[flag][3] += Integer.parseInt(m.group(2));
-                } else if (num == 6) {
-                    //疑似->确认
-                    number[flag][0] += Integer.parseInt(m.group(2));
-                    number[flag][1] -= Integer.parseInt(m.group(2));
-                } else {
-                    number[flag][num] += Integer.parseInt(m.group(2));
-                }
+                dealData(flag,flag1,flag2,num,m.group(3),m.group(2));
             }
         }
 
+    }
+
+    private void dealData(int flag, int flag1, int flag2, int num, String group, String group1) {
+        if (num == 2) {
+            //流入流出
+            number[flag1][0] += Integer.parseInt(group);
+            number[flag2][0] -= Integer.parseInt(group);
+        } else if (num == 3) {
+            number[flag1][1] += Integer.parseInt(group);
+            number[flag2][1] -= Integer.parseInt(group);
+        } else if (num == 7) {
+            //排除类型
+            number[flag][1] -= Integer.parseInt(group1);
+        } else if (num == 5) {
+            //治愈和死亡类型
+            number[flag][0] -= Integer.parseInt(group1);
+            number[flag][2] += Integer.parseInt(group1);
+        } else if (num == 4) {
+            number[flag][0] -= Integer.parseInt(group1);
+            number[flag][3] += Integer.parseInt(group1);
+        } else if (num == 6) {
+            //疑似->确认
+            number[flag][0] += Integer.parseInt(group1);
+            number[flag][1] -= Integer.parseInt(group1);
+        } else {
+            number[flag][num] += Integer.parseInt(group1);
+        }
     }
 
 
@@ -206,23 +210,25 @@ public class InfectStatistic {
                 }
             }
         }
-        provinces=sortProvinces(provinces);
-        type=deleteArrayNull(type);
-        if(isValidDate(date,dic) && isValidProvince(provinces)||!flag2&&isValidDate(date, dic)) {
-            outputFile(path, dic, date);
-            dealFlag( type, provinces);
-            System.out.println("// 该文档并非真实数据，仅供测试使用\n");
-        }
-        else {
-            isValidDate(date,dic);
-            if (!isValidDate(date,dic)){
-                System.out.println("日期格式不合法！");
-            }
-            else if (!isValidProvince(provinces)){
-                System.out.println("省份错误！");
+        if (isExistFile(path)) {
+            provinces = sortProvinces(provinces);
+            type = deleteArrayNull(type);
+            if (isValidDate(date, dic) && isValidProvince(provinces) || !flag2 && isValidDate(date, dic)) {
+                outputFile(path, dic, date);
+                dealFlag(type, provinces);
+                System.out.println("// 该文档并非真实数据，仅供测试使用\n");
+            } else {
+                isValidDate(date, dic);
+                if (!isValidDate(date, dic)) {
+                    System.out.println("日期格式不合法！");
+                } else if (!isValidProvince(provinces)) {
+                    System.out.println("省份错误！");
+                }
             }
         }
     }
+
+
 
     private String[] sortProvinces(String[] provinces) {
         provinces=deleteArrayNull(provinces);
@@ -235,6 +241,17 @@ public class InfectStatistic {
             }
         }
         return provinces;
+    }
+
+    public static boolean isExistFile(String path) {
+
+        if (null == path || "".equals(path.trim())) {
+            System.out.println("创建文件路径错误！");
+            return false;
+        }
+
+        File targetFile = new File(path);
+        return targetFile.exists();
     }
 
     public boolean isValidDate(String ymd, String dic) {

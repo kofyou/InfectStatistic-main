@@ -25,7 +25,7 @@
 //cd C:\Users\鸟蛋花机\Desktop\软件工程\寒假第二次作业\InfectStatistic-main\221701336\src
 //InfectStatistic.exe list -date 2020-01-25 -type sp ip dead -out C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt 
 //-log C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/log/ 
-//InfectStatistic.exe list -date 2020-01-23 -type sp ip dead -log C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/log/ -out C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt 
+//InfectStatistic.exe list -date 2020-01-23 -log C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/log/ -out C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt 
 using namespace std;
 
 string province[32]={"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江",
@@ -248,6 +248,97 @@ void MoveIP(string province1,string province2,int num,PNode head)
 	}
 }
 
+void MoveSP(string province1,string province2,int num,PNode head)
+{
+	//ofstream outFile;
+	//outFile.open(("C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt"),ios::app);
+	PNode p=head;
+	while(p!=NULL)
+	{
+		if(p->province==province1)
+		{
+			p->numOfSP=p->numOfSP-num;
+			p->flag=1;
+		}
+		if(p->province==province2)
+		{
+			p->numOfSP=p->numOfSP+num;
+			p->flag=1;
+		}
+		p=p->next;
+	}
+}
+
+void Dead(string province1,int num,PNode head)
+{
+	PNode p=head;
+	while(p!=NULL)
+	{
+		if(p->province==province1)
+		{
+			p->numOfIP=p->numOfIP-num;
+			p->numOfDead=p->numOfDead+num;
+			p->flag=1;
+		}
+		p=p->next;
+	}
+	head->numOfIP=head->numOfIP-num;
+	head->numOfDead=head->numOfDead+num; 
+	head->flag=1;
+}
+
+void Cure(string province1,int num,PNode head)
+{
+	PNode p=head;
+	while(p!=NULL)
+	{
+		if(p->province==province1)
+		{
+			p->numOfIP=p->numOfIP-num;
+			p->numOfCured=p->numOfCured+num;
+			p->flag=1;
+		}
+		p=p->next;
+	}
+	head->numOfIP=head->numOfIP-num;
+	head->numOfCured=head->numOfCured+num; 
+	head->flag=1;
+}
+
+void Diagnosis(string province1,int num,PNode head)
+{
+	PNode p=head;
+	while(p!=NULL)
+	{
+		if(p->province==province1)
+		{
+			p->numOfSP=p->numOfSP-num;
+			p->numOfIP=p->numOfIP+num;
+			p->flag=1;
+		}
+		p=p->next;
+	}
+	head->numOfSP=head->numOfSP-num;
+	head->numOfIP=head->numOfIP+num; 
+	head->flag=1;
+}
+
+void Exclude(string province1,int num,PNode head)
+{
+	PNode p=head;
+	while(p!=NULL)
+	{
+		if(p->province==province1)
+		{
+			p->numOfSP=p->numOfSP-num;
+			p->flag=1;
+		}
+		p=p->next;
+	}
+	head->numOfSP=head->numOfSP-num;
+	head->flag=1;
+}
+
 void operate(string op_province1,string op_province2,int op,int number,PNode head)
 {
 	PNode p=head;
@@ -266,19 +357,19 @@ void operate(string op_province1,string op_province2,int op,int number,PNode hea
 			MoveIP(province1,province2,num,p);
 			break;
 		case 3: 
-			//疑似患者流入
+			MoveSP(province1,province2,num,p);
 			break;
 		case 4:
-			//死亡
+			Dead(province1,num,p);
 			break;
 		case 5:
-			//治愈
+			Cure(province1,num,p);
 			break;
 		case 6:
-			//疑似患者确诊感染
+			Diagnosis(province1,num,p);
 			break;
 		case 7:
-			//排除疑似
+			Exclude(province1,num,p);
 			break;
 		default :
 			break;
@@ -316,10 +407,11 @@ void getOperation(char buffer[],PNode head)//读取每行文件中的操作
     
 	string operation=buffer;
  	operation=Utf8ToGbk(buffer);
-
-	//ofstream outFile;
-	//outFile.open(("C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt"),ios::app); 
-
+	
+	ofstream outFile;
+	outFile.open(("C:/Users/鸟蛋花机/Desktop/软件工程/寒假第二次作业/InfectStatistic-main/221701336/src/out.txt"),ios::app); 
+	op_province[0]=operation.substr(0,4);
+	outFile<<op_province[0]<<endl;
     string::size_type idx; 
 	
 	for(int i=0;i<8;i++)//读取指令 
@@ -338,10 +430,9 @@ void getOperation(char buffer[],PNode head)//读取每行文件中的操作
 		    {
 		    	buf_province=province[j];
 			    idx=operation.find(buf_province);//在a中查找b.
-			    if(idx != string::npos )
+			    if(idx != string::npos&&province[j]!=op_province[0] )
 			    {	
-			    	op_province[count]=buf_province;
-			    	count++;			    	
+			    	op_province[1]=buf_province;			    	
 			    }
 			}
 		} 							    
@@ -561,7 +652,7 @@ int main(int argc,char *argv[])
 	readLog(date,log,head);//读取目录 
 	
 	//Node pp={"福建",6,3,15,20,NULL};
-	output(outPath,p,head,type,province);//输出 
+	//output(outPath,p,head,type,province);//输出 
 	system("pause");
 }
 

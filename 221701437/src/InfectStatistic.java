@@ -1,6 +1,4 @@
 import java.io.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,15 +14,13 @@ import java.util.regex.Pattern;
 class InfectStatistic {
     public static void main(String[] args) throws IOException {
         CmdArgs cmdArgs = new CmdArgs(args);
-        ProvinceData pd = ProvinceData.getInstance();
         AbstractDataHandle dataHandle = AbstractDataHandle.getChainOfDataHandle();
         FileProcess fileProcess = FileProcess.getInstance();
         ArrayList<File> fileList = fileProcess.InputFileData();
-        for(int i = 0; i < fileList.size(); i++) {
-            if (fileList.get(i).getName().substring(0,10).compareTo(cmdArgs.argVals("-date").get(0)) <= 0) {
-                ArrayList<String> data = fileProcess.getFileData(fileList.get(i));
-                for (int j = 0; j < data.size(); j++)
-                    dataHandle.dataProcessing(data.get(j));
+        for (File file : fileList) {
+            if (file.getName().substring(0, 10).compareTo(cmdArgs.argVals("-date").get(0)) <= 0) {
+                ArrayList<String> data = fileProcess.getFileData(file);
+                for (String datum : data) dataHandle.dataProcessing(datum);
             }
         }
         fileProcess.LogData(cmdArgs.argVals("-province"),cmdArgs.argVals("-type"));
@@ -44,19 +40,19 @@ class ProvinceData{
     }
 
     public String logProcess(ArrayList<String> allData, ArrayList<String>typeList){
-        String data = new String();
-        int[] dataValue = new int[] {};
-        for(int i = 0; i < allData.size(); i++){
-            if(AllData.containsKey(allData.get(i))){
-                dataValue = AllData.get(allData.get(i));
-                data = data + allData.get(i) + " ";
-                for (int j = 0; j < typeList.size(); j++) {
-                    data = data + Constant.STATUSCHINESE.get(typeList.get(j)) + dataValue[Constant.STATUS.get(typeList.get(j))] + "人 ";
+        StringBuilder data = new StringBuilder();
+        int[] dataValue;
+        for (String allDatum : allData) {
+            if (AllData.containsKey(allDatum)) {
+                dataValue = AllData.get(allDatum);
+                data.append(allDatum).append(" ");
+                for (String s : typeList) {
+                    data.append(Constant.STATUSCHINESE.get(s)).append(dataValue[Constant.STATUS.get(s)]).append("人 ");
                 }
-                data += "\n";
+                data.append("\n");
             }
         }
-        return data;
+        return data.toString();
     }
 
     public static ProvinceData getInstance(){
@@ -154,7 +150,7 @@ class AddInfectPeople extends AbstractDataHandle{
         Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
-        int num = Integer.valueOf(matcher.replaceAll("").trim());
+        int num = Integer.parseInt(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.AddInfectPeople(province[0],num);
@@ -173,7 +169,7 @@ class AddDoubtPeople extends AbstractDataHandle{
         Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
-        int num = Integer.valueOf(matcher.replaceAll("").trim());
+        int num = Integer.parseInt(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.AddDoubtPeople(province[0],num);
@@ -192,7 +188,7 @@ class SubDoubtPeople extends AbstractDataHandle{
         Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
-        int num = Integer.valueOf(matcher.replaceAll("").trim());
+        int num = Integer.parseInt(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.SubDoubtPeople(province[0],num);
@@ -211,7 +207,7 @@ class AddCurePeople extends AbstractDataHandle{
         Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
-        int num = Integer.valueOf(matcher.replaceAll("").trim());
+        int num = Integer.parseInt(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.AddCurePeople(province[0],num);
@@ -232,7 +228,7 @@ class AddDeadPeople extends AbstractDataHandle{
         Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
-        int num = Integer.valueOf(matcher.replaceAll("").trim());
+        int num = Integer.parseInt(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.AddDeadPeople(province[0],num);
@@ -253,7 +249,7 @@ class DoubtInflow extends AbstractDataHandle{
         Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
-        int num = Integer.valueOf(matcher.replaceAll("").trim());
+        int num = Integer.parseInt(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.SubDoubtPeople(province[0],num);
@@ -272,7 +268,7 @@ class InfectInflow extends AbstractDataHandle{
         Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
-        int num = Integer.valueOf(matcher.replaceAll("").trim());
+        int num = Integer.parseInt(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.SubInfectPeople(province[0],num);
@@ -291,7 +287,7 @@ class SureInfectPeople extends AbstractDataHandle{
         Pattern pattern = Pattern.compile(Constant.PICKUPDIGIT);
         Matcher matcher = pattern.matcher(str);
 
-        int num = Integer.valueOf(matcher.replaceAll("").trim());
+        int num = Integer.parseInt(matcher.replaceAll("").trim());
         String[] province = str.split("\\s");
 
         provinceData.AddInfectPeople(province[0],num);
@@ -306,13 +302,13 @@ class FileProcess{
     private File file;
     private File outfile;
 
-    private FileProcess(){};
+    private FileProcess(){}
 
     public static FileProcess getInstance(){
         return fileProcess;
     }
 
-    public void FileInit(String in, String out) throws IOException {
+    public void FileInit(String in, String out){
         file = new File(in);
         outfile = new File(out);
     }
@@ -322,23 +318,18 @@ class FileProcess{
         if(tempList == null){
             return null;
         }
-        ArrayList<File> fileArrayList = new ArrayList<File>();
-        for(int i = 0; i < tempList.length; i++){
-            if(tempList[i].isFile()){
+        ArrayList<File> fileArrayList = new ArrayList<>();
+        for (File value : tempList) {
+            if (value.isFile()) {
                 Pattern pattern = Pattern.compile(Constant.GETFLENAME);
-                Matcher matcher = pattern.matcher(tempList[i].getName());
+                Matcher matcher = pattern.matcher(value.getName());
                 boolean result = matcher.matches();
-                if(result){
-                    fileArrayList.add(tempList[i]);
+                if (result) {
+                    fileArrayList.add(value);
                 }
             }
         }
-        Collections.sort(fileArrayList, new Comparator<File>() {
-            @Override
-            public int compare(File o1, File o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
+        fileArrayList.sort(Comparator.comparing(File::getName));
         return fileArrayList;
     }
 
@@ -357,7 +348,7 @@ class FileProcess{
 
     public void LogData(ArrayList<String> provinceList, ArrayList<String>typeList) throws IOException {
         ProvinceData provinceData = ProvinceData.getInstance();
-        PrintStream stream = null;
+        PrintStream stream;
         stream=new PrintStream(outfile);
         String data = provinceData.logProcess(provinceList,typeList);
         stream.print(data);
@@ -365,9 +356,9 @@ class FileProcess{
 
     public String maxFileName(ArrayList<File> files){
         String max = "";
-        for(int i = 0; i < files.size(); i++){
-            if(max.compareTo(files.get(i).getName().substring(0,10)) < 0){
-                max = files.get(i).getName();
+        for (File value : files) {
+            if (max.compareTo(value.getName().substring(0, 10)) < 0) {
+                max = value.getName();
             }
         }
         return max;
@@ -379,7 +370,7 @@ class CmdArgs{
     private HashMap<String, ArrayList<String>> paramToValue = new HashMap<>();
     private FileProcess fileProcess = FileProcess.getInstance();
 
-    CmdArgs(String[] args) throws IOException {
+    CmdArgs(String[] args) {
         this.args = args;
         argsProcess();
         argsProcess2();
@@ -398,9 +389,9 @@ class CmdArgs{
         String tempKey = "";
         int index = 0;
         for(int i = 1; i < args.length; i++){
-            if(args[i].contains("-") && !HasDigit(args[i]) && index == 0){
+            if(args[i].contains("-") && IsDate(args[i]) && index == 0){
                 tempKey = args[i];
-            }else if(args[i].contains("-") && !HasDigit(args[i]) && index == 1){
+            }else if(args[i].contains("-") && IsDate(args[i]) && index == 1){
                 ArrayList<String> tempForValue = new ArrayList<>(tempValue);
                 paramToValue.put(tempKey,tempForValue);
                 tempKey = args[i];
@@ -413,18 +404,18 @@ class CmdArgs{
         paramToValue.put(tempKey,tempValue);
     }
 
-    private void argsProcess2() throws IOException {
+    private void argsProcess2() {
         fileProcess.FileInit(argVals("-log").get(0), argVals("-out").get(0));
-        if(!hasParam("-date") || argVals("-date") == null){
+        if(HasParam("-date") || argVals("-date") == null){
             ArrayList<File> fileList = fileProcess.InputFileData();
             ArrayList<String> max = new ArrayList<>(Collections.singleton(fileProcess.maxFileName(fileList).substring(0,10)));
             paramToValue.put("-date", max);
         }
-        if(!hasParam("-type")|| argVals("type") == null){
+        if(HasParam("-type") || argVals("type") == null){
             ArrayList<String> typeList = new ArrayList<>(Arrays.asList(Constant.TYPE.split(",")));
             paramToValue.put("-type",typeList);
         }
-        if(!hasParam("-province") || argVals("-province") == null){
+        if(HasParam("-province") || argVals("-province") == null){
             ArrayList<String> provinceList = new ArrayList<>(Arrays.asList(Constant.initStr));
             paramToValue.put("-province",provinceList);
         }
@@ -434,18 +425,18 @@ class CmdArgs{
         return paramToValue.get(key);
     }
 
-    private boolean HasDigit(String content) {
+    private boolean IsDate(String content) {
         boolean flag = false;
         Pattern p = Pattern.compile(".*\\d+.*");
         Matcher m = p.matcher(content);
         if (m.matches()) {
             flag = true;
         }
-        return flag;
+        return !flag;
     }
 
-    private boolean hasParam(String key){
-        return paramToValue.containsKey(key);
+    private boolean HasParam(String key){
+        return !paramToValue.containsKey(key);
     }
 
     private boolean JudgeDate(){
@@ -471,8 +462,6 @@ class Constant{
     public final static String s8 = "^[\\u4e00-\\u9fa5]*\\s(疑似患者)\\s(流入)\\s[\\u4e00-\\u9fa5]*\\s(\\d+)人?";
     public final static String PICKUPDIGIT = "[^0-9]";
     public final static String TYPE = "ip,sp,cure,dead";
-    public final static String DEFAULTLOG = "../log";
-    public final static String DEFAULTOUT = "../result/out.txt";
 
     public final static HashMap<String,Integer> STATUS = new HashMap<>();
 

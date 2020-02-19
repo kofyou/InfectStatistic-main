@@ -1,8 +1,12 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Hashtable;
 
 
@@ -286,17 +290,32 @@ class InfectStatistic {
 			 return;
 		 }
 		 
-		//TODO： 判断是否统计全国数据
-		 if (isShowAllProvince == false) {
-			 //判断输出列表是否包含全国
-			 if (isOuputNationwide()) {
-				 //统计出全国数据
-				 Province nation = getNationStatResult();
+		 try {
+			 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath), "UTF-8"));
+			 
+				//TODO： 判断是否统计全国数据
+				 if (isShowAllProvince == false) {
+					 //判断输出列表是否包含全国
+					 if (isOuputNationwide()) {
+						 //统计出全国数据
+						 Province nation = getNationStatResult();
+						 
+					 }
+					 else { //仅输出传入参数的省份列表
+						
+					}
+				 }
+				 else {
+					 //输出全国数据和所有省份数据
+					 Province nation = getNationStatResult();
+					 
+				}
 				 
-			 }
-		 }
-		 else {
-			//输出全国数据和所有省份数据
+				 bw.write("// 该文档并非真实数据，仅供测试使用");
+				 bw.close();
+		} 
+		 catch (Exception e) {
+			e.printStackTrace();
 		}
 	 }
 	 
@@ -331,6 +350,19 @@ class InfectStatistic {
 		}
 		
 		return new Province("全国", ip, sp, cure, dead);
+	}
+	 
+	 /**
+	  * description：省份名字排序器 按字母先后顺序排列
+	  * @author VisionWong
+	  *
+	  */
+	 public class ProvinceCompartor implements Comparator<String> {
+
+		@Override
+		public int compare(String o1, String o2) {
+			return o1.compareTo(o2);
+		}		
 	}
 	 
     /**

@@ -12,7 +12,6 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <unordered_map>
 
 using namespace std;
 
@@ -40,6 +39,9 @@ enum Action {
 ///某省疫情信息
 class InfectInfo {
 public:
+    ///该省名
+    string province;
+
     ///该省是否用到
     bool exist = false;
 
@@ -55,6 +57,9 @@ public:
     ///死亡人数
     int dead_count = 0;
 
+    InfectInfo(string province) {
+        this->province = province;
+    }
 private:
 
 };
@@ -62,8 +67,8 @@ private:
 ///工程数据类
 class BaseData {
 public:
-    ///省份键值映射
-    static unordered_map<string, InfectInfo> province_map;
+    ///排好序的各省份元数据
+    static vector<InfectInfo> meta_data;
 
     ///log文件夹下的全部文件名，届时将通过此数组进行读取
     static vector<string> files;
@@ -74,36 +79,39 @@ public:
     ///需要展示的数据类型
     static vector<Action> types;
 
-    ///数据初始化
+    ///数据初始化元数据
     static void init() {
-        BaseData::province_map.insert(make_pair("浙江", InfectInfo()));
-        BaseData::province_map.insert(make_pair("云南", InfectInfo()));
-        BaseData::province_map.insert(make_pair("新疆", InfectInfo()));
-        BaseData::province_map.insert(make_pair("天津", InfectInfo()));
-        BaseData::province_map.insert(make_pair("四川", InfectInfo()));
-        BaseData::province_map.insert(make_pair("上海", InfectInfo()));
-        BaseData::province_map.insert(make_pair("陕西", InfectInfo()));
-        BaseData::province_map.insert(make_pair("山东", InfectInfo()));
-        BaseData::province_map.insert(make_pair("山西", InfectInfo()));
-        BaseData::province_map.insert(make_pair("宁夏", InfectInfo()));
-        BaseData::province_map.insert(make_pair("内蒙古", InfectInfo()));
-        BaseData::province_map.insert(make_pair("辽宁", InfectInfo()));
-        BaseData::province_map.insert(make_pair("江苏", InfectInfo()));
-        BaseData::province_map.insert(make_pair("吉林", InfectInfo()));
-        BaseData::province_map.insert(make_pair("江西", InfectInfo()));
-        BaseData::province_map.insert(make_pair("湖南", InfectInfo()));
-        BaseData::province_map.insert(make_pair("湖北", InfectInfo()));
-        BaseData::province_map.insert(make_pair("黑龙江", InfectInfo()));
-        BaseData::province_map.insert(make_pair("河南", InfectInfo()));
-        BaseData::province_map.insert(make_pair("河北", InfectInfo()));
-        BaseData::province_map.insert(make_pair("海南", InfectInfo()));
-        BaseData::province_map.insert(make_pair("贵州", InfectInfo()));
-        BaseData::province_map.insert(make_pair("广西", InfectInfo()));
-        BaseData::province_map.insert(make_pair("广东", InfectInfo()));
-        BaseData::province_map.insert(make_pair("甘肃", InfectInfo()));
-        BaseData::province_map.insert(make_pair("福建", InfectInfo()));
-        BaseData::province_map.insert(make_pair("北京", InfectInfo()));
-        BaseData::province_map.insert(make_pair("安徽", InfectInfo()));
+        meta_data.push_back(InfectInfo("安徽"));
+        meta_data.push_back(InfectInfo("北京"));
+        meta_data.push_back(InfectInfo("重庆"));
+        meta_data.push_back(InfectInfo("福建"));
+        meta_data.push_back(InfectInfo("甘肃"));
+        meta_data.push_back(InfectInfo("广东"));
+        meta_data.push_back(InfectInfo("广西"));
+        meta_data.push_back(InfectInfo("贵州"));
+        meta_data.push_back(InfectInfo("海南"));
+        meta_data.push_back(InfectInfo("河北"));
+        meta_data.push_back(InfectInfo("河南"));
+        meta_data.push_back(InfectInfo("黑龙江"));
+        meta_data.push_back(InfectInfo("湖北"));
+        meta_data.push_back(InfectInfo("湖南"));
+        meta_data.push_back(InfectInfo("江西"));
+        meta_data.push_back(InfectInfo("吉林"));
+        meta_data.push_back(InfectInfo("江苏"));
+        meta_data.push_back(InfectInfo("辽宁"));
+        meta_data.push_back(InfectInfo("内蒙古"));
+        meta_data.push_back(InfectInfo("宁夏"));
+        meta_data.push_back(InfectInfo("青海"));
+        meta_data.push_back(InfectInfo("山西"));
+        meta_data.push_back(InfectInfo("山东"));
+        meta_data.push_back(InfectInfo("陕西"));
+        meta_data.push_back(InfectInfo("上海"));
+        meta_data.push_back(InfectInfo("四川"));
+        meta_data.push_back(InfectInfo("天津"));
+        meta_data.push_back(InfectInfo("西藏"));
+        meta_data.push_back(InfectInfo("新疆"));
+        meta_data.push_back(InfectInfo("云南"));
+        meta_data.push_back(InfectInfo("浙江"));
     }
 
     static bool contains(string province) {
@@ -121,45 +129,51 @@ public:
 
         return false;
     }
+
+    static void setExist(string province) {
+        for(int i = 0 ; i < BaseData::meta_data.size() ; i++) {
+            if(BaseData::meta_data[i].province == province) BaseData::meta_data[i].exist = true;
+        }
+    }
+
+    static void setAction(string province, Action action, int count) {
+        for(int i = 0 ; i < BaseData::meta_data.size() ; i++) {
+            if(BaseData::meta_data[i].province == province) {
+                switch (action) {
+                    case dead:
+                        BaseData::meta_data[i].dead_count += count;
+                        BaseData::meta_data[i].sure_count -= count;
+                        break;
+                    case cure:
+                        BaseData::meta_data[i].cure_count += count;
+                        BaseData::meta_data[i].sure_count -= count;
+                        break;
+                    case decrease_sure:
+                        BaseData::meta_data[i].sure_count -= count;
+                        break;
+                    case decrease_doubt:
+                        BaseData::meta_data[i].doubt_count -= count;
+                        break;
+                    case increase_sure:
+                        BaseData::meta_data[i].sure_count += count;
+                        break;
+                    case increase_doubt:
+                        BaseData::meta_data[i].doubt_count += count;
+                        break;
+                }
+            }
+        }
+    }
 };
 
 ///静态数据成员的初始化 应在类外进行 需特别注意
-unordered_map<string, InfectInfo> BaseData::province_map {};
+vector<InfectInfo> BaseData::meta_data {};
 
 vector<string> BaseData::files {};
 
 vector<string> BaseData::provinces {};
 
 vector<Action> BaseData::types {};
-
-///工程操作类
-class Command {
-public:
-    static void ActionWith(Action action, int count, string province) {
-        switch (action) {
-            case dead:
-                BaseData::province_map[province].dead_count += count;
-                BaseData::province_map[province].sure_count -= count;
-                break;
-            case cure:
-                BaseData::province_map[province].cure_count += count;
-                BaseData::province_map[province].sure_count -= count;
-                break;
-            case decrease_sure:
-                BaseData::province_map[province].sure_count -= count;
-                break;
-            case decrease_doubt:
-                BaseData::province_map[province].doubt_count -= count;
-                break;
-            case increase_sure:
-                BaseData::province_map[province].sure_count += count;
-                break;
-            case increase_doubt:
-                BaseData::province_map[province].doubt_count += count;
-                break;
-        }
-    }
-};
 
 ///工程工具类
 class Tool {
@@ -207,41 +221,46 @@ public:
 
     ///根据读入并处理完的数据，结合-type -province参数输出结果
     static void outputResult() {
-        unordered_map<string, InfectInfo>::iterator it;
+        vector<InfectInfo>::iterator it;
 
         string output_res;
 
-        ///如果未指定省份 或者 省份参数里有全国 先输出全国的数据
-        if (BaseData::provinces.empty() || BaseData::contains("全国")) {
+        ///如果未指定省份 先把所有存在的省份加入到带展示省份中
+        if (BaseData::provinces.empty()) {
+            cout << "全国" << endl;
+            for(int i = 0 ; i < BaseData::meta_data.size() ; i++) {
+                BaseData::provinces.push_back(BaseData::meta_data[i].province);
+            }
+        } else if (BaseData::contains("全国")) {
             cout << "全国" << endl;
         }
 
-        for (it = BaseData::province_map.begin(); it != BaseData::province_map.end(); it++) {
+        for (it = BaseData::meta_data.begin(); it != BaseData::meta_data.end(); it++) {
 
             ///决定需要输出的省份
-            if (it->second.exist && BaseData::contains(it->first)) {
+            if (it->exist && BaseData::contains(it->province)) {
 
                 ///如果类型未被指定
                 if (BaseData::types.empty()) {
-                    cout << it->first;
-                    printf(" 感染患者 %d人 疑似患者%d人 治愈%d人 死亡%d人\n", it->second.sure_count, it->second.doubt_count,
-                           it->second.cure_count, it->second.dead_count);
+                    cout << it->province;
+                    printf(" 感染患者 %d人 疑似患者%d人 治愈%d人 死亡%d人\n", it->sure_count, it->doubt_count,
+                           it->cure_count, it->dead_count);
                 } else {
-                    cout << it->first;
+                    cout << it->province;
                     ///根据类型按顺序输出
                     for (int i = 0; i < BaseData::types.size(); i++) {
                         switch (BaseData::types[i]) {
                             case dead:
-                                printf(" 死亡%d人", it->second.dead_count);
+                                printf(" 死亡%d人", it->dead_count);
                                 break;
                             case increase_doubt:
-                                printf(" 疑似患者%d人", it->second.doubt_count);
+                                printf(" 疑似患者%d人", it->doubt_count);
                                 break;
                             case increase_sure:
-                                printf(" 确诊患者%d人", it->second.sure_count);
+                                printf(" 确诊患者%d人", it->sure_count);
                                 break;
                             case cure:
-                                printf(" 治愈%d人", it->second.cure_count);
+                                printf(" 治愈%d人", it->cure_count);
                                 break;
                         }
                     }
@@ -263,7 +282,7 @@ private:
         data = data.substr(space_index + 1, data.size());
 
         ///注册该省信息
-        BaseData::province_map[province].exist = true;
+        BaseData::setExist(province);
 
         ///此处获取该行信息的人数
         int last_space = data.find_last_of(' ');
@@ -287,7 +306,7 @@ private:
 
             ///首先执行一次疑似患者减少的操作
             action = decrease_doubt;
-            Command::ActionWith(action, count, province);
+            BaseData::setAction(province, action, count);
 
             ///再判断是确诊了 还是迁出了
             last_space = data.find_last_of(' ');
@@ -314,7 +333,7 @@ private:
         } else if (op == "感染患者") {
 
             action = decrease_sure;
-            Command::ActionWith(action, count, province);
+            BaseData::setAction(province, action, count);
 
             last_space = data.find_last_of(' ');
             string str = data.substr(last_space + 1);
@@ -322,7 +341,7 @@ private:
             province = str;
         }
 
-        Command::ActionWith(action, count, province);
+        BaseData::setAction(province, action, count);
     }
 
     ///获取文件夹下的全部文件 并根据 -date 参数来返回需要读的文件集的字符串数组

@@ -6,6 +6,7 @@
  * @version 1.0
  * @since 2020.02.13
  */ 
+ 
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -17,10 +18,14 @@
 #include <malloc.h>
 #include <cassert>
 
+
+#include <windows.h>
+
+
 //cd C:\Users\Äñµ°»¨»ú\Desktop\Èí¼þ¹¤³Ì\º®¼ÙµÚ¶þ´Î×÷Òµ\InfectStatistic-main\221701336\src
 //InfectStatistic.exe list -date 2020-01-25 -type sp ip dead -out C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt 
 //-log C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/log/ 
- 
+//InfectStatistic.exe list -date 2020-01-23 -type sp ip dead -log C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/log/ -out C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt 
 using namespace std;
 
 string province[32]={"°²»Õ","±±¾©","ÖØÇì","¸£½¨","¸ÊËà","¹ã¶«","¹ãÎ÷","¹óÖÝ","º£ÄÏ","ºÓ±±","ºÓÄÏ","ºÚÁú½­",
@@ -37,8 +42,7 @@ typedef struct ListNode
 	int numOfSP;//number of suspected patients ÒÉËÆ»¼ÕßÊýÁ¿ 
 	int numOfCured;//number of cured patients  ÒÑÈ¬Óú»¼ÕßÊýÁ¿
 	int flag;
-	struct ListNode *next; 
-	
+	struct ListNode *next; 	
 }Node,*PNode;
 
 void input(string path,Node p);
@@ -94,6 +98,7 @@ PNode CreatList(void)
 		p->next=NULL;
 		PTail=p;
 	}
+	cout<<"´´½¨Á´±í³É¹¦"<<endl;
 	return PHead;
 }
 
@@ -185,28 +190,150 @@ void getProvince(int argc,char *argv[],string province[])//»ñµÃÃüÁîÐÐ²ÎÊýÖÐµÄÒªÇ
 	}
 }
 
-void getOperation(char buffer[])//¶ÁÈ¡Ã¿ÐÐÎÄ¼þÖÐµÄ²Ù×÷ 
+
+void AddIP(string province1,int num,PNode head)
+{
+	//ofstream outFile;
+	//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app);
+	PNode p=head;
+	while(p!=NULL)
+	{
+		if(p->province==province1)
+		{
+			p->numOfIP=p->numOfIP+num;
+			p->flag=1;
+		}
+		p=p->next;
+	}
+	head->numOfIP=head->numOfIP+num; 
+	head->flag=1;
+}
+
+void AddSP(string province1,int num,PNode head)
+{
+	//ofstream outFile;
+	//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app);
+	PNode p=head;
+	while(p!=NULL)
+	{
+		if(p->province==province1)
+		{
+			p->numOfSP=p->numOfSP+num;
+			p->flag=1;
+		}
+		p=p->next;
+	}
+	head->numOfSP=head->numOfSP+num; 
+	head->flag=1;
+}
+
+void MoveIP(string province1,string province2,int num,PNode head)
+{
+	//ofstream outFile;
+	//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app);
+	PNode p=head;
+	while(p!=NULL)
+	{
+		if(p->province==province1)
+		{
+			p->numOfIP=p->numOfIP-num;
+			p->flag=1;
+		}
+		if(p->province==province2)
+		{
+			p->numOfIP=p->numOfIP+num;
+			p->flag=1;
+		}
+		p=p->next;
+	}
+}
+
+void operate(string op_province1,string op_province2,int op,int number,PNode head)
+{
+	PNode p=head;
+	string province1=op_province1;
+	string province2=op_province2;
+	int num=number;
+	switch (op)
+	{
+		case 0:
+			AddIP(province1,num,p); 
+			break;
+		case 1:
+			AddSP(province1,num,p);
+			break;
+		case 2:
+			MoveIP(province1,province2,num,p);
+			break;
+		case 3: 
+			//ÒÉËÆ»¼ÕßÁ÷Èë
+			break;
+		case 4:
+			//ËÀÍö
+			break;
+		case 5:
+			//ÖÎÓú
+			break;
+		case 6:
+			//ÒÉËÆ»¼ÕßÈ·Õï¸ÐÈ¾
+			break;
+		case 7:
+			//ÅÅ³ýÒÉËÆ
+			break;
+		default :
+			break;
+	}		
+}
+
+
+string Utf8ToGbk(const char *src_str)
+{
+	int len = MultiByteToWideChar(CP_UTF8, 0, src_str, -1, NULL, 0);
+	wchar_t* wszGBK = new wchar_t[len + 1];
+	memset(wszGBK, 0, len * 2 + 2);
+	MultiByteToWideChar(CP_UTF8, 0, src_str, -1, wszGBK, len);
+	len = WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, NULL, 0, NULL, NULL);
+	char* szGBK = new char[len + 1];
+	memset(szGBK, 0, len + 1);
+	WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, szGBK, len, NULL, NULL);
+	string strTemp(szGBK);
+	if (wszGBK) delete[] wszGBK;
+	if (szGBK) delete[] szGBK;
+	return strTemp;
+}
+
+void getOperation(char buffer[],PNode head)//¶ÁÈ¡Ã¿ÐÐÎÄ¼þÖÐµÄ²Ù×÷ 
 {
     string op_province[2];//´æ·Å²Ù×÷Ê¡·Ý 
-    int op;//´æ·Å²Ù×÷Êý     
-    int number=0;//´æ·ÅÈËÊý
-    
+    op_province[0]="0";
+    op_province[1]="0";
+    int op=10;//´æ·Å²Ù×÷Êý     
+    int number=0;//´æ·ÅÈËÊý    
     int count=0;//¼ÇÂ¼²Ù×÷ÖÐÊ¡·Ý¸öÊý 
    
     string buf_situation;
     string buf_province;
     
-	string operation=buffer; 	
+	string operation=buffer;
+ 	operation=Utf8ToGbk(buffer);
+
+	//ofstream outFile;
+	//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app); 
+
     string::size_type idx; 
 	
 	for(int i=0;i<8;i++)//¶ÁÈ¡Ö¸Áî 
     {
+
+		
     	buf_situation=situation[i];
 	    idx=operation.find(buf_situation);//ÔÚaÖÐ²éÕÒb.
 	    if(idx != string::npos )
 	    {	
-	    	cout<<buf_situation<<endl;
-			op=i;			
+	    	//ofstream outFile;
+			//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app); 
+			//outFile<<buf_situation<<endl;
+			op=i;
 			for(int j=0;j<32;j++)//¶ÁÈ¡³ÇÊÐ 
 		    {
 		    	buf_province=province[j];
@@ -214,78 +341,49 @@ void getOperation(char buffer[])//¶ÁÈ¡Ã¿ÐÐÎÄ¼þÖÐµÄ²Ù×÷
 			    if(idx != string::npos )
 			    {	
 			    	op_province[count]=buf_province;
-			    	cout<<"³ÇÊÐ"<<count+1<<"Îª"<<op_province[count]<<endl;
-			    	count++;
+			    	count++;			    	
 			    }
-			}			
-	    }
-	}	
+			}
+		} 							    
+	}								
 	for (int i = 0; buffer[i] != '\0'; ++i) //µ±aÊý×éÔªËØ²»Îª½áÊø·ûÊ±.±éÀú×Ö·û´®a.
     {
         if (buffer[i] >= '0'&& buffer[i] <= '9') //Èç¹ûÊÇÊý×Ö.
         {
             number*= 10;//ÏÈ³ËÒÔ10±£Ö¤ÏÈ¼ì²âµ½µÄÊý×Ö´æÔÚ¸ßÎ»£¬ºó¼ì²âµÄ´æÔÚµÍÎ»
-            number+= buffer[i] - '0'; //Êý×Ö×Ö·ûµÄascii-×Ö·û'0'µÄasciiÂë¾ÍµÈÓÚ¸ÃÊý×Ö.
+            number+= buffer[i] - '0'; //Êý×Ö×Ö·ûµÄascii-×Ö·û'0'µÄasciiÂë¾ÍµÈÓÚ¸ÃÊý×Ö.         	
         }
     }
-	   
+	//outFile<<"ÈËÊý:"<<number<<endl;
+    string op_province1=op_province[0];
+    string op_province2=op_province[1];
+	operate(op_province1,op_province2,op,number,head);  
 }
 
-void AddIP()
+void readTxt(char fname[],PNode head)//ÖðÐÐ¶ÁÈ¡ÎÄ¼þµÄÄÚÈÝ 
 {
-	
-}
-
-void operation(string op_province[],int op,int number,PNode p,PNode head)
-{
-	switch (op)
-	{
-		case 1:
-			//ÐÂÔö¸ÐÈ¾º¯Êý 
-			break;
-		case 2:
-			//ÐÂÔöÒÉËÆº¯Êý
-			break;
-		case 3:
-			//¸ÐÈ¾»¼ÕßÁ÷Èë
-			break;
-		case 4: 
-			//ÒÉËÆ»¼ÕßÁ÷Èë
-			break;
-		case 5:
-			//ËÀÍö
-			break;
-		case 6:
-			//ÖÎÓú
-			break;
-		case 7:
-			//ÒÉËÆ»¼ÕßÈ·Õï¸ÐÈ¾
-			break;
-		case 8:
-			//ÅÅ³ýÒÉËÆ
-			break;
-	}		
-}
-
-void readTxt(char fname[])//ÖðÐÐ¶ÁÈ¡ÎÄ¼þµÄÄÚÈÝ 
-{
-	char buffer[256];
+	char buffer[500];
 	string strLine;
-	string str;
-    ifstream outFile;
-    outFile.open(fname,ios::in);
-    while(getline(outFile,strLine))
-    {
-    	strcpy(buffer,strLine.c_str());
-		if(buffer[0]=='/'||buffer[0]==' ')
+    ifstream inFile(fname);
+	//ofstream outFile("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"); 
+	while(getline(inFile,strLine))
+	{
+	    strcpy(buffer,strLine.c_str());
+	    if(buffer[0]=='/'||buffer[0]==' ')
 		{
-            continue;
+            break;
         }
-        getOperation(buffer);		
-    }
+        else
+        {
+        	//ofstream outFile;
+			//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼þ¹¤³Ì/º®¼ÙµÚ¶þ´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app); 
+        	//outFile<<buffer<<endl;
+        	getOperation(buffer,head);
+		}	    		
+	}
 }
 
-void readLog(string date,string path)//¶ÁÈ¡¶ÔÓ¦Ä¿Â¼ÏÂµÄÎÄ¼þ 
+void readLog(string date,string path,PNode head)//¶ÁÈ¡¶ÔÓ¦Ä¿Â¼ÏÂµÄÎÄ¼þ 
 {
 	string s="*.txt";
 	string logPath=path;
@@ -293,7 +391,6 @@ void readLog(string date,string path)//¶ÁÈ¡¶ÔÓ¦Ä¿Â¼ÏÂµÄÎÄ¼þ
 	char dirPath[100];
 	strcpy(dirPath,path.c_str());
 	string latestLog;
-
 	long Handle;
     struct _finddata_t FileInfo;    
     if((Handle=_findfirst(dirPath,&FileInfo))==-1L)
@@ -308,7 +405,7 @@ void readLog(string date,string path)//¶ÁÈ¡¶ÔÓ¦Ä¿Â¼ÏÂµÄÎÄ¼þ
         	char fname[100];
 			strcpy(fname,logPath.c_str());
             cout<<"Òª´ò¿ªµÄÎÄ¼þµØÖ·ÊÇ:"<<fname<<endl;
-            readTxt(fname);          
+            readTxt(fname,head);          
         }
         while(_findnext(Handle,&FileInfo)==0)//³É¹¦·µ»Ø0£¬Ê§°Ü·µ»Ø-1
         {
@@ -395,7 +492,7 @@ void output(string path,PNode p,PNode head,string type[],string province[])
 		p=p->next;
 		while(p!=NULL)
 		{
-			if(p->flag==0)
+			if(p->flag==1)
 			{
 				outNode(outFile,p,type);
 			}
@@ -408,7 +505,7 @@ void output(string path,PNode p,PNode head,string type[],string province[])
 		{
 			while(p!=NULL)
 			{
-				if(p->flag==0&&p->province==province[i])
+				if(p->flag==1&&p->province==province[i])
 				{
 					outNode(outFile,p,type);
 				}
@@ -422,8 +519,7 @@ void output(string path,PNode p,PNode head,string type[],string province[])
 }
 
 int main(int argc,char *argv[])
-{
-		
+{		
 	string date="9999-12-31";//ËùÒªÇóµÄµÄÈÕÆÚ 
 	string type[4]={"0","0","0","0"};
 	string outPath;
@@ -444,13 +540,25 @@ int main(int argc,char *argv[])
 	outPath=getOutPath(argc,argv);
 	cout<<"ÒªÇóÊä³öµØÖ·:"<<outPath<<endl;
 	
-	getType(argc,argv,type);	
-	
+	getType(argc,argv,type);
+	cout<<"ÒªÇóÊä³öÖÖÀà";	
+	for(int i=0;i<4;i++)
+	{
+		cout<<type[i]<<endl;
+	}
 	getProvince(argc,argv,province);
+	cout<<"ÒªÇóÊä³öÊ¡·Ý";
+	for(int i=0;i<33;i++)
+	{
+		if(province[i]!="0") 
+		{
+			cout<<province[i]<<endl;
+		}	
+	}
 	
 	PNode head=CreatList();	
 	PNode p=head;	
-	readLog(date,log);//¶ÁÈ¡Ä¿Â¼ 
+	readLog(date,log,head);//¶ÁÈ¡Ä¿Â¼ 
 	
 	//Node pp={"¸£½¨",6,3,15,20,NULL};
 	output(outPath,p,head,type,province);//Êä³ö 

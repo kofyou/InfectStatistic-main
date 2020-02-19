@@ -1,7 +1,7 @@
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
 /**
  * Lib
@@ -94,5 +94,144 @@ class Common {
             }
         }
         return container;
+    }
+    public static boolean readOneLineOfOutFile(Record record, String line)
+    {
+        String[] data = line.split(" ");
+        if (data[0].equals(Lib.Skip))
+        {
+            return false;
+        }
+        record.SetProvinceName(data[0]);
+        for (int i = 1; i < data.length; ++i)
+        {
+            String type = parserStringGetType(data[i]);
+            if (type.equals(Lib.Ip))
+            {
+                record.SetIpNum(Common.parserStringToInt(data[i]));
+            }
+            else if (type.equals(Lib.Sp))
+            {
+                record.SetSpNum(Common.parserStringToInt(data[i]));
+            }
+            else if (type.equals(Lib.Cure))
+            {
+                record.SetCureNum(Common.parserStringToInt(data[i]));
+            }
+            else if (type.equals(Lib.Dead))
+            {
+                record.SetDeadNum(Common.parserStringToInt(data[i]));
+            }
+        }
+        return true;
+    }
+    public static String parserStringGetType(String string)
+    {
+        String str1 = string.trim();
+        String str2 = "";
+        for (int i = 0; i < str1.length(); ++i)
+        {
+            if(str1.charAt(i) >= '0' && str1.charAt(i) <= '9')
+            {
+                break;
+            }
+            else
+            {
+                str2 += str1.charAt(i);
+            }
+        }
+        return str2;
+    }
+    public static Date parserDateFromLogFileName(String fileName)
+    {
+        String[] strs1 = null;
+        if (isWindows())
+        {
+            strs1 = fileName.split("\\\\");
+        }
+        else
+        {
+            strs1 = fileName.split("/");
+        }
+        String[] strs2 = strs1[strs1.length - 1].split("\\.");
+        return stringToDate(strs2[0]);
+    }
+    public static int parserStringToInt(String string)
+    {
+        String str1 = string.trim();
+        String str2 = "";
+        for (int i = 0; i < str1.length(); ++i)
+        {
+            if(str1.charAt(i) >= '0' && str1.charAt(i) <= '9')
+            {
+                str2 += str1.charAt(i);
+            }
+            else
+            {
+                continue;
+            }
+        }
+        if (str2.length() == 0)
+        {
+            return 0;
+        }
+        int number = Integer.parseInt(str2);
+        return number;
+    }
+    public static <A,B> Map<A, B> sortMapByKey(Map<A, B> map, Comparator<A> comparator)
+    {
+        if (map == null || map.isEmpty())
+        {
+            return null;
+        }
+        Map<A, B> sortMap = new TreeMap<A, B>(comparator);
+        sortMap.putAll(map);
+        return sortMap;
+    }
+    public static Map<String, File> GetFiles(String path, String date, String regex) throws ParseException
+    {
+        File file = new File(path);
+        File[] fileList = file.listFiles();
+        Map<String, File> fileMap = new HashMap<>();
+        if (fileList != null)
+        {
+            for (int i = 0; i < fileList.length; ++i)
+            {
+                if (fileList[i].isFile())
+                {
+                    String[] temp = null;
+                    if (Common.isWindows())
+                    {
+                        temp = fileList[i].toString().split("\\\\");
+                    }
+                    else
+                    {
+                        temp = fileList[i].toString().split("/");
+                    }
+                    // "2020-[0-1][0-9]-[0-3][0-9].log.txt"
+                    if (!temp[temp.length - 1].matches(regex))
+                    {
+                        System.out.println("invalid file : " + temp[temp.length - 1] +" Skip ");
+                        continue;
+                    }
+                    // support args -date
+                    if (date != null && Common.CompareDate(temp[temp.length - 1], date) > 0)
+                    {
+                        continue;
+                    }
+                    fileMap.put(fileList[i].toString(), fileList[i]);
+                }
+            }
+        }
+        // sort file by date
+        FileComparator fileComparator = new FileComparator();
+        fileMap = Common.sortMapByKey(fileMap, fileComparator);
+        return fileMap;
+    }
+
+    public static boolean isWindows()
+    {
+        boolean isWindows = System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1;
+        return isWindows;
     }
 }

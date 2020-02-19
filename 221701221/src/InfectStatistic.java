@@ -388,4 +388,97 @@ class Record
         this.SetDeadNum(Dead);
         this.SetCureNum(Cure);
     }
+    public boolean CompareTo(Record r2)
+    {
+        if (r2 == null)
+        {
+            return false;
+        }
+        else if (this == r2)
+        {
+            return true;
+        }
+        else if (!(this.GetProvinceName().equals(r2.GetProvinceName())))
+        {
+            return false;
+        }
+        else if (this.GetDeadNum() != r2.GetDeadNum())
+        {
+            return false;
+        }
+        else if (this.GetCureNum() != r2.GetCureNum())
+        {
+            return false;
+        }
+        else if (this.GetSpNum() != r2.GetSpNum())
+        {
+            return false;
+        }
+        else if (this.GetIpNum() != r2.GetIpNum())
+        {
+            return false;
+        }
+        return true;
+    }
+
+    //将记录输出到文件中
+    public void OutRecord(BufferedWriter bw , Vector<String> types) throws IOException
+    {
+        String ProvinceRecord = "";
+        if (types == null || types.size() == 0)
+        {
+            ProvinceRecord = this.GetProvinceName() + " 感染患者"
+                    + this.GetIpNum() +"人 "
+                    + "疑似患者" + this.GetSpNum() + "人 "
+                    + "治愈" + this.GetCureNum() + "人 "
+                    + "死亡" + this.GetDeadNum() + "人";
+        }
+        else
+        {
+            ProvinceRecord = this.GetProvinceName();
+            for (String str : types)
+            {
+                if (str.equals(Lib.AllType[0]))
+                {
+                    ProvinceRecord += " 感染患者" + this.GetIpNum() + "人 ";
+                }
+                else if (str.equals(Lib.AllType[1]))
+                {
+                    ProvinceRecord += " 疑似患者" + this.GetSpNum() + "人 ";
+                }
+                else if (str.equals(Lib.AllType[2]))
+                {
+                    ProvinceRecord += " 治愈" + this.GetCureNum() + "人 ";
+                }
+                else if (str.equals(Lib.AllType[3]))
+                {
+                    ProvinceRecord += " 死亡" + this.GetDeadNum() + "人 ";
+                }
+            }
+        }
+        ProvinceRecord += "\r\n";
+        bw.write(ProvinceRecord);
+        bw.flush();
+    }
+    /** show record's message **/
+    public void showRecordMessage()
+    {
+        String ProvinceRecord = this.GetProvinceName() + " 感染患者"
+                + this.GetIpNum() +"人 "
+                + "疑似患者" + this.GetSpNum() + "人 "
+                + "治愈" + this.GetCureNum() + "人 "
+                + "死亡" + this.GetDeadNum() + "人";
+        ProvinceRecord += "\r\n";
+        System.out.println(ProvinceRecord);
+    }
+
+    public Record()
+    {
+        this.ProvinceName = "";
+        this.IpNum = 0;
+        this.SpNum = 0;
+        this.DeadNum = 0;
+        this.CureNum = 0;
+    }
+}
 }

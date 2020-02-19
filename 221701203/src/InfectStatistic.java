@@ -181,34 +181,24 @@ public class InfectStatistic {
         date=df.format(new Date());
         String[] provinces = new String[31];
         for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "-log":
-                    dic = args[i + 1];
-                    break;
-                case "-out":
-                    path = args[i + 1];
-                    break;
-                case "-date":
-                    date = args[i + 1];
-                    break;
-                case "-type": {
-                    flag1 = true;
-                    int k = 0;
-                    for (int j = i + 1; j < args.length && args[j].toCharArray()[0]!=a; j++) {
-                        type[k++] = args[j];
-                    }
+            if ("-log".equals(args[i])) {
+                dic = args[i + 1];
+            } else if ("-out".equals(args[i])) {
+                path = args[i + 1];
+            } else if ("-date".equals(args[i])) {
+                date = args[i + 1];
+            } else if ("-type".equals(args[i])) {
+                flag1 = true;
+                int k = 0;
+                for (int j = i + 1; j < args.length && args[j].toCharArray()[0] != a; j++) {
+                    type[k++] = args[j];
                 }
-                break;
-                case "-province": {
-                    flag2 = true;
-                    int k = 0;
-                    for (int j = i + 1; j < args.length && args[j].toCharArray()[0]!=a; j++) {
-                        provinces[k++] = args[j];
-                    }
+            } else if ("-province".equals(args[i])) {
+                flag2 = true;
+                int k = 0;
+                for (int j = i + 1; j < args.length && args[j].toCharArray()[0] != a; j++) {
+                    provinces[k++] = args[j];
                 }
-                break;
-                default:
-                    break;
             }
         }
         provinces=sortProvinces(provinces);
@@ -340,7 +330,7 @@ public class InfectStatistic {
             dealTypeAndProvince( type, provinces);
         }
         if (flag1 && !flag2) {
-            dealType(line,type);
+            dealType(type);
         }
         else if(!flag2){
             System.out.println(line);
@@ -350,34 +340,24 @@ public class InfectStatistic {
     }
 
 
-    private void dealType(String line,String[] type) {
-        Pattern r=Pattern.compile(patterns);
-        Matcher m=r.matcher(line);
-        if(m.find()) {
-            System.out.print(m.group(1) + " ");
-            for (String s : type) {
-                if (s != null) {
-                    switch (s) {
-                        case "ip":
-                            System.out.print(type2[0] + m.group(3) + person );
-                            break;
-                        case "sp":
-                            System.out.print(type2[1] + m.group(5) + person );
-                            break;
-                        case "cure":
-                            System.out.print(type2[2] + m.group(7) +person);
-                            break;
-                        case "dead":
-                            System.out.print(type2[3] + m.group(9)+person );
-                            break;
-                        default:
-                            System.out.print("无该患者类型，请重新选择！");
-                            break;
+    private void dealType(String[] type) {
+        System.out.println(getAllProvinceType(type));
+        for (int i = 0; i < province.length; i++) {
+            if (discovery[i]) {
+                System.out.print(province[i] + " ");
+                for (String s : type) {
+                    if ("ip".equals(s)) {
+                        System.out.print(type2[0] + number[i][0] + person + " ");
+                    } else if ("sp".equals(s)) {
+                        System.out.print(type2[0] + number[i][1] + person + " ");
+                    } else if ("cure".equals(s)) {
+                        System.out.print(type2[0] + number[i][2] + person + " ");
+                    } else if ("dead".equals(s)) {
+                        System.out.print(type2[0] + number[i][3] + person + " ");
                     }
-                    System.out.print(" ");
                 }
-
-            }  System.out.print("\n");
+                System.out.print("\n");
+            }
         }
     }
 

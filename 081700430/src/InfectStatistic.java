@@ -36,11 +36,14 @@ class InfectStatistic {
             for (int i = 1, typeI = 0, provinceI = 0; i < args.length; i++) {
                 switch (args[i]) {
                     case "-log" :
-                        this.log = args[++i];
+                        if (i + 1 < args.length) {
+                            this.log = args[++i];
+                        }
                         break;
                     case "-out" :
-                        this.out = args[++i];
-
+                        if (i + 1 < args.length) {
+                            this.out = args[++i];
+                        }
                         break;
                     case "-date" :
                         try {
@@ -101,6 +104,10 @@ class InfectStatistic {
             System.out.println(province[k++]);
         } */
      //   System.out.println(log + " " + out);/* dbg:调试查看读取文件是否正确 */
+        if (log == null) {
+            System.out.println("请输入正确的日志地址！");
+            System.exit(-1);
+        }
         File file = new File(log);
         if (file.isDirectory() && file.list() != null) {
             File[] files = file.listFiles();
@@ -229,11 +236,17 @@ class InfectStatistic {
             br.close();
         }
         catch (IOException ioE) {
+            System.out.println("日志统计出错！");
+            System.exit(-1);
         }
     }
 
     private void outFile() {
         try {
+            if (out == null) {
+                System.out.println("请输入正确的输出地址！");
+                System.exit(-1);
+            }
             File file = new File(out);
             status.put("全国", internal);
             if (!file.exists()) {
@@ -256,10 +269,12 @@ class InfectStatistic {
                 int i = 0;
                 while (province[i] != null) {
                  //   System.out.println("test p:"+province[i]); //xxx
-                    int[] tempStatus = status.get(province[i]);
-                    dataLine = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", province[i],
-                            tempStatus[ip], tempStatus[sp], tempStatus[cure], tempStatus[dead]);
-                    bw.write(dataLine);
+                    if (status.containsKey(province[i])) {
+                        int[] tempStatus = status.get(province[i]);
+                        dataLine = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", province[i],
+                                tempStatus[ip], tempStatus[sp], tempStatus[cure], tempStatus[dead]);
+                        bw.write(dataLine);
+                    }
                     i++;
                 }
                // System.out.println("test arrive here?"); //xxx
@@ -310,27 +325,29 @@ class InfectStatistic {
                 int i = 0;
                 while (province[i] != null) {
                     //System.out.println("test p:"+province[i]); //xxx
-                    int[] tempStatus = status.get(province[i]);
-                    String[] intToSring = new String[]{"感染患者" + tempStatus[ip] + "人", "疑似患者" + tempStatus[sp]
-                            + "人", "治愈" + tempStatus[cure] + "人", "死亡" + tempStatus[dead] + "人"};
-                    if (needTypes == 1) {
-                        dataLine = String.format("%s %s\n", province[i], intToSring[type[0]]);
+                    if (status.containsKey(province[i])) {
+                        int[] tempStatus = status.get(province[i]);
+                        String[] intToSring = new String[]{"感染患者" + tempStatus[ip] + "人", "疑似患者" + tempStatus[sp]
+                                + "人", "治愈" + tempStatus[cure] + "人", "死亡" + tempStatus[dead] + "人"};
+                        if (needTypes == 1) {
+                            dataLine = String.format("%s %s\n", province[i], intToSring[type[0]]);
+                        }
+                        else if (needTypes == 2) {
+                            dataLine = String.format("%s %s %s\n", province[i], intToSring[type[0]], intToSring[type[1]]);
+                        }
+                        else if (needTypes == 3) {
+                            dataLine = String.format("%s %s %s %s\n", province[i], intToSring[type[0]], intToSring[type[1]],
+                                    intToSring[type[2]]);
+                        }
+                        else if (needTypes == 4) {
+                            dataLine = String.format("%s %s %s %s %s\n", province[i], intToSring[type[0]], intToSring[type[1]],
+                                    intToSring[type[2]], intToSring[type[3]]);
+                        }
+                        else {
+                            dataLine = "";
+                        }
+                        bw.write(dataLine);
                     }
-                    else if (needTypes == 2) {
-                        dataLine = String.format("%s %s %s\n", province[i], intToSring[type[0]], intToSring[type[1]]);
-                    }
-                    else if (needTypes == 3) {
-                        dataLine = String.format("%s %s %s %s\n", province[i], intToSring[type[0]], intToSring[type[1]],
-                                intToSring[type[2]]);
-                    }
-                    else if (needTypes == 4) {
-                        dataLine = String.format("%s %s %s %s %s\n", province[i], intToSring[type[0]], intToSring[type[1]],
-                                intToSring[type[2]], intToSring[type[3]]);
-                    }
-                    else {
-                        dataLine = "";
-                    }
-                    bw.write(dataLine);
                     i++;
                    // System.out.println("test data:"+dataLine); //xxx
                 }

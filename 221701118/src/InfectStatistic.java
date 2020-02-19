@@ -15,13 +15,12 @@ class InfectStatistic
     static String log;
     static String out;
     static String date = null;
-    static boolean ip = false;
-    static boolean sp = false;
-    static boolean cure = false;
-    static boolean dead = false;
+    static String type[] = new String[5];
+    static int typeNumber = 0;
     static String outputProvince[] = new String[100];
     static int outputNumber = 0;
     static TreeSet<String> fileDate = new TreeSet<String>();
+    static Province nation = new Province("全国",0,0,0,0);
 
     public static void main(String[] args) {
         for(int i = 0; i < args.length; i++)
@@ -38,19 +37,23 @@ class InfectStatistic
                     date = args[i + 1];
                     break;
                 case "ip":
-                    ip = true;
+                    type[typeNumber] = "ip";
+                    typeNumber++;
                     break;
                 case "sp":
-                    sp = true;
+                    type[typeNumber] = "sp";
+                    typeNumber++;
                     break;
                 case "cure":
-                    cure = true;
+                    type[typeNumber] = "cure";
+                    typeNumber++;
                     break;
                 case "dead":
-                    dead = true;
+                    type[typeNumber] = "dead";
+                    typeNumber++;
                     break;
                 case "-province":
-                    while(!args[i + 1].contains("-") && i < args.length - 1)
+                    while( i < args.length - 1)
                     {
                         outputProvince[outputNumber] = args[i + 1];
                         outputNumber++;
@@ -59,10 +62,6 @@ class InfectStatistic
                 default:
                     break;
             }
-        }
-        if(!(ip || sp || cure || dead))
-        {
-            ip = sp = cure = dead =true;
         }
         File list = new File(log);
         getFileName(list);
@@ -157,29 +156,68 @@ class InfectStatistic
             if(dateCompare(string))
                 readFile(log + string + ".log.txt");
         }
-        int infectNumber = 0;
-        int suspectNumber = 0;
-        int cure = 0;
-        int dead = 0;
-        for(int i = 0; i < number; i++)
-        {
-            infectNumber += province[i].getInfectNumber();
-            suspectNumber += province[i].getSuspectNumber();
-            cure += province[i].getCure();
-            dead += province[i].getDead();
-        }
-        writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
-            "全国 感染患者" + infectNumber
-            +"人 疑似患者" + suspectNumber
-            + "人 治愈" + cure
-            + " 死亡"+ dead
-            + "人\n");
-        for(int i = 0; i < number; i++)
+        addNationToProvinceList();
+        if(outputNumber == 0)
         {
             writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
-                getOutputTypeString(province[i].getName(), province[i].getInfectNumber(),
-                province[i].getSuspectNumber(),province[i].getCure(), province[i].getDead())
-            );
+                    getOutputTypeString(nation.getName(), nation.getInfectNumber(),
+                    nation.getSuspectNumber(),nation.getCure(), nation.getDead())
+                );
+            for(int i = 0; i < number; i++)
+            {
+                writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
+                    getOutputTypeString(province[i].getName(), province[i].getInfectNumber(),
+                    province[i].getSuspectNumber(),province[i].getCure(), province[i].getDead())
+                );
+            }
+        }
+        else
+        {
+            for(int i = 0; i < outputNumber; i++)
+            {
+                if(outputProvince[i].equals("全国"))
+                {
+                    writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
+                        getOutputTypeString(nation.getName(),nation.getInfectNumber(),
+                        nation.getSuspectNumber(),nation.getCure(), nation.getDead())
+                    );
+                    break;
+                }
+            }
+            for(int i = 0; i < outputNumber; i++)
+            {
+                int j = 0;
+                for(j = 0; j < number; j++)
+                {
+                    if(outputProvince[i].equals(province[j].getName()))
+                    {
+                        writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
+                            getOutputTypeString(province[j].getName(), province[j].getInfectNumber(),
+                            province[j].getSuspectNumber(),province[j].getCure(), province[j].getDead())
+                        );
+                        break;
+                    }
+                }
+                if(j == number && !outputProvince[i].equals("全国"))
+                {
+                    Province newProvince = new Province(outputProvince[i]);
+                    writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
+                        getOutputTypeString(newProvince.getName(), newProvince.getInfectNumber(),
+                        newProvince.getSuspectNumber(),newProvince.getCure(), newProvince.getDead())
+                    );
+                }
+            }
+        }
+    }
+
+    public static void addNationToProvinceList()
+    {
+        for(int i = 0; i < number; i++)
+        {
+            nation.add("感染患者", province[i].getInfectNumber());
+            nation.add("疑似患者", province[i].getSuspectNumber());
+            nation.add("治愈", province[i].getCure());
+            nation.add("死亡", province[i].getDead());
         }
     }
 
@@ -219,17 +257,33 @@ class InfectStatistic
         }
     }
 
+    public static void provinceSort()
+    {
+        //Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);
+        //Arrays.sort(province, cmp);
+    }
+
     public static String getOutputTypeString(String name, int infect, int suspect, int cured, int deaded)
     {
         String string = name;
-        if(ip)
+        if(typeNumber == 0)
+        {
             string = string + " 感染患者" + infect + "人";
-        if(sp)
-            string = string + " 疑似患者" + suspect + "人";
-        if(cure)
+            string = string + " 疑似患者" + suspect+ "人";
             string = string + " 治愈" + cured + "人";
-        if(dead)
             string = string + " 死亡" + deaded + "人";
+        }
+        for(int i = 0; i < typeNumber; i++)
+        {
+            if(type[i].equals("ip"))
+                string = string + " 感染患者" + infect + "人";
+            else if(type[i].equals("sp"))
+                string = string + " 疑似患者" + suspect + "人";
+            else if(type[i].equals("cure"))
+                string = string + " 治愈" + cured + "人";
+            else if(type[i].equals("dead"))
+                string = string + " 死亡" + deaded + "人";
+        }
         string = string + "\n";
         return string;
     }

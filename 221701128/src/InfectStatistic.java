@@ -89,6 +89,22 @@ public class InfectStatistic {
 		File file = new File(fileDirect);
 		fileArray = file.listFiles();
 		statistic = new HashMap<String,String>();
+		if(dateTime != null && fileArray[fileArray.length - 1] .getName().compareTo(dateTime + ".log.txt") < 0) //如果超出比较范围
+		{
+			System.out.println("指定的日期超出了日志最新日期，请检查");
+			System.exit(0);
+		}
+		
+		else if(fileArray[0] .getName().compareTo(dateTime + ".log.txt") > 0) //如果比最早一天还早的日期，直接结束调用，并进入输出方法即可
+		{
+			return; 
+		}
+		
+		for (int i = 0 ;i < fileArray.length - 1 ;i++) //检查用户指定日期是否在两个日志文件之间 比如 日志文件只有2020-01-22，2020-01-24，用户却指定2020-01-22
+		{
+			if(fileArray[i] .getName().compareTo(dateTime + ".log.txt") < 0 && fileArray[i + 1] .getName().compareTo(dateTime + ".log.txt") > 0)
+				dateTime = fileArray[i] .getName().substring(0 , 10);
+		}
 	    
 		for(int i=0; i < fileArray.length; i++)
 		{

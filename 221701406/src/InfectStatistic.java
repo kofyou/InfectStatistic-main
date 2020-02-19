@@ -2,6 +2,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.security.PublicKey;
+
+import javafx.collections.ListChangeListener.Change;
 
 /**
  * InfectStatistic
@@ -13,7 +16,7 @@ import java.io.InputStreamReader;
  */
 class InfectStatistic {
     String[] args;  //接收命令行参数
-	int[][] allStastic=new int[32][4];  //使用二维数组存储疫情数据，一维代表省份，二维代表各省份患者类型数据
+	int[][] allStatistic=new int[32][4];  //使用二维数组存储疫情数据，一维代表省份，二维代表各省份患者类型数据
 	
 	String logPath;  //日志文件路径
 	String resultPath;  //输出文件路径
@@ -127,19 +130,121 @@ class InfectStatistic {
 		    BufferedReader br=new BufferedReader
 		        (new InputStreamReader(new FileInputStream(new File(filePath)), "UTF-8"));
 		    while ((line=br.readLine())!=null) {  //按行读取
-		        if (line.substring(0,2).equals("//")) { //忽略注释行
-				    continue;
-		        } else {
-		            //按行读取处理文本   		
-		        }
+		        if (!line.substring(0,2).equals("//")) { //忽略注释行
+		            //按行处理文本
+		        	handleFile(line);
+		        } 
             }
 		    br.close();
 		    } catch (Exception e) {
 		        e.printStackTrace();
 		    }
     }
+    
+    /*
+     * 文本处理
+     * 该日志中出现以下几种情况：
+     *   1、<省> 新增 感染患者 n人
+     *   2、<省> 新增 疑似患者 n人
+     *   3、<省1> 感染患者 流入 <省2> n人
+     *   4、<省1> 疑似患者 流入 <省2> n人
+     *   5、<省> 死亡 n人
+     *   6、<省> 治愈 n人
+     *   7、<省> 疑似患者 确诊感染 n人
+     *   8、<省> 排除 疑似患者 n人
+     *   感染患者：ip， 疑似患者：sp， 治愈：cure， 死亡：dead
+     */
+    public void handleFile(String line) {
+    	String[] array=line.split(" ");
+    	switch (array[1]) {
+    	    case "新增":
+    		    if (array[2].equals("感染患者")) {
+    			    //array[0]所对应省ip+=n
+    		    	addIp(array[0],array[3]);
+    		    } else {
+    		    	//array[0]所对应的省sp+=n
+    		    	addSp(array[0],array[3]);
+    		    }
+    	    case "感染患者":
+    	    	//array[0]对应的省份ip-=n，array[3]对应的省ip+=n
+    	    	moveIp(array[0],array[3],array[4]);
+    	    case "疑似患者":
+    	    	if (array[2].equals("流入")) {
+    	    		//array[0]对应的省份sp-=n，array[3]对应的省sp+=n
+    	    		moveSp(array[0],array[3],array[4]);
+    	    	} else {
+    	    		//sp-=n,ip+=n
+    	    		changeToIp(array[0],array[3]);
+    	    	}
+    	    case "死亡":
+    	    	//array[0]所对应省dead+=n,ip-=n
+    	    	addDead(array[0],array[2]);
+    	    case "治愈":
+    	    	//array[0] cure+=n，ip-=n
+    	    	addCure(array[0],array[2]);
+    	    case "排除":
+    	    	//sp-=n
+    	    	removeSp(array[0],array[3]);
+    	}
+    }
+	
+    /*
+     * <省> 新增 感染患者 n人
+     */
+    public void addIp(String str1, String n) {
+    	
+    }
+    
+    /*
+     * <省> 新增 疑似患者 n人
+     */
+    public void addSp(String str1, String n) {
+    	
+    }
+    
+    /*
+     * <省1> 感染患者 流入 <省2> n人
+     */
+    public void moveIp(String str1, String str2, String n) {
+    	
+    }
 	 
-	 
+    /*
+     * <省1> 疑似患者 流入 <省2> n人
+     */
+    public void moveSp(String str1, String str2,String n) {
+    	
+    }
+    
+    /*
+     * <省> 疑似患者 确诊感染 n人
+     */
+    public void changeToIp(String str1, String n) {
+    	
+    }
+    
+    /*
+     * <省> 死亡 n人
+     */
+    public void addDead(String str1, String n) {
+    	
+    }
+
+    /*
+     * <省> 治愈 n人
+     */
+	public void addCure(String str1, String n) {
+		
+	}
+
+    /*
+     * <省> 排除 疑似患者 n人
+     */
+	public void removeSp(String str1, String n) {
+		
+	}
+
+
 }
 
 	    

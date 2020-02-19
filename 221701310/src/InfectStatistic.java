@@ -1,9 +1,18 @@
 import java.awt.List;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.security.AllPermission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.IntPredicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * InfectStatistic
@@ -209,7 +218,15 @@ class InfectStatistic {
     	}
     	
     	readLogs(logPath,date);//读取指定日期以及之前的所有log文件
-    	writeLog(outPath,type,isProvinceSpecified);//带格式输出到指定文件
+    	
+    	try {
+    		writeLog(outPath,type,isProvinceSpecified);//带格式输出到指定文件
+		} catch(IOException e) {
+    		System.out.println("日志写入错误！");
+    		System.exit(0);
+    	}
+    	
+    	
     }
 	
     //读取指定日期以及之前的所有log文件
@@ -226,16 +243,26 @@ class InfectStatistic {
         for (int i = 0; i < tempList.length; i++) {
             if (tempList[i].isFile()) {
             	
-                //fileName，不包含路径、后缀（也就是说只有日期yyyy-mm-dd）
-                String fileName = tempList[i].getName().substring(0,10);
-                
-                //当d1早于d2，dateCompare返回-1，files只记录所有不晚于date的日期
-            	if(dateCompare(date,fileName) != -1) {
+            	//若未指明日期，无需判断，读取所有logs
+            	if (date.equals("")) {
+            		System.out.println("here!");
+            		isDateAllowed = true;
             		files.add(tempList[i].toString());
+				}
+            	
+            	//若指明日期，需要判断日期是否合理，选择不晚于该日期的logs
+            	else {
+                    //fileName，不包含路径、后缀（也就是说只有日期yyyy-mm-dd）
+                    String fileName = tempList[i].getName().substring(0,10);
+                    
+                    //当d1早于d2，dateCompare返回-1，files只记录所有不晚于date的日期
+                	if(dateCompare(date,fileName) != -1) {
+                		files.add(tempList[i].toString());
+                	}
+            		if(dateCompare(date, fileName) != 1) {
+            			isDateAllowed = true;
+            		}
             	}
-        		if(dateCompare(date, fileName) != 1) {
-        			isDateAllowed = true;
-        		}
             }
         }
         
@@ -245,23 +272,108 @@ class InfectStatistic {
     		System.exit(0);
         }
         
-        /*
+        //逐个读取files中的路径对应的文件
         for(int i=0;i<files.size();i++) {
-        	System.out.println(files.get(i));
+        	try{
+        		readOneLog(files.get(i));
+        	}catch(IOException e) {
+        		System.out.println("日志读取错误！");
+        		System.exit(0);
+        	}
         }
-        */
         
         
         
     }
     
     //读取单个文件
-    public void readOneLog(String logPathName) {
+    public void readOneLog(String logPathName) throws IOException {
     	
+        FileReader fileReader = new FileReader(logPathName);
+
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        String line = new String("init");
+
+        while (line!=null){
+        	line = bufferedReader.readLine();
+        	if(line!=null && !line.startsWith("//")) {//忽略空行和注释
+        		
+        		//System.out.println(line);
+        		//line为当前行
+        		String [] wordString = line.split("\\s+");//按空格分割当前行
+        		
+        		if(wordString[1].equals("新增")) {
+        			if(wordString[2].equals("感染患者")) {
+        				int num = getPeopleNum(wordString[3]);
+        				provinceMap.get(wordString[0]).ipAdd(num);
+        			}
+        			else if(wordString[2].equals("疑似患者")) {
+        				int num = getPeopleNum(wordString[3]);
+        				provinceMap.get(wordString[0]).spAdd(num);
+        			}
+        		}
+        		else if(wordString[2].equals("流入")) {
+        			if(wordString[1].equals("感染患者")) {
+        				int num = getPeopleNum(wordString[4]);
+        				provinceMap.get(wordString[0]).ipMove(wordString[3], num);
+        			}
+        			else if(wordString[1].equals("疑似患者")) {
+        				int num = getPeopleNum(wordString[4]);
+        				provinceMap.get(wordString[0]).spMove(wordString[3], num);
+        			}
+        		}
+        		else if(wordString[1].equals("死亡")) {
+        			int num = getPeopleNum(wordString[2]);
+        			provinceMap.get(wordString[0]).peopleDead(num);
+        		}
+        		else if(wordString[1].equals("治愈")) {
+        			int num = getPeopleNum(wordString[2]);
+        			provinceMap.get(wordString[0]).peopleCured(num);
+        		}
+        		else if(wordString[2].equals("确认感染")) {
+        			int num = getPeopleNum(wordString[3]);
+        			provinceMap.get(wordString[0]).spDiagnosed(num);
+        		}
+        		else if(wordString[1].equals("排除")){
+        			int num = getPeopleNum(wordString[3]);
+        			provinceMap.get(wordString[0]).spExclude(num);
+        		}
+        	}
+        }
+
+        bufferedReader.close();
+        fileReader.close();
     }
     
     //带格式输出到指定文件
-    public void writeLog(String outPath,ArrayList<String> type,boolean isProvinceSpecified) {
+    public void writeLog(String outPath,ArrayList<String> type,boolean isProvinceSpecified) throws IOException {
+    	
+    	String outStr = new String();
+    	
+    	for(int i=0;i<AllProvinceName.length;i++) {
+    		MyProvince curProvince = provinceMap.get(AllProvinceName[i]);
+    		if(curProvince.isMentioned) {
+        		outStr += curProvince.provinceName 
+            			+ " " +String.valueOf(curProvince.ip) 
+            			+ " " +String.valueOf(curProvince.sp)
+            			+ " " +String.valueOf(curProvince.cure)
+            			+ " " +String.valueOf(curProvince.dead) + "\n";
+    		}
+    	}	
+    	
+    	File file = new File(outPath);
+
+    	BufferedWriter writer = null;
+    	FileOutputStream writerStream = new FileOutputStream(file);
+    	writer = new BufferedWriter(new OutputStreamWriter(writerStream, "UTF-8"));
+
+    	StringBuilder strBuild = new StringBuilder(outStr);
+
+    	writer.write(strBuild.toString());
+    	
+    	writer.flush();
+    	writer.close();
     	
     }
     
@@ -299,6 +411,17 @@ class InfectStatistic {
     		else return -1;
     	}
     	else return -1;
+    }
+    
+    //输入诸如“24人”的字符串，返回int人数
+    public int getPeopleNum(String str) {
+    	String strNum = new String();
+    	for(int i = 0;i < str.length();i++) {
+    		if(str.charAt(i)>=48 && str.charAt(i)<=57){
+    			strNum += str.charAt(i);
+    		}
+    	}
+    	return Integer.parseInt(strNum);
     }
     
     public static void main(String[] args) {

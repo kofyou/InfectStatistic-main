@@ -1,4 +1,5 @@
 
+#pragma warning(disable:4996)
 #include <io.h>		
 #include <iostream>
 #include <fstream>
@@ -50,9 +51,9 @@ void analysis::findAllFile(const char* path, const char* format, const char* dat
 	check = 1;
 	char newpath[200];
 	char newpaths[200];
-	strcpy(newpath, path);
-	strcpy(newpaths, path);
-	strcat(newpath, "\\*.*");    // 在目录后面加上"\\*.*"进行第一次搜索
+	strcpy_s(newpath, path);
+	strcpy_s(newpaths, path);
+	strcat_s(newpath, "\\*.*");    // 在目录后面加上"\\*.*"进行第一次搜索
 	int handle;
 	int b = 0;
 	_finddata_t findData;
@@ -68,9 +69,9 @@ void analysis::findAllFile(const char* path, const char* format, const char* dat
 		if (findData.attrib & _A_SUBDIR) {
 			if (strcmp(findData.name, ".") == 0 || strcmp(findData.name, "..") == 0)
 				continue;
-			strcpy(newpath, path);
-			strcat(newpath, "\\");
-			strcat(newpath, findData.name);
+			strcpy_s(newpath, path);
+			strcat_s(newpath, "\\");
+			strcat_s(newpath, findData.name);
 			findAllFile(newpath, format, date);
 		}
 		else {
@@ -89,9 +90,9 @@ void analysis::findAllFile(const char* path, const char* format, const char* dat
 				if (fl == 1)b = 1;
 				freopen(outpath, "w", stdout);
 				char nowpath[200];
-				strcpy(nowpath, newpaths);
-				strcat(nowpath, "\\");
-				strcat(nowpath, findData.name);
+				strcpy_s(nowpath, newpaths);
+				strcat_s(nowpath, "\\");
+				strcat_s(nowpath, findData.name);
 				ifstream fin(nowpath);
 				if (!fin.is_open())cout << "error";
 				string tmp;

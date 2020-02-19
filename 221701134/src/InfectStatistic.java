@@ -26,16 +26,9 @@ class InfectStatistic {
     			
     	};
     	
-    	if(args[0].equalsIgnoreCase("list")) {
-    		
-    		//初始化统计类
-    		InfectStatistic inf = new InfectStatistic(args);
-    		//解析命令行参数列表
-    		inf.parse();
-    		//读取日志文件
-    		inf.readFiles();
-    		//输出统计结果写入文件
-    		inf.writeFile();
+    	if(args[0].equalsIgnoreCase("list")) {   		
+    		//初始化统计类并启动
+    		new InfectStatistic(args).start();
     	}
     	else {
     		System.out.println("命令" + args[0] + "不存在！");
@@ -49,7 +42,9 @@ class InfectStatistic {
 	 /** 传入的类型参数列表 */
 	 private ArrayList<String> typeList;
 	 /** 传入的需要显示的省份参数列表 */
-	 private ArrayList<String> provinceList;
+	 private ArrayList<String> provinceArgsList;	 
+	 /** 所有有数据的省份名字列表 */
+	 private ArrayList<String> allProvinceList;
 	 /** 省份数据映射表 */
 	 private Hashtable<String, Province> provinceHashtable;
 	 /** 是否读取全部日志文件 */
@@ -66,13 +61,28 @@ class InfectStatistic {
 			logPath = new String();
 			outputPath = new String();
 			typeList = new ArrayList<String>();
-			provinceList = new ArrayList<String>();
+			provinceArgsList = new ArrayList<String>();
+			allProvinceList = new ArrayList<String>();
 			provinceHashtable = new Hashtable<String, Province>();
 			this.args = args;
 			isReadAll = true;
 			isShowAllProvince = true;
 			isShowAllData = true;
 			isEnd = false;
+	}
+	 
+	 /**
+	  * 启动疫情统计程序
+	  */
+	 private void start() {
+		//解析命令行参数列表
+		this.parse();
+		
+		//读取日志文件
+		this.readFiles();
+		
+		//输出统计结果写入文件
+		this.writeFile();		
 	}
 	 
 	 /**
@@ -119,10 +129,10 @@ class InfectStatistic {
 				 typeList.add(type);
 				 index++;
 			 }
-			 else {//后续无类型参数
+			 else { //后续无类型参数
 				 return index;
 			 }
-		}//到列表尾或者四个类型都加入完成
+		} //到列表尾或者四个类型都加入完成
 		 return index;    		 
 	}
 	 
@@ -138,14 +148,17 @@ class InfectStatistic {
 					|| temp.equals(Constants.CMD_OUT) || temp.equals(Constants.CMD_TYPE)) {
 				return index;
 			}
-			else {//仍有省份参数
-				provinceList.add(args[index]);
+			else { //仍有省份参数
+				provinceArgsList.add(args[index]);
 				index++;
 			}			
-		}//到列表尾或者全部省份都加入完成
+		} //到列表尾或者全部省份都加入完成
 		return index;
 	}
 	 
+	 /**
+	  * description：读取日志文件并解析处理数据
+	  */
 	 private void readFiles() {
 		 File file = new File(logPath);
 		 File[] logFiles = file.listFiles();
@@ -160,6 +173,7 @@ class InfectStatistic {
 		 if (isReadAll == false) {
 			//比较输入日期与最新日期
 			 String lastestDate = logFiles[logFiles.length - 1].getName();
+			 //TODO： debug语句 后续删除
 			 System.out.println("当前最新的日期文件名为：" + lastestDate);
 			 lastestDate = lastestDate.split(".")[0];
 			 if (date.compareTo(lastestDate) > 0) {
@@ -181,14 +195,13 @@ class InfectStatistic {
 		                String[] datas = line.split(" ");
 		                //读取并处理单行数据
 		                executeOneLine(datas);
-		            }          
+		            } //单个文件读取完毕         
 		            br.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}				
 			}
-		}
-		 //TODO： 判断是否统计全国数据
+		} //文件全部读取完毕				 
 	 }
 	 
 	 /**
@@ -254,6 +267,9 @@ class InfectStatistic {
 		 if (provinceHashtable.containsKey(key) == false) {
 				prov = new Province(key);
 				provinceHashtable.put(key, prov);
+				
+				//加入有数据列表
+				allProvinceList.add(key);
 		}
 		else {
 			prov = provinceHashtable.get(key);
@@ -270,7 +286,52 @@ class InfectStatistic {
 			 return;
 		 }
 		 
+		//TODO： 判断是否统计全国数据
+		 if (isShowAllProvince == false) {
+			 //判断输出列表是否包含全国
+			 if (isOuputNationwide()) {
+				 //统计出全国数据
+				 Province nation = getNationStatResult();
+				 
+			 }
+		 }
+		 else {
+			//输出全国数据和所有省份数据
+		}
 	 }
+	 
+	 /** 是否统计全国数据并输出 */
+	 private boolean isOuputNationwide() {
+		//判断输出列表是否包含全国
+		for (String provName : provinceArgsList) {
+			if (provName.equals("全国")) {
+				return true;
+			}
+		} //不包含全国
+		return false;
+	}
+	 
+	 /**
+	  * 获取全国统计数据对象
+	  * @return 包含统计数据的省份对象
+	  */
+	 private Province getNationStatResult() {	 
+		long ip = 0;
+		long sp = 0;
+		long cure = 0;
+		long dead = 0;
+		
+		//遍历所有有数据的省份列表
+		for (String name : allProvinceList) {
+			Province prov = provinceHashtable.get(name);
+			ip += prov.getIp();
+			sp += prov.getSp();
+			cure += prov.getCure();
+			dead += prov.getDead();
+		}
+		
+		return new Province("全国", ip, sp, cure, dead);
+	}
 	 
     /**
      * description：常量类，储存所有全局常量
@@ -316,6 +377,14 @@ class InfectStatistic {
 			this.sp = 0;
 			this.cure = 0;
 			this.dead = 0;
+		}
+    	
+    	public Province(String name, long ip, long sp, long cure, long dead) {
+			this.name = name;
+			this.ip = ip;
+			this.sp = sp;
+			this.cure = cure;
+			this.dead = dead;
 		}
     	   	
 		public String getName() {

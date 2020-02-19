@@ -1,10 +1,14 @@
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.File;
 import org.junit.Test;
 
@@ -598,7 +602,21 @@ class Statistic {
         data.put("浙江", new int[] { 0, 0, 0, 0 });
     }
 
-    void outPutFile(String str) {
-
+    void outPutFile(String path) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path), "UTF-8"));
+            for(String keytemp:data.keySet()) {
+                int[] valuetemp=data.get(keytemp);
+                String out=keytemp;
+                bw.write(keytemp+" 感染患者"+valuetemp[0]+"人 疑似患者"+valuetemp[1]+"人 治愈"+valuetemp[2]+"人 死亡"+valuetemp[3]+"人");
+                bw.newLine();
+            }
+            bw.write("// 该文档并非真实数据，仅供测试使用");
+            bw.newLine();
+            bw.flush();
+            bw.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 }

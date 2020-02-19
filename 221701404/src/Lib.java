@@ -16,10 +16,10 @@ import java.util.Map;
  * @since 2020.2.11
  */
 public class Lib {
-	public static final String str1 = "感染患者";
-	public static final String str2 = "疑似患者";
-	public static final String str3 = "治愈";
-	public static final String str4 = "死亡";
+	public static final String ipstr = "感染患者";
+	public static final String spstr = "疑似患者";
+	public static final String curestr = "治愈";
+	public static final String deadstr = "死亡";
 	public static List<String> citiesList = new ArrayList<String>();
 	
 	/**

@@ -77,12 +77,18 @@ class InfectStatistic {
 			// System.out.println(dateString);
 			// System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
 			// System.out.println(patientsHashMap.get("治愈") + "");
-		} catch (ParseException e) {
+		} catch (NullPointerException e) {
+			// TODO: handle exception
+			System.out.println("文件名输入错误！文件不存在或已被移除");
+			//e.printStackTrace();
+		}catch (ParseException e) {
 			// TODO 自动生成的 catch 块
-			e.printStackTrace();
+			System.out.println("日期输入错误！格式应为：yyyy-mm-dd");
+			//e.printStackTrace();
 		} catch (IOException e) {
 			// TODO 自动生成的 catch 块
-			e.printStackTrace();
+			System.out.println("文件名输入错误！文件不存在或已被移除");
+			//e.printStackTrace();
 		}
 	}
 
@@ -135,7 +141,7 @@ class InfectStatistic {
 		}
 	}
 
-	private static boolean readLogName() throws ParseException {
+	private static boolean readLogName() throws ParseException,NullPointerException {
 		File file = new File(logNameString);
 		String[] fileList = file.list();
 		String temString = "";
@@ -346,8 +352,8 @@ class InfectStatistic {
 				temString += string1 + "" + patientsHashMap.get(string1) + "人 ";
 				// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
 			}
-			temString.substring(0, temString.length() - 1);
-			System.out.println(temString);
+			temString = temString.substring(0, temString.length() - 1);
+			//System.out.println(temString);
 			temString += "\n";
 			bufferedWriter.write(temString);
 		}

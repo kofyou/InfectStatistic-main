@@ -21,8 +21,14 @@ class InfectStatistic {
 	public int[] doubtfulillnessarray=new int[32];	//用于存放各省疑似患者人数
 	public int[] secureillnessarray=new int[32];	//用于存放各省治愈患者人数
 	public int[] deadillnessarray=new int[32];		//用于存放各省死亡人数
-	String outputarray;								//用于存放处理过后需要输出的字符串数组
+	public int[] type={1,2,3,4};					//用于判断-type类型的输出顺序
+	String outputarray;					//用于存放处理过后需要输出的字符串数组
     public static void main(String args[]) throws IOException {
+		String[] argstring=args;
+		InfectStatistic useInfectStatistic=new InfectStatistic();
+		OutProcess outprocess = useInfectStatistic.new OutProcess();
+		DateHandle datehandle = useInfectStatistic.new DateHandle();
+		TypeHandle typehandle = useInfectStatistic.new TypeHandle();
     	for (int i=0;i<args.length;i++) {		//循环读取命令行参数
     		//System.out.println(args[i]);
 			String logpath=null;				//日志文件路径
@@ -34,14 +40,22 @@ class InfectStatistic {
 			}
 			if (args[i].equals("-out")) {
 				outpath=args[i+1];				//-out参数的下一个参数即为输出文件路径名
-				outProcess(outpath);			//对-out参数进行处理
+				OutProcess(outpath);			//对-out参数进行处理
+			}
+			if (args[i]=="-date") {				
+				concretedate=args[i+1];			//-date参数的下一个参数即为需要输出的具体日期
+			}
+			if (args[i]=="-type") {				
+				typehandle.TypeHandle(argstring,i);			//处理-type参数
 			}
 		}
     }
-    public void OutProcess(String outpath) throws IOException {		//输出到指定文件中
-    	FileWriter fw=new FileWriter(outpath);
-    	fw.write(outputarray);								//将最终字符串数组输出到指定文件中
-    }
+    public class OutProcess {
+		public void OutProcess(String outpath) throws IOException {	//输出到指定文件中
+    		FileWriter fw=new FileWriter(outpath);
+    		fw.write(outputarray);									//将最终字符串数组输出到指定文件中
+    	}
+	}
     public void LogContentHandle(String lineText) {
     	String match1="(\\S+) 新增 感染患者 (\\d+)人";		//匹配<省> 新增 感染患者 n人
     	String match2="(\\S+) 新增 疑似患者 (\\d+)人";		//匹配<省> 新增 疑似患者 n人
@@ -195,17 +209,48 @@ class InfectStatistic {
     		}
     	}
     }
-    public static void DateHandle(String concretedate,String logpath) throws IOException {//处理-date参数所输入的具体日期
-    	File logfilepath=new File(logpath);
-		File list[]=logfilepath.listFiles();					//获取日志文件列表
-    	for (int i=0;i<list.length;i++) {						//循环获得日志文件夹中的每一个日志文件
-			String logsname=list[i].getName();					//获得日志文件名
-			String cutlineText[]=logsname.split("\\.");			//按"."分割
-			//System.out.println(cutlineText[0]);				//输出分割后的日志文件名，测试用
-			if (!(logsname.compareTo(concretedate)>0)) {		//如果在指定的日期内则处理该文本的信息
-				//LogContentHandle(LogProcess(list[i].getAbsolutePath()));
-				System.out.println(logsname);					//输出指定日期内的日志文件名，测试用
+    public class TypeHandle {
+    	public void TypeHandle(String[] args,int i) {
+    		int j;
+    		for (j=0;j<4;j++) {
+    			type[j]=0;		//-type参数将所有输出优先级置0
+    		}
+    		j=1;
+    		for(;i<args.length;i++) {
+    			if (args[i].equals("ip")) {								//只输出感染患者
+    				type[0]=j;
+    				j++;
+    			}
+    			if (args[i].equals("sp")) {								//只输出疑似患者
+    				type[1]=j;
+    				j++;
+    			}
+    			if (args[i].equals("cure")) {							//只输出治愈患者
+    				type[2]=j;
+    				j++;
+    			}
+    			if (args[i].equals("dead")) {							//只输出治愈患者
+    				type[3]=j;
+    				j++;
+    			}
+    		}
+    	}
+    }
+    public class DateHandle {
+    	public void DateHandle(String concretedate,String logpath) throws IOException {//处理-date参数所输入的具体日期
+    		File logfilepath=new File(logpath);
+    		File list[]=logfilepath.listFiles();					//获取日志文件列表
+    		for (int i=0;i<list.length;i++) {						//循环获得日志文件夹中的每一个日志文件
+    			String logsname=list[i].getName();					//获得日志文件名
+    			String cutlineText[]=logsname.split("\\.");			//按"."分割
+    			//System.out.println(cutlineText[0]);				//输出分割后的日志文件名，测试用
+    			if (!(logsname.compareTo(concretedate)>0)) {		//如果在指定的日期内则处理该文本的信息
+    				//LogContentHandle(LogProcess(list[i].getAbsolutePath()));
+    				LogProcess2(list[i].getAbsolutePath());
+    				//System.out.println(list[i].getAbsolutePath());	//测试用，输出指定日期的日志文件绝对路径
+    				//System.out.println(logsname);					//输出指定日期内的日志文件名，测试用
+				}
 			}
-		}
+    	}
     }
 }

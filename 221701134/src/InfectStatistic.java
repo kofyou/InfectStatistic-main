@@ -185,8 +185,7 @@ class InfectStatistic {
 		            br.close();
 				} catch (Exception e) {
 					e.printStackTrace();
-				}
-				
+				}				
 			}
 		}
 		 //TODO： 判断是否统计全国数据
@@ -197,10 +196,44 @@ class InfectStatistic {
 	  * @param datas  分割好的数据数组
 	  */
 	 private void executeOneLine(String[] datas) {
+		 //忽略注释行
+		 if(datas[0].equals("//")) {
+			 return;
+		 }
+		 
+		String provinceName = datas[0];
+		Province prov = null; 
 		
-	}
+		//判断省份是否已经缓存，没有则新建省份对象，并加入哈希表中
+		if (provinceHashtable.containsKey(provinceName) == false) {
+			prov = new Province(provinceName);
+			provinceHashtable.put(provinceName, prov);
+		}
+		else {
+			prov = provinceHashtable.get(provinceName);
+		}
+		
+		//根据不同情况进行处理
+		switch (datas[1]) {
+		case "死亡":
+			prov.increaseDead(datas[2]);
+			break;
+		case "治愈":
+			prov.increaseCure(datas[2]);
+			break;
+		
+
+		default:
+			break;
+		}
+		
+	}	 
 	 
+	 /**
+	  * description：将统计结果写入文件输出
+	  */
 	 private void writeFile() {
+		 //若中途出错则直接结束程序
 		 if (isEnd) {
 			 return;
 		 }
@@ -245,12 +278,12 @@ class InfectStatistic {
     	/** 死亡患者数量 */
     	private long dead;
     	
-    	public Province(String name, long ip, long sp, long cure, long dead) {
+    	public Province(String name) {
 			this.name = name;
-			this.ip = ip;
-			this.sp = sp;
-			this.cure = cure;
-			this.dead = dead;
+			this.ip = 0;
+			this.sp = 0;
+			this.cure = 0;
+			this.dead = 0;
 		}
     	   	
 		public String getName() {
@@ -271,36 +304,51 @@ class InfectStatistic {
 		
 		public long getDead() {
 			return dead;
-		}
+		}		
 
 		/** 增加感染患者数量 */
-		public void increaseIp(long changeNum) {
+		public void increaseIp(String changeNumStr) {
+			long changeNum = getChangeNum(changeNumStr);
 			ip += changeNum;
-		}
+		}	
 		
 		/** 减少感染患者数量 */
-		public void decreaseIp(long changeNum) {
+		public void decreaseIp(String changeNumStr) {
+			long changeNum = getChangeNum(changeNumStr);
 			ip -= changeNum;
 		}
 		
 		/** 增加疑似患者数量 */
-		public void increaseSp(long changeNum) {
+		public void increaseSp(String changeNumStr) {
+			long changeNum = getChangeNum(changeNumStr);
 			sp += changeNum;
 		}
 		
 		/** 减少疑似患者数量 */
-		public void decreaseSp(long changeNum) {
+		public void decreaseSp(String changeNumStr) {
+			long changeNum = getChangeNum(changeNumStr);
 			sp -= changeNum;
 		}
 		
 		/** 增加治愈患者数量 */
-		public void increaseCure(long changeNum) {
+		public void increaseCure(String changeNumStr) {
+			long changeNum = getChangeNum(changeNumStr);
 			cure += changeNum;
+			ip -= changeNum;
 		}		
 		
 		/** 增加死亡患者数量 */
-		public void increaseDead(long changeNum) {
+		public void increaseDead(String changeNumStr) {
+			long changeNum = getChangeNum(changeNumStr);
 			dead += changeNum;
+			ip -= changeNum;
+		}
+		
+		/** 疑似病例确诊 */
+		public void increaseIpBySpConfirmed(String changeNumStr) {
+			long changeNum = getChangeNum(changeNumStr);
+			ip += changeNum;
+			sp -= changeNum;
 		}
 		
 		/** 
@@ -339,6 +387,12 @@ class InfectStatistic {
 				}
 			}
 			return res;
+		}
+		
+		/** 将字符串解析为数字 */
+		private long getChangeNum(String changeNumStr) {
+			changeNumStr = changeNumStr.substring(0, changeNumStr.length() - 1);
+			return Long.parseLong(changeNumStr);
 		}
     }
          

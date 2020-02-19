@@ -3,7 +3,7 @@
  * TODO
  *
  * @author shenmw
- * @version 2.0
+ * @version final
  * @since 2.18
  */
 
@@ -12,55 +12,150 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.ArrayList;
 
+
 class InfectStatistic 
-{	
-	public String logPath;//传入路径
-	
-	public String outputPath;//output文件传入路径
+{
+    public String date;    //日期
 
-	public String[] arg;//接收命令行参数
+    public String logPath;    //日志传入路径
 
-	public boolean isRead;//读取所有日志文件
+    public String outputPath;    //output文件传入路径
 
-	public String date;//日志日期
-	
     public List<String> name;    //省份名称    
     
     public String[] provinceName;//所有省份名称
     
-    public Province country;    //全国的情况 	
+    public Province country;    //全国的情况   
+    
+    public String[] arg; //命令行参数
+
+    public boolean isRead;    //读取所有日志文件
+
+    public boolean isOutput;    //所有参数
+
+    public String[] output;    //输出顺序
+
+    public boolean isOutputAll;    //输出全国和所有省的情况
+
+    public List<String> provinces;    //-province要输出的省份
+
+    public HashMap<String,Province> map;//省份名称与其具体情况的映射
+
+    public boolean isFinish;
+        
 
     public InfectStatistic(String[] args)
-    {
+    {        
+    	arg = args;
+        isRead = true;
+        logPath = "G:\\example\\log\\";
+        outputPath = "G:\\example\\result\\output3.txt";
         provinceName = new String[]{"安徽","北京","重庆","福建","甘肃","广东",
             "广西","贵州","海南","河北","河南","黑龙江","湖北","湖南",
             "江西","吉林","江苏","辽宁","内蒙古","宁夏","青海","山西","山东","陕西","上海",
             "四川","天津","西藏","新疆","云南","浙江"};
-        arg = args;
-        isRead = true;
-        logPath = "G:\\example\\log\\";
-        outputPath = "G:\\example\\result\\output3.txt";
         name = new ArrayList<>();       
         map = new HashMap<String,Province>();
         country = new Province("全国");
         isOutput = true;
         isOutputAll = true;
         provinces = new ArrayList<>();
-        output = new String[4];     
         isFinish = false;
+        output = new String[4];     
+
         for (int i = 0; i < provinceName.length; i ++ )
         {
             name.add(provinceName[i]);
             map.put(name.get(i), null);
         }
+        
         for (int i = 0; i < 4; i ++ )
         {
             output[i] = "";
         }
         this.init();
     }
-
-	//处理日志文件
+    
+    //初始化
+    public void init()
+    {
+        for (int i = 0; i < arg.length; i ++ )
+        {           
+            switch (arg[i])
+            {
+                case "-date":
+                    date = new String(arg[i+1]);
+                    isRead = false; 
+                    break;
+                case "-log":
+                    logPath = new String(arg[i+1]);
+                    break;
+                case "-out":
+                    outputPath = new String(arg[i+1]);
+                    break;
+                case "-type":
+                    isOutput = false;
+                    dealType(i+1);
+                    break;
+                case "-province":
+                    isOutputAll = false;
+                    dealProvince(i+1);
+                default:    
+                    break;
+            }           
+        }
+    }
+    
+    //-province参数
+    public void dealProvince(int index) 
+    {
+        while (index < arg.length)
+        {
+            switch (arg[index])
+            {
+                case "-date":
+                    return;
+                case "-log":
+                    return;
+                case "-out":
+                    return;
+                case "-type":
+                    return;
+                default:
+                    provinces.add(arg[index]);
+                    map.put(arg[index], null);
+            }   
+            index ++ ;
+        }               
+    }
+    
+    //-type参数
+    public void dealType(int index)
+    {       
+        for (int i = 0; index < arg.length && i < 4; i ++ )
+        {
+            switch (arg[index])
+            {
+                case "ip":
+                    output[i] = arg[index];
+                    break;
+                case "sp":
+                    output[i] = arg[index];
+                    break;
+                case "cure":
+                    output[i] = arg[index];
+                    break;
+                case "dead":
+                    output[i] = arg[index];
+                    break;                
+                default:
+                    break;
+            }
+            index ++ ;
+        }
+    }
+    
+        
     //日志文件
     public void deal() throws IOException
     {               
@@ -104,64 +199,133 @@ class InfectStatistic
         }
         allStatistic();
     }
-
-	//处理"-date"命令
-	public void init()
-	{
-		for(int i=0;i<arg.length;i++)
-		{			
-			switch(arg[i])
-			{
-			    case "-date":
-				    date = new String(arg[i+1]);
-				    isRead = false;	
-				    break;
-			    case "-log":
-				    logPath = new String(arg[i+1]);
-				    break;
-			    case "-out":
-				    outputPath = new String(arg[i+1]);
-				    break;
-			    default:					
-			}			
-		}
-	}
-    //-province参数
-    public void dealProvince(int index) 
+        
+    private void dealOneLine(String[] array) 
     {
-        while (index < arg.length)
+        if (array[0].equals("//"))
         {
-            switch (arg[index])
-            {
-                case "-date":
-                    return;
-                case "-log":
-                    return;
-                case "-out":
-                    return;
-                case "-type":
-                    return;
-                default:
-                    provinces.add(arg[index]);
-                    map.put(arg[index], null);
-            }   
-            index ++ ;
-        }               
-    }
+            return;
+        }
 
-    public static void main(String[] args) 
+        if (map.get(array[0]) == null)
+        {
+            map.put(array[0], new Province(array[0]));  
+        }
+                        
+        switch (array[1])
+        {
+            case "新增":
+                if (array[2].equals("疑似患者"))
+                {
+                    map.get(array[0]).addSp(array[3]);
+                }
+                else
+                {
+                    map.get(array[0]).addIp(array[3]);
+                }
+                break;
+            case "感染患者":
+                map.get(array[0]).removeIp(array[4]);
+                if (map.get(array[3]) == null)
+                    map.put(array[3], new Province(array[3]));
+                map.get(array[3]).addIp(array[4]);
+                break;
+            case "疑似患者":
+                if (array[2].equals("流入"))
+                {
+                    map.get(array[0]).removeSp(array[4]);
+                    if (map.get(array[3]) == null)
+                        map.put(array[3], new Province(array[3]));
+                    map.get(array[3]).addSp(array[4]);
+                }
+                else
+                {
+                    map.get(array[0]).addIp(array[3]);
+                    map.get(array[0]).removeSp(array[3]);
+                }
+                break;
+            case "死亡":
+                map.get(array[0]).dead(array[2]);
+                break;
+            case "治愈":
+                map.get(array[0]).cure(array[2]);
+                break;
+            case "排除":
+                map.get(array[0]).removeSp(array[3]);
+                break;
+            default:
+                break;
+        }   
+    }
+    
+    //生成输出文件
+    public void output() throws IOException
     {
-    	if(args[0].equalsIgnoreCase("list"))
-    	{
-    	    InfectStatistic l = new InfectStatistic(args);
-    	    l.deal();	
-    	}
-    	else
-    	{
-    	    System.out.print("未知的命令：" + args[0]);
-    	}    		
+        if (isFinish)
+        {
+            return;
+        }
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath), "UTF-8"));
+        if (isOutputAll)
+        {
+            country.output(isOutput,output,bw);
+            for (int i = 0; i < name.size(); i ++ )
+            {   
+                if (map.get(name.get(i)) != null)
+                {
+                    map.get(name.get(i)).output(isOutput, output, bw);
+                }                
+            }
+        }
+        else
+        {
+            if (provinces.contains("全国"))
+            {
+                country.output(isOutput,output,bw);
+            }
+            for (int i = 0; i < provinceName.length; i ++ )
+            { 
+                if (provinces.contains(provinceName[i]))
+                {
+                    if (map.get(name.get(i)) == null)
+                    {
+                        map.put(provinceName[i], new Province(provinceName[i]));
+                    }
+                    map.get(provinceName[i]).output(isOutput, output, bw);
+                }                
+            }
+        }
+        bw.write("// 该文档并非真实数据，仅供测试使用");
+        bw.close();
+    }
+    
+    //全国的情况
+    public void allStatistic()
+    {
+        for (int i = 0; i < name.size(); i ++ )
+        {
+            if (map.get(name.get(i)) != null)
+            {
+                country.allAdd(map.get(name.get(i)));
+            }            
+        }
+    }                    
+    public static void main(String[] args) throws IOException 
+    {
+        if (args[0].equalsIgnoreCase("list"))
+        {
+            InfectStatistic l = new InfectStatistic(args);
+            l.deal();   
+            l.output();         
+        }
+        else
+        {
+            System.out.print("命令错误：" + args[0]);
+        }           
     }
 }
+
+//省份类
 class Province
 { 
     private String name;    //省份名称
@@ -262,4 +426,3 @@ class Province
         this.dead += p.dead;
     }
 }
-

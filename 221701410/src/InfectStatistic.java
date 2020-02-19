@@ -55,6 +55,9 @@ class InfectStatistic {
             this.typeList = new ArrayList<>();
             provinceSign = false;
             this.provinceList = new int[provinceString.length];
+            for (int i = 0; i < provinceList.length; i++) {
+                provinceList[i] = 0;
+            }
         }
 
         public String getLogPath() {
@@ -198,6 +201,9 @@ class InfectStatistic {
                         biggestDate = fileNameWithoutOut;
                     }
                 }
+                if (endDate.equals("")) {
+                    endDate = biggestDate;
+                }
                 if (endDate.compareTo(biggestDate) > 0) {
                     return false;
                 }
@@ -236,8 +242,21 @@ class InfectStatistic {
      */
     class DataHandle {
 
-        private int[][] patient = new int[provinceString.length][patientType.length];
-        private int[] influencedProvince = new int[provinceString.length];
+        private int[][] patient;
+        private int[] influencedProvince;
+
+        public DataHandle() {
+            patient = new int[provinceString.length][patientType.length];
+            for (int i = 0; i < provinceString.length; i++) {
+                for (int j = 0; j < patientType.length; j++) {
+                    patient[i][j] = 0;
+                }
+            }
+            influencedProvince = new int[provinceString.length];
+            for (int k = 0; k <influencedProvince.length; k++) {
+                influencedProvince[k] = 0;
+            }
+        }
 
         public int[][] getPatient() {
             return patient;
@@ -525,7 +544,8 @@ class InfectStatistic {
                 if (!dirFile.exists()) {
                     dirFile.mkdir();
                 }
-                FileWriter fileWriter = new FileWriter(outputPath);
+                BufferedWriter fileWriter = new BufferedWriter (new OutputStreamWriter (new FileOutputStream (outputPath,
+                        false),"UTF-8"));
                 if (provinceSign) {
                     for (int i = 0; i < provinceString.length; i++) {
                         if (provinceList[i] == 1){

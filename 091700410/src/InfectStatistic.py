@@ -10,6 +10,10 @@
 #  @since 2020-2-18
 #  
 
+import os
+import datetime
+import sys
+
 def sort_by_pinyin(str):
     
     province_dict = {
@@ -79,8 +83,8 @@ class InfectStatistic:
             InfectStatistic.data_dict['全国']['感染患者'] += num
             InfectStatistic.data_dict['全国']['疑似患者'] -= num
             
-        
     def read_file(self):
+        #  读取文档
         
         date_of_file = datetime.datetime.strptime(self.file_date,'%Y-%m-%d')
         
@@ -96,8 +100,53 @@ class InfectStatistic:
                             print(str(content))
                             InfectStatistic.file_data(self,content)
                 
-        print(InfectStatistic.data_dict)
+        # print(InfectStatistic.data_dict)
+        for m in InfectStatistic.data_dict:
+            print(InfectStatistic.data_dict[m])
+        print(len(InfectStatistic.data_dict))
+    
+    def write_file(self,type_list=[],province_list=[]):
+    #  写入文档
         
-fi = InfectStatistic('..\\log\\','','2020-01-22')
+        f = open(self.output_path,'w+',encoding='utf-8')
+        
+        if len(type_list) == 0:
+            type_list = ['感染患者','疑似患者','治愈','死亡']
+        
+        for i in range(len(type_list)):
+            if type_list[i] == 'ip':
+                type_list[i] = '感染患者'
+            elif type_list[i] == 'sp':
+                type_list[i] = '疑似患者'
+            elif type_list[i] == 'cure':
+                type_list[i] = '治愈'
+            elif type_list[i] == 'dead':
+                type_list[i] = '死亡'
+        
+        if len(province_list) == 0:
+            for i in range(34):
+                for m in InfectStatistic.data_dict:
+                    if sort_by_pinyin(m) == i:
+                        output_str = str(m)
+                        for n in type_list:
+                            output_str = output_str + ' ' + n + str(InfectStatistic.data_dict[m][n]) + '人'
+                        output_str += '\n'
+                        f.writelines(output_str)
+                        print(output_str,end='')
+    
+        else:
+            for i in range(34):
+                for m in InfectStatistic.data_dict:
+                    if sort_by_pinyin(m) == i and m in province_list:
+                        output_str = str(m)
+                        for n in type_list:
+                            output_str = output_str + ' ' + n + str(InfectStatistic.data_dict[m][n]) + '人'
+                        output_str += '\n'
+                        f.writelines(output_str)
+                        print(output_str,end='')
+                        
+        
+fi = InfectStatistic('..\\log\\','..\\result\\ListOut.txt','2020-01-27')
 fi.read_file()
+fi.write_file()
         

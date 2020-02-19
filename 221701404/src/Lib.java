@@ -116,6 +116,7 @@ public class Lib {
 			String log = "";
 			String out = "";
 			String date = "";
+			//一个参数后跟多个参数值的情况
 			List<String> type = new ArrayList<String>();
 			List<String> province = new ArrayList<String>();
 			//循环参数，确定都有哪些参数

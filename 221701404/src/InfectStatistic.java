@@ -70,16 +70,17 @@ public class InfectStatistic {
             }
 
             //定义最后返回时候的变量
-            Map<String,Map<String,Integer>> mapMap = new HashMap<String, Map<String,Integer>>();
-            Map<String,Integer> map = new LinkedHashMap<String,Integer>();
+            Map<String,Map<String,Integer>> provinceMap = new HashMap<String, Map<String,Integer>>();
+            Map<String,Integer> typeMap = new LinkedHashMap<String,Integer>();
 
-            //map2一直是全国的数据，便于下面随时操作。
-            Map<String,Integer> map2 = new LinkedHashMap<String,Integer>();
-            map2.put(Lib.str1, 0);
-            map2.put(Lib.str2, 0);
-            map2.put(Lib.str3, 0);
-            map2.put(Lib.str4,0);
-            //mapMap.put("全国", map2);
+            //totalMap一直是全国的数据，便于下面随时操作。
+            Map<String,Integer> totalMap = new LinkedHashMap<String,Integer>();
+            totalMap.put(Lib.str1, 0);
+            totalMap.put(Lib.str2, 0);
+            totalMap.put(Lib.str3, 0);
+            totalMap.put(Lib.str4,0);
+            //provinceMap.put("全国", totalMap);
+
             //根据date和log循环所有文文件，读入统计各个信息。然后计算全国信息
             for(int i=0; i<files.length; i++) {
                 String fileName = files[i].getName();
@@ -99,36 +100,35 @@ public class InfectStatistic {
                             if(arr.length>2 && arr.length<6) {
                                 //当第一组字符属于城市的一部分的时候，继续执行下面的部分
                                 if(Lib.citiesList.contains(arr[0])) {
-                                    if(mapMap.containsKey(arr[0])) {
-                                        map = mapMap.get(arr[0]);
+                                    if(provinceMap.containsKey(arr[0])) {
+                                        typeMap = provinceMap.get(arr[0]);
                                     } else {
-                                        map = new LinkedHashMap<String,Integer>();
-                                        map.put(Lib.str1, 0);
-                                        map.put(Lib.str2, 0);
-                                        map.put(Lib.str3, 0);
-                                        map.put(Lib.str4,0);
-                                        mapMap.put(arr[0], map);
+                                        typeMap = new LinkedHashMap<String,Integer>();
+                                        typeMap.put(Lib.str1, 0);
+                                        typeMap.put(Lib.str2, 0);
+                                        typeMap.put(Lib.str3, 0);
+                                        typeMap.put(Lib.str4,0);
+                                        provinceMap.put(arr[0], typeMap);
                                     }
 
-                                    //length为声明长度
                                     if(arr.length==3) {
                                         //此时状况为死亡，治愈两种情况，都是在对应的数上做加法；同时，感染患者减去这些；
                                         String tempNumStr = arr[2].substring(0,arr[2].length()-1);
                                         int tempNum = Integer.parseInt(tempNumStr);
-                                        map.put(arr[1], map.get(arr[1])+tempNum);
-                                        map.put(Lib.str1, map.get(Lib.str1)-tempNum);
+                                        typeMap.put(arr[1], typeMap.get(arr[1])+tempNum);
+                                        typeMap.put(Lib.str1, typeMap.get(Lib.str1)-tempNum);
                                         //计算上全国的数据
-                                        map2.put(arr[1], map2.get(arr[1])+tempNum);
-                                        map2.put(Lib.str1, map2.get(Lib.str1)-tempNum);
+                                        totalMap.put(arr[1], totalMap.get(arr[1])+tempNum);
+                                        totalMap.put(Lib.str1, totalMap.get(Lib.str1)-tempNum);
                                     } else if(arr.length==4) {
                                         if(arr[1].equals("新增")) {
                                             //新增，无论是感染新增，还是疑似新增，都是在原基础上做加法,同样的全国的变化也是如此
                                             String tempNumStr = arr[3].substring(0,arr[3].length()-1);
                                             int tempNum = Integer.parseInt(tempNumStr);
-                                            map.put(arr[2], map.get(arr[2])+tempNum);
+                                            typeMap.put(arr[2], typeMap.get(arr[2])+tempNum);
 
                                             //计算上全国的数据
-                                            map2.put(arr[2], map2.get(arr[2])+tempNum);
+                                            totalMap.put(arr[2], totalMap.get(arr[2])+tempNum);
 
 
                                         } else {
@@ -138,17 +138,17 @@ public class InfectStatistic {
                                                     //n 为此条数据最后的那个数字
                                                     String tempNumStr = arr[3].substring(0,arr[3].length()-1);
                                                     int tempNum = Integer.parseInt(tempNumStr);
-                                                    map.put(arr[1], map.get(arr[1])-tempNum);
-                                                    map.put(Lib.str1, map.get(Lib.str1)+tempNum);
-                                                    map2.put(arr[1], map2.get(arr[1])-tempNum);
-                                                    map2.put(Lib.str1, map2.get(Lib.str1)+tempNum);
+                                                    typeMap.put(arr[1], typeMap.get(arr[1])-tempNum);
+                                                    typeMap.put(Lib.str1, typeMap.get(Lib.str1)+tempNum);
+                                                    totalMap.put(arr[1], totalMap.get(arr[1])-tempNum);
+                                                    totalMap.put(Lib.str1, totalMap.get(Lib.str1)+tempNum);
                                                 }
                                             } else if(arr[1].equals("排除")) {
                                                 //此种情况下，该省排除相应人数，全国也排除相应人数
                                                 String tempNumStr = arr[3].substring(0,arr[3].length()-1);
                                                 int tempNum = Integer.parseInt(tempNumStr);
-                                                map.put(arr[2], map.get(arr[2])-tempNum);
-                                                map2.put(arr[2], map2.get(arr[2])-tempNum);
+                                                typeMap.put(arr[2], typeMap.get(arr[2])-tempNum);
+                                                totalMap.put(arr[2], totalMap.get(arr[2])-tempNum);
                                             }
                                         }
                                     } else if(arr.length==5) {
@@ -156,28 +156,26 @@ public class InfectStatistic {
                                         //（1）对省一的操作
                                         String tempNumStr = arr[4].substring(0,arr[4].length()-1);
                                         int tempNum = Integer.parseInt(tempNumStr);
-                                        map.put(arr[1], map.get(arr[1])-tempNum);
+                                        typeMap.put(arr[1], typeMap.get(arr[1])-tempNum);
                                         String city2 = arr[3];
-                                        if(mapMap.containsKey(city2)){
-                                            map = mapMap.get(city2);
+                                        if(provinceMap.containsKey(city2)) {
+                                            typeMap = provinceMap.get(city2);
                                         } else {
-                                            map = new LinkedHashMap<String,Integer>();
-                                            map.put(Lib.str1, 0);
-                                            map.put(Lib.str2, 0);
-                                            map.put(Lib.str3, 0);
-                                            map.put(Lib.str4,0);
-                                            mapMap.put(city2, map);
+                                            typeMap = new LinkedHashMap<String,Integer>();
+                                            typeMap.put(Lib.str1, 0);
+                                            typeMap.put(Lib.str2, 0);
+                                            typeMap.put(Lib.str3, 0);
+                                            typeMap.put(Lib.str4,0);
+                                            provinceMap.put(city2, typeMap);
                                         }
                                         //（2）对省二的操作
-                                        map.put(arr[1], map.get(arr[1])+tempNum);
+                                        typeMap.put(arr[1], typeMap.get(arr[1])+tempNum);
                                     }
                                 }
                             }
                         }
                         //到这里一个文件处理完毕
-
                     }
-
                 }
             }
             //到这里文件夹处理完毕
@@ -190,12 +188,11 @@ public class InfectStatistic {
                 f.mkdirs();
             }
 
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out)),
-                    "UTF-8"));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out)), "UTF-8"));
 
             //遍历mapMap,按照特定的顺序排序
             List<String> keys = new ArrayList<String>();
-            keys.addAll(mapMap.keySet());
+            keys.addAll(provinceMap.keySet());
             keys = Lib.sortByAlphabet(keys);
 
             //判断type
@@ -203,7 +200,7 @@ public class InfectStatistic {
                 //只有type
                 StringBuffer sbf = new StringBuffer();
                 for(int i=0; i<type.size(); i++) {
-                    sbf.append(Lib.getNamebyType(type.get(i)) + map2.get(Lib.getNamebyType(type.get(i)))+"人  ");
+                    sbf.append(Lib.getNamebyType(type.get(i)) + totalMap.get(Lib.getNamebyType(type.get(i)))+"人  ");
                 }
                 bw.write("全国  " + sbf.toString());
                 //先输出全国的
@@ -213,7 +210,7 @@ public class InfectStatistic {
 
                 //根据排好续的keys依次输出到txt中
                 for(int i=0; i<keys.size(); i++) {
-                    Map<String,Integer> tempMap = mapMap.get(keys.get(i));
+                    Map<String,Integer> tempMap = provinceMap.get(keys.get(i));
                     StringBuffer sbf2 = new StringBuffer();
                     for(int j=0; j<type.size(); j++) {
                         sbf2.append(Lib.getNamebyType(type.get(j))+tempMap.get(Lib.getNamebyType(type.get(j)))+"人  ");
@@ -227,7 +224,7 @@ public class InfectStatistic {
                 if(province.contains("全国")) {
                     StringBuffer sbf = new StringBuffer();
                     for(int i=0; i<type.size(); i++) {
-                        sbf.append(Lib.getNamebyType(type.get(i))+map2.get(Lib.getNamebyType(type.get(i)))+"人  ");
+                        sbf.append(Lib.getNamebyType(type.get(i))+totalMap.get(Lib.getNamebyType(type.get(i)))+"人  ");
                     }
                     bw.write("全国  "+sbf.toString());
                     bw.newLine();
@@ -239,10 +236,11 @@ public class InfectStatistic {
                     if(str.equals("全国")) {
                         continue;
                     }
-                    Map<String,Integer> tempMap = mapMap.get(str);
+                    Map<String,Integer> tempMap = provinceMap.get(str);
                     StringBuffer sbf2 = new StringBuffer();
                     for(int j=0; j<type.size(); j++) {
-                        sbf2.append(Lib.getNamebyType(type.get(j))+(tempMap==null? 0:tempMap.get(Lib.getNamebyType(type.get(j))))+"人  ");//???
+                        sbf2.append(Lib.getNamebyType(type.get(j))+(tempMap==null?
+                                0:tempMap.get(Lib.getNamebyType(type.get(j))))+"人  ");
                     }
                     bw.write(str+"  "+sbf2.toString());
                     bw.newLine();
@@ -253,8 +251,8 @@ public class InfectStatistic {
                 //不指定type，则列出所有情况
             } else if(type.size()<1 && province.size()>0) {
                 if(province.contains("全国")) {
-                    bw.write("全国  "+Lib.str1+map2.get(Lib.str1)+"人  "+Lib.str2+map2.get(Lib.str2)+"人  "
-                            +Lib.str3+map2.get(Lib.str3)+"人  "+Lib.str4+map2.get(Lib.str4)+"人");
+                    bw.write("全国  "+Lib.str1+totalMap.get(Lib.str1)+"人  "+Lib.str2+totalMap.get(Lib.str2)+"人  "
+                            +Lib.str3+totalMap.get(Lib.str3)+"人  "+Lib.str4+totalMap.get(Lib.str4)+"人");
                     bw.newLine();
                 } else {
                     province = Lib.sortByAlphabet(province);
@@ -263,8 +261,8 @@ public class InfectStatistic {
                         int str2Num = 0;
                         int str3Num = 0;
                         int str4Num = 0;
-                        if(mapMap.containsKey(str)) {
-                            Map<String,Integer> tempMap = mapMap.get(str);
+                        if(provinceMap.containsKey(str)) {
+                            Map<String,Integer> tempMap = provinceMap.get(str);
                             str1Num = tempMap.get(Lib.str1);
                             str2Num = tempMap.get(Lib.str2);
                             str3Num = tempMap.get(Lib.str3);
@@ -278,13 +276,13 @@ public class InfectStatistic {
             } else {
                 //既没有type也没有province
                 //先输出全国的
-                bw.write("全国  "+Lib.str1+map2.get(Lib.str1)+"人  "+Lib.str2+map2.get(Lib.str2)+"人  "
-                        +Lib.str3+map2.get(Lib.str3)+"人  "+Lib.str4+map2.get(Lib.str4)+"人");
+                bw.write("全国  "+Lib.str1+totalMap.get(Lib.str1)+"人  "+Lib.str2+totalMap.get(Lib.str2)+"人  "
+                        +Lib.str3+totalMap.get(Lib.str3)+"人  "+Lib.str4+totalMap.get(Lib.str4)+"人");
                 bw.newLine();
 
                 //根据排好续的keys依次输出到txt中
                 for(int i=0; i<keys.size(); i++) {
-                    Map<String,Integer> tempMap = mapMap.get(keys.get(i));
+                    Map<String,Integer> tempMap = provinceMap.get(keys.get(i));
                     bw.write( keys.get(i)+"  "+Lib.str1+tempMap.get(Lib.str1)+"人  "+Lib.str2+tempMap.get(Lib.str2)
                             +"人  "+Lib.str3+tempMap.get(Lib.str3)+"人  "+Lib.str4+tempMap.get(Lib.str4)+"人");
                     bw.newLine();

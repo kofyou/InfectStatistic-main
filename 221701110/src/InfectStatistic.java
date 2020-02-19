@@ -159,6 +159,7 @@ public class InfectStatistic {
 				BufferedReader bf = new BufferedReader(reader);
 				String str = null;
 				while ((str = bf.readLine()) != null) {
+					if(str.contains("//")) break;
 					line[num] = str;
 					num++;
 				}
@@ -336,6 +337,10 @@ public class InfectStatistic {
 		out.write(pi2.getBytes()); // 向文件中写入数据
 		out.write('\r'); // \r\n表示换行
 		out.write('\n');
+		out.write(pi1.getBytes());
+		out.write('\r'); // \r\n表示换行
+		out.write('\n');
+		pi1="// 该文档并非真实数据，仅供测试使用";
 		out.write(pi1.getBytes());
 		out.write('\r'); // \r\n表示换行
 		out.write('\n');

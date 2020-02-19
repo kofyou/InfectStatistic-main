@@ -146,7 +146,7 @@ class InfectStatistic {
 	 */
 	public static void printTheProvince(String provinceName, OutputStreamWriter osw) {
 		try {
-			
+			 
 			osw.write(provinceName);
 			System.out.print(provinceName);
 			if(map.get(provinceName) != null) {
@@ -226,7 +226,7 @@ class InfectStatistic {
 		try {
 			File output = new File(outputPath);
 			OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(output));
-			if(provinceItem.size() == 0) {
+			if(provinceItem.size() == 0) {//没有-province选项
 				for(String provinceName : province) {
 					if(map.get(provinceName) != null) {
 						printTheProvince(provinceName, osw);
@@ -234,11 +234,17 @@ class InfectStatistic {
 				}
 			}
 			else {
-				for(String provinceName : province) {
+				for (String provinceName : province) {
 					if(provinceItem.contains(provinceName)) {
 						printTheProvince(provinceName, osw);
 					}
 				}
+//				for(String provinceName : provinceItem) {
+//					printTheProvince(provinceName, osw);
+////					if(provinceItem.contains(provinceName)) {
+////						printTheProvince(provinceName, osw);
+////					}
+//				}
 			}
 			
 			osw.flush();

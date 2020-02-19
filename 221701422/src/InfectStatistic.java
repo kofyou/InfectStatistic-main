@@ -1,4 +1,12 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,20 +47,21 @@ class InfectStatistic {
 
 	public static void main(String[] args) {
 		init(args);
-		/*
-		 * 
-		 * for (String string : inputStrings) { if (string.length() != 0) { System.out.println(string); } }
-		 */
-		// System.out.println(typeStrings.length);
 		try {
 			readLogName();
 		} catch (ParseException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();
 		}
-		System.out.println(logNameStrings.length);
+		//System.out.println(logNameStrings.length);
 		for (String string : logNameStrings) {
-			System.out.println(string);
+			//System.out.println(string);
+		}
+		try {
+			readLogContent();
+		} catch (IOException e) {
+			// TODO 自动生成的 catch 块
+			e.printStackTrace();
 		}
 		// System.out.println(dateString);
 	}
@@ -112,4 +121,46 @@ class InfectStatistic {
 		logNameStrings = new String[temStrings.length - 1];
 		System.arraycopy(temStrings, 1, logNameStrings, 0, logNameStrings.length);
 	}
+
+	private static void readLogContent() throws IOException {
+		Charset.defaultCharset();
+		for(String string:logNameStrings) {
+			String pathString = logNameString + string;
+			//String fileCharsetString = getFileCharset(pathString);
+			//System.out.println("编码格式为" + fileCharsetString);
+			File file=new File(pathString);
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
+			
+			String lineString;
+			while ((lineString = bufferedReader.readLine()) != null) {
+				if(!lineString.startsWith("//")) {
+					System.out.println(lineString);
+				}
+			}
+		}
+	}
+
+	/**
+	 * private static String getFileCharset(String pathNameString) throws IOException {
+		InputStream inputStream = new FileInputStream(pathNameString);
+		byte[] head = new byte[3];
+		inputStream.read(head);
+
+		String charset = "GBK";// 或GB2312，即ANSI
+		if (head[0] == -1 && head[1] == -2) {// 0xFFFE
+			charset = "UTF-16";
+		} else if (head[0] == -2 && head[1] == -1) {// 0xFEFF
+			charset = "Unicode";// 包含两种编码格式：UCS2-Big-Endian和UCS2-Little-Endian
+		} else if (head[0] == -27 && head[1] == -101 && head[2] == -98) {
+			charset = "UTF-8"; // UTF-8(不含BOM)
+		} else if (head[0] == -17 && head[1] == -69 && head[2] == -65) {
+			charset = "UTF-8"; // UTF-8-BOM
+		}
+
+		inputStream.close();
+		// System.out.println(code);
+
+		return charset;
+	}
+	 */
 }

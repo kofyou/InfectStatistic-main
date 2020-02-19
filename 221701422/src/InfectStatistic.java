@@ -66,22 +66,39 @@ class InfectStatistic {
 			readLogName();
 			readLogContent();
 			typeScreen();
+			provinceScreen();
 			// System.out.println(dateString);
 			// System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
 			// System.out.println(patientsHashMap.get("治愈") + "");
-			Iterator iterator = provinceHashMap.keySet().iterator();
-			while (iterator.hasNext()) {
-				String keyString = (String) iterator.next();
-				String temString = "";
-				// System.out.print(keyString + " ");
-				temString += keyString + " ";
-				HashMap<String, Long> patientsHashMap = provinceHashMap.get(keyString);
-				for (String string : typeStrings) {
-					temString += string + "" + patientsHashMap.get(string) + "人 ";
-					// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
+			if(provinceStrings.length==0) {
+				Iterator iterator = provinceHashMap.keySet().iterator();
+				while (iterator.hasNext()) {
+					String keyString = (String) iterator.next();
+					String temString = "";
+					// System.out.print(keyString + " ");
+					temString += keyString + " ";
+					HashMap<String, Long> patientsHashMap = provinceHashMap.get(keyString);
+					for (String string : typeStrings) {
+						temString += string + "" + patientsHashMap.get(string) + "人 ";
+						// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
+					}
+					temString.substring(0, temString.length() - 1);
+					System.out.println(temString);
 				}
-				temString.substring(0, temString.length() - 1);
-				System.out.println(temString);
+			}
+			else {
+				for(String string:provinceStrings) {
+					String temString = "";
+					// System.out.print(keyString + " ");
+					temString += string + " ";
+					HashMap<String, Long> patientsHashMap = provinceHashMap.get(string);
+					for (String string1 : typeStrings) {
+						temString += string1 + "" + patientsHashMap.get(string1) + "人 ";
+						// System.out.print(string + ":" + patientsHashMap.get(string) + " ");
+					}
+					temString.substring(0, temString.length() - 1);
+					System.out.println(temString);
+				}
 			}
 		} catch (ParseException e) {
 			// TODO 自动生成的 catch 块
@@ -180,7 +197,7 @@ class InfectStatistic {
 				lineString = lineString.trim();
 				if (!lineString.startsWith("//")) {
 					dealLogContent(lineString);
-					//System.out.println(lineString);
+					// System.out.println(lineString);
 				}
 			}
 		}
@@ -287,15 +304,26 @@ class InfectStatistic {
 
 	private static void typeScreen() {
 		String[] temStrings = typeStrings;
-		if(temStrings.length==0) {
-			typeStrings=new String[4];
-			for (int i=0;i<typeAbbreviationCommandStrings.length;i++) {
-				typeStrings[i]=typeAbbreviationCommandStrings[i];
+		if (temStrings.length == 0) {
+			typeStrings = new String[4];
+			for (int i = 0; i < typeAbbreviationCommandStrings.length; i++) {
+				typeStrings[i] = typeAbbreviationCommandStrings[i];
 			}
-			temStrings=typeStrings;
+			temStrings = typeStrings;
 		}
 		for (int i = 0; i < temStrings.length; i++) {
 			typeStrings[i] = typeCharCommondStrings[typeAbbreviationCommandHashMap.get(temStrings[i])];
+		}
+	}
+
+	private static void provinceScreen() {
+		if(provinceStrings.length==0) {
+			
+		}else {
+			String[] temStrings = provinceStrings;
+			for (String string : temStrings) {
+				initProvinceHashMap(string);
+			}
 		}
 	}
 }

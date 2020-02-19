@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * InfectStatistic
@@ -38,9 +39,9 @@ class InfectStatistic {
 	// 存放患者的类型
 	private static String[] typeCharCommondStrings = { "感染患者", "疑似患者", "治愈", "死亡" };
 
-	private static String[] cureAndDeadStrings = { "治愈", "死亡"};
+	private static String[] cureAndDeadStrings = { "治愈", "死亡" };
 	private static String[] addAndExcludeAndDiagnosisStrings = { "新增", "排除", "确诊感染" };
-	private static String inflowsString = "流入";
+	private static String inflowString = "流入";
 
 	// 存放输入信息
 	private static HashMap<String, String> inputHashMap = new HashMap<String, String>();
@@ -61,8 +62,12 @@ class InfectStatistic {
 			readLogName();
 			readLogContent();
 			// System.out.println(dateString);
-			System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
+			//System.out.println(provinceHashMap.get("全国").get("疑似患者") + "");
 			// System.out.println(patientsHashMap.get("治愈") + "");
+			Iterator iterator=provinceHashMap.entrySet().iterator();
+			while(iterator.hasNext()) {
+				System.out.println(iterator.next());
+			}
 		} catch (ParseException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();
@@ -103,12 +108,19 @@ class InfectStatistic {
 		provinceStrings = new String[temStrings.length - 1];
 		System.arraycopy(temStrings, 1, provinceStrings, 0, provinceStrings.length);
 
-		HashMap<String, Long> patientsHashMap = new HashMap<String, Long>();
-		Long temLong = new Long(0);
-		for (String string : typeCharCommondStrings) {
-			patientsHashMap.put(string, temLong);
+		initProvinceHashMap("全国");
+	}
+
+	private static void initProvinceHashMap(String provinceString) {
+		if (!provinceHashMap.containsKey(provinceString)) {
+			// System.out.println("不包含");
+			HashMap<String, Long> patientsHashMap = new HashMap<String, Long>();
+			Long temLong = new Long(0);
+			for (String string : typeCharCommondStrings) {
+				patientsHashMap.put(string, temLong);
+			}
+			provinceHashMap.put(provinceString, patientsHashMap);
 		}
-		provinceHashMap.put("全国", patientsHashMap);
 	}
 
 	private static void readLogName() throws ParseException {
@@ -182,17 +194,9 @@ class InfectStatistic {
 
 	private static void dealLogContent(String lineString) {
 		String[] inputStrings = lineString.split(" ");
-		if (!provinceHashMap.containsKey(inputStrings[0])) {
-			// System.out.println("不包含");
-			HashMap<String, Long> patientsHashMap = new HashMap<String, Long>();
-			Long temLong1 = new Long(0);
-			for (String string : typeCharCommondStrings) {
-				patientsHashMap.put(string, temLong1);
-			}
-			provinceHashMap.put(inputStrings[0], patientsHashMap);
-		}
+		initProvinceHashMap(inputStrings[0]);
 		if (inputStrings.length == 3) {
-			if(Arrays.asList(cureAndDeadStrings).contains(inputStrings[1])) {
+			if (Arrays.asList(cureAndDeadStrings).contains(inputStrings[1])) {
 				cureAndDead(inputStrings);
 				inputStrings[0] = "全国";
 				cureAndDead(inputStrings);
@@ -210,7 +214,9 @@ class InfectStatistic {
 			inputStrings[0] = "全国";
 			addAndExcludeAndDiagnosis(inputStrings, tem);
 		} else if (inputStrings.length == 5) {
-			
+			if (inflowString.equals(inputStrings[2])) {
+				inflow(inputStrings);
+			}
 		}
 	}
 
@@ -246,5 +252,18 @@ class InfectStatistic {
 			originalLong += changesLong;
 			provinceHashMap.get(inputStrings[0]).put(typeCharCommondStrings[0], originalLong);
 		}
+	}
+
+	private static void inflow(String[] inputStrings) {
+		initProvinceHashMap(inputStrings[3]);
+		Long originalLong = new Long(0);
+		Long changesLong = new Long(0);
+		originalLong = provinceHashMap.get(inputStrings[0]).get(inputStrings[1]);
+		changesLong = Long.valueOf(inputStrings[4].substring(0, inputStrings[4].length() - 1));
+		originalLong -= changesLong;
+		provinceHashMap.get(inputStrings[0]).put(inputStrings[1], originalLong);
+		originalLong = provinceHashMap.get(inputStrings[3]).get(inputStrings[1]);
+		originalLong += changesLong;
+		provinceHashMap.get(inputStrings[3]).put(inputStrings[1], originalLong);
 	}
 }

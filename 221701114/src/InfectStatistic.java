@@ -2,7 +2,7 @@
 * FileName:InfectStatistic.java
 * Author:zyl
 * Version:1.0
-* Date:2020-2-16
+* Date:2020-2-21
 */
 
 
@@ -15,7 +15,12 @@ import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 
 class InfectStatistic 
 {
@@ -330,8 +335,102 @@ class InfectStatistic
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	/*
+	* Description:对province的参数值进行升序排序
+	* Input:无
+	* Return:无
+	* Others:无
+	*/ 
+	public static void paramentersOfProvinceSort()
+	{
+		int length = 0;
+		for (int i = 0;i < paramentersOfProvince.length
+			&& paramentersOfProvince[i].equals("") == false;i++)
+		{
+			length++;
+		}
+        String[] province= new String[length];
+        
+        Collator collator = Collator.getInstance(Locale.CHINA);
+        
+        for (int i = 0;i < length;i++)
+        {
+        	province[i] = paramentersOfProvince[i];
+        }
+        List<String> list = Arrays.asList(province);
+        Collections.sort(list,collator); 
+        
+        for (int i = 0;i < length;i++)
+        {
+        	paramentersOfProvince[i] = list.get(i);
+        }
 		
 	}
+	
+	/*
+	* Description:对存放省份的动态数组按省份进行升序排序
+	* Input:无
+	* Return:无
+	* Others:无
+	*/ 
+	public static void dynamicSort()
+	{
+        int length = allProvince.size();
+        String[] province= new String[length];
+        
+        Collator collator = Collator.getInstance(Locale.CHINA);
+        
+        for (int i = 0;i < length;i++)
+        {
+        	province[i] = allProvince.get(i).provinceName;
+        }
+        List<String> list = Arrays.asList(province);
+        Collections.sort(list,collator); 
+        
+        for (int i = 0;i < list.size();i++)
+        {
+        	for (int j = 0;j < length;j++)
+        	{
+        		if (allProvince.get(j).provinceName.equals(list.get(i)))
+        		{
+        			Province temp = allProvince.get(i);
+                    allProvince.set(i,allProvince.get(j));
+                    allProvince.set(j,temp);
+        		}
+        	}
+        }
+        //for(String i:list){  
+           // System.out.print(i+"  ");  
+        //}
+
+
+        
+        
+        //System.out.println(collator.getCollationKey(allProvince.get(0).provinceName));
+        
+        /*for(int i = 0;i < length-1;i++){
+            for(int j = 0;j < length-i-1;j++){
+            	CollationKey key1 = collator.getCollationKey(allProvince.get(j).provinceName);
+				CollationKey key2 = collator.getCollationKey(allProvince.get(j + 1).provinceName);
+                if(key1.compareTo(key2) > 0)
+                {
+                    //String nameString = allProvince.get(j).provinceName;
+                    //int ip = allProvince.get(j).ip;
+                    //int sp = allProvince.get(j).sp;
+                    //int cure = allProvince.get(j).cure;
+                    //int dead = allProvince.get(j).dead;
+                    
+                    Province temp = allProvince.get(j);
+                    allProvince.set(j,allProvince.get(j + 1));
+                    allProvince.set(j + 1,temp);
+                }
+            }
+        }*/
+    }
+	
+	
 	
     public static void main(String[] args) throws IOException 
     {
@@ -383,16 +482,28 @@ class InfectStatistic
     		
     		getNationInformation(); //统计全国的感染人数，疑似人数，治愈人数和死亡人数
     		
-    		String writeFileString = new String();  //用于记录写入输出文件的信息
-    		
-    		if (commandArgsFlag[4] == 1)  //命令中有带province参数
+    		if (commandArgsFlag[4] == 1)
     		{
-    			
     			for (int i = 0;i < paramentersOfProvince.length 
     				&& paramentersOfProvince[i].equals("") == false;i++)
     			{
-					addToArrayList(paramentersOfProvince[i]);  //将省份加入到动态数组中，如果已存在，则不加入
-					
+    				if (paramentersOfProvince[i].equals("全国") == false)
+    				{
+    					addToArrayList(paramentersOfProvince[i]);  //将省份加入到动态数组中，如果已存在，则不加入
+    				}
+    			}
+    			paramentersOfProvinceSort();
+    		}
+    		
+    		dynamicSort();  //对动态数组中的省按名字进行升序排序
+    		
+    		String writeFileString ="";  //用于记录写入输出文件的信息
+    		
+    		if (commandArgsFlag[4] == 1)  //命令中有带province参数
+    		{
+    			for (int i = 0;i < paramentersOfProvince.length 
+        			&& paramentersOfProvince[i].equals("") == false;i++)
+    			{
     				if (paramentersOfProvince[i].equals("全国"))  //province参数值中有全国
     				{
     					writeFileString += "全国";
@@ -428,7 +539,12 @@ class InfectStatistic
     			    			+ " 死亡" + nation.dead + "人" + "\r\n";
         				}
     				}
-    				else  //province参数值中的省份
+    			}
+    			
+    			for (int i = 0;i < paramentersOfProvince.length 
+            		&& paramentersOfProvince[i].equals("") == false;i++)
+    			{
+    				if (paramentersOfProvince[i].equals("全国") == false)
     				{
     					for (int j = 0;j < allProvince.size();j++)
     					{
@@ -472,7 +588,7 @@ class InfectStatistic
     							break;
     						}
     					}
-					}
+    				}
     			}
     		}
     		else //命令中没带province参数

@@ -1,7 +1,7 @@
 ##代码风格
 
-参考老师给的《码出高效_阿里巴巴Java开发手册》
-开发手册链接：https://github.com/chjw8016/alibaba-java-style-guide
++ 参考老师给的《码出高效_阿里巴巴Java开发手册》
++ 开发手册链接：https://github.com/chjw8016/alibaba-java-style-guide
 
 # 1、缩进
 + 缩进1个Tab键，为4个空格

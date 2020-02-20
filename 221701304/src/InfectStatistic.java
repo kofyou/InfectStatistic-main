@@ -60,13 +60,175 @@ public class InfectStatistic {
 	static Province yn=new Province();
 	static Province zj=new Province();
 	public  static void readFile(String str) {
-		
-		
+		File file= new File(str);
+		File[] filelist=file.listFiles();
+		try {
+				if(date_flag)
+				{
+					String max=(filelist[1].getName()).substring(0,10);
+					for (int i= 0;i<filelist.length;i++) 
+					{
+						
+						if ((((filelist[i].getName()).substring(0,10)).compareTo(max))>0) {
+							max=(filelist[i].getName()).substring(0,10);	
+						}
+						
+						if ((((filelist[i].getName()).substring(0,10)).compareTo(date))<=0) 
+						{
+							BufferedReader br=new BufferedReader(new FileReader(filelist[i]));
+							String line;
+							while(!(line=br.readLine()).contains("//"))
+							{
+								String[]data=line.split(" ");
+								if (data[2].equals("流入")) 
+								{
+									Province pv1=province.get(data[0]);
+									Province pv2=province.get(data[3]);
+									if(data[1].equals("感染患者"))
+									{
+										String num=Pattern.compile("[^0-9]").matcher(data[4]).replaceAll("");
+										pv1.ip=pv1.ip-Integer.parseInt(num);
+										pv2.ip=pv2.ip+Integer.parseInt(num);
+									}
+									else if(data[1].equals("疑似患者")){
+										String num=Pattern.compile("[^0-9]").matcher(data[4]).replaceAll("");
+										pv1.sp=pv1.sp-Integer.parseInt(num);
+										pv2.sp=pv2.sp+Integer.parseInt(num);
+									}	
+									
+								}
+								else {
+									Province pv=province.get(data[0]);
+									if(data[1].equals("新增"))
+									{
+										if(data[2].equals("感染患者"))
+										{
+											String num=Pattern.compile("[^0-9]").matcher(data[3]).replaceAll("");
+											pv.ip=pv.ip+Integer.parseInt(num);
+										}
+										else if(data[2].equals("疑似患者")){
+											String num=Pattern.compile("[^0-9]").matcher(data[3]).replaceAll("");
+											pv.sp=pv.sp+Integer.parseInt(num);
+										}	
+									}
+									else if (data[1].equals("治愈")) {
+										String num=Pattern.compile("[^0-9]").matcher(data[2]).replaceAll("");
+										pv.cure=pv.cure+Integer.parseInt(num);
+										pv.ip=pv.ip-Integer.parseInt(num);
+										
+				
+									}
+									else if (data[1].equals("死亡")) {
+										String num=Pattern.compile("[^0-9]").matcher(data[2]).replaceAll("");
+										pv.dead=pv.dead+Integer.parseInt(num);
+										pv.ip=pv.ip-Integer.parseInt(num);
+				
+									}
+									else if (data[1].equals("疑似患者")) {
+										String num=Pattern.compile("[^0-9]").matcher(data[3]).replaceAll("");
+										pv.sp=pv.sp-Integer.parseInt(num);
+										pv.ip=pv.ip+Integer.parseInt(num);
+				
+									}
+									else if (data[1].equals("排除")) {
+										String num=Pattern.compile("[^0-9]").matcher(data[3]).replaceAll("");
+										pv.sp=pv.sp-Integer.parseInt(num);
+				
+									}
+								}
+							}
+							br.close();
+							
+						}
+						
+					}
+					if (max.compareTo(date)<0) {
+						System.out.println("日期超出范围");
+						return;
+					}	
+				}
+				else {
+					int i=0;
+					while(filelist[i].exists())
+					{
+							BufferedReader br=new BufferedReader(new FileReader(filelist[i]));
+							String line;
+							while(!(line=br.readLine()).contains("//"))
+							{
+								String[]data=line.split(" ");
+								if (data[2].equals("流入")) 
+								{
+									Province pv1=province.get(data[0]);
+									Province pv2=province.get(data[3]);
+									if(data[1].equals("感染患者"))
+									{
+										String num=Pattern.compile("[^0-9]").matcher(data[4]).replaceAll("");
+										pv1.ip=pv1.ip-Integer.parseInt(num);
+										pv2.ip=pv2.ip+Integer.parseInt(num);
+									}
+									else if(data[1].equals("疑似患者")){
+										String num=Pattern.compile("[^0-9]").matcher(data[4]).replaceAll("");
+										pv1.sp=pv1.sp-Integer.parseInt(num);
+										pv2.sp=pv2.sp+Integer.parseInt(num);
+									}	
+									
+								}
+								else {
+									Province pv=province.get(data[0]);
+									if(data[1].equals("新增"))
+									{
+										if(data[2].equals("感染患者"))
+										{
+											String num=Pattern.compile("[^0-9]").matcher(data[3]).replaceAll("");
+											pv.ip=pv.ip+Integer.parseInt(num);
+										}
+										else if(data[2].equals("疑似患者")){
+											String num=Pattern.compile("[^0-9]").matcher(data[3]).replaceAll("");
+											pv.sp=pv.sp+Integer.parseInt(num);
+										}	
+									}
+									else if (data[1].equals("治愈")) {
+										String num=Pattern.compile("[^0-9]").matcher(data[2]).replaceAll("");
+										pv.cure=pv.cure+Integer.parseInt(num);
+										pv.ip=pv.ip-Integer.parseInt(num);
+										
+				
+									}
+									else if (data[1].equals("死亡")) {
+										String num=Pattern.compile("[^0-9]").matcher(data[2]).replaceAll("");
+										pv.dead=pv.dead+Integer.parseInt(num);
+										pv.ip=pv.ip-Integer.parseInt(num);
+				
+									}
+									else if (data[1].equals("疑似患者")) {
+										String num=Pattern.compile("[^0-9]").matcher(data[3]).replaceAll("");
+										pv.sp=pv.sp-Integer.parseInt(num);
+										pv.ip=pv.ip+Integer.parseInt(num);
+				
+									}
+									else if (data[1].equals("排除")) {
+										String num=Pattern.compile("[^0-9]").matcher(data[3]).replaceAll("");
+										pv.sp=pv.sp-Integer.parseInt(num);
+				
+									}
+								}
+							}
+							br.close();
+							i++;
+					}
+					
+					
+				}
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
 	}
 	public static void saveData() {
 		
+		
 	}
 	public  static void writeFile(String str) {
+		
 		
 	}
 	public static void main(String[] args){

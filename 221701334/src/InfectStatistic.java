@@ -1,16 +1,23 @@
 import java.io.*;  
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 class InfectStatistic {
 	static Info all = new Info();	
-	static String path = "";
-	static String out = "";
-	static String date = "";    	
+	static String path = new String();
+	static String out = new String();
+	static String date = new String();    	
 	static ArrayList<String> type = new ArrayList<String>(); 
 	static ArrayList<String> province = new ArrayList<String>(); 
 	static ArrayList<Info> list = new ArrayList<Info>(); 
     public static void main(String[] args) throws IOException,FileNotFoundException {	
+    	path="";
+    	out="";
+    	date="";
+    	type = new ArrayList<String>();
+    	province = new ArrayList<String>(); 
+    	list = new ArrayList<Info>();
         if(args[0].equals("list")) {
         	all.province="全国";
         	readParameter(args);
@@ -40,7 +47,7 @@ class InfectStatistic {
             date = args[i+1];
         	if(args[i].equals("-type")) {
         		i++;
-        		while(i<args.length&&args[i].charAt(0) != '-') {
+        		while(i < args.length&&args[i].charAt(0) != '-') {
         			type.add(args[i]);
         			i++;
         		}
@@ -59,6 +66,13 @@ class InfectStatistic {
     public static void readFile(File[] tempList) throws NumberFormatException, IOException {
     	for(int i=0;i<tempList.length;i++) {    		
     		if(tempList[i].isFile()) {
+    			if(!date.equals("")) {
+    				if(tempList[i].getName().toString().substring(0,10).compareTo(date)<0) {
+    					break;
+    				}
+//        			if(date.compareTo(tempList[i].getName().toString().substring(0,8))>0)
+//        	    	break;
+        		}
     			BufferedReader br = new BufferedReader(  
     				     new UnicodeReader(  
     				     new FileInputStream(tempList[i]),   
@@ -117,7 +131,7 @@ class InfectStatistic {
     									 to.infected = Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));  
     								 }
     								 else {
-    									 list.get(list.indexOf(from)).infected -= Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));
+    									 list.get(list.indexOf(from)).suspected -= Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));
     									 to.suspected = Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));  
     								 }   								 
     								 list.add(to);
@@ -157,22 +171,29 @@ class InfectStatistic {
     			reader.close();
     			br.close();
     		}
-    		if(date.equals(tempList[i].getName().toString().substring(0,10)))
-    		break;
+    		
+    		
     	}     	
+    	Collections.sort(list, new Comparator<Info>() {
+			@Override
+			public int compare(Info o1, Info o2) {
+				// TODO Auto-generated method stub
+				Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);  
+				 return com.compare(o1.province, o2.province); 
+			}
+        });
 	}
     public static void out() throws IOException {
     	FileWriter fw = new FileWriter(out);
 		BufferedWriter fout = new BufferedWriter(fw);
     	if(province.size()>0) {
+    		if(province.contains("全国")) {
+    			printTypeInfo(all, type,fout);	
+    		}
 			if(type.size()>0) {
 				for(int k = 0;k<province.size();k++) {
 					Info t = new Info();
 					t.province = province.get(k);
-					if(t.province.equals("全国")) {
-						printTypeInfo(all, type,fout);	    				
-	    				continue;
-					}
     				if(list.contains(t)) {
     					printTypeInfo(list.get(list.indexOf(t)), type, fout);
     				}
@@ -185,10 +206,6 @@ class InfectStatistic {
 				for(int k = 0;k<province.size();k++) {
 					Info t = new Info();
 					t.province = province.get(k);
-					if(t.province.equals("全国")) {
-						printInfo(all, fout);
-	    				continue;
-					}
     				if(list.contains(t)) {
     					printInfo(list.get(list.indexOf(t)), fout);
     				}
@@ -205,10 +222,7 @@ class InfectStatistic {
     			}
 			}
 			else {
-				String string = all.province+" "+"感染患者:"+all.infected+" "+"疑似患者:"+
-						all.suspected+" "+"治愈患者:"+all.cured+" "+"死亡患者:"+all.dead+"\r\n";
 				printInfo(all,fout);
-				fout.write(string);
 				for(int k = 0;k < list.size();k++) {
 					printInfo(list.get(k),fout);	
     			}

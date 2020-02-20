@@ -89,7 +89,7 @@ void analysis::findAllFile(const char* path, const char* format, const char* dat
 					}
 				}
 				if (b == 1)return ;
-				if (fl == 1)b = 1;
+				if (fl == 1&&size != 0)b = 1;
 				freopen(outpath, "w", stdout);
 				char nowpath[200];
 				strcpy(nowpath, newpaths);

@@ -33,7 +33,7 @@ class InfectStatisticTest {
 	}
 	@Test
 	void test6() throws FileNotFoundException, IOException { //同时带日期和类型参数
-		String args[]= {"list", "-date", "2020-01-21", "-log", "D:/log/", "-out", "D:/output6.txt","-type","治愈"};
+		String args[]= {"list", "-date", "2020-01-25", "-log", "D:/log/", "-out", "D:/output6.txt","-type","治愈"};
 		InfectStatistic.main(args);
 	}
 	@Test

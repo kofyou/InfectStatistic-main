@@ -12,6 +12,7 @@ class InfectStatistic {
 	static ArrayList<String> province = new ArrayList<String>(); 
 	static ArrayList<Info> list = new ArrayList<Info>(); 
     public static void main(String[] args) throws IOException,FileNotFoundException {	
+    	all = new Info();
     	path = "";
     	out = "";
     	date = "";
@@ -227,6 +228,7 @@ class InfectStatistic {
 			}
 			
 		}
+    	fout.write("// 该文档并非真实数据，仅供测试使用");
     	fout.close();
 	}
     public static void printInfo(Info info,BufferedWriter fout) throws IOException {

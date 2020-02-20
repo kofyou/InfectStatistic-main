@@ -18,9 +18,9 @@ import java.util.regex.Pattern;
  * InfectStatistic
  * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author kuiqc
+ * @version 0.1.0
+ * @since 2020-02-20
  */
 
 
@@ -145,6 +145,7 @@ class InfectStatistic {
     		String logPath = new String("");
     		String outPath = new String("");
     		String date = new String("");
+    		
     		//int[] type = new int[] {1,1,1,1};//默认输出四种人群。更新：难以按指定顺序输出。已修改
     		
     		//默认依ip,sp,cure,dead顺序输出四种人群，读取-type参数时重置为空
@@ -201,10 +202,12 @@ class InfectStatistic {
     		System.exit(0);
     	}
     	
-    	readLogs(logPath,date);//读取指定日期以及之前的所有log文件
+    	//读取指定日期以及之前的所有log文件
+    	readLogs(logPath,date);
     	
     	try {
-    		writeLog(outPath,type,isProvinceSpecified);//带格式输出到指定文件
+    		//带格式输出到指定文件
+    		writeLog(outPath,type,isProvinceSpecified);
 		} catch(IOException e) {
     		System.out.println("日志写入错误！");
     		System.exit(0);
@@ -232,10 +235,8 @@ class InfectStatistic {
             		System.out.println("here!");
             		isDateAllowed = true;
             		files.add(tempList[i].toString());
-				}
-            	
-            	//若指明日期，需要判断日期是否合理，选择不晚于该日期的logs
-            	else {
+				} else {//若指明日期，需要判断日期是否合理，选择不晚于该日期的logs
+					
                     //fileName，不包含路径、后缀（也就是说只有日期yyyy-mm-dd）
                     String fileName = tempList[i].getName().substring(0,10);
                     
@@ -257,7 +258,7 @@ class InfectStatistic {
         }
         
         //逐个读取files中的路径对应的文件
-        for(int i=0;i<files.size();i++) {
+        for(int i = 0;i < files.size();i++) {
         	try{
         		readOneLog(files.get(i));
         	}catch(IOException e) {
@@ -290,8 +291,7 @@ class InfectStatistic {
         			if(wordString[2].equals("感染患者")) {
         				int num = getPeopleNum(wordString[3]);
         				provinceMap.get(wordString[0]).ipAdd(num);
-        			}
-        			else if(wordString[2].equals("疑似患者")) {
+        			} else if(wordString[2].equals("疑似患者")) {
         				int num = getPeopleNum(wordString[3]);
         				provinceMap.get(wordString[0]).spAdd(num);
         			}
@@ -300,30 +300,24 @@ class InfectStatistic {
         			System.out.println(provinceMap.get(wordString[0]).ip);
         			System.out.println(provinceMap.get(wordString[0]).sp);
         			*/
-        		}
-        		else if(wordString[2].equals("流入")) {
+        		} else if(wordString[2].equals("流入")) {
         			if(wordString[1].equals("感染患者")) {
         				int num = getPeopleNum(wordString[4]);
         				provinceMap.get(wordString[0]).ipMove(wordString[3], num);
-        			}
-        			else if(wordString[1].equals("疑似患者")) {
+        			} else if(wordString[1].equals("疑似患者")) {
         				int num = getPeopleNum(wordString[4]);
         				provinceMap.get(wordString[0]).spMove(wordString[3], num);
         			}
-        		}
-        		else if(wordString[1].equals("死亡")) {
+        		} else if(wordString[1].equals("死亡")) {
         			int num = getPeopleNum(wordString[2]);
         			provinceMap.get(wordString[0]).peopleDead(num);
-        		}
-        		else if(wordString[1].equals("治愈")) {
+        		} else if(wordString[1].equals("治愈")) {
         			int num = getPeopleNum(wordString[2]);
         			provinceMap.get(wordString[0]).peopleCured(num);
-        		}
-        		else if(wordString[2].equals("确诊感染")) {
+        		} else if(wordString[2].equals("确诊感染")) {
         			int num = getPeopleNum(wordString[3]);
         			provinceMap.get(wordString[0]).spDiagnosed(num);
-        		}
-        		else if(wordString[1].equals("排除")){
+        		} else if(wordString[1].equals("排除")){
         			int num = getPeopleNum(wordString[3]);
         			provinceMap.get(wordString[0]).spExclude(num);
         		}
@@ -342,12 +336,13 @@ class InfectStatistic {
     	//构建输出字符串
     	//没有"-province"参数时，列出全国的数据，以及日志中涉及到的省的数据
     	if(!isProvinceSpecified) {
-        	for(int i=0;i<AllProvinceName.length;i++) {
+        	for(int i = 0;i < AllProvinceName.length;i++) {
         		if(provinceMap.get(AllProvinceName[i]).isMentioned) {
         			outStr += getStrByType(type,provinceMap.get(AllProvinceName[i]));
         		}
         	}
     	}
+    	
     	//有"-province"参数时，指定的省必须列出
     	else {
         	for(int i=0;i<AllProvinceName.length;i++) {
@@ -377,7 +372,7 @@ class InfectStatistic {
     public String getStrByType(ArrayList<String> type,MyProvince curProvince) {
     	String str = new String();
     	str += curProvince.provinceName;
-    	for(int i = 0;i<type.size();i++) {
+    	for(int i = 0;i < type.size();i++) {
     		switch(type.get(i)){
     			case "ip":
     				str += " " + "感染患者" + curProvince.ip + "人";
@@ -448,7 +443,7 @@ class InfectStatistic {
     public int getPeopleNum(String str) {
     	String strNum = new String();
     	for(int i = 0;i < str.length();i++) {
-    		if(str.charAt(i)>=48 && str.charAt(i)<=57){
+    		if(str.charAt(i) >= 48 && str.charAt(i) <= 57){
     			strNum += str.charAt(i);
     		}
     	}

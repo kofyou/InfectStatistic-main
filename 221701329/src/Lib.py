@@ -2,18 +2,21 @@
  * Lib
  * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author liulaoc
+ * @version 1
+ * @since 1
 """
 import datetime
 import threading
+import os
+import sys
 
 
 # 单例基类
 class Singleton(object):
     def __init__(self):
         pass
+
     _instance_lock = threading.Lock()
 
     def __new__(cls, *args, **kwargs):
@@ -24,33 +27,14 @@ class Singleton(object):
         return Singleton._instance
 
 
-class DataCenter(Singleton):
-    def __init__(self):
-        self.__private_dateTime = 0
-        pass
-    __private_date
-
-    def DataInit(self, dateTime):
-        self.__private_dateTime = datetime.datetime.strptime(dateTime, '%Y-%m-%d').date()
-        self.__private_dateTime -= 1
+# 时间与str互转
+def str2date(str, date_format="%Y%m%d"):
+    date = datetime.datetime.strptime(str, date_format)
+    return date
 
 
-# 枚举类，用来表明数据类型
-class InfluenceType:
-    def __init__(self):
-        pass
-# 感染、疑似、治愈、死亡
-    Infection = 0
-    Uncertain = 1
-    Cure = 2
-    Die = 3
-
-
-# 用于存储各个省份的数据
-class ProvinceData:
-    def __init__(self):
-        pass
-    InfectionCount = 0
-    UncertainCount = 0
-    CureCount = 0
-    DieCount = 0
+# 文件操作-获取文件全部内容
+def getFileContent(path):
+    with open(path) as file_object:
+        contends = file_object.read()
+    return contends

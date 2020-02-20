@@ -12,18 +12,18 @@ import java.lang.String;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
+/*public class defineArray {
+private static int[] illnessarray=new int[32];			//用于存放各省感染患者人数
+private static int[] doubtfulillnessarray=new int[32];	//用于存放各省疑似患者人数
+private static int[] secureillnessarray=new int[32];	//用于存放各省治愈患者人数
+private static int[] deadillnessarray=new int[32];		//用于存放各省死亡人数
+private static int[] type={1,2,3,4};					//用于判断-type类型的输出顺序
+private static int[] provinceflag=new int[32];			//用于存放输出省份的标准
+public int[] getIllnessArray() {
+	return illnessarray[];
+}
+}*/
 class InfectStatistic {
-	/*public class defineArray {
-		private static int[] illnessarray=new int[32];			//用于存放各省感染患者人数
-		private static int[] doubtfulillnessarray=new int[32];	//用于存放各省疑似患者人数
-		private static int[] secureillnessarray=new int[32];	//用于存放各省治愈患者人数
-		private static int[] deadillnessarray=new int[32];		//用于存放各省死亡人数
-		private static int[] type={1,2,3,4};					//用于判断-type类型的输出顺序
-		private static int[] provinceflag=new int[32];			//用于存放输出省份的标准
-		public int[] getIllnessArray() {
-			return illnessarray[];
-		}
-	}*/
 	public String[] province= {
 			"安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南",
 			"河北","河南","黑龙江","湖北","湖南","吉林","江苏","江西","辽宁",
@@ -36,9 +36,10 @@ class InfectStatistic {
 	public static int[] deadillnessarray=new int[32];		//用于存放各省死亡人数
 	public static int[] type={1,2,3,4};					//用于判断-type类型的输出顺序
 	public static int[] provinceflag=new int[32];			//用于存放输出省份的标准
-	String outputarray;								//用于存放处理过后需要输出的字符串数组
+	//String outputarray;								//用于存放处理过后需要输出的字符串数组
     public static void main(String args[]) throws IOException {
-    	String[] argstring=args;
+    	//String args[]= {"list","-log","D:\\game\\221701106\\example\\log","-out","D:\\output.txt","-date","2020-01-25"};
+    	String argstring[]=args;
 		int df=0,tf=0,pf=0;						//-date,-type,-province标志
 		String[] typestr={"感染患者","疑似患者","治愈","死亡"};
 		InfectStatistic useInfectStatistic=new InfectStatistic();
@@ -255,7 +256,7 @@ class InfectStatistic {
     			if (!(cutlineText[0].compareTo(concretedate)>0)) {		//如果在指定的日期内则处理该文本的信息
     				//LogContentHandle(LogProcess(list[i].getAbsolutePath()));
     				//logprocess.LogProcess(list[i].getAbsolutePath());
-    				//System.out.println(list[i].getAbsolutePath());	//测试用，输出指定日期的日志文件绝对路径
+    				System.out.println(list[i].getAbsolutePath());	//测试用，输出指定日期的日志文件绝对路径
     				//System.out.println(logsname);					//输出指定日期内的日志文件名，测试用
     				File logfile=new File(list[i].getAbsolutePath());
     		/*File logfilepath=new File(logpath);

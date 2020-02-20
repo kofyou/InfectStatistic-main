@@ -29,6 +29,7 @@ public:
 	string province_of[40];
 	string type[20];
 	string Begin(string com);
+	string Check(int date_,char *date);
 	int province_num, type_num;
 	int out[40][6];
     int Num(string tmp);
@@ -36,6 +37,9 @@ public:
     void Change(int province1,int province2,int type1,int type2,int num,int l);
 	void Init();
 	void Out();
+	void CheckType(int num);
+	void CheckAgain();
+	void LineDetail(string tmp);
     int Detail(string p, string t) 
 	{
         return out[mi[p]][mi2[t]];
@@ -79,6 +83,53 @@ void Analysis::Change(int province1, int province2,int type1,int type2,int num,i
 		out[province1][type1] -= num;
 		out[province2][type1] += num;
 	}
+}
+
+void Analysis::LineDetail(string tmp)
+{
+	int province1 = 0, province2 = 0;
+	string s = "";
+	int l = 0;
+	for (int j = 0;j < tmp.size();j++) 
+	{
+		if (tmp[j] == ' ')
+		{
+			if (!mi.count(s))
+			{
+				s = "";
+				continue;
+			}
+			mi3[s] = 1;
+			if (mi[s] >= 100)l = mi[s];
+			else if (province1 == 0)province1 = mi[s];
+			else province2 = mi[s];
+			s = "";
+		}
+		else s = s + tmp[j];
+	}
+	int type1 = 0, type2 = 0;
+	string ss = "";
+	for (int j = 0;j < tmp.size();j++)
+	{
+		if (tmp[j] == ' ')
+		{
+			if (!mi2.count(ss))
+			{
+				ss = "";
+				continue;
+			}
+			if (type1 == 0)type1 = mi2[ss];
+			else type2 = mi2[ss];
+			ss = "";
+		}
+		else 
+		{
+			ss = ss + tmp[j];
+		}
+	}
+	int num = Num(tmp);
+					//	cout<<fl1<<' '<<fl2<<' '<<f1<<' '<<f2<<' '<<num<<endl;
+	Change(province1,province2,type1,type2,num,l);
 }
 
 void Analysis::FindAllFile(const char* path, const char* format, const char* date)
@@ -135,46 +186,7 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
 				while (getline(fin, tmp))
 				{
 					if (tmp[0] == '/' && tmp[1] == '/')continue;
-					int province1 = 0, province2 = 0;
-					string s = "";
-					int l = 0;
-					for (int j = 0;j < tmp.size();j++) 
-					{
-						if (tmp[j] == ' ')
-						{
-							if (!mi.count(s))
-							{
-								s = "";
-								continue;
-							}
-							mi3[s] = 1;
-							if (mi[s] >= 100)l = mi[s];
-							else if (province1 == 0)province1 = mi[s];
-							else province2 = mi[s];
-							s = "";
-						}
-						else s = s + tmp[j];
-					}
-					int type1 = 0, type2 = 0;
-					string ss = "";
-					for (int j = 0;j < tmp.size();j++)
-					{
-						if (tmp[j] == ' ')
-						{
-							if (!mi2.count(ss))
-							{
-								ss = "";
-								continue;
-							}
-							if (type1 == 0)type1 = mi2[ss];
-							else type2 = mi2[ss];
-							ss = "";
-						}
-						else ss = ss + tmp[j];
-					}
-					int num = Num(tmp);
-					//	cout<<fl1<<' '<<fl2<<' '<<f1<<' '<<f2<<' '<<num<<endl;
-					Change(province1,province2,type1,type2,num,l);
+					LineDetail(tmp);
 				}
 				if (returnflag == 1)return;
 			}
@@ -251,6 +263,51 @@ void Analysis::Out()
 	cout << "// ¸ÃÎÄµµ²¢·ÇÕæÊµÊý¾Ý£¬½ö¹©²âÊÔÊ¹ÓÃ" << "\n";
 }
 
+string Analysis::Check(int date_,char *date)
+{
+	string data="";
+	if (date_ > 0)
+	{
+		for (int i = 0;i < date_;i++)data = data + date[i];
+		data = data + " ";
+	}
+	if (province_num > 0)
+	{
+		for (int i = 0;i < province_num;i++)data = data + province[i];
+		data = data + " ";
+	}
+	if (type_num > 1)
+	{
+		for (int i = 1;i < type_num;i++)data = data + type[i];
+		data = data + " ";
+	}
+	return data;
+}
+
+void Analysis::CheckType(int num)
+{
+	int c = num;
+	if (!mi2.count("¸ÐÈ¾»¼Õß"))mi2["¸ÐÈ¾»¼Õß"] = c, type[c++] = "¸ÐÈ¾»¼Õß";
+	if (!mi2.count("ÒÉËÆ»¼Õß"))mi2["ÒÉËÆ»¼Õß"] = c, type[c++] = "ÒÉËÆ»¼Õß";
+	if (!mi2.count("ÖÎÓú"))mi2["ÖÎÓú"] = c, type[c++] = "ÖÎÓú";
+	if (!mi2.count("ËÀÍö"))mi2["ËÀÍö"] = c, type[c++] = "ËÀÍö";
+	mi2["È·Õï¸ÐÈ¾"] = 11;
+}
+
+void Analysis::CheckAgain()
+{
+	if (type_num == 0)
+	{
+		int c = 1;
+		if (!mi2.count("¸ÐÈ¾»¼Õß"))mi2["¸ÐÈ¾»¼Õß"] = c, type[c++] = "¸ÐÈ¾»¼Õß";
+		if (!mi2.count("ÒÉËÆ»¼Õß"))mi2["ÒÉËÆ»¼Õß"] = c, type[c++] = "ÒÉËÆ»¼Õß";
+		if (!mi2.count("ÖÎÓú"))mi2["ÖÎÓú"] = c, type[c++] = "ÖÎÓú";
+		if (!mi2.count("ËÀÍö"))mi2["ËÀÍö"] = c, type[c++] = "ËÀÍö";
+		mi2["È·Õï¸ÐÈ¾"] = 11;
+		type_num = c;
+	}
+}
+
 string Analysis::Begin(string com)
 {
 	Init();
@@ -317,11 +374,7 @@ string Analysis::Begin(string com)
 				}
 			}
 			type_num = c;
-			if (!mi2.count("¸ÐÈ¾»¼Õß"))mi2["¸ÐÈ¾»¼Õß"] = c, type[c++] = "¸ÐÈ¾»¼Õß";
-			if (!mi2.count("ÒÉËÆ»¼Õß"))mi2["ÒÉËÆ»¼Õß"] = c, type[c++] = "ÒÉËÆ»¼Õß";
-			if (!mi2.count("ÖÎÓú"))mi2["ÖÎÓú"] = c, type[c++] = "ÖÎÓú";
-			if (!mi2.count("ËÀÍö"))mi2["ËÀÍö"] = c, type[c++] = "ËÀÍö";
-			mi2["È·Õï¸ÐÈ¾"] = 11;
+			CheckType(c);
 		}
 		else if (s == "-province")
 		{
@@ -339,37 +392,12 @@ string Analysis::Begin(string com)
 		else if(com[i]==' ');
 		else i--;
 	}
-	if (type_num == 0)
-	{
-		int c = 1;
-		if (!mi2.count("¸ÐÈ¾»¼Õß"))mi2["¸ÐÈ¾»¼Õß"] = c, type[c++] = "¸ÐÈ¾»¼Õß";
-		if (!mi2.count("ÒÉËÆ»¼Õß"))mi2["ÒÉËÆ»¼Õß"] = c, type[c++] = "ÒÉËÆ»¼Õß";
-		if (!mi2.count("ÖÎÓú"))mi2["ÖÎÓú"] = c, type[c++] = "ÖÎÓú";
-		if (!mi2.count("ËÀÍö"))mi2["ËÀÍö"] = c, type[c++] = "ËÀÍö";
-		mi2["È·Õï¸ÐÈ¾"] = 11;
-		type_num = c;
-	}
-	
+	CheckAgain();
 	FindAllFile(inpath, ".log.txt", date);
-	string o = "";
-	if (cc > 0)
-	{
-		for (int i = 0;i < cc;i++)o = o + date[i];
-		o = o + " ";
-	}
-	if (province_num > 0)
-	{
-		for (int i = 0;i < province_num;i++)o = o + province[i];
-		o = o + " ";
-	}
-	if (type_num > 1)
-	{
-		for (int i = 1;i < type_num;i++)o = o + type[i];
-		o = o + " ";
-	}
-	return o;
-
+	return Check(cc,date);
+	
 }
+
 
 int main(int argc, char* argv[])
 {

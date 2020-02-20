@@ -194,8 +194,16 @@ class DataHandler:
                         return_str += output_str
                         f.writelines(output_str)
         
-        f.writelines('// 该文档并非真实数据，仅供测试使用')
-
+        f.writelines('// 该文档并非真实数据，仅供测试使用\n')
+        
+        command_str = 'list'
+        
+        for arg in sys.argv[2:]:
+            command_str += ' '
+            command_str += arg
+            
+        f.writelines('//命令：' + command_str)
+        
         f.close()
 
         print(return_str)

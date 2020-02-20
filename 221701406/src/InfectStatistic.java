@@ -28,12 +28,12 @@ class InfectStatistic {
 	
 	//-type参数相关
 	boolean hasType=false;  //记录是否传入-type参数
-	String[] type=new String[4]; //记录-type相关参数值
+	boolean[] type = new boolean[4];//用于记录传入的-type参数
 	String[] typeStrings = {"感染患者", "疑似患者", "治愈", "死亡"}; //具体患者类型
 	
 	//-province参数相关
 	boolean hasProvince=false; //记录是否传入-province参数
-	int[] province = new int[32];  //记录-province相关参数值
+	boolean[] province=new boolean[32];  //记录-province相关参数值
 	String[] provinceStrings = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西",
 		"贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", 
 		"宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};  //具体省份
@@ -83,36 +83,64 @@ class InfectStatistic {
 					break;
 				case "-type":  //将-type选项后面的参数存入type[]数组
 					hasType=true;
-					/*for(int k=0;;i++,k++) {
-						if (i+1<args.length) {
-							if (!args[i+1].matches("-.*")) {
-								type[k]=args[i+1];
-							} else
-								break;
-						} else
-							break;
-					}*/
+					resolveType(i,args);
 					break;
 				case "-province":
 					hasProvince=true;
-					resolveProvince(i);
+					resolveProvince(i, args);
 					break;
 				}
 			}
+		
 		//test
 		System.out.println(date+"\n"+logPath+"\n"+resultPath);
 		for (int k=0; k<type.length; k++) {
 			System.out.println(type[k]);
 		}
+		for (int j=0; j<province.length; j++) {
+			System.out.println(province[j]);
+		}
 			return false;
 	}
 	
 	/*
-	 * 处理输入的省份参数
-	 * 待完善
+	 * 处理输入的-type参数
 	 */
-	public int resolveProvince(int i) {
-		return i;
+	private void resolveType(int i, String args[]){
+    	while(i+1<args.length && !args[i+1].matches("-.*")){
+    		switch(args[i+1]){
+    			case "ip" :
+    				type[0]=true;
+    				break;
+    			case "sp":
+    				type[1]=true;
+    				break;
+    			case "cure":
+    				type[2]=true;
+    				break;
+    			case "dead":
+    				type[3]=true;
+    				break;
+    			default :
+    				System.out.println("-type参数输入有误，请重新输入！");
+    				System.exit(0);
+    		}
+    		i++;
+    	}
+    }
+	
+	/*
+	 * 处理输入的-province参数
+	 */
+	public void resolveProvince(int i, String args[]) {
+		while(i+1<args.length && !args[i+1].matches("-.*")){
+    		for (int j=0; j<provinceStrings.length; j++) {
+    			if (args[i+1].equals(provinceStrings[j])) {
+    				province[j]=true;
+    			}
+    		}
+    		i++;
+    	}
 	}
 		
 	/*
@@ -351,7 +379,6 @@ class InfectStatistic {
 	/*
 	 * 按要求输出到指定文件
 	 */
-	@SuppressWarnings("resource")
 	public void ouputFile() throws IOException, FileNotFoundException {
 		existProvince[0]=1;  //将全国存在疫情情况置为1
 		BufferedWriter bw=new BufferedWriter

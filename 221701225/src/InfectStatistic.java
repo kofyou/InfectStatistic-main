@@ -10,6 +10,7 @@ import java.util.HashMap;
 /**
  * InfectStatistic
  * 疫情统计程序主类
+ *
  * @author 陈启元
  * @since 2020-02-19
  */
@@ -31,15 +32,16 @@ class InfectStatistic {
     HashMap<String, Integer> provinceWeight;
 
     public static void main(String[] args) {
-//        String[] debugArgs=("-log C:\\Users\\62706\\Documents\\GitHub\\InfectStatistic-main\\221701225\\log -out ..\\result\\ListOut.txt " +
-//                "-date 2020-01-22 -province 福建 安徽 浙江 重庆 河北").split(" ");
-
-        //使用命令行参数初始化InfectStatistic类（在这一步中获取各个参数）
         InfectStatistic infectInfoOperator = new InfectStatistic(args);
         infectInfoOperator.readLogs();
         infectInfoOperator.output();
     }
 
+    /**
+     * 使用命令行参数初始化InfectStatistic类（在这一步中获取各个参数）
+     *
+     * @param args 从命令行获得的分割好的字符串数组
+     */
     InfectStatistic(String[] args) {
         int inputPosition = -1;
         int outputPosition = -1;
@@ -140,8 +142,8 @@ class InfectStatistic {
 
         try {
             File outputFile = new File(outputPath);
-            File outputPath=outputFile.getParentFile();
-            if(!outputPath.exists()) {
+            File outputPath = outputFile.getParentFile();
+            if (!outputPath.exists()) {
                 outputPath.mkdir();
             }
             if (!outputFile.exists()) {
@@ -199,14 +201,14 @@ class InfectStatistic {
         }
     }
 
-    @Override
-    public String toString() {
-        return "InfectStatistic{" +
-                "inputPath='" + inputPath + '\'' +
-                ", outputPath='" + outputPath + '\'' +
-                ", date='" + date + '\'' +
-                ", types=" + types +
-                ", provinces=" + provinces +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "InfectStatistic{" +
+//                "inputPath='" + inputPath + '\'' +
+//                ", outputPath='" + outputPath + '\'' +
+//                ", date='" + date + '\'' +
+//                ", types=" + types +
+//                ", provinces=" + provinces +
+//                '}';
+//    }
 }

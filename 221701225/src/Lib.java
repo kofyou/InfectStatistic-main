@@ -217,7 +217,6 @@ class Log {
         logFile = new File(filePath);
         String logName = logFile.getName();
         date = LocalDate.parse(logName.substring(0, 10));
-        //System.out.println("日志对象已创建，日期："+date);
 
         country = Country.getInstance();
         dailyInfos = new HashMap<>();
@@ -231,7 +230,6 @@ class Log {
     public void analyzeLog() {
         FileInputStream fis = null;
 
-        //System.out.println("开始处理日志");
         try {
             fis = new FileInputStream(logFile);
             BufferedReader br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
@@ -239,9 +237,9 @@ class Log {
             String line = null;
             while ((line = br.readLine()) != null) {
                 //注释不处理
-                if (line.contains("//"))
+                if (line.contains("//")) {
                     continue;
-
+                }
                 //下面是日志中八种情况的处理
                 if (line.contains("新增") && line.contains("感染")) {
                     addInfected(line);
@@ -457,12 +455,6 @@ class Province {
     public void addDailyInfo(DailyInfo dailyInfo) {
         dailyInfos.add(dailyInfo);
     }
-
-//    public void printAllInfo(){
-//        for(DailyInfo info:dailyInfos){
-//            System.out.println(info.toString());
-//        }
-//    }
 
     public DailyInfo getStatistic(LocalDate endDate) {
         //未进行统计就计算一遍

@@ -1,11 +1,9 @@
 # InfectStatistic-221701125
 疫情统计
 
-描述你的项目，包括如何运行、功能简介、作业链接、博客链接等
+[软工实践寒假作业（2/2）](https://edu.cnblogs.com/campus/fzu/2020SPRINGS/homework/10287)
 
-[作业链接（未给出）](http://www.baidu.com)
-
-[博客链接（未给出）](http://www.baidu.com)
+[博客链接](https://www.cnblogs.com/dante206/p/12335124.html)
 
 疫情统计项目主要是通过统计日志文件来统计所有的疫情。
 

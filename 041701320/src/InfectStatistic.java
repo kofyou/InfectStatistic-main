@@ -225,27 +225,32 @@ class InfectStatistic{
 		}
 		
 		//输出日志
-		public void writeLog() throws IOException {
-			FileWriter fw=null;
-			fw=new FileWriter(path_out);
-			if(situation[0][0]==-1)
-				situation[0][0]=1;
-			int i=0;
-			while(i<35) {
-				if(situation[i][0]==1) {
-					fw.write(province[i]+" ");
-					for(int j=0,k=1;j<type_order.length;j++) {
-						if(type_order[j]==k) {
-							fw.write(type[j]+situation[i][j+1]+"人");
-							k++;
-						}
-					}			
+		public void writeLog(){
+			try {
+				FileWriter fw=null;
+				fw=new FileWriter(path_out);
+				if(situation[0][0]==-1)
+					situation[0][0]=1;
+				int i=0;
+				while(i<35) {
+					if(situation[i][0]==1) {
+						fw.write(province[i]+" ");
+						for(int j=0,k=1;j<type_order.length;j++) {
+							if(type_order[j]==k) {
+								fw.write(type[j]+situation[i][j+1]+"人");
+								k++;
+							}
+						}			
+					}
+					fw.write("\n");
+					i++;
 				}
-				fw.write("\n");
-				i++;
+				fw.write("// 该文档并非真实数据，仅供测试使用");
+				fw.close();				
+			}catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
 			}
-			fw.write("// 该文档并非真实数据，仅供测试使用");
-			fw.close();
 		}
 		
 	}	
@@ -377,6 +382,13 @@ class InfectStatistic{
 	
 
     public static void main(String[] args) {
-    	
+    	InfectStatistic infectStatistic=new InfectStatistic();
+    	InfectStatistic.ProcessCmd pCmd=infectStatistic.new ProcessCmd(args);
+    	boolean x=pCmd.ProcessPara();
+    	if(x!=true)
+    		return;
+    	InfectStatistic.ProcessFile pFile=infectStatistic.new ProcessFile();
+    	pFile.readLog();
+    	pFile.writeLog();
     }	
 }

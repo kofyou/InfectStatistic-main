@@ -259,7 +259,10 @@ public class InfectStatistic {
 	    String input_path=map.get("-log").get(0);
         File file = new File(input_path);
 	    String files_name[]=file.list();
-	    ///////////////////
+	    if(files_name==null){
+	        System.out.println("文件夹不存在或文件夹内文本信息错误");
+	        exit(0);
+        }
         SimpleDateFormat sqf=new SimpleDateFormat("yyyy-MM-dd");
         Date point_date; //point_date为目标日期，需统计该日期前的数据
         Date max_date=get_max_date(files_name);

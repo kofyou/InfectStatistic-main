@@ -123,7 +123,7 @@ class InfectStatistic {
 
             for (int i0 = 0;i0 < 32;i0++){
                 if (Statistics.KeyOfOutput[i0] == 1){
-                    writer.write(Statistics.Areas[i0].OutputInformation()+"\r\n");
+                    writer.write(Statistics.Areas[i0].Output()+"\r\n");
                 }
             }
             writer.flush();//刷新内存，将内存中的数据立刻写出。
@@ -231,7 +231,7 @@ class InfectStatistic {
             return true;
         }
 
-        public static int ReadFiles(String path) {
+        public static void ReadFiles(String path) {
             ArrayList<String> listFileName = new ArrayList<String>();
             GetAllFileName(path, listFileName);
             for (String name : listFileName) {
@@ -239,7 +239,6 @@ class InfectStatistic {
                     FileProcessor.ReadASingleFile(name);
                 }
             }
-            return 0;
         }
 
         public static void GetAllFileName(String path,ArrayList<String> listFileName){
@@ -354,11 +353,24 @@ class InfectStatistic {
             this.numberOfPeopleCured=numberOfPeopleCured;
         }
 
-        public String OutputInformation(){
-            String res=nameOfArea+" 感染患者"+numberOfInfectedPatients+"人 疑似患者"+
-                    numberOfSuspectedPatients+"人 治愈"+numberOfPeopleCured+"人 死亡"+
-                    numberOfDeaths+"人";
-
+        public String Output(){
+            String res=nameOfArea;
+            for (int i = 0;i < Controller.numberOfTypes;i++){
+                switch (Controller.designatedTypes[i]){
+                    case ("ip"):
+                        res += " 感染患者"+numberOfInfectedPatients+"人";
+                        break;
+                    case ("sp"):
+                        res += " 疑似患者"+numberOfSuspectedPatients+"人";
+                        break;
+                    case ("cure"):
+                        res += " 治愈"+numberOfPeopleCured+"人";
+                        break;
+                    case ("dead"):
+                        res += " 死亡"+numberOfDeaths+"人";
+                        break;
+                }
+            }
             return res;
         }
     }
@@ -366,15 +378,12 @@ class InfectStatistic {
 
     public static void main(String[] args){
 
-        InfectStatistic  ret = new InfectStatistic();
-
         // 初始化区域类
         for (int i0 = 0,l=Statistics.nameOfAreas.length; i0 < l; i0++){
             Statistics.Areas[i0] = new AreaInformation(Statistics.nameOfAreas[i0]);
             Statistics.indexOfAreas.put(Statistics.nameOfAreas[i0],i0);
         }
         Statistics.KeyOfOutput[0] = 1;
-
         Controller.GetParameters(args); // 获取输入的参数
         FileProcessor.CreateOutputFile();   // 创建输出文件
         FileProcessor.ReadFiles(Controller.inputLocation);

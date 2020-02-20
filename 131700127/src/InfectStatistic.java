@@ -3,8 +3,6 @@
  * @author wzzzq
  *
  */
-import java.io.File;
-
 import java.io.*;
 import java.util.regex.*;
 import java.util.ArrayList;
@@ -22,8 +20,12 @@ public class InfectStatistic {
 	public String[] args;		//保存命令
 	public String logPath;		//保存日志路径
 	public String outPath;		//保存输出路径
+	boolean typeIsExist;
+	boolean provinceIsExist;
 	public int[] type = {1,2,3,4};		  //标记类型输出及顺序
 	public int[] province = new int[35];  //标记输出省份
+	public List<String> types = new ArrayList<String>();
+	public List<String> provinces = new ArrayList<String>();
 	public String[] typeStr = {"感染患者","疑似患者","治愈","死亡"};	//保存类型（ip，sp，cure，dead）
 	public String[] provinceStr = {"全国", "安徽", "澳门" ,"北京", "重庆", "福建","甘肃",
 			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
@@ -55,6 +57,7 @@ public class InfectStatistic {
 			dead.put(provinceStr[i], 0);
 		}
 	}
+	
 	//检验参数函数
 	public boolean inspectParameter(String [] argsStr) {
 		int j;
@@ -117,6 +120,12 @@ public class InfectStatistic {
 			}
 			
 		}
+		if (types.isEmpty()) {
+            types.add("ip");
+            types.add("sp");
+            types.add("cure");
+            types.add("dead");
+        }
 		return true;
 	}
 	
@@ -150,32 +159,29 @@ public class InfectStatistic {
 	
 	//检验类型
 	public int inspectType(int j) {
+		typeIsExist = true;
 		if(j < args.length) {
 			int k,n = j,h = 0;
 			if(j < args.length) {
 				for(k = 0;k < 4;j++)
 					type[k] = 0;
-				k = 1;
+				
 				while(j < args.length) {
 					switch(args[j]){
 						case "ip":
-							type[0] = k;
-							k++;
+							types.add(args[j]);
 							j++;
 							break;
 						case "sp":
-							type[1] = k;
-							k++;
+							types.add(args[j]);
 							j++;
 							break;
 						case "cure":
-							type[2] = k;
-							k++;
+							types.add(args[j]);
 							j++;
 							break;
 						case "dead":
-							type[3] = k;
-							k++;
+							types.add(args[j]);
 							j++;
 							break;
 						default:
@@ -195,24 +201,33 @@ public class InfectStatistic {
 	//检验省份
 	public int inspectProvince(int j) {
 		int k, n = j;
-
+		
 		if(j < args.length){
 			province[0] = 0; //取消未指定状态标记
 			while(j<args.length) {
 				for(k = 0; k < provinceStr.length; k++) {
 					if(args[j].equals(provinceStr[k])) { //如果参数找到对应省份
-						province[k] = 1; //指定该省份需要输出
+						provinces.add(args[j]); //指定该省份需要输出
 						j++;
 						break;
 					}
 				}
 			}
+			provinceIsExist = true;
+			provinces = sort();
 		}
 		if(n == j) //说明-province后无正确参数
 			return -1;
 		return (j - 1); //接下来不为province的参数，或越界
 	}
-	
+	private List<String> sort() {
+        List<String> list = new ArrayList<String>();
+        int size = provinceStr.length;
+        for (int i = 0; i < size; i++)
+            if (provinces.contains(provinceStr[i]))
+                list.add(provinceStr[i]);
+        return list;
+    }
 	
 	//判断日期是否合法
 	public boolean isValidDate(String dateStr) {
@@ -262,7 +277,109 @@ public class InfectStatistic {
 			cureSum += i;
 		for(Integer i : dead.values())
 			deadSum += i;
+		 FileOutputStream outFile = new FileOutputStream(outPath);
+	        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outFile, "utf-8"));
+	        if (typeIsExist) {
+	            if (!provinceIsExist) {
+	                // 未提供要输出的省份，则输出日志文件有提供的省份的数据，
+	                List<String> list = new ArrayList<String>();
+	                int size = provinceStr.length;
+	                for (int i = 0; i < size; i++) {
+	                    // 全是0则不输出其数据
+	                    if (ip.get(provinceStr[i]) == 0 && sp.get(provinceStr[i]) == 0
+	                            && cure.get(provinceStr[i]) == 0 && dead.get(provinceStr[i]) == 0)
+	                        continue;
+	                    else
+	                        list.add(provinceStr[i]);
+	                }
+	                out(writer, list);
+	            } else {
+	                out(writer, provinces);
+	            }
+	        } else {
+	            if (provinceIsExist) {
+	                for (String province : provinces) {
+	                    writer.write(province + " 感染患者" + ip.get(province) + "人 疑似患者" + sp.get(province) + "人 治愈"
+	                            + cure.get(province) + "人 死亡" + dead.get(province) + "人\n");
+	                }
+
+	            } else {
+
+	                // 将各省数据填入相应状态数组内，由于前面集合是有顺序插入所以下面的数据也是有顺序
+	                Integer[] ipProvincesAmount = new Integer[ip.size()];
+	                ip.values().toArray(ipProvincesAmount);
+	                Integer[] spProvincesAmount = new Integer[sp.size()];
+	                sp.values().toArray(spProvincesAmount);
+	                Integer[] cureProvincesAmount = new Integer[cure.size()];
+	                cure.values().toArray(cureProvincesAmount);
+	                Integer[] deadProvincesAmount = new Integer[dead.size()];
+	                dead.values().toArray(deadProvincesAmount);
+
+	                // 将数据填入文件(由于未提供要输出的省故全部为0将不输入)
+	                int size = provinceStr.length;
+	                for (int i = 0; i < size; i++) {
+	                    if (ipProvincesAmount[i] == 0 && spProvincesAmount[i] == 0 && cureProvincesAmount[i] == 0
+	                            && deadProvincesAmount[i] == 0)
+	                        continue;
+	                    else
+	                        writer.write(
+	                                provinceStr[i] + " 感染患者" + ipProvincesAmount[i] + "人 疑似患者" + spProvincesAmount[i]
+	                                        + "人 治愈" + cureProvincesAmount[i] + "人 死亡" + deadProvincesAmount[i] + "人\n");
+	                }
+
+	            }
+	        }
+	        writer.write("//该文档并非真实数据，仅供测试使用");
+	        writer.close();
 	}
+	private void out(BufferedWriter writer, List<String> provinces) throws Exception {
+        for (String province : provinces) {
+            writer.write(province);
+            int size = types.size();
+            String[] needTypes = new String[size];
+            types.toArray(needTypes);
+            if (size == 1) {
+                if (needTypes[0].equals("ip"))
+                    writer.write(" 感染患者" + ip.get(province) + "人\n");
+                else if (needTypes[0].equals("sp"))
+                    writer.write(" 疑似患者" + sp.get(province) + "人\n");
+                else if (needTypes[0].equals("cure"))
+                    writer.write(" 治愈" + cure.get(province) + "人\n");
+                else
+                    writer.write(" 死亡" + dead.get(province) + "人\n");
+                continue;
+            }
+            if (needTypes[0].equals("ip"))
+                writer.write(" 感染患者" + ip.get(province));
+            else if (needTypes[0].equals("sp"))
+                writer.write(" 疑似患者" + sp.get(province));
+            else if (needTypes[0].equals("cure"))
+                writer.write(" 治愈" + cure.get(province));
+            else
+                writer.write(" 死亡" + dead.get(province));
+
+            for (int i = 1; i < size - 1; i++) {
+                if (needTypes[i].equals("ip"))
+                    writer.write("人 感染患者" + ip.get(province));
+                else if (needTypes[i].equals("sp"))
+                    writer.write("人 疑似患者" + sp.get(province));
+                else if (needTypes[i].equals("cure"))
+                    writer.write("人 治愈" + cure.get(province));
+                else
+                    writer.write("人 死亡" + dead.get(province));
+            }
+            if (needTypes[size - 1].equals("ip"))
+                writer.write("人 感染患者" + ip.get(province) + "人\n");
+            else if (needTypes[size - 1].equals("sp"))
+                writer.write("人 疑似患者" + sp.get(province) + "人\n");
+            else if (needTypes[size - 1].equals("cure"))
+                writer.write("人 治愈" + cure.get(province) + "人\n");
+            else
+                writer.write("人 死亡" + dead.get(province) + "人\n");
+        }
+    }
+
+
 	
 	//处理日志文件
 	public void execFile(String path) throws Exception{
@@ -271,14 +388,127 @@ public class InfectStatistic {
 		String strLine;
 		while((strLine = br.readLine()) != null) {
 			if(strLine.matches(s1)) {
-				String[] strArr = strLine.split(" ");
-				int j;
-				int m = Integer.valueOf(strArr[3].replace("人", " "));
+				int index = strLine.indexOf(" 新增 感染患者");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
+
+                // 取出感染人数
+                int sum = getAmount(strLine);
+                // 修改人数
+                sum += ip.get(province);
+                ip.put(province, sum);
 				
-				
-			}
+			}else if (strLine.matches(s2)) {
+                int index = strLine.indexOf(" 新增 疑似患者");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
+
+                // 取出疑似患者人数
+                int sum = getAmount(strLine);
+                // 修改人数
+                sum += sp.get(province);
+                sp.put(province, sum);
+            }
+			else if (strLine.matches(s3)) {
+                // String s3 = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
+                int index = strLine.indexOf(" 感染患者 流入");
+                // 取出流出省份，省份前面可能有空格
+                String outProvince = strLine.substring(0, index);
+                // 去掉全部空格
+                outProvince.replace(" ", "");
+
+                // 取出流出人数
+                int sum = getAmount(strLine);
+                index = strLine.indexOf(Integer.toString(sum));
+                // 取出流入省份
+                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index - 1);
+
+                ip.put(outProvince, ip.get(outProvince) - sum);
+                ip.put(inProvince, ip.get(inProvince) + sum);
+            } else if (strLine.matches(s4)) {
+                // String s4 = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
+                int index = strLine.indexOf(" 疑似患者 流入");
+                // 取出流出省份，省份前面可能有空格
+                String outProvince = strLine.substring(0, index);
+                // 去掉全部空格
+                outProvince.replace(" ", "");
+
+                // 取出流出人数
+                int sum = getAmount(strLine);
+                index = strLine.indexOf(Integer.toString(sum));
+                // 取出流出省份
+                String inProvince = strLine.substring(strLine.lastIndexOf("流入") + 3, index - 1);
+
+                sp.put(outProvince, sp.get(outProvince) - sum);
+                sp.put(inProvince, sp.get(inProvince) + sum);
+            } else if (strLine.matches(s5)) {
+                int index = strLine.indexOf(" 死亡");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
+
+                // 取出死亡人数
+                int deadSum = getAmount(strLine);
+                // 获得感染人数
+                int ipSum = ip.get(province);
+                // 更新感染人数
+                ip.put(province, ipSum - deadSum);
+
+                deadSum += dead.get(province);
+                dead.put(province, deadSum);
+            } else if (strLine.matches(s6)) {
+                // s6 = "\\s*\\S+ 治愈 \\d+人\\s*";
+                int index = strLine.indexOf(" 治愈");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
+
+                // 取出治愈人数
+                int cureSum = getAmount(strLine);
+                // 获得感染人数
+                int ipSum = ip.get(province);
+                // 更新感染人数
+                ip.put(province, ipSum - cureSum);
+                cureSum += cure.get(province);
+                cure.put(province, cureSum);
+
+            } else if (strLine.matches(s7)) {
+                // String s7 = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
+                int index = strLine.indexOf(" 疑似患者 确诊感染");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
+                int ipSum = getAmount(strLine);
+                sp.put(province, sp.get(province) - ipSum);
+                ip.put(province, ip.get(province) + ipSum);
+            } else if (strLine.matches(s8)) {
+                // String s8 = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
+                int index = strLine.indexOf(" 排除 疑似患者");
+                // 取出省份，省份前面可能有空格
+                String province = strLine.substring(0, index);
+                // 去掉全部空格
+                province.replace(" ", "");
+
+                int excludeSum = getAmount(strLine);
+                sp.put(province, sp.get(province) - excludeSum);
+            }
 		}
+		br.close();
+		fs.close();
 	}
+	public int getAmount(String s) {
+        Pattern p = Pattern.compile("\\d+");
+        Matcher m = p.matcher(s);
+        m.find();
+        return Integer.parseInt(s.substring(m.start(), m.end()));
+    }
 	
 	class IllegalException extends Exception{
 		private String message;
@@ -298,6 +528,12 @@ public class InfectStatistic {
 		}
 		InfectStatistic s = new InfectStatistic();
 		if(s.inspectParameter(args)) {
+			try {
+				s.execLog();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
 		else 

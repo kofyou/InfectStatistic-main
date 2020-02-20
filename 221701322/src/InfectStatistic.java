@@ -1,4 +1,4 @@
-package com.xzy;
+
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,11 +17,20 @@ public class InfectStatistic {
 
     private static void out_put(Map<String, ArrayList<String>> map, Map<String, Province> map1) throws IOException {
 
-        String out_path=map.get("-out").get(0);
+        String out_path=map.get("-out").get(0);//参数列表
         ArrayList<String> type=map.get("-type");
         ArrayList<String> province=map.get("-province");
         if(province==null){
-            out_put_as_type(map1,type,province,out_path);//按province顺序输出，若province为空，按默认顺序输出
+            String province_name[]={"全国","安徽","北京", "重庆", "福建","甘肃","广东" ,"贵州" ,"海南" ,"河北" ,"湖北","湖南" ,"吉林" ,"辽宁" ,
+                    "内蒙古", "宁夏", "山东", "山西" ,"陕西" ,"上海" ,"四川" ,"天津" ,"西藏" ,"新疆", "云南", "浙江"};
+            ArrayList<String> provinces =new ArrayList<String>();//用来顺序储存在文件中出现过的省份
+            provinces.add("全国");
+            for (String pro:province_name
+                 ) {
+                if(map1.get(pro).flag)
+                    provinces.add(map1.get(pro).name);
+            }
+            out_put_as_type(map1,type,provinces,out_path);//按province顺序输出，若province为空，按默认顺序输出
         }
         else{
             Map<String,Province> map2=new HashMap<String, Province>();
@@ -129,12 +138,10 @@ public class InfectStatistic {
              ) {
             map.put(name,provinces[i++]);
         }
-
-
         for (String after_path:filenames
              ) {
             BufferedReader br=new BufferedReader(new FileReader(front_path+after_path));
-            String data=br.readLine();
+            String data=br.readLine();//从文件中按行读取
             while(data!=null) {
                 if (!data.substring(0, 2).equals("//")) {
                     ArrayList<String> split_data = new ArrayList<String>();
@@ -144,8 +151,7 @@ public class InfectStatistic {
                         split_data.add(data1);
                     }
                     data = br.readLine();
-
-
+                    map.get(split_data.get(0)).flag=true;//某个省份出现时，将该省份的出现标记变为真
                     statistic_data(map,split_data);//统计数据，并加入map中
                 }
                 else
@@ -170,9 +176,9 @@ public class InfectStatistic {
 	    switch (length){
             case 3:
                 if(split_data.get(1).equals("死亡")){
-                    int str_length=split_data.get(length-1).toString().length();//获得xx人
+                    int str_length=split_data.get(length-1).toString().length();//获得xx人（人数）
                     long num=Long.parseLong(split_data.get(length-1).toString().substring(0,str_length-1));
-                    map.get(split_data.get(0)).setDead(num);
+                    map.get(split_data.get(0)).setDead(num);//利用类内封装的函数改变类内的数据值
                     map.get(split_data.get(0)).setIp(-num);
                 }
                 else{//治愈的情况

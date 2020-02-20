@@ -22,15 +22,14 @@ public class InfectStatistic
 {
 	public static String inputPath = "";
 	public static String outputPath = "";
-	public static String [] provinceList = new String[]{"","","","","","","","","","","","","","","","","","","","","",""
-			,"","","","","","","","","","","","",""};
+	public static String [] provinceList = new String[]{"","","","","","","","","","","","","",""
+			,"","","","","","","","","","","","","","","","","","","","",""};
 	public static String [] typeList = new String[]{"","","",""};
 	public static Date inputDate = new Date();
 	public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 	public static String initMaxDateString = "1900-01-01";
 	public static String now = "";
 	public static int nowIndex = 0;
-	
 	
 	public static class Province
 	{
@@ -241,7 +240,7 @@ public class InfectStatistic
 				            else if(info.length==3)
 				            {
 				            	provinceName1 = info[0];
-				            	operateNum = Integer.parseInt(info[2].substring(0, info[2].length()-1));
+				            	operateNum = Integer.parseInt(info[2].substring(0, info[2].length() - 1));
 				            	if(map.containsKey(provinceName1))
 			            		{
 			            			p1 = map.get(provinceName1);
@@ -264,7 +263,7 @@ public class InfectStatistic
 				            else if(info.length==4)
 				            {
 				            	provinceName1 = info[0];
-				            	operateNum = Integer.parseInt(info[3].substring(0, info[3].length()-1));
+				            	operateNum = Integer.parseInt(info[3].substring(0, info[3].length() - 1));
 				            	if(map.containsKey(provinceName1))
 			            		{
 			            			p1 = map.get(provinceName1);
@@ -301,7 +300,7 @@ public class InfectStatistic
 				            {
 				            	provinceName1 = info[0];
 				            	provinceName2 = info[3];
-				            	operateNum = Integer.parseInt(info[4].substring(0, info[4].length()-1));
+				            	operateNum = Integer.parseInt(info[4].substring(0, info[4].length() - 1));
 				            	if(map.containsKey(provinceName1))
 			            		{
 			            			p1 = map.get(provinceName1);
@@ -358,10 +357,10 @@ public class InfectStatistic
 	public static Province calTotal (HashMap<String,Province> map)
 	{
 		Province nation = new Province("全国");
-		Iterator iter1=map.entrySet().iterator();
+		Iterator iter1 = map.entrySet().iterator();
         while(iter1.hasNext())
         {
-        	Map.Entry<String,Province> entry=(Map.Entry<String,Province>)iter1.next();
+        	Map.Entry<String,Province> entry = (Map.Entry<String,Province>)iter1.next();
         	nation.cure += entry.getValue().cure;
         	nation.ip += entry.getValue().ip;
         	nation.sp += entry.getValue().sp;
@@ -370,6 +369,7 @@ public class InfectStatistic
         return nation;
 	}
 	
+	//输出统计信息
 	public static void outputInfo (String[] typeList, String[] provinceList, Province nation, String path, HashMap<String,Province> map, Set set)
 	{
 		FileWriter fileWriter = null;
@@ -380,7 +380,7 @@ public class InfectStatistic
 		}
 		else 
 		{
-			dirPath = path.substring(0,path.lastIndexOf("/")+1);
+			dirPath = path.substring(0,path.lastIndexOf("/") + 1);
 		}
 		File dir = new File(dirPath);
 		if (!dir.exists()) 
@@ -405,7 +405,8 @@ public class InfectStatistic
 			{
 				if(typeList[0].equals(""))
 				{
-					fileWriter.write(nation.name+" 感染患者"+nation.ip+"人 疑似患者"+nation.sp+"人 治愈"+nation.cure+"人 死亡"+nation.dead+"人\n");
+					fileWriter.write(nation.name + " 感染患者"+nation.ip + "人 疑似患者"
+						+nation.sp + "人 治愈" + nation.cure + "人 死亡"+nation.dead + "人\n");
 				}
 				else 
 				{
@@ -414,19 +415,19 @@ public class InfectStatistic
 					{
 						if(typeList[i].equals("ip"))
 						{
-							fileWriter.write(" 感染患者"+nation.ip+"人");
+							fileWriter.write(" 感染患者" + nation.ip + "人");
 						}
 						else if(typeList[i].equals("sp"))
 						{
-							fileWriter.write(" 疑似患者"+nation.sp+"人");
+							fileWriter.write(" 疑似患者" + nation.sp + "人");
 						}
 						else if(typeList[i].equals("cure"))
 						{
-							fileWriter.write(" 治愈"+nation.cure+"人");
+							fileWriter.write(" 治愈" + nation.cure + "人");
 						}
 						else if(typeList[i].equals("dead"))
 						{
-							fileWriter.write(" 死亡"+nation.dead+"人");
+							fileWriter.write(" 死亡" + nation.dead + "人");
 						}
 					}
 					fileWriter.write("\n");
@@ -438,7 +439,8 @@ public class InfectStatistic
 				 	p = map.get(name);
 					if(typeList[0].equals(""))
 					{
-						fileWriter.write(p.name+" 感染患者"+p.ip+"人 疑似患者"+p.sp+"人 治愈"+p.cure+"人 死亡"+p.dead+"人\n");
+						fileWriter.write(p.name + " 感染患者" + p.ip + "人 疑似患者" 
+							+ p.sp + "人 治愈" + p.cure + "人 死亡" + p.dead+"人\n");
 					}
 					else 
 					{
@@ -447,19 +449,19 @@ public class InfectStatistic
 						{
 							if(typeList[i].equals("ip"))
 							{
-								fileWriter.write(" 感染患者"+p.ip+"人");
+								fileWriter.write(" 感染患者" + p.ip + "人");
 							}
 							else if(typeList[i].equals("sp"))
 							{
-								fileWriter.write(" 疑似患者"+p.sp+"人");
+								fileWriter.write(" 疑似患者" + p.sp + "人");
 							}
 							else if(typeList[i].equals("cure"))
 							{
-								fileWriter.write(" 治愈"+p.cure+"人");
+								fileWriter.write(" 治愈" + p.cure + "人");
 							}
 							else if(typeList[i].equals("dead"))
 							{
-								fileWriter.write(" 死亡"+p.dead+"人");
+								fileWriter.write(" 死亡" + p.dead + "人");
 							}
 						}
 						fileWriter.write("\n");
@@ -472,7 +474,8 @@ public class InfectStatistic
 				{
 					if(typeList[0].equals(""))
 					{
-						fileWriter.write(nation.name+" 感染患者"+nation.ip+"人 疑似患者"+nation.sp+"人 治愈"+nation.cure+"人 死亡"+nation.dead+"人\n");
+						fileWriter.write(nation.name + " 感染患者" + nation.ip + "人 疑似患者"
+							+ nation.sp+"人 治愈" + nation.cure + "人 死亡" + nation.dead + "人\n");
 					}
 					else 
 					{
@@ -481,19 +484,19 @@ public class InfectStatistic
 						{
 							if(typeList[j].equals("ip"))
 							{
-								fileWriter.write(" 感染患者"+nation.ip+"人");
+								fileWriter.write(" 感染患者" + nation.ip + "人");
 							}
 							else if(typeList[j].equals("sp"))
 							{
-								fileWriter.write(" 疑似患者"+nation.sp+"人");
+								fileWriter.write(" 疑似患者" + nation.sp + "人");
 							}
 							else if(typeList[j].equals("cure"))
 							{
-								fileWriter.write(" 治愈"+nation.cure+"人");
+								fileWriter.write(" 治愈" + nation.cure + "人");
 							}
 							else if(typeList[j].equals("dead"))
 							{
-								fileWriter.write(" 死亡"+nation.dead+"人");
+								fileWriter.write(" 死亡" + nation.dead + "人");
 							}
 						}
 						fileWriter.write("\n");
@@ -509,7 +512,7 @@ public class InfectStatistic
 					{
 						if(typeList[0].equals(""))
 						{
-							fileWriter.write(provinceList[i]+" 感染患者0人 疑似患者0人 治愈0人 死亡0人\n");
+							fileWriter.write(provinceList[i] + " 感染患者0人 疑似患者0人 治愈0人 死亡0人\n");
 						}
 						else 
 						{
@@ -547,7 +550,8 @@ public class InfectStatistic
 						p = map.get(name);
 						if(typeList[0].equals(""))
 						{
-							fileWriter.write(p.name+" 感染患者"+p.ip+"人 疑似患者"+p.sp+"人 治愈"+p.cure+"人 死亡"+p.dead+"人\n");
+							fileWriter.write(p.name + " 感染患者" + p.ip+"人 疑似患者" 
+								+ p.sp + "人 治愈" + p.cure + "人 死亡" + p.dead + "人\n");
 						}
 						else 
 						{
@@ -556,19 +560,19 @@ public class InfectStatistic
 							{
 								if(typeList[k].equals("ip"))
 								{
-									fileWriter.write(" 感染患者"+p.ip+"人");
+									fileWriter.write(" 感染患者" + p.ip + "人");
 								}
 								else if(typeList[k].equals("sp"))
 								{
-									fileWriter.write(" 疑似患者"+p.sp+"人");
+									fileWriter.write(" 疑似患者" + p.sp + "人");
 								}
 								else if(typeList[k].equals("cure"))
 								{
-									fileWriter.write(" 治愈"+p.cure+"人");
+									fileWriter.write(" 治愈" + p.cure + "人");
 								}
 								else if(typeList[k].equals("dead"))
 								{
-									fileWriter.write(" 死亡"+p.dead+"人");
+									fileWriter.write(" 死亡" + p.dead + "人");
 								}
 							}
 							fileWriter.write("\n");
@@ -601,7 +605,7 @@ public class InfectStatistic
 		// TODO Auto-generated method stub
 		int number = args.length;
 		Province nation = new Province("全国");
-		HashMap<String,Province> map =new HashMap<>();
+		HashMap<String,Province> map = new HashMap<>();
 		if(args[0].equals("list"))
 		{
 			for(int i=1;i<number;i++)
@@ -624,9 +628,9 @@ public class InfectStatistic
 			map = readInfo(inputPath, inputDate, map);
 			nation = calTotal(map);
 		}
-		Set set=map.keySet();
-	    Object[] arr=set.toArray();
-	    Comparator<Object> com=Collator.getInstance(java.util.Locale.CHINA);
+		Set set = map.keySet();
+	    Object[] arr = set.toArray();
+	    Comparator<Object> com = Collator.getInstance(java.util.Locale.CHINA);
 	    Arrays.sort(arr);
 	    Arrays.sort(provinceList,com);	    
 	    outputInfo(typeList, provinceList, nation, outputPath, map, set);

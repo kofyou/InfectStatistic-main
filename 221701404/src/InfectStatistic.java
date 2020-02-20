@@ -2,10 +2,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -184,7 +187,7 @@ public class InfectStatistic {
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out)), "UTF-8"));
 
-            //遍历mapMap,按照特定的顺序排序
+            //遍历provinceMap,按照特定的顺序排序
             List<String> keys = new ArrayList<String>();
             keys.addAll(provinceMap.keySet());
             keys = Lib.sortByAlphabet(keys);

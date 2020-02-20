@@ -10,6 +10,8 @@ gen
 .idea/
 InfectStatistic-example.iml
 
+/test/
+/lib/
 /node_modules/              
 #过滤整个mtk文件夹
 *.json               

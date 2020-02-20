@@ -31,7 +31,7 @@ class InfectStatistic {
                  "山东" ,"山西" ,"陕西" ,"上海" ,"四川" ,"天津" ,"西藏" ,"新疆" ,"云南" ,"浙江"};
     private int solutions;                                                               //0: 无指定；1：指定省份；2：指定类型；3：都指定
 
-    public void init(String[] args) {
+    private void init(String[] args) {
         if (args.length > 0 && args[0].equals("list")) {
             for (int i = 1, typeI = 0, provinceI = 0; i < args.length; i++) {
                 switch (args[i]) {
@@ -97,7 +97,12 @@ class InfectStatistic {
         }
     }
 
-    public void dealLogs() {
+    private void dealLogs() {
+       /* int k = 0;
+        while (province[k] != null) {
+            System.out.println(province[k++]);
+        } */
+     //   System.out.println(log + " " + out);/* dbg:调试查看读取文件是否正确 */
         if (log == null) {
             System.out.println("请输入正确的日志地址！");
             System.exit(-1);
@@ -109,6 +114,7 @@ class InfectStatistic {
             for (File aFile : files) {
                 String[] splitName = aFile.getName().split("\\.");
                 if (aFile.isFile() && splitName.length > 2 && splitName[1].equals("log")) {
+                    //System.out.println(aFile.getName() + " " + splitName[0] + " " +splitName[1]+" "+splitName[2]);/* dbg:调试查看读取文件是否正确 */
                     if (date != null) {
                         try {
                             Date fileDate = sdf.parse(splitName[0]);
@@ -210,7 +216,7 @@ class InfectStatistic {
         }
     }
 
-    public void outFile() {
+    private void outFile() {
         try {
             if (out == null) {
                 System.out.println("请输入正确的输出地址！");
@@ -233,8 +239,10 @@ class InfectStatistic {
                 bw.close();
             }
             else if (province != null && type == null) {
+                //System.out.println("arrive solition1");
                 int i = 0;
                 while (province[i] != null) {
+                 //   System.out.println("test p:"+province[i]); //xxx
                     if (status.containsKey(province[i])) {
                         int[] tempStatus = status.get(province[i]);
                         dataLine = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", province[i],
@@ -243,6 +251,7 @@ class InfectStatistic {
                     }
                     i++;
                 }
+               // System.out.println("test arrive here?"); //xxx
                 bw.close();
             }
             else if (province == null) {
@@ -286,6 +295,7 @@ class InfectStatistic {
                 }
                 int i = 0;
                 while (province[i] != null) {
+                    //System.out.println("test p:"+province[i]); //xxx
                     if (status.containsKey(province[i])) {
                         int[] tempStatus = status.get(province[i]);
                         String[] intToSring = new String[]{"感染患者" + tempStatus[ip] + "人", "疑似患者" + tempStatus[sp]
@@ -310,6 +320,7 @@ class InfectStatistic {
                         bw.write(dataLine);
                     }
                     i++;
+                   // System.out.println("test data:"+dataLine); //xxx
                 }
                 bw.close();
             }

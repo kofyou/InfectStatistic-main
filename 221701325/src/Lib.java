@@ -1,12 +1,16 @@
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.junit.Test;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,10 +20,14 @@ import java.util.LinkedList;
 
 /**
  * Lib
- * 1.利用责任链模式对日志文件进行处理
- * 2.ListCommand类的实现
- * 3.CmdArgs类的实现
- * 4.
+ * 1.利用责任链模式对日志文件进行处理的实现
+ * 2.Command抽象类的定义和ListCommand类的实现
+ * 3.处理命令的CmdArgs类的实现
+ * 4.处理数据的DataManager类的实现
+ * 5.ListKey&TypeValue&ProvinceValue枚举类的定义和实现
+ * 6.常量类Constant的定义
+ * 7.日期越界异常、无输入路径异常和无输出路径异常
+ * 8.工具类TxtTool的实现
  *
  * @author Benjamin_Gnep
  * @version 1.0
@@ -27,56 +35,6 @@ import java.util.LinkedList;
  */
 public class Lib {}
 
-class DataManager{
-	public static List<int[]> solveData(List<String>data){
-		List<int[]> result = new LinkedList<int[]>();
-		ListInit(result);
-		System.out.println("建立责任链");
-		AddipHandler addip = new AddipHandler(result);
-		AddSpHandler addSp = new AddSpHandler(result);
-		ChangeHandler change = new ChangeHandler(result);
-		CureHandler cure = new CureHandler(result);
-		DeathHandler death = new DeathHandler(result);
-		ExcludeHandler exclude = new ExcludeHandler(result);
-		SwapIpHandler swapIp = new SwapIpHandler(result);
-		SwapSpHandler swapSp = new SwapSpHandler(result);
-		addip.nextHandler = addSp;
-		addSp.nextHandler = change;
-		change.nextHandler = cure;
-		cure.nextHandler = death;
-		death.nextHandler = exclude;
-		exclude.nextHandler = swapIp;
-		swapIp.nextHandler = swapSp;
-		swapSp.nextHandler = null;
-		System.out.println("建立责任链完成，开始处理文本");
-		Iterator<String> it = data.iterator();
-    	while(it.hasNext()) {
-    		String s = it.next();
-    		addip.handleRequest(s);
-    	}
-    	System.out.println("---文本处理完成");
-		return result;
-	}
-
-	private static void ListInit(List<int[]> result) {
-		System.out.println("输出结果集初始化");
-		for(int i = 0; i < ProvinceValue.values().length ;i++) {
-			int[] vals = {i,0,0,0,0};
-			result.add(vals);
-		}
-	}
-
-	public static void mergeData(List<int[]> result) {
-		System.out.println("---正在简化结果集");
-		Iterator<int[]> it = result.iterator();
-    	while(it.hasNext()) {
-    		int[] t = it.next();
-    		if(t[1] == 0 &&  t[2] == 0 && t[3] == 0 && t[4] ==0) {
-    			it.remove();
-    		}
-    	}
-	}
-}
 
 /**
  *存储命令行参数
@@ -132,7 +90,7 @@ class CmdArgs {
 
 	/**
      * 获取命令中的一个参数
-     * @return
+     * @return String
      */
     String argKey() {
     	if(index<args.length && args[index].matches(Constant.COMMAND_REG)) {
@@ -149,7 +107,7 @@ class CmdArgs {
      * 获取某个命令行参数的值，返回列表
      * 同时判断该命令是否有对应的参数，若无参数则设为default
      * @param key
-     * @return
+     * @return List
      */
 	List<String> argVals() {
     	List<String> values = new LinkedList<String>();
@@ -165,13 +123,22 @@ class CmdArgs {
     	return values;
     }
 }
-//命令模式的command类
+
+/**
+ *接口Command
+ *作为之后拓展此系统的命令接口
+ */
 interface Command{
-	void execute(Map<String,List<String>> map);
+	void execute(Map<String,List<String>> map,String[] args);
 }
 
+/**
+ *List命令的实现
+ *实现接口类Command中execute方法
+ */
 class ListCommand implements Command{
 	private ListKey listKey;
+	private String[] args;
 	private List<int[]> result = new LinkedList<int[]>();
 	private List<String> logLine = new LinkedList<String>();
 	
@@ -182,7 +149,8 @@ class ListCommand implements Command{
      * @param map
      */
 	@Override
-	public void execute(Map<String, List<String>> map) {
+	public void execute(Map<String, List<String>> map,String[] args) {
+		this.args = args;
 		System.out.println("---现在开始执行list命令");
 		String proString = null;
 		List<String> typeString = new LinkedList<String>();
@@ -205,19 +173,25 @@ class ListCommand implements Command{
 					logKey(map);
 					break;
 				case OUT:
-					outKey(map,proString,typeString);
+					outKey(map,proString,typeString,args);
 					break;
 				case TYPE:
 					typeString = typeKey(map);
 					break;
 				case PROVINCE:
-					proString = provinceKey(map,result);
+					proString = provinceKey(map);
 					break;
 			}
 		}
 	}
-
-	private String provinceKey(Map<String, List<String>> map, List<int[]> result) {
+	
+	/**
+     * 处理province参数
+     * 如果为空则默认全部输出
+     * @param map
+     * @return String province的值
+     */
+	private String provinceKey(Map<String, List<String>> map) {
 		List<String> provinceList = map.get(Constant.PROVINCE);
 		if(provinceList == null || provinceList.get(0) == Constant.DEFAULT) {
 			System.out.println("---未指定provinc参数，默认输出全部省份");
@@ -239,6 +213,12 @@ class ListCommand implements Command{
 		return proIndex;
 	}
 
+	/**
+     * 处理type参数并返回typeList
+     * 如果为空则默认全部输出
+     * @param map
+     * @return typeList type的链表
+     */
 	private List<String> typeKey(Map<String, List<String>> map) {
 		List<String> typeList = map.get(Constant.TYPE);
 		if(typeList == null || typeList.get(0) == Constant.DEFAULT) {
@@ -255,7 +235,16 @@ class ListCommand implements Command{
 		return typeList;
 	}
 
-	private void outKey(Map<String, List<String>> map,String proString,List<String> typeString) {
+	/**
+     * 处理out参数并根据province和type参数输出
+     * 如果为空则抛出异常
+     * @param map
+     * @param typeList
+     * @param provinceString
+     * @exception NoOutException
+     */
+	private void outKey(Map<String, List<String>> map
+			,String proString,List<String> typeString,String[] args) {
 		System.out.println("分析-out参数");
 		List<String> outList = map.get(Constant.OUT);
 		try {
@@ -302,9 +291,13 @@ class ListCommand implements Command{
 	    					break;
 	    				}
 	    			}
-	    			bw.write("\n");
 	    		}
 	    	}
+			bw.write("\n// 该文档并非真实数据，仅供测试使用\r\n" + 
+					"// 命令：");
+			for(int i = 0;i < args.length;i++) {
+				bw.write(args[i] + " ");
+			}
 	        bw.flush(); // 把缓存区内容压入文件
 	        bw.close();
 	        System.out.println("输出完成！");
@@ -313,6 +306,12 @@ class ListCommand implements Command{
 		} 
 	}
 
+	/**
+     * 处理log参数
+     * 如果为空则抛出异常
+     * @param map
+     * @exception NoLogException
+     */
 	private void logKey(Map<String, List<String>> map) {
 		System.out.println("分析-log参数");
 		try {
@@ -328,6 +327,13 @@ class ListCommand implements Command{
 		}
 	}
 
+	/**
+     * 处理date参数并且把符合date参数的文件
+     * 如果为空则默认全部输出
+     * @param map
+     * @param  
+     * @return typeList type的链表
+     */
 	private void dateKey(Map<String, List<String>> map) {
 		System.out.println("分析-date参数");
 		List<String> logList = map.get(Constant.LOG);
@@ -379,7 +385,7 @@ class ListCommand implements Command{
 			String[] line = result.split("\\n");
 			System.out.println("整合后待处理文本：");
 			for(int i = 0;i < line.length;i++) {
-				if(!line[i].matches(Constant.BLANKSPACE_REG)) {
+				if(!line[i].matches(Constant.BLANKSPACE_REG)) {//如果这行不为空
 					System.out.print(line[i]);
 					logLine.add(line[i].trim());
 				}
@@ -395,6 +401,58 @@ class ListCommand implements Command{
 
 }
 
+
+class DataManager{
+	public static List<int[]> solveData(List<String>data){
+		List<int[]> result = new LinkedList<int[]>();
+		ListInit(result);
+		System.out.println("建立责任链");
+		AddipHandler addip = new AddipHandler(result);
+		AddSpHandler addSp = new AddSpHandler(result);
+		ChangeHandler change = new ChangeHandler(result);
+		CureHandler cure = new CureHandler(result);
+		DeathHandler death = new DeathHandler(result);
+		ExcludeHandler exclude = new ExcludeHandler(result);
+		SwapIpHandler swapIp = new SwapIpHandler(result);
+		SwapSpHandler swapSp = new SwapSpHandler(result);
+		addip.nextHandler = addSp;
+		addSp.nextHandler = change;
+		change.nextHandler = cure;
+		cure.nextHandler = death;
+		death.nextHandler = exclude;
+		exclude.nextHandler = swapIp;
+		swapIp.nextHandler = swapSp;
+		swapSp.nextHandler = null;
+		System.out.println("建立责任链完成，开始处理文本");
+		Iterator<String> it = data.iterator();
+    	while(it.hasNext()) {
+    		String s = it.next();
+    		addip.handleRequest(s);
+    	}
+    	System.out.println("---文本处理完成");
+		return result;
+	}
+
+	private static void ListInit(List<int[]> result) {
+		System.out.println("输出结果集初始化");
+		for(int i = 0; i < ProvinceValue.values().length ;i++) {
+			int[] vals = {i,0,0,0,0};
+			result.add(vals);
+		}
+	}
+
+	public static void mergeData(List<int[]> result) {
+		System.out.println("---正在简化结果集");
+		Iterator<int[]> it = result.iterator();
+    	while(it.hasNext()) {
+    		int[] t = it.next();
+    		if(t[1] == 0 &&  t[2] == 0 && t[3] == 0 && t[4] ==0) {
+    			it.remove();
+    		}
+    	}
+	}
+}
+
 class TxtTool {
 	static List<File> filelist = new ArrayList<File>(); 
 	
@@ -403,7 +461,9 @@ class TxtTool {
         
         try{
             String s = null;
-            BufferedReader br = new BufferedReader(new FileReader(file));
+            InputStreamReader fReader = 
+            		new InputStreamReader(new FileInputStream(file),"UTF-8");
+            BufferedReader br = new BufferedReader(fReader);
             while((s = br.readLine())!=null){//使用readLine方法，一次读一行
             	//若本行为'//'开头说明为注释，应忽略
             	if(s.matches(Constant.ANNOTATION_REG))
@@ -454,7 +514,6 @@ class TxtTool {
 			}
 		}
 	}
-    
 }
 
 //责任链模式处理日志文件
@@ -782,9 +841,9 @@ enum ProvinceValue{
 
 	public static int keyOfProvince(String string) {
 		for (Entry<Integer, String> entry : map.entrySet()) {
-	        if (entry.getValue().equals(string)) {
-	            return entry.getKey();
-	        }
+				if (string.contains(entry.getValue())) {
+				    return entry.getKey();
+				}
 	    }
 		return -1;
 	}

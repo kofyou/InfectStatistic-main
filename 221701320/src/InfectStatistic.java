@@ -16,26 +16,31 @@ class InfectStatistic {
 						"山东","河南","湖北","湖南","广东","海南","四川",
 						"贵州","云南","陕西","甘肃","青海","台湾","内蒙古",
 						"广西","西藏","宁夏","新疆","香港","澳门"};
+	
 	public static int[] ip= {0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0};
+	
 	public static int[] sp= {0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0};
+	
 	public static int[] cp= {0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0};
+	
 	public static int[] dp= {0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0};
+	
 	public static int[] pro={0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
@@ -55,7 +60,6 @@ class InfectStatistic {
 		for(String fname:listFileName) {
 			readfile(fname);
 		}
-		
 	}
 	
 	public static void readfile(String file) {
@@ -67,7 +71,6 @@ class InfectStatistic {
 			}
 		}catch (IOException e) {
         }
-		
 	}
 	
 	public static void readfile2(String str) {

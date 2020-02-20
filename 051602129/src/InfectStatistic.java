@@ -47,10 +47,18 @@ class InfectStatistic {
                     list = true;
                     break;
                 case "-log":
-                    log.put(true,args[i+1]);
+                    if (i + 1 < args.length) {
+                        log.put(true, args[i + 1]);
+                    }else {
+                        log.put(true,null);
+                    }
                     break;
                 case "-out":
-                    out.put(true,args[i+1]);
+                    if(i + 1 < args.length) {
+                        out.put(true, args[i + 1]);
+                    }else {
+                        out.put(true,null);
+                    }
                     break;
                 case "-date":
                     if (i + 1 < args.length) {
@@ -107,13 +115,13 @@ class InfectStatistic {
             throw new Exception("date参数错误");
         }
 
-        if (date.keySet().equals(true)){
+        if (date.containsKey(true)&&date.get(true)!=null){
             if (!this.checkTime(date.get(true))){
                 throw new Exception("输入日期不正确");
             }
         }
 
-        if (type.keySet().equals(true)){
+        if (type.containsKey(true)){
             ArrayList<String> temps = new ArrayList<>(){{
                     add("ip");
                     add("sp");

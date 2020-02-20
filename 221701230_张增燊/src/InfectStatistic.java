@@ -12,12 +12,12 @@ public class InfectStatistic {
 			String type,String province)
 	{
 		//读取文件
-		GetFileList(log);
+		getFileList(log);
 		//输出信息
 		outListToFile(out,type,date,province);
 	}
 	//读文件的函数
-	public static void GetFileList(String log)
+	public static void getFileList(String log)
 	{
 		File file = new File(log);
 		File[] fileList = file.listFiles();
@@ -42,7 +42,7 @@ public class InfectStatistic {
 			{
 				//是目录就递归读取
 				String fileName = fileList[i].getName();
-				GetFileList(log+"\\"+fileName);
+				getFileList(log+"\\"+fileName);
             }
 	    }
 	}
@@ -54,10 +54,9 @@ public class InfectStatistic {
 		try {
 			InputStreamReader read = new InputStreamReader(new FileInputStream(fileName), "UTF-8");
 			reader = new BufferedReader(read);
-			String line=null;
-						
+			String line=null;			
 			while((line =reader.readLine()) != null){
-				OpData(line,lib);						
+				opData(line,lib);						
 			}			
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -77,7 +76,7 @@ public class InfectStatistic {
         
     }  
 	//处理数据的函数
-	public static void OpData(String data,Lib lib)
+	public static void opData(String data,Lib lib)
 	{
 		String[] strarray=data.split(" |人");
 		if(strarray.length==5)
@@ -120,7 +119,9 @@ public class InfectStatistic {
 		int i=Find(lib,strarray,0),j=Find(lib,strarray,3);
 		if(i!=-1&&j!=-1)
 		{
+			//temp1是省1
 			temp1=lib.provinces.get(i);
+			//temp2是省2
 			temp2=lib.provinces.get(j);
 			if(strarray[1].contentEquals("感染患者")==true)
 			{
@@ -363,27 +364,21 @@ public class InfectStatistic {
 			String date,String province)
 	{
 		 try {
-			    File writename1 = new File(out);
+			    File file = new File(out);
 	            //判断是否存在
-	            if(!writename1.exists()) 
+	            if(!file.exists()) 
 	            {
 	                //不存在就创建
-	                writename1.createNewFile();
+	                file.createNewFile();
 	            }
-	            //创建写入文件方式，true为追加写入，原内容不覆盖
-	            //FileWriter fw = new FileWriter(writename1,true);
 	            
-	            FileWriter fileWriter = new FileWriter(writename1.getAbsoluteFile());
+	            FileWriter fw = new FileWriter(file.getAbsoluteFile());
 
-				BufferedWriter bw = new BufferedWriter(fileWriter);
-
-				
+				BufferedWriter bw = new BufferedWriter(fw);
 	            
 	            int x=findDate(date);
 	            if(x==-1)
 	            {
-	            	//fw.append("日期超出范围\n");
-	            	//fw.close();
 	            	bw.write("日期超出范围\n");
 	            	bw.close();
 	            	return;
@@ -398,19 +393,13 @@ public class InfectStatistic {
 	    				{
 	    					if(type.contentEquals(" ")==true)
 	    					{
-	    						//追加写入
-	    	    				//fw.append(temp.ToString());
 	    						bw.write(temp.ToString());
 	    					}
 	    					else
 	    					{
-	    						//追加写入
-	    	    				//fw.append(outType(type,temp));
 	    						bw.write(outType(type,temp));
 	    					}
 	    				}
-	    				//刷新
-	    	            //fw.flush();
 	    			}
 	    		}
 	    		else
@@ -423,39 +412,36 @@ public class InfectStatistic {
 	    				{
 	    					if(type.contentEquals(" ")==true)
 	    					{
-	    						//追加写入
-	    	    				//fw.append(temp.ToString());
 	    						bw.write(temp.ToString());
 	    					}
 	    					else
 	    					{
-	    						//追加写入
-	    	    				//fw.append(outType(type,temp));
 	    						bw.write(outType(type,temp));
 	    					}
 	    				}
-	    				//刷新
-	    	            //fw.flush();
 	    			}
 	    		}
-	            
-	            //关闭资源
-	            //fw.close();
 	    		bw.close();
 	        }
 		 catch (Exception e) {
 	            e.printStackTrace();
 	        }
 	}
-	
+	//根据对应的参数标志找到mian函数参数中的数据的函数
+	//parament可能是-log，-out,-date，-type,-province中的一个
+	//args是main函数参数数组
 	public static String getParaments(String parament,String[] args)
 	{
 		int i=1;
+		//result是待返回的字符串
 		String result="";
+		//遍历args[]数组
 		for(;i<args.length;i++)
 		{
+			//如果args[]数组中能找到parament相等的字符串
 			if(args[i].contentEquals(parament)==true)
 			{
+				//那么就说明，这个字符串的下一个或者下几个是它的对应参数
 				for(int j=i+1;j<args.length;j++)
 				{
 					if(result.contentEquals("")==true)
@@ -463,6 +449,7 @@ public class InfectStatistic {
 					else result=result+" "+args[j];
 					if(j+1>=args.length)
 					{
+						//如果数组越界就退出循环
 						break;
 					}
 					else if(args[j+1].contentEquals("-log")||
@@ -471,30 +458,42 @@ public class InfectStatistic {
 							args[j+1].contentEquals("-type")||
 							args[j+1].contentEquals("-province"))
 					{
+						//如果已经是别的参数标志了也退出循环
 						break;
 					}
 				}
 			}
 		}
+		//如果没有找到对应的参数标志就说明这个参数没有，用空格表示
 		if(result.contentEquals("")==true)
 		{
 			return " ";
 		}
+		//最后返回字符串
 		return result;
 	}
 	
+	
 	public static void main(String[] args){
+		//根据参数标识找到相应的数据
+		//long l=System.currentTimeMillis();
+		
 		String log=getParaments("-log",args);
 		log=log.substring(0,getParaments("-log",args).length()-1);
 		String out=getParaments("-out",args);
 		String date=getParaments("-date",args);
 		String type=getParaments("-type",args);
 		String province=getParaments("-province",args);
+		
+		//如果没有-log，-out就说明参数不合法
 		if(log.contentEquals(" ")==false&&out.contentEquals(" ")==false)
 		{
 			list(log,out,date,type,province);
 		}
 		else System.out.println("指令错误");
+		
+		//l=System.currentTimeMillis()-l;
+		//System.out.println("程序花费了"+l+"毫秒");
 	}
 
 }

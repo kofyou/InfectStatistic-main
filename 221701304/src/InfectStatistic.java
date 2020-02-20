@@ -249,7 +249,39 @@ public class InfectStatistic {
 		qg.sp=sum_sp;
 		qg.cure=sum_cure;
 		qg.dead=sum_dead;
-			int k=0;
+			if (province_flag) 
+			{
+				int j=0;
+				for (int i = 0; i < list.size(); i++) 
+				{
+					if (list_province.contains(list.get(i)))
+					{
+						String str=list.get(i);
+						if (type.contains("ip")) {
+							str=str+" 感染患者"+province.get(list.get(i)).ip+"人";
+						}
+						if(type.contains("sp"))
+						{
+							str=str+" 疑似患者"+province.get(list.get(i)).sp+"人";
+				
+						}
+						if(type.contains("cure"))
+						{
+							str=str+" 治愈"+province.get(list.get(i)).cure+"人";
+						}
+						if (type.contains("dead")) 
+						{
+							str=str+" 死亡"+province.get(list.get(i)).dead+"人";
+						
+						}
+						arr[j]=str;
+						j++;
+					}
+				}
+			}
+			else 
+			{
+				int k=0;
 				for(int i=0;i<list.size();i++)//将信息读入arr数组
 				{
 					String str=list.get(i);
@@ -279,6 +311,7 @@ public class InfectStatistic {
 					
 				}
 				
+			}
 		
 	}
 	public  static void writeFile(String str) {

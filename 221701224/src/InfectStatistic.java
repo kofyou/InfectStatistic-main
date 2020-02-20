@@ -145,17 +145,23 @@ public static void judgeCommandLine(String[] str) {
 				//-province如果是最后一个指令，直接
 				if((i+j)<str.length)
 				{
+					int temp=0;//用来判断省份名称是否输入正确
 					if(str[i+j].equals("-log")||str[i+j].equals("-out")
-						||str[i+j].equals("-date")||str[i+j].equals("-province"))
+						||str[i+j].equals("-date")||str[i+j].equals("-type"))
 					{
 						break;
 					}
-					else if(str[i+j].equals(province_name[j-1]))
+					for(int k=0;k<province_name.length;k++)
 					{
-						province_select[0]=1;
-						province_select[j-1]=1;
+						if(str[i+j].equals(province_name[k]))
+						{
+							temp=1;
+							province_select[0]=0;
+							province_select[k]=1;
+							break;
+						}
 					}
-					else
+					if(temp==0)
 					{
 						System.out.println("命令行错误，-province格式有误！");
 						System.exit(0);
@@ -514,26 +520,6 @@ public static void outputFile(String str) {
 }
 */
 public static void main(String[] args) {
-    /*    if(args[0].equals("list"))
-        {
-        	for(int i=1;i<args.length;i++)
-        	{
-        		if(args[i].equals("-log"))
-        		{
-        			File file=new File(args[i+1]);
-        		}
-        		if(args[i].equals("-out"))
-        		{
-        			
-        		}	
-        		    
-        	}
-        }
-        else
-        {
-        	
-        }
-    	*/
 	province_select[0]=-1;
     judgeCommandLine(args);
     balance();
@@ -543,12 +529,12 @@ public static void main(String[] args) {
     {
     	if(log_need.compareTo(log_list[i])<=0)
     	{
-    		//System.out.println(log_list[i]);
-    		getTextContent(log_list[i]);
+    		System.out.println(log_list[i]);
+    		getTextContent(log_route+log_list[i]);
     	}
     	else break;
     }
-    //System.out.println(log_list[0]);
+    System.out.println(log_need);
     outputFile(out_route);
     	
     }

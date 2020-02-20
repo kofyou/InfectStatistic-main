@@ -1,12 +1,4 @@
-import javax.naming.CompoundName;
-import javax.naming.directory.Attributes;
-import javax.xml.xpath.XPath;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.security.Key;
+import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,13 +29,14 @@ class InfectStatistic {
     private static String [][] commandlist ={{"-log",Inpath},{"-out",Outpath},{"-date",dateflag},{"-type",typeflag},{"-province",proflag}}; //命令集
     private static  ArrayList<String> provincelist = new ArrayList<String>();//需要的的省份集
     private static HashMap<String,Integer[]> prolist = new HashMap<String,Integer[]>(); //处理的的的省份集
-    private static  ArrayList<String> typelist = new ArrayList<String>(); //需要的状态集,
+    private static  String[] typelist = new String[]{"0","0","0","0"}; //需要的状态集,
     private static ArrayList<String> datelist = new ArrayList<String>(); //已处理的日志时间集
     private static ArrayList<String> dlist = new ArrayList<>(); //符合格式的日志文件名列表
     private  static  String[] need = new String[]{"0","0","0"}; //三个必要参数是否存在
     private static String[] province = new String[]{"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
             "江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};//省份集
     private static String[] type = new String[]{"ip","sp","cure","dead"};//状态集，{"ip","感染患者"},{"sp","疑似患者"},{"cure","治愈患者"},{"dead","死亡患者"}
+    private static String[] typeC = new String[]{"感染患者","疑似患者","治愈患者","死亡患者"};//中文
     private static String[] status = new String[]{"新增 感染患者","新增 疑似患者","感染患者 流入","疑似患者 流入","死亡","治愈","疑似患者 确诊感染","排除 疑似患者"};//每日情况
     /*
     1、<省> 新增 感染患者 n人
@@ -72,7 +65,6 @@ class InfectStatistic {
                     if(CheckPos(Inpath)){
                         need[1] = "1";
                         list.put("-log",Inpath);
-                        continue;
                     }else{
                         System.out.println("请输入完整的日志所在位置！");
                         flag = false;
@@ -96,7 +88,6 @@ class InfectStatistic {
                         }else{
                             need[2] = "1";
                             list.put("-out",Outpath);
-                            continue;
                         }
                     }else{
                         System.out.println("请输入完整的文件输出位置！");
@@ -130,17 +121,24 @@ class InfectStatistic {
                 i++;
                 num=0;
                 for(;i<Mes.length;i++){
-                    if(!(Mes[i].substring(0,1).equals("-"))){
+                    if(!(Mes[i].startsWith("-"))){
                         num++;
                         if(CheckType(Mes[i])){
-                            typelist.add(Mes[i]);
+                            for(int c = 0;c<type.length;c++ ){
+                                if(Mes[i].equals(type[c])){
+                                    typelist[c]="1";
+                                }
+                            }
                         }else{
                             System.out.println("请输入正确的类型！");
                             flag = false;
                             break;
                         }
+                    }else {
+                        break;
                     }
                 }
+                i -=1;
                 typeflag = String.valueOf(num);
                 list.put("-type",typeflag);
             }
@@ -148,7 +146,7 @@ class InfectStatistic {
                 i++;
                 num=0;
                 for(;i<Mes.length;i++){
-                    if(!(Mes[i].substring(0,1).equals("-"))){
+                    if(!(Mes[i].startsWith("-"))){
                         num++;
                         if(CheckName(Mes[i])){
                             provincelist.add(Mes[i]);
@@ -157,8 +155,16 @@ class InfectStatistic {
                             flag = false;
                             break;
                         }
+                    }else {
+                        break;
                     }
                 }
+                Collections.sort(provincelist);
+                if(provincelist.contains("全国")){
+                    provincelist.remove("全国");
+                    provincelist.add(0,"全国");
+                }
+                i -=1;
                 proflag = String.valueOf(num);
                 list.put("-province",proflag);
             }else{
@@ -179,13 +185,10 @@ class InfectStatistic {
             }
         }
         if(proflag.equals("0")){
-            provincelist.add("全国");
+            provincelist.addAll(Arrays.asList(province));
         }
         if(typeflag.equals("0")){
-            typelist.add(type[0]);
-            typelist.add(type[1]);
-            typelist.add(type[2]);
-            typelist.add(type[3]);
+            typelist = new String[]{"1","1","1","1"};
         }
         return flag;
     }
@@ -194,11 +197,7 @@ class InfectStatistic {
     public static boolean CheckPos(String pa)
     {
         String test = ":/";
-        if(pa.indexOf(test) != -1){
-            return true;
-        }else{
-            return false;
-        }
+        return pa.indexOf(test) != -1;
     }
 
     /*获取输出路径、输出文件名以及文件后缀*/
@@ -269,12 +268,12 @@ class InfectStatistic {
 
     public static void ReadData(){
         String path;
-        Integer[] m1,m2;
+        Integer[] m1,m2,m3;
         for(String n:dlist){
             if(n.compareTo(date) < 0) {
                 path = Inpath + n;
-                try (FileReader reader = new FileReader(path);
-                     BufferedReader br = new BufferedReader(reader) // 建立一个对象，它把文件内容转成计算机能读懂的语言
+                File file = new File(path);
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8")) // 建立一个对象，它把文件内容转成计算机能读懂的语言
                 ) {
                     String line;
                     //网友推荐更加简洁的写法
@@ -297,8 +296,11 @@ class InfectStatistic {
                                     case 0: {
                                         if (prolist.containsKey(lined[0])) {
                                             m1 = prolist.get(lined[0]);
+                                            m3 = prolist.get("全国");
                                             m1[0] += num;
+                                            m3[0] += num;
                                             prolist.put(lined[0], m1);
+                                            prolist.put("全国",m3);
                                         }
                                         break;
                                     }
@@ -307,6 +309,9 @@ class InfectStatistic {
                                             m1 = prolist.get(lined[0]);
                                             m1[1] += num;
                                             prolist.put(lined[0], m1);
+                                            m3 = prolist.get("全国");
+                                            m3[1] += num;
+                                            prolist.put("全国",m3);
                                         }
                                         break;
                                     }
@@ -338,6 +343,10 @@ class InfectStatistic {
                                             m1[0] -= num;
                                             m1[3] += num;
                                             prolist.put(lined[0], m1);
+                                            m3 = prolist.get("全国");
+                                            m3[0] -= num;
+                                            m3[3] += num;
+                                            prolist.put("全国",m3);
                                         }
                                         break;
                                     }
@@ -347,6 +356,10 @@ class InfectStatistic {
                                             m1[0] -= num;
                                             m1[2] += num;
                                             prolist.put(lined[0], m1);
+                                            m3 = prolist.get("全国");
+                                            m3[0] -= num;
+                                            m3[2] += num;
+                                            prolist.put("全国",m3);
                                         }
                                         break;
                                     }
@@ -356,6 +369,10 @@ class InfectStatistic {
                                             m1[1] -= num;
                                             m1[0] += num;
                                             prolist.put(lined[0], m1);
+                                            m3 = prolist.get("全国");
+                                            m3[1] -= num;
+                                            m3[0] += num;
+                                            prolist.put("全国",m3);
                                         }
                                         break;
                                     }
@@ -364,6 +381,9 @@ class InfectStatistic {
                                             m1 = prolist.get(lined[0]);
                                             m1[1] -= num;
                                             prolist.put(lined[0], m1);
+                                            m3 = prolist.get("全国");
+                                            m3[1] -= num;
+                                            prolist.put("全国",m3);
                                         }
                                         break;
                                     }
@@ -371,9 +391,9 @@ class InfectStatistic {
                             }
 
                         }
-
-                        System.out.println(line);
+                        //System.out.println(line);
                     }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -383,29 +403,60 @@ class InfectStatistic {
         }
     }
 
+    public static void writeFile() {
+        try {
+            File writeName = new File(Outpath+filename+"."+named); // 相对路径，如果没有则要建立一个新的output.txt文件
+            writeName.createNewFile(); // 创建新文件,有同名的文件的话直接覆盖
+            try (FileWriter writer = new FileWriter(writeName);
+                 BufferedWriter out = new BufferedWriter(writer)
+            ) {
+                for (String p:provincelist) {
+                    for(Map.Entry<String, Integer[]> entry : prolist.entrySet()) {
+
+                        if(entry.getKey().equals(p)){
+                            out.write(entry.getKey()+" ");
+                            //System.out.print(entry.getKey()+"");
+                            Integer[] ei = entry.getValue();
+                            for(int i = 0;i < ei.length;i++){
+                                if(typelist[i].equals("1")){
+                                    out.write(typeC[i]);
+                                    out.write(ei[i]+"人 ");
+                                    //System.out.print(typeC[i]+ei[i]+"人 ");
+                                }else{
+                                    continue;
+                                }
+
+                            }
+                            out.write("\n");
+                            System.out.print("\n");
+                            break;
+                        }
+
+                    }
+
+                }
+                out.flush(); // 把缓存区内容压入文件
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args)
     {//java InfectStatistic list -date 2020-01-22 -log D:/log/ -out D:/output.txt
-        Integer[] inte = new Integer[]{0,0,0,0};
         for(String p:province){
             prolist.put(p,new Integer[]{0,0,0,0});
         }
-        args= new String[]{ "list","-date","2019-02-30","-log","D:/log/","-out","D:/output.txt","-type","ip","sp"};
+        //args= new String[]{ "list","-date","2019-02-30","-log","D:/log/","-out","D:/output.txt","-type","ip","sp","-province","福建","全国"};
 
         if(InputLog(args)){
             if(ReadLog()) {
                 Collections.sort(dlist);
                 if(dateflag.equals("0")){
-                    date=dlist.get(dlist.size());
+                    date=dlist.get(dlist.size()-1);
                 }
                 ReadData();
-                for (HashMap.Entry<String, Integer[]> entry : prolist.entrySet()) {
-                    String key = entry.getKey();
-                    Integer[] val = entry.getValue();
-                    System.out.println(key);
-                    for(int i:val){
-                        System.out.println(i);
-                    }
-                }
+                writeFile();
             }else {
                 System.out.println("无日志文件！");
             }

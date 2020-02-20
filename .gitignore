@@ -9,5 +9,9 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
-/log
-/result
+log/
+result/
+.vscode/
+.vs/
+test*
+__pycache__

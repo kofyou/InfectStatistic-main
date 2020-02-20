@@ -609,6 +609,11 @@ public class InfectStatistic
 				getParameters(args[i]);
 			}
 		}
+		if(!Arrays.asList(args).contains("-log")||!Arrays.asList(args).contains("-out"))
+		{
+			System.out.print("缺少参数-log或-out");
+			return ;
+		}
 		if(!checkDate(inputPath,inputDate))
 		{
 			System.out.print("输入的日期超出范围！");
@@ -627,4 +632,3 @@ public class InfectStatistic
 	    outputInfo(typeList, provinceList, nation, outputPath, map, set);
 	}
 }
-

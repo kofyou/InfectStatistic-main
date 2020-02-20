@@ -52,7 +52,7 @@ MAX_STOCK_COUNT
 + 举例如下
 ```
 class Province{
-		String name=null;//省份名称(拼音）
+	    String name=null;//省份名称(拼音）
 	    int ip=0;//感染患者
 	    int sp=0;//疑似患者
 	    int cure=0;//治愈
@@ -85,10 +85,10 @@ class Province{
 //统计全国数据
 public void Sum(Hashtable<String,Province> hashtable) {
     Province nation = new Province("全国");
-	Set set = hashtable.keySet();
-	Iterator iterator = set.iterator();
+    Set set = hashtable.keySet();
+    Iterator iterator = set.iterator();
 	
-	//遍历哈希表
+    //遍历哈希表
     while(iterator.hasNext()) {
         Object keys = iterator.next();
         nation.ip += hashtable.get(keys).getIp();

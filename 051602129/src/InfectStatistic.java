@@ -388,7 +388,7 @@ class InfectStatistic {
      */
     public String processCountryData(ArrayList<String> types){
         String result = new String();
-        int[] num = new int[type.size()+1];
+        int[] num = new int[types.size()+1];
         Set<String> provinceNames = data.keySet();
         for (String provinceName : provinceNames){
             HashMap<String,Integer> temp = data.get(provinceName);
@@ -513,7 +513,9 @@ class InfectStatistic {
         if (province.keySet().contains(true)){
             return province.get(true);
         }
-        return new ArrayList(data.keySet());
+        ArrayList re = new ArrayList(data.keySet());
+        re.add("全国");
+        return re;
     }
 
     /**

@@ -1,7 +1,12 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 /**
  * InfectStatistic
@@ -22,16 +27,17 @@ class InfectStatistic {
 	String date;  //指定日期
 	
 	//-type参数相关
-	boolean hastype=false;  //记录是否传入-type参数
+	boolean hasType=false;  //记录是否传入-type参数
 	String[] type=new String[4]; //记录-type相关参数值
 	String[] typeStrings = {"感染患者", "疑似患者", "治愈", "死亡"}; //具体患者类型
 	
 	//-province参数相关
-	boolean hasprovince=false; //记录是否传入-province参数
+	boolean hasProvince=false; //记录是否传入-province参数
 	int[] province = new int[32];  //记录-province相关参数值
 	String[] provinceStrings = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西",
 		"贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", 
 		"宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};  //具体省份
+	int[] existProvince=new int[32];  //记录日志文档中是否有对应省份
 	
 	/*
 	 * 使用二维数组存储疫情数据，一维代表省份，二维代表各省份患者类型数据
@@ -43,12 +49,14 @@ class InfectStatistic {
 	/**
 	 * 主函数
 	 * @param args
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException, IOException {
 		InfectStatistic infectStatistic = new InfectStatistic();
 		infectStatistic.resolveCmd(args);
 		infectStatistic.getFiles();
-		
+		infectStatistic.ouputFile();
     }
 	
 	/**
@@ -74,8 +82,8 @@ class InfectStatistic {
 					date=args[i+1];
 					break;
 				case "-type":  //将-type选项后面的参数存入type[]数组
-					hastype=true;
-					for(int k=0;;i++,k++) {
+					hasType=true;
+					/*for(int k=0;;i++,k++) {
 						if (i+1<args.length) {
 							if (!args[i+1].matches("-.*")) {
 								type[k]=args[i+1];
@@ -83,10 +91,10 @@ class InfectStatistic {
 								break;
 						} else
 							break;
-					}
+					}*/
 					break;
 				case "-province":
-					hasprovince=true;
+					hasProvince=true;
 					resolveProvince(i);
 					break;
 				}
@@ -165,7 +173,7 @@ class InfectStatistic {
      *   6、<省> 治愈 n人
      *   7、<省> 疑似患者 确诊感染 n人
      *   8、<省> 排除 疑似患者 n人
-     *   感染患者：ip， 疑似患者：sp， 治愈：cure， 死亡：dead
+              *   感染患者：ip， 疑似患者：sp， 治愈：cure， 死亡：dead
      */
     public void handleFile(String line) {
     	String[] array=line.split(" ");
@@ -216,6 +224,8 @@ class InfectStatistic {
         	if (str1.equals(provinceStrings[i])) {  //匹配省份
         		allStatistic[0][0]+=Integer.parseInt(n);  //全国感染患者增加
         		allStatistic[i][0]+=Integer.parseInt(n);  //对应省份的感染患者增加
+        		
+        		existProvince[i]=1;  //记录该省份存在疫情相关情况
         	}
         }
     }
@@ -229,6 +239,8 @@ class InfectStatistic {
         	if (str1.equals(provinceStrings[i])) {  //匹配省份
         		allStatistic[0][1]+=Integer.parseInt(n);  //全国感染患者增加
         		allStatistic[i][1]+=Integer.parseInt(n);  //对应省份的感染患者增加
+        		
+        		existProvince[i]=1;  //记录该省份存在疫情相关情况
         	}
         }
     }
@@ -244,6 +256,8 @@ class InfectStatistic {
         	}
         	if (str2.equals(provinceStrings[i])) {  //匹配省份二
         	    allStatistic[i][0]+=Integer.parseInt(n);  //流入省份感染患者增加
+        	    
+        	    existProvince[i]=1;  //记录该省份存在疫情相关情况
         	}
         }
     }
@@ -259,6 +273,8 @@ class InfectStatistic {
         	}
         	if (str2.equals(provinceStrings[i])) {
         	    allStatistic[i][1]+=Integer.parseInt(n);  //流入省份疑似患者增加
+        	    
+        	    existProvince[i]=1;  //记录该省份存在疫情相关情况
         	}
         }
     }
@@ -275,6 +291,8 @@ class InfectStatistic {
         		
         		allStatistic[0][1]-=Integer.parseInt(n);  //全国疑似患者减少
         		allStatistic[i][1]-=Integer.parseInt(n);  //对应省份疑似患者减少
+        		
+        		existProvince[i]=1;  //记录该省份存在疫情相关情况
         	}
         }
     }
@@ -291,6 +309,8 @@ class InfectStatistic {
         		
         		allStatistic[0][0]-=Integer.parseInt(n);  //全国感染患者减少
         		allStatistic[i][0]-=Integer.parseInt(n);  //对应省份的感染患者减少
+        		
+        		existProvince[i]=1;  //记录该省份存在疫情相关情况
         	}
         }
     }
@@ -307,6 +327,8 @@ class InfectStatistic {
         		
         		allStatistic[0][0]-=Integer.parseInt(n);  //全国感染患者减少
         		allStatistic[i][0]-=Integer.parseInt(n);  //对应省份的感染患者减少
+        		
+        		existProvince[i]=1;  //记录该省份存在疫情相关情况
         	}
         }
 	}
@@ -320,9 +342,52 @@ class InfectStatistic {
         	if (str1.equals(provinceStrings[i])) {  //匹配省份       		
         		allStatistic[0][1]-=Integer.parseInt(n);  //全国疑似患者减少
         		allStatistic[i][1]-=Integer.parseInt(n);  //对应省份的疑似患者减少
+        		
+        		existProvince[i]=1;  //记录该省份存在疫情相关情况
         	}
         }
 	}
+	
+	/*
+	 * 按要求输出到指定文件
+	 */
+	@SuppressWarnings("resource")
+	public void ouputFile() throws IOException, FileNotFoundException {
+		existProvince[0]=1;  //将全国存在疫情情况置为1
+		BufferedWriter bw=new BufferedWriter
+			(new OutputStreamWriter(new FileOutputStream(resultPath), "UTF-8"));
+		if (!hasProvince) {
+			for (int i=0; i<provinceStrings.length; i++) {
+				if (existProvince[i]==1) {
+					bw.write(provinceStrings[i]+" ");
+			        if (!hasType) {
+				    //全部输出
+			            for (int j=0; j<type.length; j++) {
+			            	bw.write(typeStrings[j]+allStatistic[i][j]+"人 ");
+			            }
+			        } else {
+				    //按传入的Type参数输出相对应类型
+			        }
+			        bw.write("\n");
+				}
+				
+			}
+			
+		} else {
+			for (int i=0; i<provinceStrings.length; i++) {
+				if (!hasType) {
+					//输出相应省份全部类型患者数据
+				} else {
+					//输出相应省份相应类型患者数据
+				}
+			}
+			
+		}
+		bw.write("// 该文档并非真实数据，仅供测试使用");
+		bw.flush();
+		bw.close();
+	}
+	
 
 }
 

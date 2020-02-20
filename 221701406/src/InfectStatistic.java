@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 /**
  * InfectStatistic
@@ -17,23 +19,31 @@ import java.io.OutputStreamWriter;
  * @since xxx
  */
 class InfectStatistic {
+	private static final int PROVINCE_NUM=32; //省份数
+	private static final int TYPE_NUM=4;  //患者类型数
     String[] args;  //接收命令行参数
 	
+    //-log参数相关
+    boolean hasLog=false;  //记录是否传入-log参数
 	String logPath;  //日志文件路径
+	
+	//-out参数相关
+	boolean hasOut=false;  //记录是否传入-out参数
 	String resultPath;  //输出文件路径
 	
 	//-date参数相关
-	boolean hasDate=false; //记录是否记录-date参数
+	boolean hasDate=false; //记录是否传入-date参数
 	String date;  //指定日期
+	SimpleDateFormat format=new SimpleDateFormat("yyyy-MM-dd");  //-date参数的正确格式
 	
 	//-type参数相关
 	boolean hasType=false;  //记录是否传入-type参数
-	boolean[] type = new boolean[4];//用于记录传入的-type参数
+	boolean[] type = new boolean[TYPE_NUM];//用于记录传入的-type参数
 	String[] typeStrings = {"感染患者", "疑似患者", "治愈", "死亡"}; //具体患者类型
 	
 	//-province参数相关
 	boolean hasProvince=false; //记录是否传入-province参数
-	boolean[] province=new boolean[32];  //记录-province相关参数值
+	boolean[] province=new boolean[PROVINCE_NUM];  //记录-province相关参数值
 	String[] provinceStrings = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西",
 		"贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", 
 		"宁夏", "青海", "山东", "山西", "陕西", "上海", "四川", "天津", "西藏", "新疆", "云南", "浙江"};  //具体省份
@@ -44,7 +54,7 @@ class InfectStatistic {
 	 * 省份和provinceStrings数组中省份顺序相对应
 	 * 患者类型按顺序分别为:ip,sp,cure,dead
 	 */
-	int[][] allStatistic=new int[32][4];
+	int[][] allStatistic=new int[PROVINCE_NUM][TYPE_NUM];
 	
 	/**
 	 * 主函数
@@ -63,23 +73,43 @@ class InfectStatistic {
 	 * 解析命令行参数
 	 * @param args
 	 */
-	public boolean resolveCmd(String[] args) {
+	public void resolveCmd(String[] args) {
 		if(!args[0].equals("list")) {  
-		    System.out.println("输入的命令有误！");
-		    return false;
+		    System.out.println("输入的命令有误，开头不是list命令！");
+		    System.exit(0);
 		}
 			
 		for (int i=0; i<args.length; i++) {
 			switch (args[i]) {
 				case "-log":
-					logPath =args[i+1];
+					hasLog=true;
+					if(args[i+1].matches("^[A-z]:\\\\(.+?\\\\)*$")) {
+					    logPath=args[i+1];
+					} else {
+						System.out.println("-log选项的参数输入有误，请重新输入！");
+						System.exit(0);
+					}
 					break;
 				case "-out":
-					resultPath=args[i+1];
+					hasOut=true;
+					if(args[i+1].matches("^[A-z]:\\\\(\\S+)+(\\.txt)$")) { 
+					    resultPath=args[i+1];
+					} else {
+						System.out.println("-out选项的参数输入有误，请重新输入！");
+						System.exit(0);
+					}
 					break;
-				case "-date":
+				case "-date":					
+				try {
 					hasDate=true;
 					date=args[i+1];
+					format.setLenient(false);
+					format.parse(date);					
+				} catch (ParseException e) {
+					e.printStackTrace();
+					System.out.println("日期格式错误，请重新输入！");
+					System.exit(0);
+				}
 					break;
 				case "-type":  //将-type选项后面的参数存入type[]数组
 					hasType=true;
@@ -89,18 +119,26 @@ class InfectStatistic {
 					hasProvince=true;
 					resolveProvince(i, args);
 					break;
+				default:
+					break;
 				}
 			}
+		//判断-log,-out选项是否存在
+		if (!hasLog||!hasOut) {
+			System.out.println("-log,-out选项必须存在，请重新输入命令！");
+			System.exit(0);
+		}
+		
 		
 		//test
-		System.out.println(date+"\n"+logPath+"\n"+resultPath);
+		/*System.out.println(date+"\n"+logPath+"\n"+resultPath);
 		for (int k=0; k<type.length; k++) {
 			System.out.println(type[k]);
 		}
 		for (int j=0; j<province.length; j++) {
 			System.out.println(province[j]);
-		}
-			return false;
+		}*/
+			return;
 	}
 	
 	/*
@@ -149,24 +187,40 @@ class InfectStatistic {
 	 public void getFiles() {
 	     File file = new File(logPath);
 	     File[] allFile = file.listFiles();  //获取目录下的所有文件
-         if (hasDate) {
+         if (hasDate) {  //读取-date选项指定的日期及其之前的所有文件
+        	 
+        	//判断-date提供的日期是否早于日志最早一天的日期
+        	 String earliestDate=new String(allFile[0].getName());                      
+             if ((earliestDate.compareTo(date+".log.txt"))>0) {
+                 System.out.println("日期早于最早提供日志的时间，请重新输入！");
+                 return;
+             }
+             //判断-date提供的日期是否晚于日志最晚一天的日期
+             String latestDate=new String(allFile[allFile.length-1].getName());                      
+             if ((latestDate.compareTo(date+".log.txt"))<0) {
+                 System.out.println("日期晚于最后更新的日志时间，请重新输入！");
+                 return;
+             }
+             
+        	 //读取文件
         	 for (int i=0; i<allFile.length; i++) {
         		 if (allFile[i].getName().compareTo(date+".log.txt")<=0) {
+        			 //test
         			 //System.out.println(allFile[i].getName());
         			 readFile(logPath+allFile[i].getName());
         		 } 
         	 }
-         } else {
+         } else {  //没有-date选项，读取所有文件
         	 for (int j=0; j<allFile.length; j++) {
         		 readFile(logPath+allFile[j].getName());
         	 }
          }
-         for (int i=0; i<32; i++) {
+         //test
+        /* for (int i=0; i<32; i++) {
  			for (int j=0; j<4; j++) {
  				System.out.print(allStatistic[i][j]);
- 			}
- 			
- 		}
+ 			}	
+ 		}*/
 	 }
 	 
 	 /*
@@ -399,8 +453,7 @@ class InfectStatistic {
 				        }
 			        }
 			        bw.write("\n");
-				}
-				
+				}	
 			}
 			
 		} else {
@@ -420,7 +473,6 @@ class InfectStatistic {
 					}
 					bw.write("\n");
 				}
-				
 			}	
 		}
 		bw.write("// 该文档并非真实数据，仅供测试使用");

@@ -146,7 +146,7 @@ class InfectStatistic {
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
-	                } else { System.out.println(log + "/" +list[i] + "不为标准文件，或者日期超过最晚日期。"); }
+	                } //else { System.out.println(log + "/" +list[i] + "不为标准文件，或者日期超过最晚日期。"); }
 				}
 				if (outputprovince.size() == 1) 
 	    			outputprovince.add("全国");

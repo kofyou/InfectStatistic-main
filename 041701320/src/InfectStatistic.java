@@ -234,9 +234,12 @@ class InfectStatistic{
 			while(i<35) {
 				if(situation[i][0]==1) {
 					fw.write(province[i]+" ");
-					
-					
-					
+					for(int j=0,k=1;j<type_order.length;j++) {
+						if(type_order[j]==k) {
+							fw.write(type[j]+situation[i][j+1]+"人");
+							k++;
+						}
+					}			
 				}
 				fw.write("\n");
 				i++;

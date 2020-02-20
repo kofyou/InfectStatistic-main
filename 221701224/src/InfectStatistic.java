@@ -25,7 +25,7 @@ class InfectStatistic {
 	public static String log_need;//需要被解析的日志文件路径
 	public static String out_name;//
 	public static String[] log_list;//读取到的日志文件列表,并且按照日期从小到大排序
-	public static int[] type_num= {1,2,3,4};
+	public static int[] type_num= {1,2,3,4};//决定类型的输出顺序。
 	/*
 	 * ip代表感染患者，sp代表疑似患者，cure代表治愈，dead代表死亡
 	 */
@@ -165,16 +165,6 @@ public static void judgeCommandLine(String[] str) {
 			}
 			
 		}
-	}
-	if("".equals(log_route))
-	{
-		System.out.println("命令行错误，没有输入-log！");
-		System.exit(0);
-	}
-	if("".equals(out_route))
-	{
-		System.out.println("命令行错误，没有输入-out！");
-		System.exit(0);
 	}
 }
 public static boolean isLegalDate(String str) {
@@ -426,6 +416,36 @@ public static void excludeSP(String str) {
 	}
 }
 
+public static void balance() {
+	if("".equals(log_route))
+	{
+		System.out.println("命令行错误，没有输入-log！");
+		System.exit(0);
+	}
+	if("".equals(out_route))
+	{
+		System.out.println("命令行错误，没有输入-out！");
+		System.exit(0);
+	}
+	if(log_list==null)
+	{
+		getLogList(log_route);
+		log_need=log_list[0];
+	}
+	/*
+	 * 如果未读到-type 对type_num进行初始化
+	 */
+	int t=0;
+	for(int i=0;i<type_num.length;i++)
+	t+=type_num[i];
+	if(t==0)
+	{
+		for(int i=0;i<type_num.length;i++)
+		type_num[i]=i+1;
+	}
+	
+}
+
 public static void outputFile(String str) {
 	FileWriter fwriter = null;
 	try {
@@ -440,7 +460,7 @@ public static void outputFile(String str) {
 					fwriter.write(province_name[i] + " ");
 					for(j=0;j<type_num.length;j++)
 					{
-						for(k=0;k>type_num.length;k++)
+						for(k=0;k<type_num.length;k++)
 						{
 							if(type_num[k]==j+1)
 							{
@@ -516,15 +536,19 @@ public static void main(String[] args) {
     	*/
 	province_select[0]=-1;
     judgeCommandLine(args);
+    balance();
+   // System.out.println(log_list);
+    //System.exit(0);
     for(int i=0;i<log_list.length;i++)
     {
-    	if(log_need.compareTo(log_list[i])>=0)
+    	if(log_need.compareTo(log_list[i])<=0)
     	{
+    		//System.out.println(log_list[i]);
     		getTextContent(log_list[i]);
     	}
     	else break;
     }
-    //System.out.println(out_route);
+    //System.out.println(log_list[0]);
     outputFile(out_route);
     	
     }

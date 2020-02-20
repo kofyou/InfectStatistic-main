@@ -163,7 +163,11 @@ class InfectStatistic {
 			cmd = CommandAnalysis.analysis(list);
 			
 			FileControl file = new FileControl();
+			if(cmd.log_value.equals("") || cmd.out_value.equals("")) {
+     		}else {
+	        file.readLog(cmd.log_value,cmd.date_value);
 	        //file.writeTxt(cmd,cmd.type_value,cmd.province_value);
+     		}
      	}
 	}
 	
@@ -409,9 +413,148 @@ class InfectStatistic {
 
  		//按要求输出到文件
  		public void writeTxt(Command command,ArrayList<String> type,ArrayList<String> province) throws IOException {
+ 			String path = command.out_value;
+ 			File file = new File(path);
+ 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),"UTF-8"));
  			
- 			//待完善
+ 			//有-province,没有-type
+ 			if(command.province && (!command.type)) {
+ 				for(int i = 0;i < province.size();i++) {
+                    if(province.get(i).equals("全国")) {
+                    	bw.write("全国" +
+ 	 		        			" 感染患者" + all_ip + "人" +
+ 	 		        			" 疑似患者" + all_sp + "人" + 
+ 	 		       			    " 治愈" + all_cure + "人" + 
+ 	 		        			" 死亡" + all_dead + "人");
+ 	 						bw.write("\n");
+                    }
+                }
+                for(int j = 0;j < 31;j++) {
+                    for(int i = 0;i < province.size();i++) {
+                        if(provinces[j].equals(province.get(i))) {
+                        	bw.write(provinces[j] +
+     	 		        			" 感染患者" + ip[j] + "人" +
+     	 		        			" 疑似患者" + sp[j] + "人" + 
+     	 		       			    " 治愈" + cure[j] + "人" + 
+     	 		        			" 死亡" + dead[j] + "人");
+     	 						bw.write("\n");
+                        }
+                    }
+                }
+ 			}
  			
+ 			//有-province,有-type
+            if(command.province && command.type) {
+            	for(int i = 0;i < province.size();i++) {
+                    if(province.get(i).equals("全国")) {
+                        String total="全国";
+                        for (int j = 0; j < type.size(); j++) {
+                            if (type.get(j).equals("ip")) {
+                                total += " 感染患者" + all_ip + "人 ";
+                            }
+                            if (type.get(j).equals("sp")) {
+                                total += " 疑似患者" + all_sp + "人 ";
+                            }
+                            if (type.get(j).equals("cure")) {
+                                total += " 治愈" + all_cure + "人 ";
+                            }
+                            if (type.get(j).equals("dead")) {
+                                total += " 死亡" + all_dead + "人 ";
+                            }
+                        }
+                        total += "\n";
+                        bw.write(total);
+                    }
+                }
+                for(int j = 0;j < 31;j++) {
+                    for(int i = 0;i < province.size();i++) {
+                        if(provinces[j].equals(province.get(i))) {
+                            String prov = provinces[j];
+                            for (int k = 0;k < type.size();k++) {
+                                if (type.get(k).equals("ip")) {
+                                    prov += " 感染患者" + ip[j] + "人 ";
+                                }
+                                if (type.get(k).equals("sp")) {
+                                    prov += " 疑似患者" + sp[j] + "人 ";
+                                }
+                                if (type.get(k).equals("cure")) {
+                                    prov += " 治愈" + cure[j] + "人 ";
+                                }
+                                if (type.get(k).equals("dead")) {
+                                    prov += " 死亡" + dead[j] + "人 ";
+                                }
+                            }
+                            prov += "\n";
+                            bw.write(prov);
+                        }
+                    }
+                }
+ 			}
+ 										
+	        //没有-province,没有-type
+	        if((!command.province) && (!command.type)) {
+	        	bw.write("全国" +
+		        		" 感染患者" + all_ip + "人" +
+		        		" 疑似患者" + all_sp + "人" + 
+		       		    " 治愈" + all_cure + "人" + 
+		        		" 死亡" + all_dead + "人");
+						bw.write("\n");
+                for (int i = 0; i < 31; i++) {
+ 		            if (is_province[i]) {
+ 		            	bw.write(provinces[i] +
+ 	 		        			" 感染患者" + ip[i] + "人" +
+ 	 		        			" 疑似患者" + sp[i] + "人" + 
+ 	 		       			    " 治愈" + cure[i] + "人" + 
+ 	 		        			" 死亡" + dead[i] + "人");
+ 	 						bw.write("\n");
+ 			        }
+ 		        }
+	        }
+	        
+	        //没有-province，有-type
+            if((!command.province) && command.type) {
+ 				String total = "全国";
+                for (int i = 0;i < type.size();i++) {
+                     if (type.get(i).equals("ip")) {
+                         total += " 感染患者" + all_ip + "人 ";
+                     }
+                     if (type.get(i).equals("sp")) {
+                         total += " 疑似患者" + all_sp + "人 ";
+                     }
+ 		             if (type.get(i).equals("cure")) {
+                         total += " 治愈" + all_cure + "人 ";
+                     }
+                     if (type.get(i).equals("dead")) {
+                         total += " 死亡" + all_dead + "人 ";
+                     }
+                 }
+                 total += "\n";
+                 bw.write(total);
+                 for (int i = 0;i < 31;i++) {
+                     if (is_province[i]) {
+                         String prov = provinces[i];
+                         for (int j = 0;j< type.size();j++) {
+                             if (type.get(j).equals("ip")) {
+                                 prov += " 感染患者" + ip[i] + "人 ";
+                             }
+                             if (type.get(j).equals("sp")) {
+                                 prov += " 疑似患者" + sp[i] + "人 ";
+                             }
+                             if (type.get(j).equals("cure")) {
+                                 prov += " 治愈" + cure[i] + "人 ";
+                             }
+                             if (type.get(j).equals("dead")) {
+                                 prov += " 死亡" + dead[i] + "人 ";
+                             }
+                         }
+                         prov += "\n";
+                         bw.write(prov);
+                     }
+                 }
+            }
+ 			bw.write("//该文档并非真实数据，仅供测试使用\n");
+ 			bw.flush();
+ 			bw.close();	
  		}	
 	}
 	    

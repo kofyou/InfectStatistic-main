@@ -64,7 +64,7 @@ class InfectStatistic {
 	
 	public static void readfile(String file) {
 		try {
-			BufferedReader bReader = new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
+			BufferedReader bReader=new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
 			String str="";
 			while((str=bReader.readLine())!=null) {
 				readfile2(str);

@@ -215,6 +215,7 @@ public class InfectStatistic {
                     bw.write(keys.get(i)+"  "+sbf2.toString());
                     bw.newLine();
                 }
+                bw.write("// 该文档并非真实数据，仅供测试使用");
                 bw.close();
             } else if(type.size()>0 && province.size()>0) {
                 //既有type，也有province  //先输出全国的
@@ -243,7 +244,7 @@ public class InfectStatistic {
                     bw.newLine();
 
                 }
-
+                bw.write("// 该文档并非真实数据，仅供测试使用");
                 bw.close();
                 //不指定type，则列出所有情况
             } else if(type.size()<1 && province.size()>0) {
@@ -269,6 +270,7 @@ public class InfectStatistic {
                         bw.newLine();
                     }
                 }
+                bw.write("// 该文档并非真实数据，仅供测试使用");
                 bw.close();
             } else {
                 //既没有type也没有province
@@ -284,6 +286,7 @@ public class InfectStatistic {
                             +"人  "+Lib.curestr +tempMap.get(Lib.curestr)+"人  "+Lib.deadstr +tempMap.get(Lib.deadstr)+"人");
                     bw.newLine();
                 }
+                bw.write("// 该文档并非真实数据，仅供测试使用");
                 bw.close();
             }
         }

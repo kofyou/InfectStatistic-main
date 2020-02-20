@@ -128,7 +128,7 @@ class InfectStatistic {
 		    "陕西","上海","四川","天津","西藏","新疆","云南","浙江",
 	};
 	
-	//初始化HashMap
+	//初始化HashMap，建立对应关系
     public void init() {
     	provinceMap.clear();
     	for(String strProvinceName:AllProvinceName) {
@@ -147,7 +147,7 @@ class InfectStatistic {
     		String date = new String("");
     		//int[] type = new int[] {1,1,1,1};//默认输出四种人群。更新：难以按指定顺序输出。已修改
     		
-    		//默认依ip,sp,cure,dead顺序输出四种人群
+    		//默认依ip,sp,cure,dead顺序输出四种人群，读取-type参数时重置为空
     		ArrayList<String> type = new ArrayList<String>();
     		type.add("ip");
     		type.add("sp");
@@ -195,22 +195,6 @@ class InfectStatistic {
     
     //执行输入的命令
     public void excuteCmd(String logPath,String outPath,String date,ArrayList<String> type,boolean isProvinceSpecified) {
-    	
-    	/*
-    	System.out.println("-----In excuteCmd-----");
-    	System.out.println(logPath);
-    	System.out.println(outPath);
-    	System.out.println(date);
-    	
-    	System.out.print("type.size=");
-    	System.out.println(type.size());
-    	for(int i=0;i<type.size();i++) {
-    		System.out.print(type.get(i));
-    	}
-    	
-    	System.out.println();
-    	System.out.println(isProvinceSpecified);
-		*/
     	
     	if(logPath.equals("")||outPath.equals("")) {
     		System.out.println("输入、输出路径均不能为空！");
@@ -299,7 +283,6 @@ class InfectStatistic {
         	line = bufferedReader.readLine();
         	if(line!=null && !line.startsWith("//")) {//忽略空行和注释
         		
-        		//System.out.println(line);
         		//line为当前行
         		String [] wordString = line.split("\\s+");//按空格分割当前行
         		
@@ -378,13 +361,11 @@ class InfectStatistic {
     	outStr += "// 该文档并非真实数据，仅供测试使用";
     	
     	File file = new File(outPath);
-
     	BufferedWriter writer = null;
     	FileOutputStream writerStream = new FileOutputStream(file);
     	writer = new BufferedWriter(new OutputStreamWriter(writerStream, "UTF-8"));
 
     	StringBuilder strBuild = new StringBuilder(outStr);
-
     	writer.write(strBuild.toString());
     	
     	writer.flush();
@@ -417,12 +398,22 @@ class InfectStatistic {
     }
     
     /*
+     * 输入String日期d1，d2，比较两个日期的先后
      * 当d1早于d2，dateCompare返回-1
      * 当d1等于d2，dateCompare返回0
      * 当d1晚于d2，dateCompare返回1
      */
     public int dateCompare(String date1,String date2) {
-    	
+
+        int res=date1.compareTo(date2);
+        if(res>0)
+            return 1;
+        else if(res==0)
+        	return 0;
+        else
+        	return -1;
+
+    	/*
     	//将yyyy-mm-dd分解成(int)year,(int)month,(int)day
     	int y1 = Integer.parseInt(date1.substring(0,4));
     	int y2 = Integer.parseInt(date2.substring(0,4));
@@ -450,6 +441,7 @@ class InfectStatistic {
     		else return -1;
     	}
     	else return -1;
+    	*/
     }
     
     //输入诸如“24人”的字符串，返回int人数
@@ -466,14 +458,6 @@ class InfectStatistic {
     public static void main(String[] args) {
     	InfectStatistic infectStatistic = new InfectStatistic();
     	infectStatistic.init();
-    	
-    	/*
-    	for(String i:args) {
-    		System.out.println(i);
-    	}
-    	System.out.println(args.length);
-    	*/
-    	
     	infectStatistic.processCmd(args);
     }
 }

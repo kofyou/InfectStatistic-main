@@ -200,7 +200,7 @@ void  analysis::Out()
 	}
 	for (int i = 1;i < 36;i++)
 	{
-		if (mi1.count(p[i]) || (num == 0 && mi3.count(p[i])) || i == 1)
+		if (mi1.count(p[i]) || (num == 0 &&(mi3.count(p[i]) || i == 1))) 
 		{
 			cout << p[i] << ' ';
 			for (int j = 1;j < num1;j++)

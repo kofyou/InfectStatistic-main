@@ -37,6 +37,78 @@ class InfectStatistic{
 	//类型输出顺序，默认ip,sp,cure,dead
 	public int type_order[]= {1,2,3,4};
 	public String[] type= {"感染患者", "疑似患者", "治愈", "死亡"};
+
+	//处理命令行
+	class ProcessCmd{
+		String[] args;//存储命令行
+		
+		ProcessCmd(String[] args){
+			this.args=args;
+		}
+		
+		//处理参数
+		public boolean ProcessPara(){
+			
+			//判断命令是否正确	
+			if(!args[0].equals("list")){
+				System.out.println("命令错误");
+				return false;
+			}
+		
+			int i;
+			for(i = 1;i<args.length;i++){
+				//读取-log
+				if(args[i].equals("-log")){
+					getPathIn(++i);
+					
+				} 
+				//读取-out
+				else if(args[i].equals("-out")){ 
+					getPathOut(++i);
+					
+				} 
+				//读取-date
+				else if(args[i].equals("-date")){
+					getDate(++i);
+	
+				} 
+				//设置-type输出顺序
+				else if(args[i].equals("-type")){ 
+					setType(++i); 
+					
+				} 
+				//读取-province
+				else if(args[i].equals("-province")){ 
+					getProvince(++i);
+	
+				}
+			}
+			return true;
+		}	
+	
+		public void getPathIn(int i){
+			
+		}
+		public void getPathOut(int i){
+			
+		}
+		public void getDate(int i){
+			
+		}
+		public void setType(int i){
+			
+		}
+		public void getProvince(int i){
+			
+		}
+		
+	}
+	
+	//处理文件
+	public void ProcessFile() {
+		
+	}
+
 	
     public static void main(String[] args) {
     	

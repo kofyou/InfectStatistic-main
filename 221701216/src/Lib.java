@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Lib {
-    private Pattern[] p = {
+    private Pattern[] p = {//匹配正则表达式模式
             Pattern.compile("(.+) 新增 感染患者 (\\d+)人"),
             Pattern.compile("(.+) 新增 疑似患者 (\\d+)人"),
             Pattern.compile("(.+) 感染患者 流入 (.*) (\\d+)人"),
@@ -22,15 +22,15 @@ public class Lib {
 
     private HashMap<String, Integer> statIp = new HashMap<>(), statSp = new HashMap<>(), statCure = new HashMap<>(), statDead = new HashMap<>();
     private int totalIp = 0, totalSp = 0, totalCure = 0, totalDead = 0;
-    private Set<String> provinceSet = new HashSet<>();
+    private Set<String> provinceSet = new HashSet<>();//哈希表存储
 
-    public void loadData(String path, String endDate) {
+    public void loadData(String path, String endDate) {//读取截止日期前的文本
         File file = new File(path);
         File[] files = file.listFiles();
-        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");//日期格式
         Date eDate;
         try {
-            eDate = fmt.parse(endDate);
+            eDate = fmt.parse(endDate);//解析截止日期
         } catch (ParseException e) {
             eDate = new Date();
 
@@ -38,13 +38,13 @@ public class Lib {
         if (files != null) {
             for (File f : files) {
                 String filename = f.getName();
-                if (f.isFile() && filename.endsWith(".txt")) {
+                if (f.isFile() && filename.endsWith(".txt")) {//索引
                     String shortName = filename.substring(filename.lastIndexOf(File.separator) + 1);
                     String dateStr = shortName.substring(0, shortName.indexOf("."));
                     try {
-                        Date curDate = fmt.parse(dateStr);
+                        Date curDate = fmt.parse(dateStr);//解析当前日期
                         if (curDate.getTime() <= eDate.getTime()) {
-                            loadFile(f);
+                            loadFile(f);//当前日期小于截止日期则读取文本
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -54,14 +54,14 @@ public class Lib {
         }
     }
 
-    public void Print(String outFile, List<String> types, List<String> provinces) {
+    public void Print(String outFile, List<String> types, List<String> provinces) {//输出统计文本
         boolean showNational = false;
         if (types.size() == 0) {
             types.add("ip");
             types.add("sp");
             types.add("cure");
             types.add("dead");
-        }
+        }//添加类型
         if (provinces.size() == 0) {
             showNational = true;
             provinces.addAll(provinceSet);
@@ -69,7 +69,7 @@ public class Lib {
             if (provinces.contains("全国")) {
                 showNational = true;
                 provinces.remove("全国");
-            }
+            }//省份不包括全国
         }
         provinces.sort(Collator.getInstance(java.util.Locale.CHINA));
         try {
@@ -77,7 +77,7 @@ public class Lib {
             PrintWriter pw = new PrintWriter(f);
             if (showNational) {
                 StringBuilder n = new StringBuilder("全国");
-                for (String t : types) {
+                for (String t : types) {//选择显示类型
                     switch (t) {
                         case "ip":
                             n.append(" 感染患者").append(totalIp).append("人");
@@ -95,7 +95,7 @@ public class Lib {
                 }
                 pw.println(n.toString());
             }
-            for (String p : provinces) {
+            for (String p : provinces) {//选择显示省份
                 StringBuilder n = new StringBuilder(p);
                 for (String t : types) {
                     switch (t) {
@@ -136,7 +136,7 @@ public class Lib {
         }
     }
 
-    private void process(String str) {
+    private void process(String str) {//疫情变化情况统计
         for (int i = 0; i < p.length; i++) {
             Matcher m = p[i].matcher(str);
             if (m.matches()) {
@@ -155,55 +155,55 @@ public class Lib {
         }
     }
 
-    private void operate(int type, String province, int num) {
+    private void operate(int type, String province, int num) {//患者身体变化情况
         int ip, sp, cure, dead;
         provinceSet.add(province);
-        if (type == 0) {
+        if (type == 0) {//感染患者增加
             ip = statIp.getOrDefault(province, 0);
             statIp.put(province, ip + num);
             totalIp += num;
-        } else if (type == 1) {
+        } else if (type == 1) {//疑似患者增加
             sp = statSp.getOrDefault(province, 0);
             statSp.put(province, sp + num);
             totalSp += num;
-        } else if (type == 4) {
+        } else if (type == 4) {//感染患者死亡
             ip = statIp.getOrDefault(province, 0);
             statIp.put(province, ip - num);
             totalIp -= num;
             dead = statDead.getOrDefault(province, 0);
             statDead.put(province, dead + num);
             totalDead += num;
-        } else if (type == 5) {
+        } else if (type == 5) {//感染患者治愈
             ip = statIp.getOrDefault(province, 0);
             statIp.put(province, ip - num);
             totalIp -= num;
             cure = statCure.getOrDefault(province, 0);
             statCure.put(province, cure + num);
             totalCure += num;
-        } else if (type == 6) {
+        } else if (type == 6) {//疑似患者确诊
             ip = statIp.getOrDefault(province, 0);
             statIp.put(province, ip + num);
             totalIp += num;
             sp = statSp.getOrDefault(province, 0);
             statSp.put(province, sp - num);
             totalSp -= num;
-        } else if (type == 7) {
+        } else if (type == 7) {//疑似患者排除
             sp = statSp.getOrDefault(province, 0);
             statSp.put(province, sp - num);
             totalSp -= num;
         }
     }
 
-    private void operate(int type, String outProvince, String inProvince, int num) {
+    private void operate(int type, String outProvince, String inProvince, int num) {//患者流动情况
         int ip, sp;
         provinceSet.add(inProvince);
         provinceSet.add(outProvince);
-        if (type == 2) {
+        if (type == 2) {//感染患者
             ip = statIp.getOrDefault(outProvince, 0);
             statIp.put(outProvince, ip - num);
             ip = statIp.getOrDefault(inProvince, 0);
             statIp.put(inProvince, ip + num);
-        } else if (type == 3) {
+        } else if (type == 3) {//疑似患者
             sp = statSp.getOrDefault(outProvince, 0);
             statSp.put(outProvince, sp - num);
             sp = statSp.getOrDefault(inProvince, 0);

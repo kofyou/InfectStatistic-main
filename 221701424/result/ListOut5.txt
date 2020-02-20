@@ -1,0 +1,4 @@
+福建 感染患者 22人  治愈 3人 
+湖北 感染患者 125人  治愈 24人 
+// 该文档并非真实数据，仅供测试使用
+//命令：list -log D:\log\ -out D:\ListOut5.txt -type ip cure -province 福建 湖北

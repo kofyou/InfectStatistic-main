@@ -235,15 +235,18 @@ public:
 
         ///如果未指定省份 先把所有存在的省份加入到带展示省份中
         if (BaseData::provinces.empty()) {
-            printf("%s", "全国");
+            outputCountryData();
             for(int i = 0 ; i < BaseData::meta_data.size() ; i++) {
             	if(BaseData::meta_data[i].exist) {
             		BaseData::provinces.push_back(BaseData::meta_data[i].province);
             	}
             }
         } else if (BaseData::contains("全国")) {
-            printf("%s", "全国");
+            outputCountryData();
         }
+        
+        ofstream outfile;
+        outfile.open("D:\\output.txt", ios::app);
 
         for (it = BaseData::meta_data.begin(); it != BaseData::meta_data.end(); it++) {
 
@@ -252,30 +255,39 @@ public:
 
                 ///如果类型未被指定
                 if (BaseData::types.empty()) {
-                    cout << it->province;
+                	cout << it->province;
+                    outfile << it->province;
                     printf(" 感染患者 %d人 疑似患者%d人 治愈%d人 死亡%d人\n", it->sure_count, it->doubt_count,
-                           it->cure_count, it->dead_count);
+                           it->cure_count, it->dead_count);    
+                    outfile << " 确诊患者" << it->sure_count << "人" << " 疑似患者" << it->doubt_count << "人" << " 治愈" << it->cure_count << "人" << " 死亡" << it->dead_count << "人" << endl; 
+                    
                 } else {
                     cout << it->province;
+                    outfile << it->province;
                     ///根据类型按顺序输出
                     for (int i = 0; i < BaseData::types.size(); i++) {
                         switch (BaseData::types[i]) {
                             case dead:
                                 printf(" 死亡%d人", it->dead_count);
+                                outfile << " 死亡" << it->dead_count << "人"; 
                                 break;
                             case increase_doubt:
                                 printf(" 疑似患者%d人", it->doubt_count);
+                                outfile << " 疑似患者" << it->doubt_count << "人"; 
                                 break;
                             case increase_sure:
                                 printf(" 确诊患者%d人", it->sure_count);
+                                outfile << " 确诊患者" << it->sure_count << "人"; 
                                 break;
                             case cure:
                                 printf(" 治愈%d人", it->cure_count);
+                                outfile << " 治愈" << it->cure_count << "人"; 
                                 break;
                         }
                     }
 
                     printf("\n");
+                    outfile << endl;
                 }
             }
         }
@@ -284,7 +296,6 @@ public:
 private:
     ///根据传入的字符串 读取信息 并将其添加到映射表
     static void getInfoFromString(string data) {
-    	cout << data << endl;
     	
         int first_index = 0;
         int space_index = data.find_first_of(' ');
@@ -487,6 +498,65 @@ private:
 			}
 		}
 	}
+	
+	///输出全国数据 
+	static void outputCountryData() {
+		
+		///计算全国数据
+		int sure_count = 0;
+		int doubt_count = 0;
+		int cure_count = 0;
+		int dead_count = 0; 
+		
+		ofstream outfile;
+   		outfile.open("D:\\output.txt");
+   		
+		for(int i = 0 ; i < BaseData::meta_data.size() ; i++) {
+			if(BaseData::meta_data[i].exist) {
+				sure_count += BaseData::meta_data[i].sure_count;
+				doubt_count += BaseData::meta_data[i].doubt_count;
+				cure_count += BaseData::meta_data[i].cure_count;
+				dead_count += BaseData::meta_data[i].dead_count; 
+			}
+		}
+		
+		printf("%s", "全国");
+        outfile << "全国";
+		
+		 ///如果类型未被指定
+    	if (BaseData::types.empty()) {
+            printf(" 感染患者 %d人 疑似患者%d人 治愈%d人 死亡%d人\n", sure_count, doubt_count,
+            cure_count, dead_count);
+            outfile << " 确诊患者" << sure_count << "人" << " 疑似患者" << doubt_count << "人" << " 治愈" << cure_count << "人" << " 死亡" << dead_count << "人" << endl; 
+            
+        } else {
+            ///根据类型按顺序输出
+            for (int i = 0; i < BaseData::types.size(); i++) {
+                switch (BaseData::types[i]) {
+                    case dead:
+                        printf(" 死亡%d人", dead_count);
+                        outfile << " 死亡" << dead_count << "人"; 
+                        break;
+                    case increase_doubt:
+                    	printf(" 疑似患者%d人", doubt_count);
+                    	outfile << " 疑似患者" << doubt_count << "人"; 
+                    	break;
+                	case increase_sure:
+                   		printf(" 确诊患者%d人", sure_count);
+                   		outfile << " 确诊患者" << sure_count << "人"; 
+                    	break;
+               		case cure:
+                    	printf(" 治愈%d人", cure_count);
+                    	outfile << " 治愈" << cure_count << "人"; 
+                    	break;
+                    }
+                }
+
+            printf("\n");
+	}
+	
+	outfile.close();
+}
 };
 
 

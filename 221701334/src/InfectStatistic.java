@@ -12,9 +12,9 @@ class InfectStatistic {
 	static ArrayList<String> province = new ArrayList<String>(); 
 	static ArrayList<Info> list = new ArrayList<Info>(); 
     public static void main(String[] args) throws IOException,FileNotFoundException {	
-    	path="";
-    	out="";
-    	date="";
+    	path = "";
+    	out = "";
+    	date = "";
     	type = new ArrayList<String>();
     	province = new ArrayList<String>(); 
     	list = new ArrayList<Info>();
@@ -66,12 +66,10 @@ class InfectStatistic {
     public static void readFile(File[] tempList) throws NumberFormatException, IOException {
     	for(int i=0;i<tempList.length;i++) {    		
     		if(tempList[i].isFile()) {
-    			if(!date.equals("")) {
-    				if(tempList[i].getName().toString().substring(0,10).compareTo(date)<0) {
-    					break;
+    			if(!date.equals("")) { 			
+    				if(tempList[i].getName().toString().substring(0,10).compareTo(date)>0) {
+    					break;		
     				}
-//        			if(date.compareTo(tempList[i].getName().toString().substring(0,8))>0)
-//        	    	break;
         		}
     			BufferedReader br = new BufferedReader(  
     				     new UnicodeReader(  

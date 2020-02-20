@@ -89,7 +89,7 @@ class InfectStatistic {
 							BufferedReader br = new BufferedReader(fr);
 							String str = null;
 							while((str = br.readLine())!=null){
-								System.out.println(str);
+//								System.out.println(str);
 								String[] arr = str.split(" ");
 								if (arr[0].equals("//"))
 									break;
@@ -146,7 +146,7 @@ class InfectStatistic {
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
-	                } else { System.out.println(log + "/" +list[i] + "不为标准文件。"); }
+	                } else { System.out.println(log + "/" +list[i] + "不为标准文件，或者日期超过最晚日期。"); }
 				}
 				if (outputprovince.size() == 1) 
 	    			outputprovince.add("全国");
@@ -268,10 +268,41 @@ class InfectStatistic {
 		return;
 	}
 	
-	public static void outPut() {
+	public static void outPut(String[] args) {
 //		for (int i = 0; i<outputprovince.size(); i++)
 //			System.out.println("output开始：" + outputprovince.get(i));
 		String str = new String("");
+		//////////////////////以下根据拼音置换省份//////////////////////
+		List<String> provinceout = new ArrayList<String>();
+		int[] index = {
+				0,0,0,0,0,
+				0,0,0,0,0,
+				0,0,0,0,0,
+				0,0,0,0,0,
+				0,0,0,0,0,
+				0,0,0,0,0,
+				0,0
+		}; 
+//		for (int i = 0; i<outputprovince.size(); i++) {
+//			System.out.println(outputprovince.get(i));
+//		}
+		for (int i = 0; i<outputprovince.size(); i++) {
+			for (int n = 0; n<provincename.length; n++) {
+				if (outputprovince.get(i).equals(provincename[n])) {
+					index[n] = 1;
+//					System.out.println("n = " + n);
+					break;
+				}
+			}
+		}
+		for (int i = 0; i<index.length; i++) {
+			if (index[i] == 1)
+				provinceout.add(provincename[i]);
+		}
+//		for (int i=0; i<provinceout.size(); i++) {
+//			System.out.println("provinceout[" + i + "] = " + provinceout.get(i));
+//		}
+		/////////////////////省份置换结束/////////////////////////
 		if (type.size() == 1) {
 			type.add("ip");
 			type.add("sp");
@@ -279,23 +310,24 @@ class InfectStatistic {
 			type.add("dead");
 		}
 		try {
-			for (int i = 1; i<outputprovince.size(); i++) {
-			str += map.get(outputprovince.get(i)).getname();
+			for (int i = 0; i<provinceout.size(); i++) {
+//				System.out.println("1");
+			str += map.get(provinceout.get(i)).getname();
 //			System.out.println("name");
 			for (int n = 0; n<type.size(); n++) {
 				switch (type.get(n)) {
 			    case "ip":
 //			    	System.out.println("ip");
-		    		str += " 感染患者" + map.get(outputprovince.get(i)).getip() + "人"; break;
+		    		str += " 感染患者" + map.get(provinceout.get(i)).getip() + "人"; break;
 		    	case "sp":
 //			    	System.out.println("sp");
-			    	str += " 疑似患者" + map.get(outputprovince.get(i)).getsp() + "人"; break;
+			    	str += " 疑似患者" + map.get(provinceout.get(i)).getsp() + "人"; break;
 			    case "cure":
 //			    	System.out.println("cure");
-			    	str += " 治愈" + map.get(outputprovince.get(i)).getcure() + "人"; break;
+			    	str += " 治愈" + map.get(provinceout.get(i)).getcure() + "人"; break;
 		    	case "dead":
 //			    	System.out.println("dead");
-			    	str += " 死亡" + map.get(outputprovince.get(i)).getdead() + "人"; break;
+			    	str += " 死亡" + map.get(provinceout.get(i)).getdead() + "人"; break;
 			    }
 			}
 //			System.out.println(str);
@@ -303,6 +335,10 @@ class InfectStatistic {
 		    }
 		}catch (Exception e) {
 			// TODO: handle exception
+		}
+		str += "// 该文档并非真实数据，仅供测试使用\r\n//命令：";
+		for (int i = 0; i<args.length; i++) {
+			str += args[i] + " ";
 		}
 		try {
 			FileOutputStream fos = new FileOutputStream(outpath);
@@ -327,7 +363,7 @@ class InfectStatistic {
         getLogFile(log);
 //    	for (int i=0; i<args.length; i++)
 //    		System.out.println("arg[" + i + "] = " + args[i]);
-    	outPut();
+    	outPut(args);
         return;
     }
 }

@@ -18,7 +18,19 @@ public class InfectStatistic {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ParameterOption parOpt=new ParameterOption(args);
-		parOpt.process();
+		try {
+			parOpt.process();
+		} catch (MissingCommandException e) {
+			// TODO Auto-generated catch block
+			e.showMessage();
+		} catch (ParameterExpection e1) {
+			// TODO: handle exception
+			e1.showMessage();
+		} catch(DateFormatException e2) {
+			// TODO: handle exception
+			e2.showMessage();
+		}
+		
 		Reader r=new Reader(parOpt.log,parOpt.date);
 		DateProcess dp=new DateProcess(r.getArrayListOfFiles(),
 		parOpt.province,parOpt.out,parOpt.type);
@@ -34,8 +46,8 @@ public class InfectStatistic {
 class ParameterOption{
 	private String[] myArgs;//用于记录命令行输入的参数
 	private Lib lib;//持有Lib类
-	public String log;//文件路径
-	public String out;//输出文件路径
+	public String log=null;//文件路径
+	public String out=null;//输出文件路径
 	public String date=null;//统计日期
 	public int[] province=null;//统计省份
 	public int[] type= null;//统计类型
@@ -67,15 +79,20 @@ class ParameterOption{
 
 	   *      
 	   * @return 无
+	 * @throws MissingCommandException 
+	 * @throws ParameterNumberExpection 
+	 * @throws DateFormatException 
 
 	   */
-	public void process() {
+	public void process() throws MissingCommandException, ParameterExpection, DateFormatException{
 		if(myArgs.length==0) {
 			//没有参数的情况
+			throw new MissingCommandException();
 		}
 		else {
 			if(!myArgs[0].equals("list")) {
 				System.out.println("不以list命令开头");
+				throw new MissingCommandException();
 			}//if-end
 			
 			for(int i=1;i<myArgs.length;i++) {
@@ -84,30 +101,59 @@ class ParameterOption{
 					if(myArgs[i].equals(lib.commands[0])) {
 						if(i+1>=myArgs.length||myArgs[i+1].startsWith("-")) {//扫描之后的命令行(检查命令行数目)
 							System.out.println("命令不符合规范");
-							break;
+							throw new ParameterExpection();
 						}
 						else {
 							//把后一条命令行当作日志文件路径
+							/**2020-2-20新增beg**/
+							if(myArgs[i+1].startsWith("-")) {
+								throw new ParameterExpection();
+							}
+							
+							/**2020-2-20新增end**/
 							log=myArgs[i+1];
 						}	
 					}//command-0-log
 				  if(myArgs[i].equals(lib.commands[1])) {
 					  if(i+1>=myArgs.length||myArgs[i+1].startsWith("-")) {//扫描之后的命令行(检查命令行数目)
 							System.out.println("命令不符合规范");
-							break;
+							throw new ParameterExpection();
 						}
 						else {
 							//把后一条命令行当作日志文件路径
+							/**2020-2-20新增beg**/
+							if(myArgs[i+1].startsWith("-")) {
+								throw new ParameterExpection();
+							}
+							/**2020-2-20新增end**/
 							out=myArgs[i+1];
 						}	
 				  }//command-1-out
 				  if(myArgs[i].equals(lib.commands[2])){
 					  if(i+1>=myArgs.length||myArgs[i+1].startsWith("-")) {//扫描之后的命令行(检查命令行数目)
 							//可能是省略日期，则日期为最新的一天
-						  date=null;
+						  //date=null;
+						  throw new ParameterExpection();
 						}
 					  else {
 						  date=myArgs[i+1];
+						  //校验日期格式是否正确
+						  String regex="(([0-9]{3}[1-9]"
+						  		+ "|[0-9]{2}[1-9][0-9]{1}"
+						  		+ "|[0-9]{1}[1-9][0-9]{2}"
+						  		+ "|[1-9][0-9]{3})-(((0[13578]"
+						  		+ "|1[02])-(0[1-9]"
+						  		+ "|[12][0-9]|3[01]))"
+						  		+ "|((0[469]|11)-(0[1-9]"
+						  		+ "|[12][0-9]|30))"
+						  		+ "|(02-(0[1-9]|[1][0-9]|2[0-8]))))"
+						  		+ "|((([0-9]{2})(0[48]|[2468][048]"
+						  		+ "|[13579][26])"
+						  		+ "|((0[48]|[2468][048]"
+						  		+ "|[3579][26])00))-02-29)";
+						  if(!date.matches(regex)) {
+							  throw new DateFormatException(date);
+						  }
 					  }
 				  }//command-2-date
 				  if(myArgs[i].equals(lib.commands[3])){
@@ -117,20 +163,33 @@ class ParameterOption{
 							//可能是省略，则type为所有
 						  for(int t=0;t<type.length;t++) {
 							  type[t]=1;
-						  }
+						  }//for-end
 						}//if-end
 					  else {
 						  for(i++;i<myArgs.length;i++) {
 							  if(myArgs[i].startsWith("-")) {
 									flag=true;
 									break;
-								}
+								}//if-end
+							    boolean flagLoop=false;
 								for(int j=0;j<lib.types.length;j++) {
 									//System.out.println("进入循环");
 									if(myArgs[i].equals(lib.types[j])) {
 										type[j]=1;
+										flagLoop=true;//表示读取到该指令
+									}//if-end
+								}//for-end
+								if(!flagLoop) {
+									if(i==myArgs.length) {
+										System.out.print("i++引发的错误");
 									}
-								}//for-end		
+									System.out.printf("%d %d\n",i,myArgs.length);
+									System.out.printf("%s %s\n",myArgs[i],"line");
+									System.out.print("flagLoop!"+myArgs[i]+"XX");
+									throw new ParameterExpection();
+								}
+								
+									
 							}//for-end
 						  if(flag==true){
 							  i--;
@@ -151,28 +210,32 @@ class ParameterOption{
 						}//if-end
 					  else {
 							for(i++;i<myArgs.length;i++) {
+								
 								for(int j=0;j<lib.provinces.length;j++) {
 									if(myArgs[i].equals(lib.provinces[j])) {
 										province[j]=1;
-									}
+									}//if-end
 								}//for-end	
 								if(myArgs[i].startsWith("-")) {
 									flag2=true;
 									break;
-								}
+								}//if-end
 								
 							}//for-end
 							if(flag2==true){
 								  i--;
 								  continue;
-							  }
+							  }//flag2-end
 							else {
 								break;
-							}
+							}//else-end
 					  }//else-end
 				  }//command-4-province
 				}//start with "-"
 			}//for loop -
+			if(log==null||out==null) {
+				throw new MissingCommandException();
+			}
 			if(date==null) date=lib.lastDayFlag;
 			if(type==null) type= new int[]{1,1,1,1};
 			if(province==null) {
@@ -192,7 +255,7 @@ class ParameterOption{
 
 class Reader{
 	private String filePath;//读取的文件路径
-	private String lastdate;//统计日期
+	private String lastDate;//统计日期
 	private String[] fileLists;//所有文件列表
 	private ArrayList<String> files=new ArrayList<String>();//需要的文件列表
 	//记录真实log
@@ -224,9 +287,14 @@ class Reader{
 	   */
  	public Reader(String fp,String ld) {
 		filePath=fp;
-		lastdate=ld;
+		lastDate=ld;
 		lib=new Lib();
-		this.reader_fileList();
+		try {
+			this.reader_fileList();
+		} catch (DirectoryNotExistException e) {
+			// TODO Auto-generated catch block
+			e.showMessage();
+		}
 		this.filter();
 		
 	}
@@ -234,10 +302,15 @@ class Reader{
 	   *  读取文件
 	   * @param 无
 	   * @return 无
+ 	 * @throws DirectoryNotExistException 
 	*/
-	private void reader_fileList() {
-		//通过filepath和lastdate确定读取的文件列表
+	private void reader_fileList() throws DirectoryNotExistException {
+		//通过filepath和lastDate确定读取的文件列表
 		File file=new File(filePath);
+		/**检查文件夹是否存在如果不存在则报错**/
+		if(!file.isDirectory()) {
+			throw new DirectoryNotExistException();
+		}
 		fileLists=file.list();
 	}
 	
@@ -249,7 +322,7 @@ class Reader{
 	*/
 	private void filter() {
 		//对文件列表进行处理
-		if(lastdate.equals(null)||lastdate.equals(lib.lastDayFlag)) {
+		if(lastDate.equals(null)||lastDate.equals(lib.lastDayFlag)) {
 			//最新一天
 			for(int i=0;i<fileLists.length;i++) {
 				if(fileLists[i].contains(".log")) {
@@ -258,9 +331,9 @@ class Reader{
 			}
 		}
 		else {
-			lastdate=lastdate.concat(".txt");
+			lastDate=lastDate.concat(".txt");
 			for(int i=0;i<fileLists.length;i++) {
-				if(fileLists[i].contains(".log")&&(fileLists[i].compareTo(lastdate)<=0)) {
+				if(fileLists[i].contains(".log")&&(fileLists[i].compareTo(lastDate)<=0)) {
 					
 					files.add(filePath.concat(fileLists[i]));
 					//files.add(fileLists[i]);
@@ -546,6 +619,16 @@ class DateProcess{
 	   * @return 无
 	*/
 	public void writeFile() {
+		File file=new File(outPath);
+		if (!file.exists()) {
+			   System.out.println("out：输出文件不存在系统自动创建");
+			   try {
+				file.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			}
 		try {
 			FileWriter fw=new FileWriter(outPath,false);
 			//清空文件内容
@@ -603,5 +686,50 @@ class DateProcess{
 			e.printStackTrace();
 		}
 		
+	}
+}
+
+/**
+ * 自定义文件夹不存在异常处理的类
+ * @author
+ */
+class DirectoryNotExistException extends Exception/*这里的继承不能少*/{
+    void showMessage(){
+        System.out.println("文件夹不存在！请检查文件夹是否存在！");
+    }
+}
+
+/**
+* 参数数目不匹配异常处理
+* @author SpringAlex
+*/
+class ParameterExpection extends Exception{
+	void showMessage(){
+        System.out.println("！检查参数是否输入正确~");
+    }
+}
+
+
+/**
+* 命令行异常处理
+* @author SpringAlex
+*/
+class MissingCommandException extends Exception{
+	void showMessage() {
+		System.out.println("命令list、-out、-log 是必不可少的！");
+	}
+}
+
+/**
+* 日期格式错误
+* @author SpringAlex
+*/
+class DateFormatException extends Exception{
+	private String time;
+	public DateFormatException(String time) {
+		this.time=time;
+	}
+	void showMessage() {
+		System.out.println(time+"日期格式错误！");
 	}
 }

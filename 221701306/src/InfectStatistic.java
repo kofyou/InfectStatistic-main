@@ -1,6 +1,5 @@
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 import java.io.BufferedReader;
@@ -10,8 +9,6 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.File;
-import org.junit.Test;
-
 import java.lang.String;
 
 /**
@@ -23,6 +20,11 @@ import java.lang.String;
  */
 public class InfectStatistic {
     public static void main(String[] args) {
+        // 命令输入格式检查
+        if (!ListCommand.checkInput(args)) {
+            System.out.println("命令输入格式错误，退出程序");
+            System.exit(1);
+        }
         ListCommand aListCommand = new ListCommand(args);
         Statistic aStatistic = new Statistic();
         aListCommand.checkCommand(aStatistic);
@@ -48,12 +50,6 @@ class ListCommand {
         arguments[3] = new TypeArgument("-type");
         arguments[4] = new ProvinceArgument("-province");
 
-        // 命令输入格式检查
-        if (!checkInput(strs)) {
-            System.out.println("命令输入格式错误，退出程序");
-            System.exit(1);
-        }
-
         // 分析命令行 赋值arguments
         for (int i = 1, k = 0; i < strs.length && k < 5; ++i) {
             int n = 1;
@@ -62,6 +58,9 @@ class ListCommand {
             while (!strs[i].startsWith("-")) {
                 ++n;
                 ++i;
+                if(i==strs.length) {
+                    break;
+                }
             }
             --i;
             // 创建赋值BaseArgument的string数组
@@ -93,9 +92,9 @@ class ListCommand {
         }
     }
 
-    boolean checkInput(String[] strs) {
+    static boolean checkInput(String[] strs) {
         // 若命令不是list 则返回false
-        if (!name.equals("list")) {
+        if (!strs[0].equals("list")) {
             return false;
         }
         // list后紧跟参数
@@ -223,7 +222,7 @@ class LogArgument extends BaseArgument {
         if (strs.length > 2) {
             value = "*";
         }
-        value = strs[1];
+        value += strs[1];
     }
 
     boolean checkError() {
@@ -254,7 +253,7 @@ class OutArgument extends BaseArgument {
         if (strs.length > 2) {
             value = "*";
         }
-        value = strs[1];
+        value += strs[1];
     }
 
     boolean checkError() {
@@ -281,6 +280,7 @@ class DateArgument extends BaseArgument {
     DateArgument(String name) {
         // TODO Auto-generated constructor stub
         super(name);
+        value="lastdate";
     }
 
     DateArgument(String[] strs) {
@@ -307,7 +307,7 @@ class DateArgument extends BaseArgument {
                         + "|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))"
                         + "-02-29) \r\n")) {
             value = "lastdate";
-            System.out.println("日期格式有误，改为默认最新日期");
+            System.out.println("日期格式应为YYYY-MM-DD满足平闰，默认最新日期");
         }
         return true;
     }
@@ -325,7 +325,7 @@ class TypeArgument extends BaseArgument {
     TypeArgument(String[] strs) {
         super(strs);
         // TODO Auto-generated constructor stub
-        value = "valueList";
+        value = "valuelist";
         int n = strs.length - 1;
         // 参数值只能为ip,sp,cure,dead 若不是就忽略该错误输入
         for (int i = 1; i < strs.length; ++i) {
@@ -355,7 +355,7 @@ class TypeArgument extends BaseArgument {
         for (int i = 0; i < n; ++i) {
             for (int j = i + 1; j < n; ++j) {
                 if (valueList[i].equals(valueList[j])) {
-                    valueList[j] = valueList[n--];
+                    valueList[j] = valueList[--n];
                 }
             }
         }
@@ -392,6 +392,21 @@ class ProvinceArgument extends BaseArgument {
     }
 
     boolean checkError(Statistic sta) {
+        // 参数值不能重复 若重复则删去
+        int n = valueList.length;
+        for (int i = 0; i < n; ++i) {
+            for (int j = i + 1; j < n; ++j) {
+                if (valueList[i].equals(valueList[j])) {
+                    valueList[j] = valueList[--n];
+                }
+            }
+        }
+        String[] temp = new String[n];
+        for (int i = 0; i < n; ++i) {
+            temp[i] = valueList[i];
+        }
+        valueList = temp;
+        
         // 输入的省份存在，若不存在则列出所有
         for (int i = 0; i < valueList.length; ++i) {
             if (!sta.data.containsKey(valueList[i])) {
@@ -464,6 +479,16 @@ class LogFiles {
             }
             break;
         }
+        
+        //各省数据统计到全国
+        int[] all= {0,0,0,0};
+        for (String keytemp : sta.data.keySet()) {
+            int[] valuetemp=sta.data.get(keytemp);
+            for(int i=0;i<4;++i) {
+                all[i]+=valuetemp[i];
+            }
+        }
+        sta.data.put("全国", all);
     }
 
     // 统计某个日志文件的数据
@@ -472,6 +497,7 @@ class LogFiles {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
             String line;
             while ((line = br.readLine()) != null) {
+                //忽略'/'开头的行
                 if (line.startsWith("/")) {
                     continue;
                 }
@@ -484,10 +510,6 @@ class LogFiles {
     }
 
     // 处理日志文件中的一行
-    /**
-     * @param line
-     * @param sta
-     */
     static void statisLine(String line, Statistic sta) {
         String[] strs = line.split(" ");
         // 省份存在
@@ -554,7 +576,7 @@ class LogFiles {
             return true;
         }
         if (Integer.parseInt(date0.substring(8, 10)) < Integer.parseInt(date1.substring(8, 10))) {
-            return true;
+            return false;
         }
         if (Integer.parseInt(date0.substring(8, 10)) > Integer.parseInt(date1.substring(8, 10))) {
             return true;

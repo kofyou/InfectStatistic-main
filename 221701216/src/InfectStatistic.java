@@ -18,7 +18,7 @@ class InfectStatistic {
         List<String> types = new ArrayList<>();
         List<String> provinces = new ArrayList<>();
         int curType = 0;
-        for (int i = 1; i < args.length; i++) {
+        for (int i = 1; i < args.length; i++) {//处理参数值
             if (args[i].startsWith("-")) {
                 curType = 0;
                 if ("-log".equals(args[i])) {//设置读取路径
@@ -37,10 +37,10 @@ class InfectStatistic {
                 }
             } else {
                 if (curType == 1) {
-                    types.add(args[i]);
+                    types.add(args[i]);//存储病人类型
                 } else if (curType == 2) {
-                    provinces.add(args[i]);
-                }//添加要关注的命令行参数
+                    provinces.add(args[i]);//存储省份
+                }
             }
         }
         Lib lib = new Lib();

@@ -271,7 +271,6 @@ void process_file(string log_file)
 			process_pai_chu(fei_yan_log, province_name);
 			is_province = true;
 		}
-
 	}
 }
 

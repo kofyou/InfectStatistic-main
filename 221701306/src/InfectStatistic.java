@@ -11,23 +11,34 @@ import java.io.OutputStreamWriter;
 import java.io.File;
 import java.lang.String;
 
-
+/**
+ * InfectStatistic TODO
+ *
+ * @author 221701306高雨欣
+ * @version 1.0
+ * @since 2020-02-12
+ */
 public class InfectStatistic {
     public static void main(String[] args) {
-        String[] argstemp= {"list", "-date","2020-01-22","-log", "D:/log/", "-out", "D:/output", "-type", "sp"};
         // 命令输入格式检查
-        if (!ListCommand.checkInput(argstemp)) {
+        if (!ListCommand.checkInput(args)) {
             System.out.println("命令输入格式错误，退出程序");
             System.exit(1);
         }
-        ListCommand aListCommand = new ListCommand(argstemp);
+        // 初始化命令和数据表
+        ListCommand aListCommand = new ListCommand(args);
         Statistic aStatistic = new Statistic();
+        // 检查命令是否符合要求
         aListCommand.checkCommand(aStatistic);
+        // 初始化日志目录
         LogFiles aLogFiles = new LogFiles(aListCommand.arguments[0].value);
+        // 读取日志
         aLogFiles.readFiles(aListCommand.arguments[2].value, aStatistic);
+        // 输出统计结果
         aStatistic.outPutFile(aListCommand.arguments[1].value, (TypeArgument) aListCommand.arguments[3],
-                (ProvinceArgument) aListCommand.arguments[4]);
-        System.out.println("helloworld");
+            (ProvinceArgument) aListCommand.arguments[4]);
+        // 完成
+        System.out.println("运行成功！统计数据存放在" + aListCommand.arguments[1].value);
     }
 
 }
@@ -37,7 +48,6 @@ class ListCommand {
     BaseArgument[] arguments;
 
     ListCommand(String[] strs) {
-        // TODO Auto-generated constructor stub
         name = strs[0];
         arguments = new BaseArgument[5];
         arguments[0] = new LogArgument("-log");
@@ -101,7 +111,7 @@ class ListCommand {
         for (int i = 1; i < strs.length; ++i) {
             if (strs[i].startsWith("-")) {
                 if (!(strs[i].equals("-log") || strs[i].equals("-out") || strs[i].equals("-type")
-                        || strs[i].equals("-date") || strs[i].equals("-province"))) {
+                    || strs[i].equals("-date") || strs[i].equals("-province"))) {
                     return false;
                 }
             }
@@ -208,13 +218,11 @@ abstract class BaseArgument {
 class LogArgument extends BaseArgument {
 
     LogArgument(String name) {
-        // TODO Auto-generated constructor stub
         super(name);
     }
 
     LogArgument(String[] strs) {
         super(strs);
-        // TODO Auto-generated constructor stub
         if (strs.length > 2) {
             value = "*";
         }
@@ -239,13 +247,11 @@ class LogArgument extends BaseArgument {
 class OutArgument extends BaseArgument {
 
     OutArgument(String name) {
-        // TODO Auto-generated constructor stub
         super(name);
     }
 
     OutArgument(String[] strs) {
         super(strs);
-        // TODO Auto-generated constructor stub
         if (strs.length > 2) {
             value = "*";
         }
@@ -258,7 +264,7 @@ class OutArgument extends BaseArgument {
             System.out.println("-out参数值错误，退出程序");
             return false;
         }
-        // 若输入的生成文件路径没有后缀 或后缀不为".txt" //则修改为默认
+        // 若输入的生成文件路径没有后缀 或后缀不为".txt" 则修改为默认
         if (!value.endsWith(".txt")) {
             int x = value.lastIndexOf('.');
             if (x >= 0) {
@@ -274,14 +280,12 @@ class OutArgument extends BaseArgument {
 class DateArgument extends BaseArgument {
 
     DateArgument(String name) {
-        // TODO Auto-generated constructor stub
         super(name);
         value = "lastdate";
     }
 
     DateArgument(String[] strs) {
         super(strs);
-        // TODO Auto-generated constructor stub
         if (strs.length > 2) {
             value = "*";
         }
@@ -294,13 +298,14 @@ class DateArgument extends BaseArgument {
             System.out.println("-date参数值错误，退出程序");
             return false;
         }
-        // 日期格式检查 满足平年闰年的YYYY-MM-DD格式
-        if (!value.matches("(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]"
-            + "|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468]"
-            + "[048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)   \r\n(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]"
-            + "{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))"
-            + "|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))"
-            + "-02-29) \r\n")) {
+        // 日期格式检查,满足平年闰年的YYYY-MM-DD格式
+        if (!value.matches(
+            "(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]"
+                + "|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468]"
+                + "[048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)   \r\n(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]"
+                + "{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))"
+                + "|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))"
+                + "-02-29) \r\n")) {
             value = "lastdate";
             System.out.println("日期格式应为YYYY-MM-DD满足平闰，默认最新日期");
         }
@@ -313,16 +318,14 @@ class TypeArgument extends BaseArgument {
     String[] valueList;
 
     TypeArgument(String name) {
-        // TODO Auto-generated constructor stub
         super(name);
     }
 
     TypeArgument(String[] strs) {
         super(strs);
-        // TODO Auto-generated constructor stub
         value = "valuelist";
         int n = strs.length - 1;
-        // 参数值只能为ip,sp,cure,dead 若不是就忽略该错误输入
+        // 参数值只能为ip,sp,cure,dead,若不是就忽略该错误输入
         for (int i = 1; i < strs.length; ++i) {
             if (!(strs[i].equals("ip") || strs[i].equals("sp") || strs[i].equals("cure") || strs[i].equals("dead"))) {
                 strs[i] = "";
@@ -330,7 +333,7 @@ class TypeArgument extends BaseArgument {
                 System.out.println("-type参数值只能为ip,sp,cure,dead，忽略该错误参数值");
             }
         }
-        // 若全部输入错误 则视为参数缺省
+        // 若全部输入错误,则视为参数缺省
         if (n == 0) {
             valueList = new String[] { "ip", "sp", "cure", "dead" };
             return;
@@ -345,7 +348,10 @@ class TypeArgument extends BaseArgument {
     }
 
     boolean checkError() {
-        // 参数值不能重复 若重复则删去
+        if (value == "") {
+            return true;
+        }
+        // 参数值不能重复,若重复则删去
         int n = valueList.length;
         for (int i = 0; i < n; ++i) {
             for (int j = i + 1; j < n; ++j) {
@@ -368,13 +374,11 @@ class ProvinceArgument extends BaseArgument {
     String[] valueList;
 
     ProvinceArgument(String name) {
-        // TODO Auto-generated constructor stub
         super(name);
     }
 
     ProvinceArgument(String[] strs) {
         super(strs);
-        // TODO Auto-generated constructor stub
         value = "valuelist";
         valueList = new String[strs.length - 1];
         for (int i = 1; i < strs.length; ++i) {
@@ -390,7 +394,7 @@ class ProvinceArgument extends BaseArgument {
         if (value == "") {
             return true;
         }
-        // 参数值不能重复 若重复则删去
+        // 参数值不能重复,若重复则删去
         int n = valueList.length;
         for (int i = 0; i < n; ++i) {
             for (int j = i + 1; j < n; ++j) {
@@ -405,7 +409,7 @@ class ProvinceArgument extends BaseArgument {
         }
         valueList = temp;
 
-        // 输入的省份存在，若不存在则列出所有
+        // 输入的省份存在,若不存在则列出所有
         for (int i = 0; i < valueList.length; ++i) {
             if (!sta.data.containsKey(valueList[i])) {
                 value = "";
@@ -428,7 +432,6 @@ class LogFiles {
             @Override
             // 文件按日期排序 重写匿名内部类Comparator的compare()
             public int compare(File f0, File f1) {
-                // TODO Auto-generated method stub
                 String name0 = f0.getName();
                 String name1 = f1.getName();
                 // 按年份月份日期依次比较时间前后
@@ -587,7 +590,6 @@ class Statistic {
     Map<String, int[]> data;
 
     public Statistic() {
-        // TODO Auto-generated constructor stub
         data = new HashMap<String, int[]>();
         data.put("全国", new int[] { 0, 0, 0, 0 });
         data.put("安徽", new int[] { 0, 0, 0, 0 });
@@ -659,8 +661,8 @@ class Statistic {
             // 若输出所有省份数据 遍历数据,并按省份拼音排序写入文件
             if (provinces.value.equals("")) {
                 String[] provincesort = { "全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江",
-                    "湖北", "湖南", "江西", "吉林", "江苏", "辽宁", "内蒙古", "宁夏", "青海", "山西", "山东", "陕西", "上海", "四川", "天津", "西藏", "新疆",
-                    "云南", "浙江" };
+                    "湖北", "湖南", "江西", "吉林", "江苏", "辽宁", "内蒙古", "宁夏", "青海", "山西", "山东", "陕西", "上海", "四川", "天津", "西藏",
+                    "新疆", "云南", "浙江" };
                 for (int i = 0; i < provincesort.length; ++i) {
                     String keytemp = provincesort[i];
                     int[] valuetemp = data.get(keytemp);

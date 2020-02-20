@@ -166,14 +166,14 @@ class InfectStatistic {
 			if(cmd.log_value.equals("") || cmd.out_value.equals("")) {
      		}else {
 	        file.readLog(cmd.log_value,cmd.date_value);
-	        //file.writeTxt(cmd,cmd.type_value,cmd.province_value);
+	        file.writeTxt(cmd,cmd.type_value,cmd.province_value);
      		}
      	}
 	}
 	
 	//文件处理类
 		static class FileControl {	
-			public String[] provinces = {"全国","安徽","澳门","北京","重庆","福建","甘肃","广东","广西",
+			public String[] provinces = {"安徽","澳门","北京","重庆","福建","甘肃","广东","广西",
 		            "贵州", "海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏",
 		            "江西", "辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
 		            "四川", "台湾","天津","西藏","香港","新疆","云南","浙江"};
@@ -398,7 +398,7 @@ class InfectStatistic {
 					}
 				}
 			}
- 			for(int i = 0;i <= file_list.size();i++) {
+ 			for(int i = 0;i < file_list.size();i++) {
  				String path = log + "\\" + file_list.get(i);
                 BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
                 String line = null;
@@ -416,6 +416,10 @@ class InfectStatistic {
  			String path = command.out_value;
  			File file = new File(path);
  			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),"UTF-8"));
+ 			if(!file.exists()) {
+     			file.createNewFile();
+     			file=new File(path);//重新实例化
+     		} 			
  			
  			//有-province,没有-type
  			if(command.province && (!command.type)) {
@@ -564,8 +568,30 @@ class InfectStatistic {
         for(String i:args) {
         	list.add(i);//把命令加入list
         }
+        
+        /*测试用
+        ArrayList<String> commandline_test = new ArrayList<String>();
+        commandline_test.add("list");
+        commandline_test.add("-log");
+        commandline_test.add("C:\\Users\\RY\\Documents\\GitHub\\InfectStatistic-main\\221701405\\log");
+        commandline_test.add("-out");
+        commandline_test.add("C:\\Users\\RY\\Documents\\GitHub\\InfectStatistic-main\\221701405\\result\\test.txt");
+        commandline_test.add("-type");
+        commandline_test.add("ip");
+        commandline_test.add("sp");
+        commandline_test.add("dead");
+        commandline_test.add("-province");
+        commandline_test.add("全国");
+        commandline_test.add("福建");
+        commandline_test.add("-date");
+        commandline_test.add("2020-01-27"); 
+        */
+        
         CommandAnalysis cmd_analysis=new CommandAnalysis();//实例化命令行解析对象
+        
+        //cmd_analysis.commandRun(commandline_test);
         cmd_analysis.commandRun(list);//执行命令
+        
     }
 }
 	

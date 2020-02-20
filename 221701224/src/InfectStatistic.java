@@ -23,7 +23,6 @@ class InfectStatistic {
 	public static String log_route="";//日志文件路径
 	public static String out_route="";//输出文件路径
 	public static String log_need;//需要被解析的日志文件路径
-	public static String out_name;//
 	public static String[] log_list;//读取到的日志文件列表,并且按照日期从小到大排序
 	public static int[] type_num= {0,0,0,0};//决定类型的输出顺序。
 	/*
@@ -32,7 +31,7 @@ class InfectStatistic {
 	public static String[] type_symbol= {"ip","sp","cure","dead"};
 	public static String[] type_name= {"感染患者","疑似患者","治愈","死亡"};
 	
-	public static int[] province_select = new int[35];
+	public static int[] province_select = new int[35];//用来确定该省份是否被选中
 	public static int[][] province_num = new int[35][4];
 	public static String[] province_name = {"全国", "安徽", "澳门" ,"北京", "重庆", "福建","甘肃",
 			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
@@ -40,6 +39,9 @@ class InfectStatistic {
 			"四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};
     
 public static void judgeCommandLine(String[] str) {
+	/*
+	 * 判断开头是否为list
+	 */
 	if(!str[0].equals("list"))
 	{
 		System.out.println("命令行错误，开头非list错误");
@@ -47,6 +49,9 @@ public static void judgeCommandLine(String[] str) {
 	}
 	for(int i=1;i<str.length;i++)
 	{
+		/*
+		 * 判断-log 以及提取出log_route
+		 */
 		if(str[i].equals("-log"))
 		{
 			if(str[++i].matches("^[A-z]:\\\\(.+?\\\\)*$"))
@@ -59,6 +64,9 @@ public static void judgeCommandLine(String[] str) {
 				System.exit(0);
 			}
 		}
+		/*
+		 * 判断-log 以及提取出out_route
+		 */
 		if(str[i].equals("-out"))
 		{
 			if(str[++i].matches("^[A-z]:\\\\(\\S+)+(\\.txt)$"))
@@ -71,19 +79,21 @@ public static void judgeCommandLine(String[] str) {
 				System.exit(0);
 			}
 		}
+		/*
+		 * 判断-date，得到log_list和log_need
+		 */
 		if(str[i].equals("-date"))
 		{
-			//-date如果是最后一个指令，直接
 			if((i+1)==str.length)
 			{
 				getLogList(log_route);
-				log_need=log_list[0];
+				log_need=log_list[log_list.length-1];
 			}
 			else if(str[i+1].equals("-log")||str[i+1].equals("-out")
 			   ||str[i+1].equals("-type")||str[i+1].equals("-province"))
 			{
 				getLogList(log_route);
-				log_need=log_list[0];
+				log_need=log_list[log_list.length-1];
 			}
 			else
 			{
@@ -101,16 +111,18 @@ public static void judgeCommandLine(String[] str) {
 			}
 			
 		}
+		/*
+		 * 判断-type 并且按顺序给定数值
+		 */
 		if(str[i].equals("-type"))
 		{
 			for(int j=1;j<5;j++)
 			{
-				//-date如果是最后一个指令，直接
-				if((i+j)<str.length)
+				if((i+j)<str.length)//-date如果是最后一个指令，直接退出
 				{
 					if(str[i+j].equals("-log")||str[i+j].equals("-out")
 						||str[i+j].equals("-date")||str[i+j].equals("-province"))
-					{
+					{//即-date没有参数直接break
 						break;
 					}
 					else if(str[i+j].equals(type_symbol[0]))
@@ -138,12 +150,14 @@ public static void judgeCommandLine(String[] str) {
 				else break;
 			}
 		}
+		/*
+		 * 判断-province 如果存在province_select置为1
+		 */
 		if(str[i].equals("-province"))
 		{
 			for(int j=1;j<=province_name.length;j++)
 			{
-				//-province如果是最后一个指令，直接
-				if((i+j)<str.length)
+				if((i+j)<str.length)//-province如果是最后一个指令，直接退出
 				{
 					int temp=0;//用来判断省份名称是否输入正确
 					if(str[i+j].equals("-log")||str[i+j].equals("-out")
@@ -158,6 +172,7 @@ public static void judgeCommandLine(String[] str) {
 							temp=1;
 							if(k==0)
 							province_select[0]=1;
+							if(province_select[0]==-1)
 							province_select[0]=0;
 							province_select[k]=1;
 							break;
@@ -175,6 +190,9 @@ public static void judgeCommandLine(String[] str) {
 		}
 	}
 }
+/*
+ * 判断是否是合法日期
+ */
 public static boolean isLegalDate(String str) {
 	SimpleDateFormat date_format = new SimpleDateFormat("yyyy-MM-dd");
 	 try {
@@ -192,10 +210,12 @@ public static boolean isLegalDate(String str) {
      }
      return true;
 }
-
+/*
+ * 得到log_route下的所有文件名
+ */
 public static void getLogList(String str) {
 	log_list=new File(str).list();
-	for (int i=0;i<log_list.length-1;i++){
+	for (int i=0;i<log_list.length-1;i++){//将获取到的文件名进行排序
         for (int j=0;j<log_list.length-i-1;j++) {
         	if(log_list[j].compareTo(log_list[j+1])>0){
                 String temp=log_list[j];
@@ -228,7 +248,9 @@ public static void getTextContent(String str) {
 
     
     
-    
+/*
+ * 处理传进来的那一行数据
+ */
 public static void processingText(String str) {
 	String situation1 = "(\\S+) 新增 感染患者 (\\d+)人";
 	String situation2 = "(\\S+) 新增 疑似患者 (\\d+)人";
@@ -268,9 +290,9 @@ public static void processingText(String str) {
 
 public static void addIP(String str) {
 	//
-	String[] str_arr = str.split(" "); //将字符串以空格分割为多个字符串
+	String[] str_arr = str.split(" "); //字符串数组以空格分割成多个字符串
 	int i;
-	int n = Integer.valueOf(str_arr[3].replace("人", ""));//将人前的数字从字符串类型转化为int类型
+	int n = Integer.valueOf(str_arr[3].replace("人", ""));//提取人前面的数字
 	for(i = 0; i < province_name.length; i++)
 	{
 		if(str_arr[0].equals(province_name[i])) 
@@ -287,7 +309,7 @@ public static void addIP(String str) {
 
 public static void addSP(String str) {
 	// 
-	String[] str_arr = str.split(" "); //将字符串以空格分割为多个字符串
+	String[] str_arr = str.split(" "); //字符串数组以空格分割成多个字符串
 	int i;
 	int n = Integer.valueOf(str_arr[3].replace("人", ""));//将人前的数字从字符串类型转化为int类型
 	for(i = 0; i < province_name.length; i++)
@@ -305,7 +327,7 @@ public static void addSP(String str) {
 }
 public static void influxIP(String str) {
 	// 
-	String[] str_arr = str.split(" "); //将字符串以空格分割为多个字符串
+	String[] str_arr = str.split(" "); //字符串数组以空格分割成多个字符串
 	int i;
 	int n = Integer.valueOf(str_arr[4].replace("人", ""));
 	for(i = 0; i < province_name.length; i++)
@@ -327,7 +349,7 @@ public static void influxIP(String str) {
 }
 public static void influxSP(String str) {
 	// TODO 自动生成的方法存根
-	String[] str_arr = str.split(" "); //将字符串以空格分割为多个字符串
+	String[] str_arr = str.split(" "); //字符串数组以空格分割成多个字符串
 	int i;
 	int n = Integer.valueOf(str_arr[4].replace("人", ""));
 	for(i = 0; i < province_name.length; i++)
@@ -348,7 +370,7 @@ public static void influxSP(String str) {
 }
 public static void addDead(String str) {
 	// 
-	String[] str_arr = str.split(" "); //将字符串以空格分割为多个字符串
+	String[] str_arr = str.split(" "); //字符串数组以空格分割成多个字符串
 	int i;
 	int n = Integer.valueOf(str_arr[2].replace("人", ""));
 	for(i = 0; i < province_name.length; i++) 
@@ -367,7 +389,7 @@ public static void addDead(String str) {
 }
 public static void addCure(String str) {
 	// 
-	String[] str_arr = str.split(" "); //将字符串以空格分割为多个字符串
+	String[] str_arr = str.split(" "); //字符串数组以空格分割成多个字符串
 	int i;
 	int n = Integer.valueOf(str_arr[2].replace("人", ""));
 	for(i = 0; i < province_name.length; i++) 
@@ -385,9 +407,12 @@ public static void addCure(String str) {
 	}
 	
 }
+/*
+ * 疑似患者确诊
+ */
 public static void diagnoseSP(String str) {
 	// TODO 自动生成的方法存根
-	String[] str_arr=str.split(" "); //将字符串以空格分割为多个字符串
+	String[] str_arr=str.split(" "); //字符串数组以空格分割成多个字符串
 	int i;
 	int n=Integer.valueOf(str_arr[3].replace("人", ""));//将人前的数字从字符串类型转化为int类型
 	
@@ -405,9 +430,12 @@ public static void diagnoseSP(String str) {
 		}
 	}
 }
+/*
+ * 疑似患者排除
+ */
 public static void excludeSP(String str) {
 	// TODO 自动生成的方法存根
-	String[] str_arr=str.split(" "); //将字符串以空格分割为多个字符串
+	String[] str_arr=str.split(" "); //字符串数组以空格分割成多个字符串
 	int i;
 	int n=Integer.valueOf(str_arr[3].replace("人", ""));//将人前的数字从字符串类型转化为int类型
 	
@@ -423,13 +451,21 @@ public static void excludeSP(String str) {
 		}
 	}
 }
-
+/*
+ * 对命令行没有提到的明亮进行初始化
+ */
 public static void balance() {
+	/*
+	 * 如果没有读到-log，程序停止运行并报错
+	 */
 	if("".equals(log_route))
 	{
 		System.out.println("命令行错误，没有输入-log！");
 		System.exit(0);
 	}
+	/*
+	 * 如果没有读到-out，程序停止运行并报错
+	 */
 	if("".equals(out_route))
 	{
 		System.out.println("命令行错误，没有输入-out！");
@@ -438,7 +474,7 @@ public static void balance() {
 	if(log_list==null)
 	{
 		getLogList(log_route);
-		log_need=log_list[0];
+		log_need=log_list[log_list.length-1];
 	}
 	/*
 	 * 如果未读到-type 对type_num进行初始化
@@ -453,7 +489,9 @@ public static void balance() {
 	}
 	
 }
-
+/*
+ * 输出文件
+ */
 public static void outputFile(String str) {
 	FileWriter fwriter = null;
 	try {
@@ -531,10 +569,12 @@ public static void main(String[] args) {
     {
     	if(log_need.compareTo(log_list[i])>=0)
     	{
+    		System.out.println(log_list[i]);
     		getTextContent(log_route+log_list[i]);
     	}
     	else break;
     }
+    System.out.println(log_need);
     outputFile(out_route);
     	
     }

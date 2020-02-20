@@ -1,0 +1,15 @@
+#Mac files
+.DS_Store
+.DS_store/
+
+#IntelliJ project files
+.idea
+*.iml
+out
+gen
+.idea/
+test/
+log/
+result/
+InfectStatistic-example.iml
+

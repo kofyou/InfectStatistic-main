@@ -196,8 +196,8 @@ public class Lib {
 
     private void operate(int type, String outProvince, String inProvince, int num) {//患者流动情况
         int ip, sp;
-        provinceSet.add(inProvince);
-        provinceSet.add(outProvince);
+        provinceSet.add(inProvince);//进省
+        provinceSet.add(outProvince);//出省
         if (type == 2) {//感染患者
             ip = statIp.getOrDefault(outProvince, 0);
             statIp.put(outProvince, ip - num);

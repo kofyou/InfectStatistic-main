@@ -281,7 +281,7 @@ public class InfectStatistic {
 			}
 			else 
 			{
-
+				int k=0;
 				for(int i=0;i<list.size();i++)//将信息读入arr数组
 				{
 					String str=list.get(i);
@@ -305,8 +305,8 @@ public class InfectStatistic {
 					if (((province.get(list.get(i)).ip)>0)||((province.get(list.get(i)).sp)>0)||((province.get(list.get(i)).sp)>0)
 							||((province.get(list.get(i)).sp)>0)) 
 					{
-						arr[i]=str;
-						i++;
+						arr[k]=str;
+						k++;
 					}
 					
 				}
@@ -447,11 +447,7 @@ public class InfectStatistic {
 				}
 			}
 		}
-			if(!log_flag||!out_flag)
-			{	
-				System.out.println("请输入必带参数");
-				return;
-			}
+			
 			readFile(log_path);
 			saveData();
 			writeFile(out_path);

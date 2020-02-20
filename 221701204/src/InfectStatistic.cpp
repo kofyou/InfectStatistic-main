@@ -22,16 +22,16 @@ class Analysis
 public:
     char outpath[1005];
     string province[40];
-	map<string, int>mi;
-	map<string, int>mi1;
+    map<string, int>mi;
+    map<string, int>mi1;
 	map<string, int>mi2;
-	map<string, int>mi3;
-	string province_of[40];
-	string type[20];
-	string Begin(string com);
-	string Check(int date_,char *date);
+    map<string, int>mi3;
+    string province_of[40];
+    string type[20];
+    string Begin(string com);
+    string Check(int date_,char *date);
 	int province_num, type_num;
-	int out[40][6];
+    int out[40][6];
     int Num(string tmp);
     void FindAllFile(const char* path, const char* format, const char* date);
     void Change(int province1,int province2,int type1,int type2,int num,int l);

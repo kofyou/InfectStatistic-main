@@ -121,7 +121,7 @@ class InfectStatistic {
             container.AddRecord(record);
         }
         //获取数量
-        int num = Common.parserStringToInt(data[data.length - 1]);
+        int num = Common.ParserStringToInt(data[data.length - 1]);
         int[] dataLength = {3 , 4 , 5};
         // 处理数据
         if (data.length == dataLength[0])
@@ -285,7 +285,7 @@ class Container
     public void SortByProvince()
     {
         ChinaComparator mapKeyComparator = new ChinaComparator();
-        recordMap = Common.sortMapByKey(recordMap , mapKeyComparator);
+        recordMap = Common.SortMap(recordMap , mapKeyComparator);
     }
 
     //将容器内容输入文件
@@ -548,7 +548,7 @@ class CmdArgs
 
     public boolean SetDate(String date) throws ParseException
     {
-        if (Common.stringToDate(date) == null)
+        if (Common.StringToDate(date) == null)
         {
             // invalid date
             return false;

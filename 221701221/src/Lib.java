@@ -7,7 +7,11 @@ import java.util.*;
 /**
  * Lib
  * TODO
- * @author Kvc
+ * Lib
+ * Common
+ * @author 岳逾先
+ * @version 1.1.1
+ * @since 1.8
  */
 public class Lib {
     public static String LogFileRegex = "2020-[0-1][0-9]-[0-3][0-9].log.txt";
@@ -54,13 +58,12 @@ class Common {
 
     public static int CompareDate(String d1, String d2)
     {
-        Date date1 = stringToDate(d1);
-        Date date2 = stringToDate(d2);
+        Date date1 = StringToDate(d1);
+        Date date2 = StringToDate(d2);
         return date1.compareTo(date2);
     }
 
-    /** tranform "yyyy-MM-dd" to Date **/
-    public static Date stringToDate(String dateStr)
+    public static Date StringToDate(String dateStr)
     {
         Date date = null;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -76,29 +79,26 @@ class Common {
             System.out.println("args's date is not invalid");
             return null;
         }
-        // comfirm now date >= date
-        Date now = new Date();
-        if (now.compareTo(date) < 0)
+        Date today = new Date();
+        if (today.compareTo(date) < 0)
         {
-            /** now >= date **/
-            System.out.println("now's date < date, " + dateStr + " is invalid" );
+            System.out.println("today's date < date, " + dateStr + " is invalid" );
             return null;
         }
         return date;
     }
 
-    /** read out put file **/
-    public static Container readOutFile(String outFilePath) throws IOException
+    public static Container ReadOutFile(String OutFilePath) throws IOException
     {
         Container container = new Container();
-        File file = new File(outFilePath);
+        File file = new File(OutFilePath);
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
         String line = null;
         while((line = br.readLine()) != null)
         {
             Record record = new Record();
-            if (readOneLineOfOutFile(record, line))
+            if (ReadOutFile(record, line))
             {
                 container.AddRecord(record);
             }
@@ -110,8 +110,7 @@ class Common {
         return container;
     }
 
-    /** read one line in output file **/
-    public static boolean readOneLineOfOutFile(Record record, String line)
+    public static boolean ReadOutFile(Record record, String line)
     {
         String[] data = line.split(" ");
         if (data[0].equals(Lib.Skip))
@@ -121,33 +120,28 @@ class Common {
         record.SetProvinceName(data[0]);
         for (int i = 1; i < data.length; ++i)
         {
-            String type = parserStringGetType(data[i]);
+            String type = ParserStringGetType(data[i]);
             if (type.equals(Lib.Ip))
             {
-                record.SetIpNum(Common.parserStringToInt(data[i]));
+                record.SetIpNum(Common.ParserStringToInt(data[i]));
             }
             else if (type.equals(Lib.Sp))
             {
-                record.SetSpNum(Common.parserStringToInt(data[i]));
+                record.SetSpNum(Common.ParserStringToInt(data[i]));
             }
             else if (type.equals(Lib.Cure))
             {
-                record.SetCureNum(Common.parserStringToInt(data[i]));
+                record.SetCureNum(Common.ParserStringToInt(data[i]));
             }
             else if (type.equals(Lib.Dead))
             {
-                record.SetDeadNum(Common.parserStringToInt(data[i]));
+                record.SetDeadNum(Common.ParserStringToInt(data[i]));
             }
         }
         return true;
     }
 
-    /**
-     * parser a string to get type
-     * type ： 感染患者(Ip) 疑似患者(Sp) 治愈(Cure) 死亡(Dead)
-     * example ： 感染患者5人 -> type is 感染患者
-     */
-    public static String parserStringGetType(String string)
+    public static String ParserStringGetType(String string)
     {
         String str1 = string.trim();
         String str2 = "";
@@ -165,14 +159,10 @@ class Common {
         return str2;
     }
 
-    /**
-     * parser date from log file name
-     * log file name : XX/XX/XX/YYYY-MM-dd.log.txt
-     */
-    public static Date parserDateFromLogFileName(String fileName)
+    public static Date ParserDateFromLogFileName(String fileName)
     {
         String[] strs1 = null;
-        if (isWindows())
+        if (IsWindows())
         {
             strs1 = fileName.split("\\\\");
         }
@@ -181,11 +171,10 @@ class Common {
             strs1 = fileName.split("/");
         }
         String[] strs2 = strs1[strs1.length - 1].split("\\.");
-        return stringToDate(strs2[0]);
+        return StringToDate(strs2[0]);
     }
 
-    /** parser number from string **/
-    public static int parserStringToInt(String string)
+    public static int ParserStringToInt(String string)
     {
         String str1 = string.trim();
         String str2 = "";
@@ -208,8 +197,7 @@ class Common {
         return number;
     }
 
-    /** sort map by key **/
-    public static <A,B> Map<A, B> sortMapByKey(Map<A, B> map, Comparator<A> comparator)
+    public static <A,B> Map<A, B> SortMap(Map<A, B> map, Comparator<A> comparator)
     {
         if (map == null || map.isEmpty())
         {
@@ -220,8 +208,7 @@ class Common {
         return sortMap;
     }
 
-    /** get files from path and only get file which date < date **/
-    public static Map<String, File> GetFiles(String path, String date, String regex) throws ParseException
+    public static Map<String, File> GetFiles(String path, String date, String regex)
     {
         File file = new File(path);
         File[] fileList = file.listFiles();
@@ -233,7 +220,7 @@ class Common {
                 if (fileList[i].isFile())
                 {
                     String[] temp = null;
-                    if (Common.isWindows())
+                    if (Common.IsWindows())
                     {
                         temp = fileList[i].toString().split("\\\\");
                     }
@@ -256,16 +243,15 @@ class Common {
                 }
             }
         }
-        // sort file by date
         FileComparator fileComparator = new FileComparator();
-        fileMap = Common.sortMapByKey(fileMap, fileComparator);
+        fileMap = Common.SortMap(fileMap, fileComparator);
         return fileMap;
     }
 
-    public static boolean isWindows()
+    public static boolean IsWindows()
     {
-        boolean isWindows = System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1;
-        return isWindows;
+        boolean IsWindows = System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1;
+        return IsWindows;
     }
 }
 
@@ -294,8 +280,8 @@ class FileComparator implements Comparator<String>
     @Override
     public int compare(String str1, String str2)
     {
-        Date date1 = Common.parserDateFromLogFileName(str1);
-        Date date2 = Common.parserDateFromLogFileName(str2);
+        Date date1 = Common.ParserDateFromLogFileName(str1);
+        Date date2 = Common.ParserDateFromLogFileName(str2);
         return date2.compareTo(date1);
     }
 }

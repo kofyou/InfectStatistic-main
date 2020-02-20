@@ -38,6 +38,100 @@ class InfectStatistic{
 	public int type_order[]= {1,2,3,4};
 	public String[] type= {"感染患者", "疑似患者", "治愈", "死亡"};
 
+	//处理文件
+	class ProcessFile{
+		
+		public void readLog() {
+			File file=new File(path_in);
+			File[] listFiles=file.listFiles();
+			String path;
+			
+			int i=0;
+			while(i<listFiles.length){
+				path=listFiles[i].getName();
+				if(path.compareTo(date)<=0) {
+					try {
+						BufferedReader b=new BufferedReader(new InputStreamReader(
+								new FileInputStream(new File(path_in+path)), "UTF-8"));
+						String line;
+						while((line=b.readLine())!=null) {
+							if(!line.startsWith("//")) {
+								String p1 = "(\\S+) 新增 感染患者 (\\d+)人";
+						    	String p2 = "(\\S+) 新增 疑似患者 (\\d+)人";
+						    	String p3 = "(\\S+) 治愈 (\\d+)人";
+						    	String p4 = "(\\S+) 死亡 (\\d+)人";
+						    	String p5 = "(\\S+) 感染患者 流入 (\\S+) (\\d+)人";
+						    	String p6 = "(\\S+) 疑似患者 流入 (\\S+) (\\d+)人";
+						    	String p7 = "(\\S+) 疑似患者 确诊感染 (\\d+)人";
+						    	String p8 = "(\\S+) 排除 疑似患者 (\\d+)人";
+						    	if(Pattern.matches(p1, line)) 
+						    		IP(line);
+						    	if(Pattern.matches(p2, line)) 
+						    		SP(line);
+						    	if(Pattern.matches(p3, line)) 
+						    		Cure(line);
+						    	if(Pattern.matches(p4, line)) 
+						    		Dead(line);
+						    	if(Pattern.matches(p5, line)) 
+						    		toIP(line);
+						    	if(Pattern.matches(p6, line))
+						    		toSP(line);
+						    	if(Pattern.matches(p7, line))
+						    		SPtoIP(line);
+						    	if(Pattern.matches(p8, line))
+						    		notSP(line);
+							}
+						}
+						b.close();
+					} catch (UnsupportedEncodingException e) {
+						// TODO 自动生成的 catch 块
+						e.printStackTrace();
+					} catch (FileNotFoundException e) {
+						// TODO 自动生成的 catch 块
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO 自动生成的 catch 块
+						e.printStackTrace();
+					}
+				}
+				i++;
+			}			
+		}
+		public void IP(String line) {
+			
+		}
+		public void SP(String line) {
+			
+		}
+		public void Cure(String line) {
+			
+		}
+		public void Dead(String line) {
+			
+		}
+		public void toIP(String line) {
+			
+		}
+		public void toSP(String line) {
+			
+		}
+		public void SPtoIP(String line) {
+			
+		}
+		public void notSP(String line) {
+			
+		}
+		
+		//输出日志
+		public void writeLog() {
+			
+		}
+		
+	}	
+	
+	 
+	
+	
 	//处理命令行
 	class ProcessCmd{
 		String[] args;//存储命令行
@@ -104,12 +198,9 @@ class InfectStatistic{
 		
 	}
 	
-	//处理文件
-	public void ProcessFile() {
-		
-	}
-
 	
+	
+
     public static void main(String[] args) {
     	
     }	

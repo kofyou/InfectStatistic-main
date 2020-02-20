@@ -65,6 +65,12 @@ class InfectStatistic {
     	}
 	}
     public static void readFile(File[] tempList) throws NumberFormatException, IOException {
+    	if(!date.equals("")) {
+    		if(tempList[tempList.length-1].getName().toString().substring(0,10).compareTo(date)<0) {
+        		System.out.print("日期超出范围!");
+        		System.exit(0);
+        	}
+    	} 	
     	for(int i=0;i<tempList.length;i++) {    		
     		if(tempList[i].isFile()) {
     			if(!date.equals("")) { 			
@@ -186,13 +192,15 @@ class InfectStatistic {
     	FileWriter fw = new FileWriter(out);
 		BufferedWriter fout = new BufferedWriter(fw);
     	if(province.size()>0) {
-    		if(province.contains("全国")) {
-    			printTypeInfo(all, type,fout);	
-    		}
 			if(type.size()>0) {
+				if(province.contains("全国")) {
+	    			printTypeInfo(all, type,fout);	
+	    		}
 				for(int k = 0;k<province.size();k++) {
 					Info t = new Info();
 					t.province = province.get(k);
+					if(t.province.equals("全国"))
+						continue;
     				if(list.contains(t)) {
     					printTypeInfo(list.get(list.indexOf(t)), type, fout);
     				}
@@ -202,13 +210,19 @@ class InfectStatistic {
     			}
 			}
 			else {
-				for(int k = 0;k<province.size();k++) {
+				if(province.contains("全国")) {
+	    			printInfo(all,fout);	
+	    		}
+				for(int k = 0;k<province.size();k++) {					
 					Info t = new Info();
 					t.province = province.get(k);
+					if(t.province.equals("全国"))
+						continue;
     				if(list.contains(t)) {
     					printInfo(list.get(list.indexOf(t)), fout);
     				}
     				else {
+    					
     					printInfo(t, fout);
     				}
     			}
@@ -245,19 +259,19 @@ class InfectStatistic {
     public static void printTypeInfo(Info info,ArrayList<String> type,BufferedWriter fout) throws IOException {
     	System.out.print(info.province+" ");
 		String string = info.province+" ";
-		if(type.contains("感染")) {
+		if(type.contains("ip")) {
 			System.out.print("感染患者:"+info.infected+" ");
 			string += "感染患者:"+info.infected+" ";
 		}
-		if(type.contains("疑似")) {
+		if(type.contains("sp")) {
 			System.out.print("疑似患者:"+info.suspected+" ");
 			string += "疑似患者:"+info.suspected+" ";
 		}
-		if(type.contains("治愈")) {
+		if(type.contains("cure")) {
 			System.out.print("治愈患者:"+info.cured+" ");
 			string += "治愈患者:"+info.cured+" ";
 		}
-		if(type.contains("死亡")) {
+		if(type.contains("dead")) {
 			System.out.print("死亡患者:"+info.dead+"");
 			string+="死亡患者:"+info.dead+"";
 		}

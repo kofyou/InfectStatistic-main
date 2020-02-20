@@ -447,7 +447,11 @@ public class InfectStatistic {
 				}
 			}
 		}
-			
+			if(!log_flag||!out_flag)
+			{	
+				System.out.println("请输入必带参数");
+				return;
+			}
 			readFile(log_path);
 			saveData();
 			writeFile(out_path);

@@ -20,7 +20,7 @@ class InfectStatistic {
     	province = new ArrayList<String>(); 
     	list = new ArrayList<Info>();
         if(args[0].equals("list")) {
-        	all.province="È«¹ú";
+        	all.province="å…¨å›½";
         	readParameter(args);
         	File file = new File(path);
         	File[] tempList = file.listFiles();
@@ -67,7 +67,7 @@ class InfectStatistic {
     public static void readFile(File[] tempList) throws NumberFormatException, IOException {
     	if(!date.equals("")) {
     		if(tempList[tempList.length-1].getName().toString().substring(0,10).compareTo(date)<0) {
-        		System.out.print("ÈÕÆÚ³¬³ö·¶Î§!");
+        		System.out.print("æ—¥æœŸè¶…å‡ºèŒƒå›´!");
         		System.exit(0);
         	}
     	} 	
@@ -90,10 +90,10 @@ class InfectStatistic {
     				for(int j = 0;j<arrays.length;j++) {
     					Info t = new Info();					
     					switch(arrays[j]) {
-    						 case "ĞÂÔö":
+    						 case "æ–°å¢":
     							 t.province=arrays[j-1];							 
     							 if(list.contains(t)) {
-    								 if(arrays[j+1].equals("¸ĞÈ¾»¼Õß")) {
+    								 if(arrays[j+1].equals("æ„ŸæŸ“æ‚£è€…")) {
     									 list.get(list.indexOf(t)).infected+=Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));
     									 all.infected += Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));
     								 }
@@ -103,7 +103,7 @@ class InfectStatistic {
     								 } 								 
     							 }
     							 else {
-    								 if(arrays[j+1].equals("¸ĞÈ¾»¼Õß")) {
+    								 if(arrays[j+1].equals("æ„ŸæŸ“æ‚£è€…")) {
     									 t.infected = Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));  
     									 all.infected += Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));
     								 }
@@ -115,13 +115,13 @@ class InfectStatistic {
     								 list.add(t);
     							 }
     				            break;
-    				         case "Á÷Èë":
+    				         case "æµå…¥":
     				        	 Info from = new Info();
     				        	 Info to = new Info();
     				        	 from.province = arrays[j-2];
     				        	 to.province = arrays[j+1];
     							 if(list.contains(to)) {
-    								 if(arrays[j-1].equals("¸ĞÈ¾»¼Õß")) {
+    								 if(arrays[j-1].equals("æ„ŸæŸ“æ‚£è€…")) {
     									 list.get(list.indexOf(from)).infected -= Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));
     									 list.get(list.indexOf(to)).infected += Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1)); 
     								 }
@@ -131,7 +131,7 @@ class InfectStatistic {
     								 }     								 
     							 }
     							 else {
-    								 if(arrays[j-1].equals("¸ĞÈ¾»¼Õß")) {
+    								 if(arrays[j-1].equals("æ„ŸæŸ“æ‚£è€…")) {
     									 list.get(list.indexOf(from)).infected -= Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));
     									 to.infected = Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1));  
     								 }
@@ -142,28 +142,28 @@ class InfectStatistic {
     								 list.add(to);
     							 }
     				            break;
-    				         case "ËÀÍö":
+    				         case "æ­»äº¡":
     							 t.province = arrays[j-1];
     							 list.get(list.indexOf(t)).infected -= Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     							 list.get(list.indexOf(t)).dead += Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     							 all.infected -= Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     							 all.dead += Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     				            break;
-    				         case "ÖÎÓú":
+    				         case "æ²»æ„ˆ":
     				        	 t.province = arrays[j-1];
     				        	 list.get(list.indexOf(t)).infected -= Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     							 list.get(list.indexOf(t)).cured += Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     							 all.infected -= Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     							 all.cured += Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     				            break;
-    				         case "È·Õï¸ĞÈ¾":
+    				         case "ç¡®è¯Šæ„ŸæŸ“":
     				        	 t.province = arrays[j-2];
     				        	 list.get(list.indexOf(t)).suspected -= Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     							 list.get(list.indexOf(t)).infected += Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1));   
     							 all.suspected -= Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
     							 all.infected += Integer.parseInt(arrays[j+1].substring(0,arrays[j+1].length()-1)); 
      				            break;
-    				         case "ÅÅ³ı":
+    				         case "æ’é™¤":
     				        	 t.province = arrays[j-1];
     				        	 list.get(list.indexOf(t)).suspected -= Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1)); 
     				        	 all.suspected -= Integer.parseInt(arrays[j+2].substring(0,arrays[j+2].length()-1)); 
@@ -193,13 +193,13 @@ class InfectStatistic {
 		BufferedWriter fout = new BufferedWriter(fw);
     	if(province.size()>0) {
 			if(type.size()>0) {
-				if(province.contains("È«¹ú")) {
+				if(province.contains("å…¨å›½")) {
 	    			printTypeInfo(all, type,fout);	
 	    		}
 				for(int k = 0;k<province.size();k++) {
 					Info t = new Info();
 					t.province = province.get(k);
-					if(t.province.equals("È«¹ú"))
+					if(t.province.equals("å…¨å›½"))
 						continue;
     				if(list.contains(t)) {
     					printTypeInfo(list.get(list.indexOf(t)), type, fout);
@@ -210,13 +210,13 @@ class InfectStatistic {
     			}
 			}
 			else {
-				if(province.contains("È«¹ú")) {
+				if(province.contains("å…¨å›½")) {
 	    			printInfo(all,fout);	
 	    		}
 				for(int k = 0;k<province.size();k++) {					
 					Info t = new Info();
 					t.province = province.get(k);
-					if(t.province.equals("È«¹ú"))
+					if(t.province.equals("å…¨å›½"))
 						continue;
     				if(list.contains(t)) {
     					printInfo(list.get(list.indexOf(t)), fout);
@@ -242,38 +242,38 @@ class InfectStatistic {
 			}
 			
 		}
-    	fout.write("// ¸ÃÎÄµµ²¢·ÇÕæÊµÊı¾İ£¬½ö¹©²âÊÔÊ¹ÓÃ");
+    	fout.write("// è¯¥æ–‡æ¡£å¹¶éçœŸå®æ•°æ®ï¼Œä»…ä¾›æµ‹è¯•ä½¿ç”¨");
     	fout.close();
 	}
     public static void printInfo(Info info,BufferedWriter fout) throws IOException {
     	String string;
     	System.out.print(info.province+" ");
-		System.out.print("¸ĞÈ¾»¼Õß:"+info.infected+" ");
-		System.out.print("ÒÉËÆ»¼Õß:"+info.suspected+" ");
-		System.out.print("ÖÎÓú»¼Õß:"+info.cured+" ");
-		System.out.print("ËÀÍö»¼Õß:"+info.dead+"\n");
-		string = info.province+" "+"¸ĞÈ¾»¼Õß:"+info.infected+" "+"ÒÉËÆ»¼Õß:"+info.suspected+" "+
-				"ÖÎÓú»¼Õß:"+info.cured+" "+"ËÀÍö»¼Õß:"+info.dead+"\r\n";
+		System.out.print("æ„ŸæŸ“æ‚£è€…:"+info.infected+" ");
+		System.out.print("ç–‘ä¼¼æ‚£è€…:"+info.suspected+" ");
+		System.out.print("æ²»æ„ˆæ‚£è€…:"+info.cured+" ");
+		System.out.print("æ­»äº¡æ‚£è€…:"+info.dead+"\n");
+		string = info.province+" "+"æ„ŸæŸ“æ‚£è€…:"+info.infected+" "+"ç–‘ä¼¼æ‚£è€…:"+info.suspected+" "+
+				"æ²»æ„ˆæ‚£è€…:"+info.cured+" "+"æ­»äº¡æ‚£è€…:"+info.dead+"\r\n";
 		fout.write(string);
 	}
     public static void printTypeInfo(Info info,ArrayList<String> type,BufferedWriter fout) throws IOException {
     	System.out.print(info.province+" ");
 		String string = info.province+" ";
 		if(type.contains("ip")) {
-			System.out.print("¸ĞÈ¾»¼Õß:"+info.infected+" ");
-			string += "¸ĞÈ¾»¼Õß:"+info.infected+" ";
+			System.out.print("æ„ŸæŸ“æ‚£è€…:"+info.infected+" ");
+			string += "æ„ŸæŸ“æ‚£è€…:"+info.infected+" ";
 		}
 		if(type.contains("sp")) {
-			System.out.print("ÒÉËÆ»¼Õß:"+info.suspected+" ");
-			string += "ÒÉËÆ»¼Õß:"+info.suspected+" ";
+			System.out.print("ç–‘ä¼¼æ‚£è€…:"+info.suspected+" ");
+			string += "ç–‘ä¼¼æ‚£è€…:"+info.suspected+" ";
 		}
 		if(type.contains("cure")) {
-			System.out.print("ÖÎÓú»¼Õß:"+info.cured+" ");
-			string += "ÖÎÓú»¼Õß:"+info.cured+" ";
+			System.out.print("æ²»æ„ˆæ‚£è€…:"+info.cured+" ");
+			string += "æ²»æ„ˆæ‚£è€…:"+info.cured+" ";
 		}
 		if(type.contains("dead")) {
-			System.out.print("ËÀÍö»¼Õß:"+info.dead+"");
-			string+="ËÀÍö»¼Õß:"+info.dead+"";
+			System.out.print("æ­»äº¡æ‚£è€…:"+info.dead+"");
+			string+="æ­»äº¡æ‚£è€…:"+info.dead+"";
 		}
 		System.out.print("\n");
 		string += "\r\n";
@@ -298,7 +298,7 @@ class Info implements Comparable<Info>{
 		return this.province.equals(t.province);
 	}
 }
-class UnicodeReader extends Reader {   //¹¤¾ßÀàÓÃÓÚ¶ÁÈ¡ÎÄ¼şÈ¥³ıBOM
+class UnicodeReader extends Reader {   //å·¥å…·ç±»ç”¨äºè¯»å–æ–‡ä»¶å»é™¤BOM
 	  PushbackInputStream internalIn;  
 	  InputStreamReader internalIn2 = null;  
 	  String defaultEnc;  

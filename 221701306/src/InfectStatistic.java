@@ -11,26 +11,22 @@ import java.io.OutputStreamWriter;
 import java.io.File;
 import java.lang.String;
 
-/**
- * InfectStatistic TODO
- *
- * @author xxx
- * @version xxx
- * @since xxx
- */
+
 public class InfectStatistic {
     public static void main(String[] args) {
+        String[] argstemp= {"list", "-date","2020-01-22","-log", "D:/log/", "-out", "D:/output", "-type", "sp"};
         // 命令输入格式检查
-        if (!ListCommand.checkInput(args)) {
+        if (!ListCommand.checkInput(argstemp)) {
             System.out.println("命令输入格式错误，退出程序");
             System.exit(1);
         }
-        ListCommand aListCommand = new ListCommand(args);
+        ListCommand aListCommand = new ListCommand(argstemp);
         Statistic aStatistic = new Statistic();
         aListCommand.checkCommand(aStatistic);
         LogFiles aLogFiles = new LogFiles(aListCommand.arguments[0].value);
         aLogFiles.readFiles(aListCommand.arguments[2].value, aStatistic);
-        aStatistic.outPutFile(aListCommand.arguments[1].value, (TypeArgument)aListCommand.arguments[3], (ProvinceArgument)aListCommand.arguments[4]);
+        aStatistic.outPutFile(aListCommand.arguments[1].value, (TypeArgument) aListCommand.arguments[3],
+                (ProvinceArgument) aListCommand.arguments[4]);
         System.out.println("helloworld");
     }
 
@@ -58,7 +54,7 @@ class ListCommand {
             while (!strs[i].startsWith("-")) {
                 ++n;
                 ++i;
-                if(i==strs.length) {
+                if (i == strs.length) {
                     break;
                 }
             }
@@ -183,7 +179,7 @@ class ListCommand {
 
     void checkCommand(Statistic sta) {
         for (int i = 0; i < 4; ++i) {
-            if (!arguments[0].checkError()) {
+            if (!arguments[i].checkError()) {
                 System.exit(1);
             }
         }
@@ -280,7 +276,7 @@ class DateArgument extends BaseArgument {
     DateArgument(String name) {
         // TODO Auto-generated constructor stub
         super(name);
-        value="lastdate";
+        value = "lastdate";
     }
 
     DateArgument(String[] strs) {
@@ -299,13 +295,12 @@ class DateArgument extends BaseArgument {
             return false;
         }
         // 日期格式检查 满足平年闰年的YYYY-MM-DD格式
-        if (!value.matches(
-                "(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]"
-                        + "|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468]"
-                        + "[048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)   \r\n(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]"
-                        + "{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))"
-                        + "|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))"
-                        + "-02-29) \r\n")) {
+        if (!value.matches("(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]"
+            + "|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468]"
+            + "[048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)   \r\n(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]"
+            + "{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))"
+            + "|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))"
+            + "-02-29) \r\n")) {
             value = "lastdate";
             System.out.println("日期格式应为YYYY-MM-DD满足平闰，默认最新日期");
         }
@@ -392,6 +387,9 @@ class ProvinceArgument extends BaseArgument {
     }
 
     boolean checkError(Statistic sta) {
+        if (value == "") {
+            return true;
+        }
         // 参数值不能重复 若重复则删去
         int n = valueList.length;
         for (int i = 0; i < n; ++i) {
@@ -406,7 +404,7 @@ class ProvinceArgument extends BaseArgument {
             temp[i] = valueList[i];
         }
         valueList = temp;
-        
+
         // 输入的省份存在，若不存在则列出所有
         for (int i = 0; i < valueList.length; ++i) {
             if (!sta.data.containsKey(valueList[i])) {
@@ -479,13 +477,13 @@ class LogFiles {
             }
             break;
         }
-        
-        //各省数据统计到全国
-        int[] all= {0,0,0,0};
+
+        // 各省数据统计到全国
+        int[] all = { 0, 0, 0, 0 };
         for (String keytemp : sta.data.keySet()) {
-            int[] valuetemp=sta.data.get(keytemp);
-            for(int i=0;i<4;++i) {
-                all[i]+=valuetemp[i];
+            int[] valuetemp = sta.data.get(keytemp);
+            for (int i = 0; i < 4; ++i) {
+                all[i] += valuetemp[i];
             }
         }
         sta.data.put("全国", all);
@@ -497,7 +495,7 @@ class LogFiles {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
             String line;
             while ((line = br.readLine()) != null) {
-                //忽略'/'开头的行
+                // 忽略'/'开头的行
                 if (line.startsWith("/")) {
                     continue;
                 }
@@ -599,6 +597,7 @@ class Statistic {
         data.put("甘肃", new int[] { 0, 0, 0, 0 });
         data.put("广东", new int[] { 0, 0, 0, 0 });
         data.put("广西", new int[] { 0, 0, 0, 0 });
+        data.put("贵州", new int[] { 0, 0, 0, 0 });
         data.put("海南", new int[] { 0, 0, 0, 0 });
         data.put("河北", new int[] { 0, 0, 0, 0 });
         data.put("河南", new int[] { 0, 0, 0, 0 });
@@ -657,9 +656,13 @@ class Statistic {
                 typetemp[2] = true;
                 typetemp[3] = true;
             }
-            // 若输出所有省份数据 遍历数据，并写入文件
+            // 若输出所有省份数据 遍历数据,并按省份拼音排序写入文件
             if (provinces.value.equals("")) {
-                for (String keytemp : data.keySet()) {
+                String[] provincesort = { "全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江",
+                    "湖北", "湖南", "江西", "吉林", "江苏", "辽宁", "内蒙古", "宁夏", "青海", "山西", "山东", "陕西", "上海", "四川", "天津", "西藏", "新疆",
+                    "云南", "浙江" };
+                for (int i = 0; i < provincesort.length; ++i) {
+                    String keytemp = provincesort[i];
                     int[] valuetemp = data.get(keytemp);
                     outline = keytemp;
                     if (typetemp[0]) {
@@ -678,9 +681,9 @@ class Statistic {
                     bw.newLine();
                 }
             }
-            //若只输出-province参数值省份数据
-            if(provinces.value.equals("valuelist")) {
-                for(String provincetemp:provinces.valueList) {
+            // 若只输出-province参数值省份数据
+            if (provinces.value.equals("valuelist")) {
+                for (String provincetemp : provinces.valueList) {
                     int[] valuetemp = data.get(provincetemp);
                     outline = provincetemp;
                     if (typetemp[0]) {

@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 
 /**
@@ -20,21 +20,12 @@ import java.util.Hashtable;
  */
 class InfectStatistic {
 				
-    public static void main(String[] _args) {
-    	
-		
-		  String[] args = { "list","-log","D:\\log\\","-out",
-		  "D:\\ListOut4.txt", "-date",
-		  "2020-01-23",
-		  "-type",
-		  "cure",
-		  "dead",
-		  "ip",
-		  "-province",
-		  "全国",
-		  "福建",
-		  "浙江"
-		  };
+    public static void main(String[] args) {
+
+    	if (args.length <= 0) {
+    		System.out.println("命令不合法！");
+    		return;
+    	}
     	
     	if(args[0].equalsIgnoreCase("list")) {   		
     		//初始化统计类并启动
@@ -56,7 +47,7 @@ class InfectStatistic {
 	 /** 所有有数据的省份名字列表 */
 	 private ArrayList<String> allProvinceList;
 	 /** 省份数据映射表 */
-	 private Hashtable<String, Province> provinceHashtable;
+	 private HashMap<String, Province> provinceHashtable;
 	 /** 是否读取全部日志文件 */
 	 private boolean isReadAll;
 	 /** 是否显示全国省份数据 */
@@ -73,7 +64,7 @@ class InfectStatistic {
 			typeList = new ArrayList<String>();
 			provinceArgsList = new ArrayList<String>();
 			allProvinceList = new ArrayList<String>();
-			provinceHashtable = new Hashtable<String, Province>();
+			provinceHashtable = new HashMap<String, Province>();
 			this.args = args;
 			isReadAll = true;
 			isShowAllProvince = true;
@@ -124,6 +115,7 @@ class InfectStatistic {
 				break;
 			}
 		}
+		 
 	 }   	 
 	 
 	 /**
@@ -159,10 +151,11 @@ class InfectStatistic {
 				return index;
 			}
 			else { //仍有省份参数
-				if (temp.equals("全国") == false) {
-					provinceArgsList.add(temp);
-					provinceHashtable.put(temp, new Province(temp));					
-				}
+				provinceArgsList.add(temp);
+				if (!temp.equals("全国")) {
+					provinceHashtable.put(temp, new Province(temp));				
+					allProvinceList.add(temp);
+				}				
 				index++;
 			}			
 		} //到列表尾或者全部省份都加入完成
@@ -175,7 +168,6 @@ class InfectStatistic {
 	 private void readFiles() {
 		 File file = new File(logPath);
 		 File[] logFiles = file.listFiles();
-		 String logDate = new String();
 		 
 		 if (logFiles.length == 0) {
 			 System.out.println("当前文件夹下没有日志文件！路径：" + logPath);
@@ -196,7 +188,7 @@ class InfectStatistic {
 		 
 		 //读取日志文件
 		 for (int i = 0; i < logFiles.length; i++) {
-			logDate = logFiles[i].getName().split("\\.")[0];
+			String logDate = logFiles[i].getName().split("\\.")[0];
 			if (isReadAll || date.compareTo(logDate) >= 0) {
 				try {
 					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(logFiles[i]), "UTF-8"));;               
@@ -224,7 +216,7 @@ class InfectStatistic {
 		 if(datas[0].equals("//")) {
 			 return;
 		 }
-		 
+
 		String provinceName = datas[0];
 		Province prov = getProvinceByKey(provinceName); 
 		
@@ -258,7 +250,7 @@ class InfectStatistic {
 				}
 				break;
 			case "感染患者": //感染患者流入他省
-				Province prov2 = getProvinceByKey(datas[3]);
+				Province prov2 = getProvinceByKey(datas[3]);				
 				prov.decreaseIp(datas[4]);
 				prov2.increaseIp(datas[4]);
 				break;
@@ -274,16 +266,13 @@ class InfectStatistic {
 	  * @return
 	  */
 	 private Province getProvinceByKey(String key) {		 
-		 Province prov = null;
-		 if (provinceHashtable.containsKey(key) == false) {
+		 Province prov = provinceHashtable.get(key);
+		 if (prov == null) {
 				prov = new Province(key);
+				//System.out.println("是否存在值"+ key + provinceHashtable.containsKey(key));
 				provinceHashtable.put(key, prov);
-				System.out.println(key);
 				//加入有数据列表
 				allProvinceList.add(key);
-		}
-		else {
-			prov = provinceHashtable.get(key);
 		}
 		return prov;	
 	}
@@ -304,26 +293,27 @@ class InfectStatistic {
 			 if (isShowAllProvince || isOuputNationwide()) {
 				//打印全国数据
 				 Province nation = getNationStatResult();
-				 bw.write(nation.getAllOuputResult());
+				 bw.write(nation.getOuputResult());
 				 bw.newLine();				 
 			 }
 			 			 
 			 if (isShowAllProvince == false) { //输出参数传入的省份				 
 				 provinceArgsList.sort(new ProvinceCompartor());
 				 for (String name : provinceArgsList) {
-					 bw.write(provinceHashtable.get(name).getAllOuputResult());
-					 bw.newLine();					
+					 if (!name.equals("全国")) {
+						 bw.write(provinceHashtable.get(name).getOuputResult());
+						 bw.newLine();
+					 }					 					
 				}
 			 }
 			 else {	//输出所有省份			 
 				 allProvinceList.sort(new ProvinceCompartor());
 				 for (String name : allProvinceList) {					 
-					 bw.write(provinceHashtable.get(name).getAllOuputResult());
+					 bw.write(provinceHashtable.get(name).getOuputResult());
 					 bw.newLine();
 				}					 			 					 
 			 }
 			 
-			 bw.write("// 该文档并非真实数据，仅供测试使用");
 			 bw.close();
 			 System.out.println("文件写入完毕.");
 		} 
@@ -524,7 +514,7 @@ class InfectStatistic {
 		 * @return 要输出的字符串
 		 */
 		private String getOuputResultByTypes(ArrayList<String> types) {
-			String res = name + "";
+			String res = name + " ";
 			for (int i = 0; i < types.size(); i++) {
 				switch (types.get(i)) {
 				case Constants.TYPE_IP:

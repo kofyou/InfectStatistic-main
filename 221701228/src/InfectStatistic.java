@@ -3,22 +3,28 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 public class InfectStatistic 
 {
 	public static String inputPath = "";
 	public static String outputPath = "";
-	public static String [] provinceList = null;
-	public static String [] typeList = null;
+	public static String [] provinceList = new String[]{"","","","","","","","","","","","","","","","","","","","","",""
+			,"","","","","","","","","","","","",""};
+	public static String [] typeList = new String[]{"","","",""};
 	public static Date inputDate = new Date();
 	public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 	public static String initMaxDateString = "1900-01-01";
@@ -316,13 +322,13 @@ public class InfectStatistic
 				            	{
 				            		ipMoveTo(p1, p2, operateNum);
 				            		map.put(provinceName1,p1);
-				            		map.put(provinceName1,p2);
+				            		map.put(provinceName2,p2);
 				            	}
 				            	else if(info[1].equals("疑似患者"))
 			            		{
 				            		spMoveTo(p1, p2, operateNum);
 				            		map.put(provinceName1,p1);
-				            		map.put(provinceName1,p2);
+				            		map.put(provinceName2,p2);
 			            		}
 				            }
 				        }
@@ -348,7 +354,8 @@ public class InfectStatistic
 		return map;
 	}
 	
-	public static Province calTotle (HashMap<String,Province> map)
+	//计算全国信息
+	public static Province calTotal (HashMap<String,Province> map)
 	{
 		Province nation = new Province("全国");
 		Iterator iter1=map.entrySet().iterator();
@@ -361,6 +368,232 @@ public class InfectStatistic
         	nation.dead += entry.getValue().dead;
         }
         return nation;
+	}
+	
+	public static void outputInfo (String[] typeList, String[] provinceList, Province nation, String path, HashMap<String,Province> map, Set set)
+	{
+		FileWriter fileWriter = null;
+		String dirPath = "";
+		if(path.indexOf("/")>1)
+		{
+			dirPath = path.substring(0,path.lastIndexOf("/"));
+		}
+		else 
+		{
+			dirPath = path.substring(0,path.lastIndexOf("/")+1);
+		}
+		File dir = new File(dirPath);
+		if (!dir.exists()) 
+		{
+	        dir.mkdirs();
+	    }
+		File file = new File(path);
+		fileWriter = null;
+		try 
+		{
+			if(!file.exists())
+			{
+				file.createNewFile();
+			}
+			else 
+			{
+				file.delete();
+				file.createNewFile();
+			}
+			fileWriter = new FileWriter(file, true);
+			if(provinceList[34].equals(""))       //输出全部省份信息
+			{
+				if(typeList[0].equals(""))
+				{
+					fileWriter.write(nation.name+" 感染患者"+nation.ip+"人 疑似患者"+nation.sp+"人 治愈"+nation.cure+"人 死亡"+nation.dead+"人\n");
+				}
+				else 
+				{
+					fileWriter.write(nation.name);
+					for(int i=0;i<typeList.length&&!typeList[i].equals("");i++)
+					{
+						if(typeList[i].equals("ip"))
+						{
+							fileWriter.write(" 感染患者"+nation.ip+"人");
+						}
+						else if(typeList[i].equals("sp"))
+						{
+							fileWriter.write(" 疑似患者"+nation.sp+"人");
+						}
+						else if(typeList[i].equals("cure"))
+						{
+							fileWriter.write(" 治愈"+nation.cure+"人");
+						}
+						else if(typeList[i].equals("dead"))
+						{
+							fileWriter.write(" 死亡"+nation.dead+"人");
+						}
+					}
+					fileWriter.write("\n");
+				}
+				Province p = null;
+				for (Object str : set) 
+				{  
+					String name = (String)str;  
+				 	p = map.get(name);
+					if(typeList[0].equals(""))
+					{
+						fileWriter.write(p.name+" 感染患者"+p.ip+"人 疑似患者"+p.sp+"人 治愈"+p.cure+"人 死亡"+p.dead+"人\n");
+					}
+					else 
+					{
+						fileWriter.write(p.name);
+						for(int i=0;i<typeList.length&&!typeList[0].equals("");i++)
+						{
+							if(typeList[i].equals("ip"))
+							{
+								fileWriter.write(" 感染患者"+p.ip+"人");
+							}
+							else if(typeList[i].equals("sp"))
+							{
+								fileWriter.write(" 疑似患者"+p.sp+"人");
+							}
+							else if(typeList[i].equals("cure"))
+							{
+								fileWriter.write(" 治愈"+p.cure+"人");
+							}
+							else if(typeList[i].equals("dead"))
+							{
+								fileWriter.write(" 死亡"+p.dead+"人");
+							}
+						}
+						fileWriter.write("\n");
+					}
+				} 
+			}
+			else               //输出部分省份信息
+			{
+				if(Arrays.asList(provinceList).contains("全国"))
+				{
+					if(typeList[0].equals(""))
+					{
+						fileWriter.write(nation.name+" 感染患者"+nation.ip+"人 疑似患者"+nation.sp+"人 治愈"+nation.cure+"人 死亡"+nation.dead+"人\n");
+					}
+					else 
+					{
+						fileWriter.write(nation.name);
+						for(int j=0;j<typeList.length&&!typeList[j].equals("");j++)
+						{
+							if(typeList[j].equals("ip"))
+							{
+								fileWriter.write(" 感染患者"+nation.ip+"人");
+							}
+							else if(typeList[j].equals("sp"))
+							{
+								fileWriter.write(" 疑似患者"+nation.sp+"人");
+							}
+							else if(typeList[j].equals("cure"))
+							{
+								fileWriter.write(" 治愈"+nation.cure+"人");
+							}
+							else if(typeList[j].equals("dead"))
+							{
+								fileWriter.write(" 死亡"+nation.dead+"人");
+							}
+						}
+						fileWriter.write("\n");
+					}
+				}
+				for(int i=0;i<provinceList.length&&!provinceList[34].equals("");i++)
+				{
+					if(provinceList[i].equals("全国"))
+					{
+						continue;
+					}
+					else if(!map.containsKey(provinceList[i])&&!provinceList[i].equals(""))
+					{
+						if(typeList[0].equals(""))
+						{
+							fileWriter.write(provinceList[i]+" 感染患者0人 疑似患者0人 治愈0人 死亡0人\n");
+						}
+						else 
+						{
+							fileWriter.write(provinceList[i]);
+							for(int k=0;k<typeList.length&&!typeList[0].equals("");k++)
+							{
+								if(typeList[k].equals("ip"))
+								{
+									fileWriter.write(" 感染患者0人");
+								}
+								else if(typeList[k].equals("sp"))
+								{
+									fileWriter.write(" 疑似患者0人");
+								}
+								else if(typeList[k].equals("cure"))
+								{
+									fileWriter.write(" 治愈0人");
+								}
+								else if(typeList[k].equals("dead"))
+								{
+									fileWriter.write(" 死亡0人");
+								}
+							}
+							fileWriter.write("\n");
+						}
+					}
+					else 
+					{
+						if(provinceList[i].equals(""))
+						{
+							continue;
+						}
+						Province p = null;
+						String name = provinceList[i];  
+						p = map.get(name);
+						if(typeList[0].equals(""))
+						{
+							fileWriter.write(p.name+" 感染患者"+p.ip+"人 疑似患者"+p.sp+"人 治愈"+p.cure+"人 死亡"+p.dead+"人\n");
+						}
+						else 
+						{
+							fileWriter.write(p.name);
+							for(int k=0;k<typeList.length&&!typeList[0].equals("");k++)
+							{
+								if(typeList[k].equals("ip"))
+								{
+									fileWriter.write(" 感染患者"+p.ip+"人");
+								}
+								else if(typeList[k].equals("sp"))
+								{
+									fileWriter.write(" 疑似患者"+p.sp+"人");
+								}
+								else if(typeList[k].equals("cure"))
+								{
+									fileWriter.write(" 治愈"+p.cure+"人");
+								}
+								else if(typeList[k].equals("dead"))
+								{
+									fileWriter.write(" 死亡"+p.dead+"人");
+								}
+							}
+							fileWriter.write("\n");
+						}
+					}
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		finally 
+		{
+			try 
+			{
+				fileWriter.write("// 该文档并非真实数据，仅供测试使用\n");
+				fileWriter.flush();
+				fileWriter.close();
+			} 
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public static void main(String[] args) 
@@ -384,23 +617,14 @@ public class InfectStatistic
 		else
 		{
 			map = readInfo(inputPath, inputDate, map);
-			nation = calTotle(map);
+			nation = calTotal(map);
 		}
-		
-		
-		
-		
+		Set set=map.keySet();
+	    Object[] arr=set.toArray();
+	    Comparator<Object> com=Collator.getInstance(java.util.Locale.CHINA);
+	    Arrays.sort(arr);
+	    Arrays.sort(provinceList,com);	    
+	    outputInfo(typeList, provinceList, nation, outputPath, map, set);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
 

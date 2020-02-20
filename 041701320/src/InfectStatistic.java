@@ -73,9 +73,9 @@ class InfectStatistic{
 						    	if(Pattern.matches(p4, line)) 
 						    		Dead(line);
 						    	if(Pattern.matches(p5, line)) 
-						    		toIP(line);
+						    		IPgo(line);
 						    	if(Pattern.matches(p6, line))
-						    		toSP(line);
+						    		SPgo(line);
 						    	if(Pattern.matches(p7, line))
 						    		SPtoIP(line);
 						    	if(Pattern.matches(p8, line))
@@ -98,28 +98,117 @@ class InfectStatistic{
 			}			
 		}
 		public void IP(String line) {
-			
+			String[] str = line.split(" ");    	
+	    	int n = Integer.valueOf(str[3].replace("人", ""));
+	    	int i;
+	    	for(i = 0; i < 35; i++) {
+	    		if(str[0].equals(province[i])) { 
+	    			situation[0][1] += n;
+	    			situation[i][1] += n; 
+	    			situation[i][0] = 1;
+	    			break;
+	    		}
+	    	}
 		}
 		public void SP(String line) {
+			String[] str = line.split(" ");	    	
+	    	int n = Integer.valueOf(str[3].replace("人", ""));
+	    	int i;
+	    	for(i = 0; i < 35; i++) {
+	    		if(str[0].equals(province[i])) { 
+	    			situation[0][2] += n;
+	    			situation[i][2] += n; 
+	    			situation[i][0] = 1;
+	    			break;
+	    		}
+	    	}
 			
 		}
 		public void Cure(String line) {
-			
+			String[] str = line.split(" ");	    	
+	    	int n = Integer.valueOf(str[2].replace("人", ""));
+	    	int i;
+	    	for(i = 0; i < 35; i++) {
+	    		if(str[0].equals(province[i])) { 
+	    			situation[0][3] += n;
+	    			situation[0][1] -= n;
+	    			situation[i][3] += n;
+	    			situation[i][1] -= n;
+	    			situation[i][0] = 1;
+	    			break;
+	    		}
+	    	}
 		}
 		public void Dead(String line) {
-			
+			String[] str = line.split(" ");	    	
+	    	int n = Integer.valueOf(str[2].replace("人", ""));
+	    	int i;
+	    	for(i = 0; i < 35; i++) {
+	    		if(str[0].equals(province[i])) { 
+	    			situation[0][4] += n;
+	    			situation[0][1] -= n;
+	    			situation[i][4] += n;
+	    			situation[i][1] -= n;
+	    			situation[i][0] = 1;
+	    			break;
+	    		}
+	    	}
 		}
-		public void toIP(String line) {
-			
+		public void IPgo(String line) {
+	    	String[] str = line.split(" ");	    	
+	    	int n = Integer.valueOf(str[4].replace("人", ""));
+	    	int i;
+	    	for(i = 0; i < province.length; i++) {
+	    		if(str[0].equals(province[i])) {
+	    			situation[i][1] -= n;
+	    			situation[i][0]=1;
+	    		}
+	    		if(str[3].equals(province[i])) {
+	    			situation[i][1] += n;
+	    			situation[i][0]=1;
+	    		}
+	    	}		
 		}
-		public void toSP(String line) {
-			
+		public void SPgo(String line) {
+	    	String[] str = line.split(" ");	    	
+	    	int n = Integer.valueOf(str[4].replace("人", ""));
+	    	int i;
+	    	for(i = 0; i < province.length; i++) {
+	    		if(str[0].equals(province[i])) {
+	    			situation[i][2] -= n;
+	    			situation[i][0]=1;
+	    		}
+	    		if(str[3].equals(province[i])) {
+	    			situation[i][2] += n;
+	    			situation[i][0]=1;
+	    		}
+	    	}			
 		}
 		public void SPtoIP(String line) {
-			
+	    	String[] str = line.split(" ");     	
+	    	int n = Integer.valueOf(str[3].replace("人", ""));
+	    	int i;
+	    	for(i = 0; i < province.length; i++) {
+	    		if(str[0].equals(province[i])) { 
+	    			situation[0][2] -= n; 
+	    			situation[0][1] += n; 
+	    			situation[i][2] -= n; 
+	    			situation[i][1] += n; 
+	    			situation[i][0]=1;
+	    		}
+	    	}
 		}
 		public void notSP(String line) {
-			
+	    	String[] str = line.split(" ");     	
+	    	int n = Integer.valueOf(str[3].replace("人", ""));
+	    	int i;
+	    	for(i = 0; i < province.length; i++) {
+	    		if(str[0].equals(province[i])) { 
+	    			situation[0][2] -= n; 	    			
+	    			situation[i][2] -= n; 
+	    			situation[i][0]=1;
+	    		}
+	    	}			
 		}
 		
 		//输出日志

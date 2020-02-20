@@ -159,7 +159,7 @@ class Common {
         return str2;
     }
 
-    public static Date ParserDateFromLogFileName(String fileName)
+    public static Date ParserDateFromLFN(String fileName)
     {
         String[] strs1 = null;
         if (IsWindows())
@@ -228,13 +228,11 @@ class Common {
                     {
                         temp = fileList[i].toString().split("/");
                     }
-                    // "2020-[0-1][0-9]-[0-3][0-9].log.txt"
                     if (!temp[temp.length - 1].matches(regex))
                     {
                         System.out.println("invalid file : " + temp[temp.length - 1] +" Skip ");
                         continue;
                     }
-                    // support args -date
                     if (date != null && Common.CompareDate(temp[temp.length - 1], date) > 0)
                     {
                         continue;
@@ -257,13 +255,13 @@ class Common {
 
 class ChinaComparator implements Comparator<String>
 {
-    public static Map<String, Integer> provinceMap = new HashMap<>();
+    public static Map<String, Integer> ProvinceMap = new HashMap<>();
     static
     {
         int index = 0;
         for (String str : Lib.Provinces)
         {
-            provinceMap.put(str, index);
+            ProvinceMap.put(str, index);
             index++;
         }
     }
@@ -271,7 +269,7 @@ class ChinaComparator implements Comparator<String>
     @Override
     public int compare(String str1, String str2)
     {
-        return (provinceMap.get(str1) - provinceMap.get(str2));
+        return (ProvinceMap.get(str1) - ProvinceMap.get(str2));
     }
 }
 
@@ -280,8 +278,8 @@ class FileComparator implements Comparator<String>
     @Override
     public int compare(String str1, String str2)
     {
-        Date date1 = Common.ParserDateFromLogFileName(str1);
-        Date date2 = Common.ParserDateFromLogFileName(str2);
+        Date date1 = Common.ParserDateFromLFN(str1);
+        Date date2 = Common.ParserDateFromLFN(str2);
         return date2.compareTo(date1);
     }
 }

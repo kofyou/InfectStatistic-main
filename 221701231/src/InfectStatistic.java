@@ -9,8 +9,8 @@ import java.util.Map;
  * TODO
  *
  * @author 221701231_朱鸿昊
- * @version 1.1.1
- * @since 2020/2/19 17:25
+ * @version 1.1.3
+ * @since 2020/2/20 16:50
  */
 class InfectStatistic {
     static class Controller{
@@ -126,6 +126,7 @@ class InfectStatistic {
                     writer.write(Statistics.Areas[i0].Output()+"\r\n");
                 }
             }
+            writer.write("// 该文档并非真实数据，仅供测试使用\r\n");
             writer.flush();//刷新内存，将内存中的数据立刻写出。
             writer.close();
         }

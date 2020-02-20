@@ -315,6 +315,21 @@ public class InfectStatistic {
 		
 	}
 	public  static void writeFile(String str) {
+		try {
+			OutputStream os=new FileOutputStream(str);
+			PrintWriter pw=new PrintWriter(os);
+			for(int i=0;arr[i]!=null;i++)
+			{
+				pw.println(arr[i]);
+			}
+			pw.println("// 该文档并非真实数据，仅供测试使用");
+			pw.close();
+			os.close();
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
 		
 	}
 	public static void main(String[] args){

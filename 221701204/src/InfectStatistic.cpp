@@ -1,9 +1,8 @@
-/*********************************
+ï»¿/*********************************
 FileName:InfectStatistic.cpp
-Author:ÁÖÓğÏ£
-Function:ÒßÇé×´¿öÍ³¼Æ 
+Author:æ—ç¾½å¸Œ
+Function:ç–«æƒ…çŠ¶å†µç»Ÿè®¡ 
 **********************************/
-
 #pragma warning(disable:4996)
 #include <io.h>		
 #include <iostream>
@@ -65,19 +64,19 @@ void Analysis::Change(int province1, int province2,int type1,int type2,int num,i
 		else if (l == 101)out[province1][type1] -= num;
 		else if (l == 102)
 		{
-			out[province1][mi2["¸ĞÈ¾»¼Õß"]] -= num;
-			out[province1][mi2["ÖÎÓú"]] += num;	
+			out[province1][mi2["æ„ŸæŸ“æ‚£è€…"]] -= num;
+			out[province1][mi2["æ²»æ„ˆ"]] += num;	
 		}
 		else 
 		{
-			out[province1][mi2["ËÀÍö"]] += num;
-			out[province1][mi2["¸ĞÈ¾»¼Õß"]] -= num;
+			out[province1][mi2["æ­»äº¡"]] += num;
+			out[province1][mi2["æ„ŸæŸ“æ‚£è€…"]] -= num;
 		}
 	}
 	else if (province2 == 0 && type2 != 0)
 	{
-		out[province1][mi2["ÒÉËÆ»¼Õß"]] -= num;
-		out[province1][mi2["¸ĞÈ¾»¼Õß"]] += num;
+		out[province1][mi2["ç–‘ä¼¼æ‚£è€…"]] -= num;
+		out[province1][mi2["æ„ŸæŸ“æ‚£è€…"]] += num;
 	}
 	else 
 	{
@@ -139,14 +138,14 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
     char newpaths[200];
     strcpy(newpath, path);
     strcpy(newpaths, path);
-	strcat(newpath, "\\*.*");    // ÔÚÄ¿Â¼ºóÃæ¼ÓÉÏ"\\*.*"½øĞĞµÚÒ»´ÎËÑË÷
+	strcat(newpath, "\\*.*");    // åœ¨ç›®å½•åé¢åŠ ä¸Š"\\*.*"è¿›è¡Œç¬¬ä¸€æ¬¡æœç´¢
 	int handle;
 	int returnflag = 0;
 	_finddata_t findData;
 	handle = _findfirst(newpath, &findData);
 	if (handle == -1)
 	{
-		// ¼ì²éÊÇ·ñ³É¹¦
+		// æ£€æŸ¥æ˜¯å¦æˆåŠŸ
 		return;
 	}
     while (_findnext(handle, &findData) == 0) 
@@ -162,7 +161,7 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
         else 
         {
             if (strstr(findData.name, format))
-			{     //ÅĞ¶ÏÊÇ²»ÊÇtxtÎÄ¼ş 
+			{     //åˆ¤æ–­æ˜¯ä¸æ˜¯txtæ–‡ä»¶ 
 				
 				int size = strlen(date);
 				int flg = 1;
@@ -193,7 +192,7 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
 			}
 		}
 	}
-	_findclose(handle);    // ¹Ø±ÕËÑË÷¾ä±ú
+	_findclose(handle);    // å…³é—­æœç´¢å¥æŸ„
 }
 
 void Analysis::Init()
@@ -205,34 +204,34 @@ void Analysis::Init()
 	mi2.clear();
 	mi3.clear();
 	province_num = 0, type_num = 0;
-	mi["ĞÂÔö"] = 100;
-	mi["ÅÅ³ı"] = 101;
-	mi["ÖÎÓú"] = 102;
-	mi["ËÀÍö"] = 103;
-	mi["È«¹ú"] = 1;
-	mi["°²»Õ"] = 2, mi["±±¾©"] = 3, mi["ÖØÇì"] = 4;
-	 mi["¸£½¨"] = 5, mi["¸ÊËà"] = 6, mi["¹ã¶«"] = 7;
-	mi["¹ãÎ÷"] = 8, mi["¹óÖİ"] = 9, mi["º£ÄÏ"] = 10;
-	mi["ºÓ±±"] = 11, mi["ºÓÄÏ"] = 12, mi["ºÚÁú½­"] = 13;
-	mi["ºş±±"] = 14, mi["ºşÄÏ"] = 15, mi["¼ªÁÖ"] = 16;
-	mi["½­ËÕ"] = 17, mi["½­Î÷"] = 18, mi["ÁÉÄş"] = 19;
-	mi["ÄÚÃÉ¹Å"] = 20, mi["ÄşÏÄ"] = 21, mi["Çàº£"] = 22;
-	 mi["É½¶«"] = 23, mi["É½Î÷"] = 24, mi["ÉÂÎ÷"] = 25;
-	mi["ÉÏº£"] = 26, mi[""] = 27, mi["ËÄ´¨"] = 28;
-	mi["Ì¨Íå"] = 29, mi["Ìì½ò"] = 30, mi["Î÷²Ø"] = 31;
-	mi["Ïã¸Û"] = 32, mi["ĞÂ½®"] = 33, mi["ÔÆÄÏ"] = 34,mi["Õã½­"];
-	province_of[1] = "È«¹ú", province_of[2] = "°²»Õ", province_of[3] = "±±¾©";
-	province_of[4] = "ÖØÇì", province_of[5] = "¸£½¨", province_of[6] = "¸ÊËà";
-	province_of[7] = "¹ã¶«", province_of[8] = "¹ãÎ÷", province_of[9] = "¹óÖİ";
-	province_of[10] = "º£ÄÏ", province_of[11] = "ºÓ±±", province_of[12] = "ºÓÄÏ" ;
-	province_of[13] = "ºÚÁú½­", province_of[14] = "ºş±±", province_of[15] = "ºşÄÏ";
-	province_of[16] = "¼ªÁÖ", province_of[17] = "½­ËÕ", province_of[18] = "½­Î÷";
-	province_of[19] = "ÁÉÄş", province_of[20] = "ÄÚÃÉ¹Å", province_of[21] = "ÄşÏÄ";
-	province_of[22] = "Çàº£", province_of[23] = "É½¶«", province_of[24] = "É½Î÷";
-	province_of[25] = "ÉÂÎ÷", province_of[26] = "ÉÏº£", province_of[28] = "ËÄ´¨";
-	province_of[29] = "Ì¨Íå", province_of[30] = "Ìì½ò", province_of[31] = "Î÷²Ø";
-	province_of[32] = "Ïã¸Û", province_of[33] = "ĞÂ½®", province_of[34] = "ÔÆÄÏ";
-	province_of[35] = "Õã½­"; province_of[27]="-";
+	mi["æ–°å¢"] = 100;
+	mi["æ’é™¤"] = 101;
+	mi["æ²»æ„ˆ"] = 102;
+	mi["æ­»äº¡"] = 103;
+	mi["å…¨å›½"] = 1;
+	mi["å®‰å¾½"] = 2, mi["åŒ—äº¬"] = 3, mi["é‡åº†"] = 4;
+	 mi["ç¦å»º"] = 5, mi["ç”˜è‚ƒ"] = 6, mi["å¹¿ä¸œ"] = 7;
+	mi["å¹¿è¥¿"] = 8, mi["è´µå·"] = 9, mi["æµ·å—"] = 10;
+	mi["æ²³åŒ—"] = 11, mi["æ²³å—"] = 12, mi["é»‘é¾™æ±Ÿ"] = 13;
+	mi["æ¹–åŒ—"] = 14, mi["æ¹–å—"] = 15, mi["å‰æ—"] = 16;
+	mi["æ±Ÿè‹"] = 17, mi["æ±Ÿè¥¿"] = 18, mi["è¾½å®"] = 19;
+	mi["å†…è’™å¤"] = 20, mi["å®å¤"] = 21, mi["é’æµ·"] = 22;
+	 mi["å±±ä¸œ"] = 23, mi["å±±è¥¿"] = 24, mi["é™•è¥¿"] = 25;
+	mi["ä¸Šæµ·"] = 26, mi[""] = 27, mi["å››å·"] = 28;
+	mi["å°æ¹¾"] = 29, mi["å¤©æ´¥"] = 30, mi["è¥¿è—"] = 31;
+	mi["é¦™æ¸¯"] = 32, mi["æ–°ç–†"] = 33, mi["äº‘å—"] = 34,mi["æµ™æ±Ÿ"];
+	province_of[1] = "å…¨å›½", province_of[2] = "å®‰å¾½", province_of[3] = "åŒ—äº¬";
+	province_of[4] = "é‡åº†", province_of[5] = "ç¦å»º", province_of[6] = "ç”˜è‚ƒ";
+	province_of[7] = "å¹¿ä¸œ", province_of[8] = "å¹¿è¥¿", province_of[9] = "è´µå·";
+	province_of[10] = "æµ·å—", province_of[11] = "æ²³åŒ—", province_of[12] = "æ²³å—" ;
+	province_of[13] = "é»‘é¾™æ±Ÿ", province_of[14] = "æ¹–åŒ—", province_of[15] = "æ¹–å—";
+	province_of[16] = "å‰æ—", province_of[17] = "æ±Ÿè‹", province_of[18] = "æ±Ÿè¥¿";
+	province_of[19] = "è¾½å®", province_of[20] = "å†…è’™å¤", province_of[21] = "å®å¤";
+	province_of[22] = "é’æµ·", province_of[23] = "å±±ä¸œ", province_of[24] = "å±±è¥¿";
+	province_of[25] = "é™•è¥¿", province_of[26] = "ä¸Šæµ·", province_of[28] = "å››å·";
+	province_of[29] = "å°æ¹¾", province_of[30] = "å¤©æ´¥", province_of[31] = "è¥¿è—";
+	province_of[32] = "é¦™æ¸¯", province_of[33] = "æ–°ç–†", province_of[34] = "äº‘å—";
+	province_of[35] = "æµ™æ±Ÿ"; province_of[27]="-";
 }
 
 
@@ -253,7 +252,7 @@ void Analysis::Out()
 			cout << province_of[i] << ' ';
 			for (int j = 1;j < type_num;j++)
 			{
-				cout << type[j] << out[i][j] << "ÈË ";
+				cout << type[j] << out[i][j] << "äºº ";
 			}
 			if (mi1[province_of[i]] == 1 || province_num == 0)
 			{
@@ -261,7 +260,7 @@ void Analysis::Out()
 			}
 		}
 	}
-	cout << "// ¸ÃÎÄµµ²¢·ÇÕæÊµÊı¾İ£¬½ö¹©²âÊÔÊ¹ÓÃ" << "\n";
+	cout << "// è¯¥æ–‡æ¡£å¹¶éçœŸå®æ•°æ®ï¼Œä»…ä¾›æµ‹è¯•ä½¿ç”¨" << "\n";
 }
 
 string Analysis::Check(int date_,char *date)
@@ -288,11 +287,11 @@ string Analysis::Check(int date_,char *date)
 void Analysis::CheckType(int num)
 {
 	int c = num;
-	if (!mi2.count("¸ĞÈ¾»¼Õß"))mi2["¸ĞÈ¾»¼Õß"] = c, type[c++] = "¸ĞÈ¾»¼Õß";
-	if (!mi2.count("ÒÉËÆ»¼Õß"))mi2["ÒÉËÆ»¼Õß"] = c, type[c++] = "ÒÉËÆ»¼Õß";
-	if (!mi2.count("ÖÎÓú"))mi2["ÖÎÓú"] = c, type[c++] = "ÖÎÓú";
-	if (!mi2.count("ËÀÍö"))mi2["ËÀÍö"] = c, type[c++] = "ËÀÍö";
-	mi2["È·Õï¸ĞÈ¾"] = 11;
+	if (!mi2.count("æ„ŸæŸ“æ‚£è€…"))mi2["æ„ŸæŸ“æ‚£è€…"] = c, type[c++] = "æ„ŸæŸ“æ‚£è€…";
+	if (!mi2.count("ç–‘ä¼¼æ‚£è€…"))mi2["ç–‘ä¼¼æ‚£è€…"] = c, type[c++] = "ç–‘ä¼¼æ‚£è€…";
+	if (!mi2.count("æ²»æ„ˆ"))mi2["æ²»æ„ˆ"] = c, type[c++] = "æ²»æ„ˆ";
+	if (!mi2.count("æ­»äº¡"))mi2["æ­»äº¡"] = c, type[c++] = "æ­»äº¡";
+	mi2["ç¡®è¯Šæ„ŸæŸ“"] = 11;
 }
 
 void Analysis::CheckAgain()
@@ -300,11 +299,11 @@ void Analysis::CheckAgain()
 	if (type_num == 0)
 	{
 		int c = 1;
-		if (!mi2.count("¸ĞÈ¾»¼Õß"))mi2["¸ĞÈ¾»¼Õß"] = c, type[c++] = "¸ĞÈ¾»¼Õß";
-		if (!mi2.count("ÒÉËÆ»¼Õß"))mi2["ÒÉËÆ»¼Õß"] = c, type[c++] = "ÒÉËÆ»¼Õß";
-		if (!mi2.count("ÖÎÓú"))mi2["ÖÎÓú"] = c, type[c++] = "ÖÎÓú";
-		if (!mi2.count("ËÀÍö"))mi2["ËÀÍö"] = c, type[c++] = "ËÀÍö";
-		mi2["È·Õï¸ĞÈ¾"] = 11;
+		if (!mi2.count("æ„ŸæŸ“æ‚£è€…"))mi2["æ„ŸæŸ“æ‚£è€…"] = c, type[c++] = "æ„ŸæŸ“æ‚£è€…";
+		if (!mi2.count("ç–‘ä¼¼æ‚£è€…"))mi2["ç–‘ä¼¼æ‚£è€…"] = c, type[c++] = "ç–‘ä¼¼æ‚£è€…";
+		if (!mi2.count("æ²»æ„ˆ"))mi2["æ²»æ„ˆ"] = c, type[c++] = "æ²»æ„ˆ";
+		if (!mi2.count("æ­»äº¡"))mi2["æ­»äº¡"] = c, type[c++] = "æ­»äº¡";
+		mi2["ç¡®è¯Šæ„ŸæŸ“"] = 11;
 		type_num = c;
 	}
 }
@@ -366,10 +365,10 @@ string Analysis::Begin(string com)
 				i++;
 				if (com[i] == ' ' || i == size)
 				{
-					if (ss == "ip")mi2["¸ĞÈ¾»¼Õß"] = c, type[c++] = "¸ĞÈ¾»¼Õß";
-					else if (ss == "sp")mi2["ÒÉËÆ»¼Õß"] = c, type[c++] = "ÒÉËÆ»¼Õß";
-					else if (ss == "cure")mi2["ÖÎÓú"] = c, type[c++] = "ÖÎÓú";
-					else if (ss == "dead")mi2["ËÀÍö"] = c, type[c++] = "ËÀÍö";
+					if (ss == "ip")mi2["æ„ŸæŸ“æ‚£è€…"] = c, type[c++] = "æ„ŸæŸ“æ‚£è€…";
+					else if (ss == "sp")mi2["ç–‘ä¼¼æ‚£è€…"] = c, type[c++] = "ç–‘ä¼¼æ‚£è€…";
+					else if (ss == "cure")mi2["æ²»æ„ˆ"] = c, type[c++] = "æ²»æ„ˆ";
+					else if (ss == "dead")mi2["æ­»äº¡"] = c, type[c++] = "æ­»äº¡";
 					i++;
 					ss = "";
 				}

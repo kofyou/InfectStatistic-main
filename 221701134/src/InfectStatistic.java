@@ -5,8 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashMap;
 
 
@@ -21,12 +22,7 @@ import java.util.HashMap;
 class InfectStatistic {
 				
     public static void main(String[] args) {
-
-    	if (args.length <= 0) {
-    		System.out.println("命令不合法！");
-    		return;
-    	}
-    	
+    					
     	if(args[0].equalsIgnoreCase("list")) {   		
     		//初始化统计类并启动
     		new InfectStatistic(args).start();
@@ -58,7 +54,7 @@ class InfectStatistic {
 	 private boolean isEnd;
      
 	 public InfectStatistic(String[] args) {
-		    date = new String();
+		    date = null;
 			logPath = new String();
 			outputPath = new String();
 			typeList = new ArrayList<String>();
@@ -166,19 +162,19 @@ class InfectStatistic {
 	  * description：读取日志文件并解析处理数据
 	  */
 	 private void readFiles() {
+		 
 		 File file = new File(logPath);
 		 File[] logFiles = file.listFiles();
-		 
+		 		 		 		 
 		 if (logFiles.length == 0) {
 			 System.out.println("当前文件夹下没有日志文件！路径：" + logPath);
 			 isEnd = true;
 			 return;
-		 }
+		 }		 
 		 
 		 if (isReadAll == false) {
 			//比较输入日期与最新日期
-			 String lastestDate = logFiles[logFiles.length - 1].getName();	 
-			 lastestDate = lastestDate.split("\\.")[0];
+			 String lastestDate = getLastestData(logFiles);
 			 if (date.compareTo(lastestDate) > 0) {
 				 System.out.println("日期超出范围，当前最新日期为：" + lastestDate);
 				 isEnd = true;
@@ -206,6 +202,17 @@ class InfectStatistic {
 			}
 		} //文件全部读取完毕				 
 	 }
+	 
+	 /**
+	  * description：获取日志文件夹下最新日期
+	  * @param files  日志文件夹
+	  * @return  最新日志的日期字符串
+	  */
+	 private String getLastestData(File[] files) {
+		 String lastestDate = files[files.length - 1].getName();	 
+		 lastestDate = lastestDate.split("\\.")[0];
+		 return lastestDate;
+	}
 	 
 	 /**
 	  * description：处理文件读取的单行数据
@@ -298,7 +305,8 @@ class InfectStatistic {
 			 }
 			 			 
 			 if (isShowAllProvince == false) { //输出参数传入的省份				 
-				 provinceArgsList.sort(new ProvinceCompartor());
+				 //provinceArgsList.sort(new ProvinceCompartor());
+				 Collections.sort(provinceArgsList, Collator.getInstance(java.util.Locale.CHINA));
 				 for (String name : provinceArgsList) {
 					 if (!name.equals("全国")) {
 						 bw.write(provinceHashtable.get(name).getOuputResult());
@@ -307,7 +315,8 @@ class InfectStatistic {
 				}
 			 }
 			 else {	//输出所有省份			 
-				 allProvinceList.sort(new ProvinceCompartor());
+				 //allProvinceList.sort(new ProvinceCompartor());
+				 Collections.sort(allProvinceList, Collator.getInstance(java.util.Locale.CHINA));
 				 for (String name : allProvinceList) {					 
 					 bw.write(provinceHashtable.get(name).getOuputResult());
 					 bw.newLine();
@@ -355,18 +364,18 @@ class InfectStatistic {
 		return new Province("全国", ip, sp, cure, dead);
 	}
 	 
-	 /**
-	  * description：省份名字排序器 按字母先后顺序排列
-	  * @author VisionWong
-	  *
-	  */
-	 public class ProvinceCompartor implements Comparator<String> {
-
-		@Override
-		public int compare(String o1, String o2) {
-			return o2.compareTo(o1);
-		}		
-	}
+	/**
+	 * description：省份名字排序器 按字母先后顺序排列(无法对中文排序，已经删除)
+	 * 
+	 * @author VisionWong
+	 *
+	 */
+	/*
+	 * public class ProvinceCompartor implements Comparator<String> {
+	 * 
+	 * @Override public int compare(String o1, String o2) { return o2.compareTo(o1);
+	 * } }
+	 */
 	 
     /**
      * description：常量类，储存所有全局常量

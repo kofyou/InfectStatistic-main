@@ -32,3 +32,9 @@ result/
 log/
 #命令行在src生成的编译文件
 src/*.class
+.idea
+*.iml
+out
+gen
+.idea/
+InfectStatistic-example.iml

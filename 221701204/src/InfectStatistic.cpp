@@ -20,7 +20,7 @@ using namespace std;
 class Analysis
 {
 public:
-    char outpath[1005];
+	char outpath[1005];
 	string province[40];
 	map<string, int>mi;
 	map<string, int>mi1;
@@ -42,7 +42,7 @@ public:
 	void LineDetail(string tmp);
 	int Detail(string p, string t) 
 	{
-	return out[mi[p]][mi2[t]];
+		return out[mi[p]][mi2[t]];
 	}
     
 };

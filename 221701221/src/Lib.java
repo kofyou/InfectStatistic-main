@@ -33,7 +33,7 @@ public class Lib {
 class Common {
 
     /** new BufferReader br **/
-    public static BufferedReader newBufferReader(String path) throws FileNotFoundException
+    public static BufferedReader NewBufferReader(String path) throws FileNotFoundException
     {
         FileReader fr = new FileReader(path);
         BufferedReader br = new BufferedReader(fr);
@@ -76,13 +76,13 @@ class Common {
         }
         if (date == null)
         {
-            System.out.println("args's date is not invalid");
+            System.out.println("日期错误");
             return null;
         }
         Date today = new Date();
         if (today.compareTo(date) < 0)
         {
-            System.out.println("today's date < date, " + dateStr + " is invalid" );
+            System.out.println("日期可用" );
             return null;
         }
         return date;
@@ -203,30 +203,30 @@ class Common {
         {
             return null;
         }
-        Map<A, B> sortMap = new TreeMap<A, B>(comparator);
-        sortMap.putAll(map);
-        return sortMap;
+        Map<A, B> SortMap = new TreeMap<A, B>(comparator);
+        SortMap.putAll(map);
+        return SortMap;
     }
 
     public static Map<String, File> GetFiles(String path, String date, String regex)
     {
         File file = new File(path);
-        File[] fileList = file.listFiles();
+        File[] FileList = file.listFiles();
         Map<String, File> fileMap = new HashMap<>();
-        if (fileList != null)
+        if (FileList != null)
         {
-            for (int i = 0; i < fileList.length; ++i)
+            for (int i = 0; i < FileList.length; ++i)
             {
-                if (fileList[i].isFile())
+                if (FileList[i].isFile())
                 {
                     String[] temp = null;
                     if (Common.IsWindows())
                     {
-                        temp = fileList[i].toString().split("\\\\");
+                        temp = FileList[i].toString().split("\\\\");
                     }
                     else
                     {
-                        temp = fileList[i].toString().split("/");
+                        temp = FileList[i].toString().split("/");
                     }
                     if (!temp[temp.length - 1].matches(regex))
                     {
@@ -237,7 +237,7 @@ class Common {
                     {
                         continue;
                     }
-                    fileMap.put(fileList[i].toString(), fileList[i]);
+                    fileMap.put(FileList[i].toString(), FileList[i]);
                 }
             }
         }
@@ -248,12 +248,12 @@ class Common {
 
     public static boolean IsWindows()
     {
-        boolean IsWindows = System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1;
+        boolean IsWindows = System.getProperties().getProperty("os.name").toUpperCase().contains("WINDOWS");
         return IsWindows;
     }
 }
 
-class ChinaComparator implements Comparator<String>
+class CComparator implements Comparator<String>
 {
     public static Map<String, Integer> ProvinceMap = new HashMap<>();
     static

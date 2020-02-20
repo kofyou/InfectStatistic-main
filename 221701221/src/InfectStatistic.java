@@ -181,7 +181,7 @@ class InfectStatistic {
             System.out.println("Handle file : " + entry.getKey());
             BufferedReader br = null;
             try{
-                br = Common.newBufferReader(entry.getKey());
+                br = Common.NewBufferReader(entry.getKey());
                 String line  = null;
                 while((line = br.readLine()) != null)
                 {
@@ -284,8 +284,8 @@ class Container
 
     public void SortByProvince()
     {
-        ChinaComparator mapKeyComparator = new ChinaComparator();
-        RecordMap = Common.SortMap(RecordMap , mapKeyComparator);
+        CComparator MapComparator = new CComparator();
+        RecordMap = Common.SortMap(RecordMap , MapComparator);
     }
 
     //将容器内容输入文件
@@ -514,9 +514,9 @@ class Cmd
         this.Provinces = new Vector<String>();
         this.LogPath = null;
         this.OutputPath = null;
-        Date now = new Date();
+        Date today = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        this.date = sdf.format(now);
+        this.date = sdf.format(today);
         this.ShowArgs = false;
     }
 

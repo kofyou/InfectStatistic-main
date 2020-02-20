@@ -4,17 +4,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.lang.System.exit;
+
 public class InfectStatistic {
 	public static void main(String[] args) throws ParseException, IOException {
         Map<String, ArrayList<String>> map=get_params(args);
         String front_path=map.get("-log").get(0);
         ArrayList<String> filenames=get_input_data(map);//获得所有需要统计的数据的文件名称
         Map<String, Province> map1=init_date(filenames,front_path);//初始化map，并将数据写入
-
         out_put(map,map1);
 	}
 
-    private static void out_put(Map<String, ArrayList<String>> map, Map<String, Province> map1) {
+    private static void out_put(Map<String, ArrayList<String>> map, Map<String, Province> map1) throws IOException {
 
         String out_path=map.get("-out").get(0);
         ArrayList<String> type=map.get("-type");
@@ -35,8 +36,9 @@ public class InfectStatistic {
 
     }
 
-    private static void out_put_as_type(Map<String, Province> map, ArrayList<String> type, ArrayList<String> province,String out_path) {
+    private static void out_put_as_type(Map<String, Province> map, ArrayList<String> type, ArrayList<String> province,String out_path) throws IOException {
 
+        ArrayList<String> results=new ArrayList<String>();
 	    if(province!=null){
             for (String pro:province
             ) {
@@ -60,7 +62,10 @@ public class InfectStatistic {
                         result+=province1.get_result(str);
                     }
                 }
-                //System.out.println(result);
+                results.add(result);
+                out_put_to_file(results,out_path);
+
+                // System.out.println(result);
             }
         }
 
@@ -89,14 +94,29 @@ public class InfectStatistic {
                         result+=province1.get_result(str);
                     }
                 }
+                results.add(result);
                 //System.out.println(result);
+                out_put_to_file(results,out_path);
             }
         }
 
 
     }
 
-    private static Map<String, Province> init_date(ArrayList<String> filenames,String front_path) throws IOException {
+    private static void out_put_to_file(ArrayList<String> result, String out_path) throws IOException {
+        FileWriter file = new FileWriter(out_path);
+        BufferedWriter bw = new BufferedWriter(file);
+        for (String str:result
+             ) {
+            bw.write(str);
+            bw.newLine();
+        }
+        bw.write("// 该文档并非真实数据，仅供测试使用");
+        bw.close();
+
+    }
+
+    private static Map<String, Province> init_date(ArrayList<String> filenames,String front_path) throws IOException {//初始化数据，并装入map中
 	    String province_name[]={"全国","安徽","北京", "重庆", "福建","甘肃","广东" ,"贵州" ,"海南" ,"河北" ,"湖北","湖南" ,"吉林" ,"辽宁" ,
                 "内蒙古", "宁夏", "山东", "山西" ,"陕西" ,"上海" ,"四川" ,"天津" ,"西藏" ,"新疆", "云南", "浙江"};
 	    Province[] provinces=new Province[26];
@@ -239,6 +259,7 @@ public class InfectStatistic {
 	    String input_path=map.get("-log").get(0);
         File file = new File(input_path);
 	    String files_name[]=file.list();
+	    ///////////////////
         SimpleDateFormat sqf=new SimpleDateFormat("yyyy-MM-dd");
         Date point_date; //point_date为目标日期，需统计该日期前的数据
         Date max_date=get_max_date(files_name);
@@ -265,11 +286,11 @@ public class InfectStatistic {
                 need_date.add(filename);
             }
         }
-        for (String str:need_date
+        /*for (String str:need_date
         ) {
             System.out.println(str);
 
-        }
+        }*/
 	    return need_date;
     }
 

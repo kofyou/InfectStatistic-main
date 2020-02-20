@@ -1,4 +1,4 @@
-# InfectStatistic-学号
+# InfectStatistic-221701214
 疫情统计
 <ul>
     <li>如何运行：<br />进入src文件夹<br />

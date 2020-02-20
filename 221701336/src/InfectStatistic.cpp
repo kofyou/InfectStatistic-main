@@ -6,7 +6,6 @@
  * @version 1.0
  * @since 2020.02.13
  */ 
- 
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -19,18 +18,17 @@
 #include <cassert>
 #include <windows.h>
 
-//cd C:\Users\Äñµ°»¨»ú\Desktop\Èí¼ş¹¤³Ì\º®¼ÙµÚ¶ş´Î×÷Òµ\InfectStatistic-main\221701336\src
-//InfectStatistic.exe list -date 2020-01-25 -type sp ip dead -out C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt 
-//-log C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/log/ 
-//InfectStatistic.exe list -date 2020-01-23 -province ¸£½¨ ºş±± -type sp -log C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/log/ -out C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt 
 using namespace std;
 
+//°´Ò»¶¨Ë³ĞòÊÂÏÈ´æ´¢¸÷Ê¡·İ£¬ÓÃÓÚÖ¸ÁîÖĞÊ¡·İµÄ¶ÁÈ¡ºÍÅĞ¶Ï 
 string province[32]={"°²»Õ","±±¾©","ÖØÇì","¸£½¨","¸ÊËà","¹ã¶«","¹ãÎ÷","¹óÖİ","º£ÄÏ","ºÓ±±","ºÓÄÏ","ºÚÁú½­",
 "ºş±±","ºşÄÏ","¼ªÁÖ","½­ËÕ","½­Î÷","ÁÉÄş","ÄÚÃÉ¹Å","ÄşÏÄ","Çàº£","É½¶«","É½Î÷"
 ,"ÉÂÎ÷","ÉÏº£","ËÄ´¨","Ìì½ò","Î÷²Ø","ĞÂ½®","ÔÆÄÏ","Õã½­","È«¹ú"}; 
 
+//ÊÂÏÈ´æ´¢¸÷Çé¿ö£¬ÓÃÓÚºóĞøÇé¿öµÄ¶ÁÈ¡ºÍÅĞ¶Ï 
 string situation[8]={"ĞÂÔö ¸ĞÈ¾»¼Õß","ĞÂÔö ÒÉËÆ»¼Õß","¸ĞÈ¾»¼Õß Á÷Èë","ÒÉËÆ»¼Õß Á÷Èë","ËÀÍö","ÖÎÓú","ÒÉËÆ»¼Õß È·Õï¸ĞÈ¾","ÅÅ³ı ÒÉËÆ»¼Õß"};
 
+//´æ´¢¸÷Ê¡·İÏà¹ØÏà¹ØÄÚÈİµÄ½á¹¹ÌåÁ´±í 
 typedef struct ListNode
 {
     char province[8];//Ê¡·İ 
@@ -42,8 +40,13 @@ typedef struct ListNode
 	struct ListNode *next;//Ö¸ÏòÏÂÒ»¸ö½ÚµãµÄÖ¸Õë	
 }Node,*PNode;
 
-
-PNode CreatList(void)//³õÊ¼»¯Á´±í 
+/*
+¹¦ÄÜ£º³õÊ¼»¯Á´±í 
+ÊäÈë²ÎÊı£ºÎŞ
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÍ·½áµãÖ¸Õë 
+*/ 
+PNode CreatList(void) 
 {
 	int len=31;
 	PNode PHead =(PNode)malloc(sizeof(Node));
@@ -51,6 +54,7 @@ PNode CreatList(void)//³õÊ¼»¯Á´±í
 	{
 		cout<<"¿Õ¼ä·ÖÅäÊ§°Ü"<<endl;
 	}
+	//³õÊ¼»¯¸÷ÊıÖµ 
 	PHead->numOfCured=0;
 	PHead->numOfDead=0;
 	PHead->numOfIP=0;
@@ -74,7 +78,7 @@ PNode CreatList(void)//³õÊ¼»¯Á´±í
 	PHead->next=pNew;
 	PNode PTail=pNew;
 	PTail->next=NULL;
-	
+	//·ÖÅä½áµã 
 	for(int i=1;i<len;i++)
 	{
 		PNode p=(PNode)malloc(sizeof(Node));
@@ -92,11 +96,17 @@ PNode CreatList(void)//³õÊ¼»¯Á´±í
 		p->next=NULL;
 		PTail=p;
 	}
-	cout<<"´´½¨Á´±í³É¹¦"<<endl;
 	return PHead;
 }
 
-string getDate(int argc, char *argv[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÈÕÆÚ 
+
+/*
+¹¦ÄÜ£º»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÈÕÆÚ 
+ÊäÈë²ÎÊı£ºÃüÁîĞĞ²ÎÊı¸öÊı argc(int) ÃüÁîº¯²ÎÊıÊı×é argv[](char *) 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºdateÖµ 
+*/ 
+string getDate(int argc, char *argv[]) 
 {
 	string s1,s2;
 	s2="9999-12-31";
@@ -111,7 +121,13 @@ string getDate(int argc, char *argv[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÈÕÆÚ
     return s2;
 }
 
-string getLog(int argc, char *argv[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÄ¿Â¼ 
+/*
+¹¦ÄÜ£º»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÄ¿Â¼ 
+ÊäÈë²ÎÊı£ºÃüÁîĞĞ²ÎÊı¸öÊı argc(int) ÃüÁîº¯²ÎÊıÊı×é argv[](char *) 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºLogÖµ 
+*/
+string getLog(int argc, char *argv[]) 
 {
 	string s1;
     string s2="NULL";
@@ -126,7 +142,13 @@ string getLog(int argc, char *argv[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÄ¿Â¼
 	return s2; 
 }
 
-string getOutPath(int argc, char *argv[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÊä³öÂ·¾¶ 
+/*
+¹¦ÄÜ£º»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÂ·¾¶ 
+ÊäÈë²ÎÊı£ºÃüÁîĞĞ²ÎÊı¸öÊı argc(int) ÃüÁîº¯²ÎÊıÊı×é argv[](char *) 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºoutpath 
+*/
+string getOutPath(int argc, char *argv[]) 
 {
 	string s1;
     string s2="NULL";
@@ -141,7 +163,13 @@ string getOutPath(int argc, char *argv[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÊä³öÂ·¾¶
 	return s2; 
 }
 
-void getType(int argc, char *argv[],string type[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄ²Ù×÷ÖÖÀà 
+/*
+¹¦ÄÜ£º»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄ²Ù×÷ÖÖÀà 
+ÊäÈë²ÎÊı£ºÃüÁîĞĞ²ÎÊı¸öÊı argc(int) ÃüÁîº¯²ÎÊıÊı×é argv[](char *) ×Ö·û´®Êı×étype[] 
+Êä³ö²ÎÊı£ºÊä³ötypeÖµ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void getType(int argc, char *argv[],string type[]) 
 {
 	string s1;
 	string s2;
@@ -162,7 +190,13 @@ void getType(int argc, char *argv[],string type[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄ²Ù×÷ÖÖÀà
     }
 }
 
-void getProvince(int argc,char *argv[],string province[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÒªÇóÊ¡·İ 
+/*
+¹¦ÄÜ£º»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÒªÇóÊ¡·İ 
+ÊäÈë²ÎÊı£ºÃüÁîĞĞ²ÎÊı¸öÊı argc(int) ÃüÁîº¯²ÎÊıÊı×é argv[](char *) ×Ö·û´®Êı×éprovince[] 
+Êä³ö²ÎÊı£ºÊä³öprovinceÖµ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void getProvince(int argc,char *argv[],string province[]) 
 {
 	string s1;
 	string s2;
@@ -182,11 +216,15 @@ void getProvince(int argc,char *argv[],string province[])//»ñµÃÃüÁîĞĞ²ÎÊıÖĞµÄÒªÇ
 		}
 	}
 }
-
-void AddIP(string province1,int num,PNode head)//Í³¼ÆĞÂÔö¸ĞÈ¾»¼ÕßµÄÇé¿ö 
+ 
+/*
+¹¦ÄÜ£ºÍ³¼ÆĞÂÔö¸ĞÈ¾»¼ÕßµÄÇé¿ö 
+ÊäÈë²ÎÊı£ºÊ¡·İprovince1(string) ±ä»¯ÈËÊınum£¨int) Á´±íÍ·Ö¸Õëhead£¨PNode£© 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void AddIP(string province1,int num,PNode head)
 {
-	//ofstream outFile;
-	//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app);
 	PNode p=head;
 	while(p!=NULL)
 	{
@@ -201,7 +239,13 @@ void AddIP(string province1,int num,PNode head)//Í³¼ÆĞÂÔö¸ĞÈ¾»¼ÕßµÄÇé¿ö
 	head->flag=1;
 }
 
-void AddSP(string province1,int num,PNode head)//Í³¼ÆĞÂÔöÒÉËÆ»¼ÕßµÄÇé¿ö
+/*
+¹¦ÄÜ£ºÍ³¼ÆĞÂÔöÒÉËÆ»¼ÕßµÄÇé¿ö 
+ÊäÈë²ÎÊı£ºÊ¡·İprovince1(string) ±ä»¯ÈËÊınum£¨int) Á´±íÍ·Ö¸Õëhead£¨PNode£© 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void AddSP(string province1,int num,PNode head)
 {
 	//ofstream outFile;
 	//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app);
@@ -219,7 +263,13 @@ void AddSP(string province1,int num,PNode head)//Í³¼ÆĞÂÔöÒÉËÆ»¼ÕßµÄÇé¿ö
 	head->flag=1;
 }
 
-void MoveIP(string province1,string province2,int num,PNode head)//Í³¼Æ¸ĞÈ¾»¼ÕßÁ÷ÈëÍâÊ¡µÄÇé¿ö
+/*
+¹¦ÄÜ£ºÍ³¼Æ¸ĞÈ¾»¼ÕßÁ÷ÈëÍâÊ¡µÄÇé¿ö 
+ÊäÈë²ÎÊı£ºÁ÷³öÊ¡·İprovince1(string) Á÷ÈëÊ¡·İprovince2(string) ±ä»¯ÈËÊınum£¨int) Á´±íÍ·Ö¸Õëhead£¨PNode£© 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void MoveIP(string province1,string province2,int num,PNode head)
 {
 	//ofstream outFile;
 	//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app);
@@ -240,7 +290,13 @@ void MoveIP(string province1,string province2,int num,PNode head)//Í³¼Æ¸ĞÈ¾»¼ÕßÁ
 	}
 }
 
-void MoveSP(string province1,string province2,int num,PNode head)//Í³¼ÆÒÉËÆ»¼ÕßÁ÷ÈëÍâÊ¡µÄÇé¿ö
+/*
+¹¦ÄÜ£ºÍ³¼ÆÒÉËÆ»¼ÕßÁ÷ÈëÍâÊ¡µÄÇé¿ö 
+ÊäÈë²ÎÊı£ºÁ÷³öÊ¡·İprovince1(string) Á÷ÈëÊ¡·İprovince2(string) ±ä»¯ÈËÊınum£¨int) Á´±íÍ·Ö¸Õëhead£¨PNode£© 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void MoveSP(string province1,string province2,int num,PNode head)
 {
 	//ofstream outFile;
 	//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app);
@@ -261,7 +317,13 @@ void MoveSP(string province1,string province2,int num,PNode head)//Í³¼ÆÒÉËÆ»¼ÕßÁ
 	}
 }
 
-void Dead(string province1,int num,PNode head)//Í³¼Æ¸ĞÈ¾»¼ÕßËÀÍöµÄÇé¿ö
+/*
+¹¦ÄÜ£ºÍ³¼Æ¸ĞÈ¾»¼ÕßËÀÍöµÄÇé¿ö 
+ÊäÈë²ÎÊı£ºÊ¡·İprovince1(string) ±ä»¯ÈËÊınum£¨int) Á´±íÍ·Ö¸Õëhead£¨PNode£© 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void Dead(string province1,int num,PNode head)
 {
 	PNode p=head;
 	while(p!=NULL)
@@ -279,7 +341,13 @@ void Dead(string province1,int num,PNode head)//Í³¼Æ¸ĞÈ¾»¼ÕßËÀÍöµÄÇé¿ö
 	head->flag=1;
 }
 
-void Cure(string province1,int num,PNode head)//Í³¼Æ¸ĞÈ¾»¼ÕßÖÎÓúµÄÇé¿ö
+/*
+¹¦ÄÜ£ºÍ³¼Æ¸ĞÈ¾»¼ÕßÖÎÓúµÄÇé¿ö 
+ÊäÈë²ÎÊı£ºÊ¡·İprovince1(string) ±ä»¯ÈËÊınum£¨int) Á´±íÍ·Ö¸Õëhead£¨PNode£© 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void Cure(string province1,int num,PNode head)
 {
 	PNode p=head;
 	while(p!=NULL)
@@ -297,7 +365,13 @@ void Cure(string province1,int num,PNode head)//Í³¼Æ¸ĞÈ¾»¼ÕßÖÎÓúµÄÇé¿ö
 	head->flag=1;
 }
 
-void Diagnosis(string province1,int num,PNode head)//Í³¼ÆÒÉËÆ»¼ÕßÈ·ÕïµÄÇé¿ö
+/*
+¹¦ÄÜ£ºÍ³¼ÆÒÉËÆ»¼ÕßÈ·ÕïµÄÇé¿ö 
+ÊäÈë²ÎÊı£ºÊ¡·İprovince1(string) ±ä»¯ÈËÊınum£¨int) Á´±íÍ·Ö¸Õëhead£¨PNode£© 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void Diagnosis(string province1,int num,PNode head)
 {
 	PNode p=head;
 	while(p!=NULL)
@@ -315,7 +389,13 @@ void Diagnosis(string province1,int num,PNode head)//Í³¼ÆÒÉËÆ»¼ÕßÈ·ÕïµÄÇé¿ö
 	head->flag=1;
 }
 
-void Exclude(string province1,int num,PNode head)//Í³¼ÆÒÉËÆ»¼Õß±»ÅÅ³ıµÄÇé¿ö 
+/*
+¹¦ÄÜ£ºÍ³¼ÆÒÉËÆ»¼Õß±»ÅÅ³ıµÄÇé¿ö 
+ÊäÈë²ÎÊı£ºÊ¡·İprovince1(string) ±ä»¯ÈËÊınum£¨int) Á´±íÍ·Ö¸Õëhead£¨PNode£© 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void Exclude(string province1,int num,PNode head) 
 {
 	PNode p=head;
 	while(p!=NULL)
@@ -331,7 +411,13 @@ void Exclude(string province1,int num,PNode head)//Í³¼ÆÒÉËÆ»¼Õß±»ÅÅ³ıµÄÇé¿ö
 	head->flag=1;
 }
 
-void operate(string op_province1,string op_province2,int op,int number,PNode head)//Í³¼Æº¯Êı 
+/*
+¹¦ÄÜ£ºÍ³¼Æ×Üº¯Êı£¬²Ù×÷Ñ¡Ôñ 
+ÊäÈë²ÎÊı£ºÊ¡·İprovince1(string) Ê¡·İprovince2(string) ²Ù×÷Êıop(int) ±ä»¯ÈËÊınum£¨int) Á´±íÍ·Ö¸Õëhead£¨PNode£© 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ 
+*/
+void operate(string op_province1,string op_province2,int op,int number,PNode head) 
 {
 	PNode p=head;
 	string province1=op_province1;
@@ -368,7 +454,14 @@ void operate(string op_province1,string op_province2,int op,int number,PNode hea
 	}		
 }
 
-static string Utf8ToGbk(const char *src_str)//±àÂë·½Ê½£ºUTF-8 ×ª GBK
+/*
+¹¦ÄÜ£º×Ö·û´®±àÂë·½Ê½£ºUTF-8 ×ª GBK 
+ÊäÈë²ÎÊı£º×Ö·û´®(UTF-8) 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£º×Ö·û´®(GBK)
+±¸×¢£ºVC++11ĞÂÔöµÄ¹¦ÄÜ¿â 
+*/
+static string Utf8ToGbk(const char *src_str)
 {
 	int len = MultiByteToWideChar(CP_UTF8, 0, src_str, -1, NULL, 0);
 	wchar_t* wszGBK = new wchar_t[len + 1];
@@ -384,7 +477,14 @@ static string Utf8ToGbk(const char *src_str)//±àÂë·½Ê½£ºUTF-8 ×ª GBK
 	return strTemp;
 }
 
-static string GBKToUTF8(const char* strGBK)//±àÂë·½Ê½£ºGBK ×ª UTF-8 
+/*
+¹¦ÄÜ£º×Ö·û´®±àÂë·½Ê½£ºGBK ×ª UTF-8 
+ÊäÈë²ÎÊı£º×Ö·û´®(GBK) 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£º×Ö·û´®(UTF-8)
+±¸×¢£ºVC++11ĞÂÔöµÄ¹¦ÄÜ¿â 
+*/
+static string GBKToUTF8(const char* strGBK) 
 {
 	int len = MultiByteToWideChar(CP_ACP, 0, strGBK, -1, NULL, 0);
 	wchar_t* wstr = new wchar_t[len + 1];
@@ -402,7 +502,13 @@ static string GBKToUTF8(const char* strGBK)//±àÂë·½Ê½£ºGBK ×ª UTF-8
 	return strTemp;
 }
 
-void getOperation(char buffer[],PNode head)//¶ÁÈ¡Ã¿ĞĞÎÄ¼şÖĞµÄ²Ù×÷ 
+/*
+¹¦ÄÜ£º¶ÁÈ¡Ã¿ĞĞÎÄ¼şÖĞµÄ²Ù×÷
+ÊäÈë²ÎÊı£º´æ·Å¸÷ĞĞÄÚÈİµÄbuffer[](char) Á´±íÍ·Ö¸Õëhead(PNode) 
+Êä³ö²ÎÊı£ºÊ¡·İprovince1 province2(string)  ÈËÊınum(int) Ö¸ÁîÊıop(int)  
+·µ»ØÖµ£ºÎŞ  
+*/
+void getOperation(char buffer[],PNode head) 
 {
     string op_province[2];//´æ·Å²Ù×÷Ê¡·İ 
     op_province[0]="0";
@@ -410,35 +516,27 @@ void getOperation(char buffer[],PNode head)//¶ÁÈ¡Ã¿ĞĞÎÄ¼şÖĞµÄ²Ù×÷
     int op=10;//´æ·Å²Ù×÷Êı     
     int number=0;//´æ·ÅÈËÊı    
     int count=0;//¼ÇÂ¼²Ù×÷ÖĞÊ¡·İ¸öÊı 
-   
+	   
     string buf_situation;
     string buf_province;
     
 	string operation=buffer;
  	operation=Utf8ToGbk(buffer);
-	
-	//ofstream outFile;
-	//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app); 
+
 	op_province[0]=operation.substr(0,4);
-	//outFile<<op_province[0]<<endl;
     string::size_type idx; 
 	
 	for(int i=0;i<8;i++)//¶ÁÈ¡Ö¸Áî 
-    {
-
-		
+    {		
     	buf_situation=situation[i];
-	    idx=operation.find(buf_situation);//ÔÚaÖĞ²éÕÒb.
+	    idx=operation.find(buf_situation);
 	    if(idx != string::npos )
 	    {	
-	    	//ofstream outFile;
-			//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app); 
-			//outFile<<buf_situation<<endl;
 			op=i;
 			for(int j=0;j<32;j++)//¶ÁÈ¡³ÇÊĞ 
 		    {
 		    	buf_province=province[j];
-			    idx=operation.find(buf_province);//ÔÚaÖĞ²éÕÒb.
+			    idx=operation.find(buf_province);
 			    if(idx != string::npos&&province[j]!=op_province[0] )
 			    {	
 			    	op_province[1]=buf_province;			    	
@@ -446,7 +544,7 @@ void getOperation(char buffer[],PNode head)//¶ÁÈ¡Ã¿ĞĞÎÄ¼şÖĞµÄ²Ù×÷
 			}
 		} 							    
 	}								
-	for (int i = 0; buffer[i] != '\0'; ++i) //µ±aÊı×éÔªËØ²»Îª½áÊø·ûÊ±.±éÀú×Ö·û´®a.
+	for (int i = 0; buffer[i] != '\0'; ++i)
     {
         if (buffer[i] >= '0'&& buffer[i] <= '9') //Èç¹ûÊÇÊı×Ö.
         {
@@ -454,18 +552,22 @@ void getOperation(char buffer[],PNode head)//¶ÁÈ¡Ã¿ĞĞÎÄ¼şÖĞµÄ²Ù×÷
             number+= buffer[i] - '0'; //Êı×Ö×Ö·ûµÄascii-×Ö·û'0'µÄasciiÂë¾ÍµÈÓÚ¸ÃÊı×Ö.         	
         }
     }
-	//outFile<<"ÈËÊı:"<<number<<endl;
     string op_province1=op_province[0];
     string op_province2=op_province[1];
 	operate(op_province1,op_province2,op,number,head);  
 }
 
-void readTxt(char fname[],PNode head)//ÖğĞĞ¶ÁÈ¡ÎÄ¼şµÄÄÚÈİ 
+/*
+¹¦ÄÜ£ºÖğĞĞ¶ÁÈ¡ÎÄ¼şµÄÄÚÈİ£¬²¢¶Ô'/'ºÍ¿ÕĞĞ½øĞĞÅÅ³ı 
+ÊäÈë²ÎÊı£º´æ·ÅÂ·¾¶µÄfname[](char) Á´±íÍ·Ö¸Õëhead(PNode) 
+Êä³ö²ÎÊı£ºÎŞ 
+·µ»ØÖµ£ºÎŞ  
+*/ 
+void readTxt(char fname[],PNode head)
 {
 	char buffer[500];
 	string strLine;
     ifstream inFile(fname);
-	//ofstream outFile("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"); 
 	while(getline(inFile,strLine))
 	{
 	    strcpy(buffer,strLine.c_str());
@@ -475,15 +577,18 @@ void readTxt(char fname[],PNode head)//ÖğĞĞ¶ÁÈ¡ÎÄ¼şµÄÄÚÈİ
         }
         else
         {
-        	//ofstream outFile;
-			//outFile.open(("C:/Users/Äñµ°»¨»ú/Desktop/Èí¼ş¹¤³Ì/º®¼ÙµÚ¶ş´Î×÷Òµ/InfectStatistic-main/221701336/src/out.txt"),ios::app); 
-        	//outFile<<buffer<<endl;
         	getOperation(buffer,head);
 		}	    		
 	}
 }
 
-void readLog(string date,string path,PNode head)//¶ÁÈ¡¶ÔÓ¦Ä¿Â¼ÏÂµÄÎÄ¼ş 
+/*
+¹¦ÄÜ£º¶ÁÈ¡¶ÔÓ¦Ä¿Â¼ÏÂµÄÎÄ¼ş 
+ÊäÈë²ÎÊı£ºÒªÇóÈÕÆÚdate(string) Â·¾¶µÄpath(string) Á´±íÍ·Ö¸Õëhead(PNode) 
+Êä³ö²ÎÊı£º´ò¿ªÎÄ¼şÂ·¾¶fname(char) 
+·µ»ØÖµ£ºÎŞ  
+*/
+void readLog(string date,string path,PNode head)
 {
 	string s1="*.txt";
 	string s2=".log.txt";
@@ -519,7 +624,13 @@ void readLog(string date,string path,PNode head)//¶ÁÈ¡¶ÔÓ¦Ä¿Â¼ÏÂµÄÎÄ¼ş
     }
 }
 
-void outNode(ostream &outFile,PNode p,string type[])//Êä³ö¸÷Ä¿±ê½áµãµÄÏàÓ¦ÊôĞÔ 
+/*
+¹¦ÄÜ£ºÊä³ö¸÷Ä¿±ê½áµãµÄÏàÓ¦ÊôĞÔ 
+ÊäÈë²ÎÊı£ºÊı¾İÁ÷outFile(ostream) Á´±íÍ·Ö¸Õëp (PNode) Êä³öÖÖÀàtype[](string) 
+Êä³ö²ÎÊı£ºÊä³ö½áµãµÄ¸÷Ö¸¶¨Êı¾İµ½ÎÄ±¾ 
+·µ»ØÖµ£ºÎŞ  
+*/
+void outNode(ostream &outFile,PNode p,string type[]) 
 {
 	outFile<<GBKToUTF8(p->province); 
 	if(type[0]=="0")
@@ -558,7 +669,13 @@ void outNode(ostream &outFile,PNode p,string type[])//Êä³ö¸÷Ä¿±ê½áµãµÄÏàÓ¦ÊôĞÔ
 	}
 }
 
-void output(string path,PNode p,PNode head,string type[],string province[])//Êä³öµ½ÎÄ±¾ 
+/*
+¹¦ÄÜ£º½«Á´±íÊä³öÊä³öµ½¶ÔÓ¦ÎÄ±¾ 
+ÊäÈë²ÎÊı£ºÎÄ¼şÂ·¾¶path(string) Á´±íÖ¸Õëp (PNode) Á´±íÍ·Ö¸Õëhead(PNode) Êä³öÖÖÀàtype[](string) Êä³öÊ¡·İprovince[](string) 
+Êä³ö²ÎÊı£ºÊı¾İÁ÷outFile(ostream) Á´±íÖ¸Õëp(PNode) Êä³öÖÖÀàtyep[](string) 
+·µ»ØÖµ£ºÎŞ  
+*/
+void output(string path,PNode p,PNode head,string type[],string province[]) 
 {
 	FILE *fp;
 	int i=0;
@@ -619,15 +736,15 @@ int main(int argc,char *argv[])
 	{
 		province[i]="0";
 	}	
-	date=getDate(argc,argv);		
-	log=getLog(argc,argv);	
-	outPath=getOutPath(argc,argv);	
-	getType(argc,argv,type);	
-	getProvince(argc,argv,province);
+	date=getDate(argc,argv);//¶ÁÈ¡ÒªÇóÈÕÆÚ		
+	log=getLog(argc,argv);//¶ÁÈ¡´ò¿ªÄ¿Â¼ 
+	outPath=getOutPath(argc,argv);//¶ÁÈ¡Êä³öÄ¿Â¼	
+	getType(argc,argv,type);//¶ÁÈ¡Êä³öÖÖÀà	
+	getProvince(argc,argv,province);//¶ÁÈ¡Êä³öÊ¡·İ 
 		
-	PNode head=CreatList();	
+	PNode head=CreatList();//³õÊ¼»¯Á´±í	
 	PNode p=head;	
-	readLog(date,log,head);//¶ÁÈ¡Ä¿Â¼ 
+	readLog(date,log,head);//¶ÁÈ¡²¢Ö´ĞĞ 
 	output(outPath,p,head,type,province);//Êä³ö 
 	system("pause");
 }

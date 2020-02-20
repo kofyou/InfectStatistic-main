@@ -47,26 +47,26 @@ class InfectStatistic {
 			   0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0};
 	
-	public static void getAllFileName(String path,ArrayList<String> listFileName){
+	public static void getallfilename(String path,ArrayList<String> listfilename){
 		File file = new File(path);
 		String [] names = file.list();
 		if(names != null){
-			String [] completNames = new String[names.length];
+			String [] completnames = new String[names.length];
 			for(int i=0;i<names.length;i++){
-					completNames[i]=path+names[i];
+					completnames[i]=path+names[i];
 			}
-			listFileName.addAll(Arrays.asList(completNames));
+			listfilename.addAll(Arrays.asList(completnames));
 		}
-		for(String fname:listFileName) {
+		for(String fname:listfilename) {
 			readfile(fname);
 		}
 	}
 	
 	public static void readfile(String file) {
 		try {
-			BufferedReader bReader=new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
+			BufferedReader breader=new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8"));
 			String str="";
-			while((str=bReader.readLine())!=null) {
+			while((str=breader.readLine())!=null) {
 				readfile2(str);
 			}
 		}catch (IOException e) {
@@ -175,7 +175,7 @@ class InfectStatistic {
 	}
 	
 	public static void main(String[] args){
-		ArrayList<String> listFileName = new ArrayList<String>();
+		ArrayList<String> listfilename = new ArrayList<String>();
 		int grhz=0;
         int yshz=0;
         int zy=0;
@@ -241,7 +241,7 @@ class InfectStatistic {
 				pro[i]=1;
 			}
 		}
-		getAllFileName(address,listFileName);
+		getallfilename(address,listfilename);
 		String string="";
 		try {
 	        File writename = new File(outaddress);

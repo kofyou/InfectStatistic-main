@@ -25,7 +25,7 @@ class InfectStatistic {
 	public static String log_need;//需要被解析的日志文件路径
 	public static String out_name;//
 	public static String[] log_list;//读取到的日志文件列表,并且按照日期从小到大排序
-	public static int[] type_num= {1,2,3,4};//决定类型的输出顺序。
+	public static int[] type_num= {0,0,0,0};//决定类型的输出顺序。
 	/*
 	 * ip代表感染患者，sp代表疑似患者，cure代表治愈，dead代表死亡
 	 */
@@ -90,7 +90,7 @@ public static void judgeCommandLine(String[] str) {
 				if(isLegalDate(str[++i]))
 				{
 					getLogList(log_route);
-					log_need=str[i];
+					log_need=str[i]+".log.txt";
 							
 				}
 				else
@@ -156,6 +156,8 @@ public static void judgeCommandLine(String[] str) {
 						if(str[i+j].equals(province_name[k]))
 						{
 							temp=1;
+							if(k==0)
+							province_select[0]=1;
 							province_select[0]=0;
 							province_select[k]=1;
 							break;
@@ -527,14 +529,12 @@ public static void main(String[] args) {
     //System.exit(0);
     for(int i=0;i<log_list.length;i++)
     {
-    	if(log_need.compareTo(log_list[i])<=0)
+    	if(log_need.compareTo(log_list[i])>=0)
     	{
-    		System.out.println(log_list[i]);
     		getTextContent(log_route+log_list[i]);
     	}
     	else break;
     }
-    System.out.println(log_need);
     outputFile(out_route);
     	
     }

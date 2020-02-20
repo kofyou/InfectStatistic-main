@@ -177,11 +177,11 @@ class InfectStatistic {
 		            "贵州", "海南","河北","河南","黑龙江","湖北","湖南","吉林","江苏",
 		            "江西", "辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海",
 		            "四川", "台湾","天津","西藏","香港","新疆","云南","浙江"};
-			public boolean[] is_province = new boolean[31];//判断是否有这个省份
-		    public int[] ip = new int[31];//各省感染患者人数
-		    public int[] sp = new int[31];//各省疑似患者人数
-		    public int[] cure = new int[31];//各省治愈人数
-		    public int[] dead = new int[31];//各省死亡人数
+			public boolean[] is_province = new boolean[34];//判断是否有这个省份
+		    public int[] ip = new int[34];//各省感染患者人数
+		    public int[] sp = new int[34];//各省疑似患者人数
+		    public int[] cure = new int[34];//各省治愈人数
+		    public int[] dead = new int[34];//各省死亡人数
 		    public int all_ip = 0,all_sp = 0,all_cure = 0,all_dead = 0;//全国数据
 		    
 		    //处理单行日志文件
@@ -433,7 +433,7 @@ class InfectStatistic {
  	 						bw.write("\n");
                     }
                 }
-                for(int j = 0;j < 31;j++) {
+                for(int j = 0;j < 34;j++) {
                     for(int i = 0;i < province.size();i++) {
                         if(provinces[j].equals(province.get(i))) {
                         	bw.write(provinces[j] +
@@ -470,7 +470,7 @@ class InfectStatistic {
                         bw.write(total);
                     }
                 }
-                for(int j = 0;j < 31;j++) {
+                for(int j = 0;j < 34;j++) {
                     for(int i = 0;i < province.size();i++) {
                         if(provinces[j].equals(province.get(i))) {
                             String prov = provinces[j];
@@ -503,7 +503,7 @@ class InfectStatistic {
 		       		    " 治愈" + all_cure + "人" + 
 		        		" 死亡" + all_dead + "人");
 						bw.write("\n");
-                for (int i = 0; i < 31; i++) {
+                for (int i = 0; i < 34; i++) {
  		            if (is_province[i]) {
  		            	bw.write(provinces[i] +
  	 		        			" 感染患者" + ip[i] + "人" +
@@ -534,7 +534,7 @@ class InfectStatistic {
                  }
                  total += "\n";
                  bw.write(total);
-                 for (int i = 0;i < 31;i++) {
+                 for (int i = 0;i < 34;i++) {
                      if (is_province[i]) {
                          String prov = provinces[i];
                          for (int j = 0;j< type.size();j++) {
@@ -563,7 +563,6 @@ class InfectStatistic {
 	}
 	    
 	public static void main(String[] args) throws IOException {
-		
         ArrayList<String> list=new ArrayList<String>();
         for(String i:args) {
         	list.add(i);//把命令加入list

@@ -12,6 +12,6 @@ gen
 InfectStatistic-example.iml
 /bin/
 .classpath
-.project
-InfectStatistic.java
-.gitignore
+/.project
+/src/InfectStatistic.java
+/.gitignore

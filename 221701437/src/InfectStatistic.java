@@ -52,6 +52,7 @@ class ProvinceData{
                 data.append("\n");
             }
         }
+        data.append(Constant.TIP);
         return data.toString();
     }
 
@@ -462,13 +463,10 @@ class Constant{
     public final static String s8 = "^[\\u4e00-\\u9fa5]*\\s(疑似患者)\\s(流入)\\s[\\u4e00-\\u9fa5]*\\s(\\d+)人?";
     public final static String PICKUPDIGIT = "[^0-9]";
     public final static String TYPE = "ip,sp,cure,dead";
-
     public final static HashMap<String,Integer> STATUS = new HashMap<>();
-
     public final static HashMap<String,String> STATUSCHINESE = new HashMap<>();
-
     public final static String GETFLENAME = "(\\d{4})-(\\d{2})-(\\d{2})\\.log\\.txt";
-
+    public final static String TIP = "// 该文档并非真实数据，仅供测试使用";
     static {
         STATUS.put("ip", 0);
         STATUS.put("sp", 1);

@@ -85,8 +85,10 @@ void analysis::findAllFile(const char* path, const char* format, const char* dat
 					for (int i = 0;i < size;i++)
 					{
 						if (findData.name[i] != date[i])fl = 0;
+						if (findData.name[i] > date[i])b = 1;
 					}
 				}
+				if (b == 1)return ;
 				if (fl == 1)b = 1;
 				freopen(outpath, "w", stdout);
 				char nowpath[200];

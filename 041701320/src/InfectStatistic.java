@@ -111,6 +111,8 @@ class InfectStatistic{
 	    			break;
 	    		}
 	    	}
+	    	//System.out.println(line);
+
 		}
 		public void SP(String line) {
 			String[] str = line.split(" ");	    	
@@ -125,7 +127,8 @@ class InfectStatistic{
 	    			break;
 	    		}
 	    	}
-			
+	    	//System.out.println(line);
+	    	
 		}
 		public void Cure(String line) {
 			String[] str = line.split(" ");	    	
@@ -227,23 +230,32 @@ class InfectStatistic{
 		//输出日志
 		public void writeLog(){
 			try {
+				
 				FileWriter fw=null;
 				fw=new FileWriter(path_out);
 				if(situation[0][0]==-1)
 					situation[0][0]=1;
 				int i=0;
 				while(i<35) {
+					
 					if(situation[i][0]==1) {
+						
+						//System.out.println("a");
+						
 						fw.write(province[i]+" ");
 						for(int j=0,k=1;j<type_order.length;j++) {
 							if(type_order[j]==k) {
-								fw.write(type[j]+situation[i][j+1]+"人");
+								String string=type[j]+situation[i][j+1]+"人"+" ";
+								fw.write(string);
 								k++;
+								//System.out.println(string);
 							}
-						}			
+						}
+						fw.write("\n");	
 					}
-					fw.write("\n");
+					
 					i++;
+					
 				}
 				fw.write("// 该文档并非真实数据，仅供测试使用");
 				fw.close();				
@@ -264,6 +276,9 @@ class InfectStatistic{
 		
 		ProcessCmd(String[] args){
 			this.args=args;
+			situation[0][0]=-1;
+			for(int t=1;t<35;t++)
+				situation[t][0]=0;
 		}
 		
 		//处理参数
@@ -361,6 +376,7 @@ class InfectStatistic{
 			for(int t=0;t<35;t++)
 				situation[t][0]=0;
 			while(i<args.length) {
+				//System.out.println("province arg");
 				for(int j=0;j<35;j++) {
 					if(args[i].equals(province[j])) {
 						situation[j][0]=1;
@@ -370,6 +386,7 @@ class InfectStatistic{
 				}
 			}
 			if(flag==i) {
+				//System.out.println("flag==i");
 				situation[0][0]=-1;
 				return i--;
 			}
@@ -385,8 +402,6 @@ class InfectStatistic{
     	InfectStatistic infectStatistic=new InfectStatistic();
     	InfectStatistic.ProcessCmd pCmd=infectStatistic.new ProcessCmd(args);
     	boolean x=pCmd.ProcessPara();
-    	if(x!=true)
-    		return;
     	InfectStatistic.ProcessFile pFile=infectStatistic.new ProcessFile();
     	pFile.readLog();
     	pFile.writeLog();

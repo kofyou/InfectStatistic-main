@@ -35,7 +35,7 @@ class InfectStatistic
 ```
 public int getIp() 
 {
-	return ip;
+    return ip;
 }
 ```
 
@@ -52,27 +52,27 @@ MAX_STOCK_COUNT
 + 举例如下
 ```
 class Province{
-	    String name=null;//省份名称(拼音）
-	    int ip=0;//感染患者
-	    int sp=0;//疑似患者
-	    int cure=0;//治愈
-	    int dead=0;//死亡
+    String name=null;//省份名称(拼音）
+    int ip=0;//感染患者
+    int sp=0;//疑似患者
+    int cure=0;//治愈
+    int dead=0;//死亡
 	    
-	    public Province(String name) {
-	    	this.name=name;
-	    	this.ip=0;
-	    	this.sp=0;
-	    	this.cure=0;
-	    	this.dead=0;
-	    }
+    public Province(String name) {
+	this.name=name;
+    	this.ip=0;
+	this.sp=0;
+    	this.cure=0;
+	this.dead=0;
+    }
+    
+    public int getIp() {
+    	return ip;
+    }
 	    
-	    public int getIp() {
-	    	return ip;
-	    }
-	    
-	    public int getSp() {
-	    	return sp;
-	    }
+    public int getSp() {
+    	return sp;
+    }
 }
 ```
 

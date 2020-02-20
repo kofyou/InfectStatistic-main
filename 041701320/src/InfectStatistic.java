@@ -41,6 +41,7 @@ class InfectStatistic{
 	//处理文件
 	class ProcessFile{
 		
+		//读取日志
 		public void readLog() {
 			File file=new File(path_in);
 			File[] listFiles=file.listFiles();
@@ -105,7 +106,8 @@ class InfectStatistic{
 	    		if(str[0].equals(province[i])) { 
 	    			situation[0][1] += n;
 	    			situation[i][1] += n; 
-	    			situation[i][0] = 1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0] = 1;
 	    			break;
 	    		}
 	    	}
@@ -118,7 +120,8 @@ class InfectStatistic{
 	    		if(str[0].equals(province[i])) { 
 	    			situation[0][2] += n;
 	    			situation[i][2] += n; 
-	    			situation[i][0] = 1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0] = 1;
 	    			break;
 	    		}
 	    	}
@@ -134,7 +137,8 @@ class InfectStatistic{
 	    			situation[0][1] -= n;
 	    			situation[i][3] += n;
 	    			situation[i][1] -= n;
-	    			situation[i][0] = 1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0] = 1;
 	    			break;
 	    		}
 	    	}
@@ -149,7 +153,8 @@ class InfectStatistic{
 	    			situation[0][1] -= n;
 	    			situation[i][4] += n;
 	    			situation[i][1] -= n;
-	    			situation[i][0] = 1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0] = 1;
 	    			break;
 	    		}
 	    	}
@@ -161,11 +166,13 @@ class InfectStatistic{
 	    	for(i = 0; i < province.length; i++) {
 	    		if(str[0].equals(province[i])) {
 	    			situation[i][1] -= n;
-	    			situation[i][0]=1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0]=1;
 	    		}
 	    		if(str[3].equals(province[i])) {
 	    			situation[i][1] += n;
-	    			situation[i][0]=1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0]=1;
 	    		}
 	    	}		
 		}
@@ -176,11 +183,13 @@ class InfectStatistic{
 	    	for(i = 0; i < province.length; i++) {
 	    		if(str[0].equals(province[i])) {
 	    			situation[i][2] -= n;
-	    			situation[i][0]=1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0]=1;
 	    		}
 	    		if(str[3].equals(province[i])) {
 	    			situation[i][2] += n;
-	    			situation[i][0]=1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0]=1;
 	    		}
 	    	}			
 		}
@@ -194,7 +203,9 @@ class InfectStatistic{
 	    			situation[0][1] += n; 
 	    			situation[i][2] -= n; 
 	    			situation[i][1] += n; 
-	    			situation[i][0]=1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0]=1;
+	    			break;
 	    		}
 	    	}
 		}
@@ -206,14 +217,32 @@ class InfectStatistic{
 	    		if(str[0].equals(province[i])) { 
 	    			situation[0][2] -= n; 	    			
 	    			situation[i][2] -= n; 
-	    			situation[i][0]=1;
+	    			if(situation[0][0]==-1)
+	    				situation[i][0]=1;
+	    			break;
 	    		}
 	    	}			
 		}
 		
 		//输出日志
-		public void writeLog() {
-			
+		public void writeLog() throws IOException {
+			FileWriter fw=null;
+			fw=new FileWriter(path_out);
+			if(situation[0][0]==-1)
+				situation[0][0]=1;
+			int i=0;
+			while(i<35) {
+				if(situation[i][0]==1) {
+					fw.write(province[i]+" ");
+					
+					
+					
+				}
+				fw.write("\n");
+				i++;
+			}
+			fw.write("// 该文档并非真实数据，仅供测试使用");
+			fw.close();
 		}
 		
 	}	

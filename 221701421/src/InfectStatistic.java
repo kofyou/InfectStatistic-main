@@ -49,7 +49,7 @@ class InfectStatistic {
         int dirIndex = list.indexOf("-log");//日志文件目录
         if (dirIndex < 0) {
             System.out.println("错误：没有传入日志文件路径");
-            System.exit(-1);
+            return;
         }
         String dirPath = args[dirIndex + 1];//日志文件夹路径
         logDir = new File(dirPath);//日志文件夹
@@ -57,7 +57,7 @@ class InfectStatistic {
         int outputIndex = list.indexOf("-out");//输出文件目录
         if (outputIndex < 0) {
             System.out.println("错误：没有传入输出文件路径");
-            System.exit(-1);
+            return;
         }
         outputPath = args[outputIndex + 1];
 
@@ -79,11 +79,10 @@ class InfectStatistic {
         typeMap.put("cure", t);
         typeMap.put("dead", t);
         if (typeIndex >= 0) {//有传入-type参数
-            for (int i = typeIndex; i <= typeLastIndex; i++) {
+            for (int i = typeIndex + 1; i <= typeLastIndex; i++) {
                 typeMap.put(args[i], 1);
             }
         }
-
     }
 
     public void statistic(){
@@ -94,7 +93,7 @@ class InfectStatistic {
     }
 
 
-    public static int findLastIndex(String[] list, int begin) {
+    public int findLastIndex(String[] list, int begin) {
         int len = list.length;
         int index = begin + 1;
         while (index < len && list[index].charAt(0) != '-') {
@@ -141,7 +140,35 @@ class InfectStatisticOperator {
         infectTotalNum = suspectedTotalNum = cureTotalNum = diedTotalNum = 0;
     }
 
-    public void statistic(File dir, Date date){//统计
+    public String[] getProvinceList() {
+        return provinceList;
+    }
+
+    public HashMap<String, ProvanceInfo> getProvinceMap() {
+        return provinceMap;
+    }
+
+    public List<String> getFileList() {
+        return fileList;
+    }
+
+    public int getInfectTotalNum() {
+        return infectTotalNum;
+    }
+
+    public int getSuspectedTotalNum() {
+        return suspectedTotalNum;
+    }
+
+    public int getCureTotalNum() {
+        return cureTotalNum;
+    }
+
+    public int getDiedTotalNum() {
+        return diedTotalNum;
+    }
+
+    public int statistic(File dir, Date date){//统计
         try {
             BufferedReader reader = null;
             String line;
@@ -154,7 +181,7 @@ class InfectStatisticOperator {
             Date lastDate = simpleDateFormat.parse(lastDateString);
             if (date != null && date.compareTo(lastDate) > 0) {
                 System.out.println("抱歉，日期超出范围");
-                return;
+                return -1;
             }
             for (String fileDateString : fileList) {
                 File file = new File(dir.getPath() + "/" + fileDateString + ".log.txt");
@@ -172,6 +199,7 @@ class InfectStatisticOperator {
         }catch (Exception e){
 
         }
+        return 0;
     }
 
     public void updateProvinceInfo(String line){

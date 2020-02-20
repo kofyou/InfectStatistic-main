@@ -1,12 +1,15 @@
 import java.io.*;
+import java.text.Collator;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.TreeSet;
 
 /**
  * InfectStatistic TODO
  *
  * @author 张嘉伟
- * @version 4.0
- * @since 2020-02-19 17:32
+ * @version 5.0
+ * @since 2020-02-20 23:40
  */
 class InfectStatistic
 {
@@ -22,7 +25,8 @@ class InfectStatistic
     static TreeSet<String> fileDate = new TreeSet<String>();
     static Province nation = new Province("全国",0,0,0,0);
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         for(int i = 0; i < args.length; i++)
         {
             switch(args[i])
@@ -53,10 +57,17 @@ class InfectStatistic
                     typeNumber++;
                     break;
                 case "-province":
-                    while( i < args.length - 1)
+                    while(i < args.length - 1)
                     {
-                        outputProvince[outputNumber] = args[i + 1];
-                        outputNumber++;
+                        if(!args[i + 1].contains("-"))
+                        {
+                            outputProvince[outputNumber] = args[i + 1];
+                            outputNumber++;
+                        }
+                        else
+                        {
+                            break;
+                        }
                         i++;
                     }
                 default:
@@ -148,28 +159,25 @@ class InfectStatistic
         return Integer.parseInt(number);
     }
 
-    /**该函数供本机测试使用，后期会做修改 */
+    /**读取资源文件，根据命令参数处理后将结果写入到目标文件 */
     public static void writeALLProvince()
     {
+        clearFile(out);
         for(String string : fileDate)
         {
             if(dateCompare(string))
                 readFile(log + string + ".log.txt");
         }
         addNationToProvinceList();
+        //如果没有指定-province，直接输出nation，否则判断参数里是否含"全国"
         if(outputNumber == 0)
         {
-            writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
+            writeFile(out,
                     getOutputTypeString(nation.getName(), nation.getInfectNumber(),
                     nation.getSuspectNumber(),nation.getCure(), nation.getDead())
                 );
-            for(int i = 0; i < number; i++)
-            {
-                writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
-                    getOutputTypeString(province[i].getName(), province[i].getInfectNumber(),
-                    province[i].getSuspectNumber(),province[i].getCure(), province[i].getDead())
-                );
-            }
+            //将已存的省份名添加进outputProovince[]
+            ProvinceListIntoOutputProvince();
         }
         else
         {
@@ -177,35 +185,36 @@ class InfectStatistic
             {
                 if(outputProvince[i].equals("全国"))
                 {
-                    writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
+                    writeFile(out,
                         getOutputTypeString(nation.getName(),nation.getInfectNumber(),
                         nation.getSuspectNumber(),nation.getCure(), nation.getDead())
                     );
                     break;
                 }
             }
-            for(int i = 0; i < outputNumber; i++)
+        }
+        provinceSort();
+        for(int i = 0; i < outputNumber; i++)
+        {
+            int j = 0;
+            for(j = 0; j < number; j++)
             {
-                int j = 0;
-                for(j = 0; j < number; j++)
+                if(outputProvince[i].equals(province[j].getName()))
                 {
-                    if(outputProvince[i].equals(province[j].getName()))
-                    {
-                        writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
-                            getOutputTypeString(province[j].getName(), province[j].getInfectNumber(),
-                            province[j].getSuspectNumber(),province[j].getCure(), province[j].getDead())
-                        );
-                        break;
-                    }
-                }
-                if(j == number && !outputProvince[i].equals("全国"))
-                {
-                    Province newProvince = new Province(outputProvince[i]);
-                    writeFile(("C:/Users/张嘉伟的电脑/Desktop/demo.txt"),
-                        getOutputTypeString(newProvince.getName(), newProvince.getInfectNumber(),
-                        newProvince.getSuspectNumber(),newProvince.getCure(), newProvince.getDead())
+                    writeFile(out,
+                        getOutputTypeString(province[j].getName(), province[j].getInfectNumber(),
+                        province[j].getSuspectNumber(),province[j].getCure(), province[j].getDead())
                     );
+                    break;
                 }
+            }
+            if(j == number && !outputProvince[i].equals("全国"))
+            {
+                Province newProvince = new Province(outputProvince[i]);
+                writeFile(out,
+                    getOutputTypeString(newProvince.getName(), newProvince.getInfectNumber(),
+                    newProvince.getSuspectNumber(),newProvince.getCure(), newProvince.getDead())
+                );
             }
         }
     }
@@ -238,6 +247,7 @@ class InfectStatistic
         inputDate = inputDate.substring(inputDate.indexOf("-") + 1, inputDate.length());
         int inputDay = Integer.valueOf(string);
         int fileDay = Integer.valueOf(inputDate);
+
         if(inputYear > fileYear)
             return true;
         else if(inputYear < fileYear)
@@ -257,10 +267,30 @@ class InfectStatistic
         }
     }
 
+    public static void ProvinceListIntoOutputProvince()
+    {
+        for(int i = 0; i < number; i++)
+        {
+            outputProvince[outputNumber] = province[i].getName();
+            outputNumber++;
+        }
+    }
+
+    /**将要输出的省份按拼音排序 */
     public static void provinceSort()
     {
-        //Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);
-        //Arrays.sort(province, cmp);
+        //数据交换防止Array.sort因存在空指针的报错
+        String string[] = new String[outputNumber];
+        for(int i = 0; i < outputNumber; i++)
+        {
+            string[i] = outputProvince[i];
+        }
+        Comparator<Object> cmp = Collator.getInstance(java.util.Locale.CHINA);
+        Arrays.sort(string, cmp);
+        for(int i = 0; i < outputNumber; i++)
+        {
+            outputProvince[i] = string[i];
+        }
     }
 
     public static String getOutputTypeString(String name, int infect, int suspect, int cured, int deaded)
@@ -311,13 +341,13 @@ class InfectStatistic
 
     public static void readFile(String fileName)
     {
-        try 
+        try
         {
-            FileInputStream file = new FileInputStream(fileName);   
-            InputStreamReader isr = new InputStreamReader(file, "UTF-8");   
-            BufferedReader reader = new BufferedReader(isr);  
+            FileInputStream file = new FileInputStream(fileName);
+            InputStreamReader isr = new InputStreamReader(file, "UTF-8");
+            BufferedReader reader = new BufferedReader(isr);
             String tempString = null;
-            while ((tempString = reader.readLine()) != null)
+            while((tempString = reader.readLine()) != null)
             {
                 //读取文件里不以"//"开头的每行记录，传入recordProcess方法
                 if(tempString.indexOf("//") != 0)
@@ -341,6 +371,26 @@ class InfectStatistic
             FileWriter writer = new FileWriter(fileName, true);
             writer.write(content);
             writer.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void clearFile(String fileName)
+    {
+        File file =new File(fileName);
+        try
+        {
+            if(!file.exists())
+            {
+                file.createNewFile();
+            }
+            FileWriter fileWriter =new FileWriter(file);
+            fileWriter.write("");
+            fileWriter.flush();
+            fileWriter.close();
         }
         catch (IOException e)
         {

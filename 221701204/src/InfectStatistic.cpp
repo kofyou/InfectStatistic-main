@@ -1,7 +1,7 @@
 ﻿/*********************************
 FileName:InfectStatistic.cpp
 Author:林羽希
-Function:疫情状况统计 
+Function:疫情状况统计
 **********************************/
 #pragma warning(disable:4996)
 #include <io.h>		
@@ -28,35 +28,49 @@ public:
 	string province_of[40];
 	string type[20];
 	string Begin(string com);
-	string Check(int date_,char *date);
+	string Check(int date_, char* date);
 	int province_num, type_num;
 	int out[40][6];
 	int Num(string tmp);
 	void FindAllFile(const char* path, const char* format, const char* date);
-	void Change(int province1,int province2,int type1,int type2,int num,int l);
+	void Change(int province1, int province2, int type1, int type2, int num, int l);
 	void Init();
 	void Out();
 	void CheckType(int num);
 	void CheckAgain();
 	void LineDetail(string tmp);
-	int Detail(string p, string t) 
+	char* U2G(const char* utf8);
+	int Detail(string p, string t)
 	{
 		return out[mi[p]][mi2[t]];
 	}
-    
 };
 
 int Analysis::Num(string tmp)
 {
-    int num = 0;
-    for (int i = tmp.size() - 1,c = 1;i >= 0;i--)
+	int num = 0;
+	for (int i = tmp.size() - 1, c = 1; i >= 0; i--)
 	{
 		if (tmp[i] >= '0' && tmp[i] <= '9')num += (tmp[i] - '0') * c, c *= 10;
 	}
 	return num;
 }
 
-void Analysis::Change(int province1, int province2,int type1,int type2,int num,int l)
+char* Analysis::U2G(const char* utf8)
+{
+	int len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
+	wchar_t* wstr = new wchar_t[len + 1];
+	memset(wstr, 0, len + 1);
+	MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wstr, len);
+	len = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);
+	char* str = new char[len + 1];
+	memset(str, 0, len + 1);
+	WideCharToMultiByte(CP_ACP, 0, wstr, -1, str, len, NULL, NULL);
+	if (wstr) delete[] wstr;
+	return str;
+}
+
+void Analysis::Change(int province1, int province2, int type1, int type2, int num, int l)
 {
 	if (province2 == 0 && type2 == 0)
 	{
@@ -65,9 +79,9 @@ void Analysis::Change(int province1, int province2,int type1,int type2,int num,i
 		else if (l == 102)
 		{
 			out[province1][mi2["感染患者"]] -= num;
-			out[province1][mi2["治愈"]] += num;	
+			out[province1][mi2["治愈"]] += num;
 		}
-		else 
+		else
 		{
 			out[province1][mi2["死亡"]] += num;
 			out[province1][mi2["感染患者"]] -= num;
@@ -78,7 +92,7 @@ void Analysis::Change(int province1, int province2,int type1,int type2,int num,i
 		out[province1][mi2["疑似患者"]] -= num;
 		out[province1][mi2["感染患者"]] += num;
 	}
-	else 
+	else
 	{
 		out[province1][type1] -= num;
 		out[province2][type1] += num;
@@ -90,7 +104,7 @@ void Analysis::LineDetail(string tmp)
 	int province1 = 0, province2 = 0;
 	string s = "";
 	int l = 0;
-	for (int j = 0;j < tmp.size();j++) 
+	for (int j = 0; j < tmp.size(); j++)
 	{
 		if (tmp[j] == ' ')
 		{
@@ -109,7 +123,7 @@ void Analysis::LineDetail(string tmp)
 	}
 	int type1 = 0, type2 = 0;
 	string ss = "";
-	for (int j = 0;j < tmp.size();j++)
+	for (int j = 0; j < tmp.size(); j++)
 	{
 		if (tmp[j] == ' ')
 		{
@@ -122,22 +136,22 @@ void Analysis::LineDetail(string tmp)
 			else type2 = mi2[ss];
 			ss = "";
 		}
-		else 
+		else
 		{
 			ss = ss + tmp[j];
 		}
 	}
 	int num = Num(tmp);
-					//	cout<<fl1<<' '<<fl2<<' '<<f1<<' '<<f2<<' '<<num<<endl;
-	Change(province1,province2,type1,type2,num,l);
+	//	cout<<fl1<<' '<<fl2<<' '<<f1<<' '<<f2<<' '<<num<<endl;
+	Change(province1, province2, type1, type2, num, l);
 }
 
 void Analysis::FindAllFile(const char* path, const char* format, const char* date)
 {
-    char newpath[200];
-    char newpaths[200];
-    strcpy(newpath, path);
-    strcpy(newpaths, path);
+	char newpath[200];
+	char newpaths[200];
+	strcpy(newpath, path);
+	strcpy(newpaths, path);
 	strcat(newpath, "\\*.*");    // 在目录后面加上"\\*.*"进行第一次搜索
 	int handle;
 	int returnflag = 0;
@@ -148,9 +162,9 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
 		// 检查是否成功
 		return;
 	}
-    while (_findnext(handle, &findData) == 0) 
-    {
-        if (findData.attrib & _A_SUBDIR) {
+	while (_findnext(handle, &findData) == 0)
+	{
+		if (findData.attrib & _A_SUBDIR) {
 			if (strcmp(findData.name, ".") == 0 || strcmp(findData.name, "..") == 0)
 				continue;
 			strcpy(newpath, path);
@@ -158,23 +172,23 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
 			strcat(newpath, findData.name);
 			FindAllFile(newpath, format, date);
 		}
-        else 
-        {
-            if (strstr(findData.name, format))
+		else
+		{
+			if (strstr(findData.name, format))
 			{     //判断是不是txt文件 
-				
+
 				int size = strlen(date);
 				int flg = 1;
 				if (size != 0)
 				{
-					for (int i = 0;i < size;i++)
+					for (int i = 0; i < size; i++)
 					{
 						if (findData.name[i] != date[i])flg = 0;
 						if (findData.name[i] > date[i])returnflag = 1;
 					}
 				}
-				if (returnflag == 1)return ;
-				if (flg == 1&&size != 0)returnflag = 1;
+				if (returnflag == 1)return;
+				if (flg == 1 && size != 0)returnflag = 1;
 				freopen(outpath, "w", stdout);
 				char nowpath[200];
 				strcpy(nowpath, newpaths);
@@ -182,9 +196,16 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
 				strcat(nowpath, findData.name);
 				ifstream fin(nowpath);
 				if (!fin.is_open())cout << "error";
-				string tmp;
-				while (getline(fin, tmp))
+				string in;
+				while (getline(fin, in))
 				{
+					char In[200];
+					for (int i = 0; i < in.size(); i++)In[i] = in[i];
+					In[in.size()] = '\0';
+					char* p;
+					p = U2G(In);
+					string tmp;
+					for (int i = 0; p[i] != '\0'; i++)tmp = tmp + p[i];
 					if (tmp[0] == '/' && tmp[1] == '/')continue;
 					LineDetail(tmp);
 				}
@@ -198,7 +219,7 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
 void Analysis::Init()
 {
 	memset(out, 0, sizeof(out));
-	for (int i = 0;i <= 35;i++)province[i] = "";
+	for (int i = 0; i <= 35; i++)province[i] = "";
 	mi.clear();
 	mi1.clear();
 	mi2.clear();
@@ -210,20 +231,20 @@ void Analysis::Init()
 	mi["死亡"] = 103;
 	mi["全国"] = 1;
 	mi["安徽"] = 2, mi["北京"] = 3, mi["重庆"] = 4;
-	 mi["福建"] = 5, mi["甘肃"] = 6, mi["广东"] = 7;
+	mi["福建"] = 5, mi["甘肃"] = 6, mi["广东"] = 7;
 	mi["广西"] = 8, mi["贵州"] = 9, mi["海南"] = 10;
 	mi["河北"] = 11, mi["河南"] = 12, mi["黑龙江"] = 13;
 	mi["湖北"] = 14, mi["湖南"] = 15, mi["吉林"] = 16;
 	mi["江苏"] = 17, mi["江西"] = 18, mi["辽宁"] = 19;
 	mi["内蒙古"] = 20, mi["宁夏"] = 21, mi["青海"] = 22;
-	 mi["山东"] = 23, mi["山西"] = 24, mi["陕西"] = 25;
+	mi["山东"] = 23, mi["山西"] = 24, mi["陕西"] = 25;
 	mi["上海"] = 26, mi[""] = 27, mi["四川"] = 28;
 	mi["台湾"] = 29, mi["天津"] = 30, mi["西藏"] = 31;
-	mi["香港"] = 32, mi["新疆"] = 33, mi["云南"] = 34,mi["浙江"];
+	mi["香港"] = 32, mi["新疆"] = 33, mi["云南"] = 34, mi["浙江"];
 	province_of[1] = "全国", province_of[2] = "安徽", province_of[3] = "北京";
 	province_of[4] = "重庆", province_of[5] = "福建", province_of[6] = "甘肃";
 	province_of[7] = "广东", province_of[8] = "广西", province_of[9] = "贵州";
-	province_of[10] = "海南", province_of[11] = "河北", province_of[12] = "河南" ;
+	province_of[10] = "海南", province_of[11] = "河北", province_of[12] = "河南";
 	province_of[13] = "黑龙江", province_of[14] = "湖北", province_of[15] = "湖南";
 	province_of[16] = "吉林", province_of[17] = "江苏", province_of[18] = "江西";
 	province_of[19] = "辽宁", province_of[20] = "内蒙古", province_of[21] = "宁夏";
@@ -231,26 +252,26 @@ void Analysis::Init()
 	province_of[25] = "陕西", province_of[26] = "上海", province_of[28] = "四川";
 	province_of[29] = "台湾", province_of[30] = "天津", province_of[31] = "西藏";
 	province_of[32] = "香港", province_of[33] = "新疆", province_of[34] = "云南";
-	province_of[35] = "浙江"; province_of[27]="-";
+	province_of[35] = "浙江"; province_of[27] = "-";
 }
 
 
 void Analysis::Out()
 {
-	for (int i = 2;i < 36;i++)
+	for (int i = 2; i < 36; i++)
 	{
-		for (int j = 1;j < type_num;j++)
+		for (int j = 1; j < type_num; j++)
 		{
 			out[1][j] += out[i][j];
 		}
 	}
-	for (int i = 1;i < 36;i++)
+	for (int i = 1; i < 36; i++)
 	{
-		bool flg= province_num == 0 &&(mi3.count(province_of[i]) || i == 1);
-		if (mi1.count(province_of[i]) || flg ) 
+		bool flg = province_num == 0 && (mi3.count(province_of[i]) || i == 1);
+		if (mi1.count(province_of[i]) || flg)
 		{
 			cout << province_of[i] << ' ';
-			for (int j = 1;j < type_num;j++)
+			for (int j = 1; j < type_num; j++)
 			{
 				cout << type[j] << out[i][j] << "人 ";
 			}
@@ -263,22 +284,22 @@ void Analysis::Out()
 	cout << "// 该文档并非真实数据，仅供测试使用" << "\n";
 }
 
-string Analysis::Check(int date_,char *date)
+string Analysis::Check(int date_, char* date)
 {
-	string data="";
+	string data = "";
 	if (date_ > 0)
 	{
-		for (int i = 0;i < date_;i++)data = data + date[i];
+		for (int i = 0; i < date_; i++)data = data + date[i];
 		data = data + " ";
 	}
 	if (province_num > 0)
 	{
-		for (int i = 0;i < province_num;i++)data = data + province[i];
+		for (int i = 0; i < province_num; i++)data = data + province[i];
 		data = data + " ";
 	}
 	if (type_num > 1)
 	{
-		for (int i = 1;i < type_num;i++)data = data + type[i];
+		for (int i = 1; i < type_num; i++)data = data + type[i];
 		data = data + " ";
 	}
 	return data;
@@ -312,10 +333,10 @@ string Analysis::Begin(string com)
 {
 	Init();
 	char inpath[1005], date[105];
-	
+
 	int cc = 0;
 	int size = com.size();
-	for (int i = 0;i < size;i++)
+	for (int i = 0; i < size; i++)
 	{
 		string s = "";
 		while (i < size && com[i] != ' ')
@@ -389,30 +410,30 @@ string Analysis::Begin(string com)
 			if (com[i] >= 'z' || com[i] <= 'a')i--;
 			province_num = c;
 		}
-		else if(com[i]==' ');
+		else if (com[i] == ' ');
 		else i--;
 	}
 	CheckAgain();
 	FindAllFile(inpath, ".log.txt", date);
-	return Check(cc,date);
-	
-}
+	return Check(cc, date);
 
+}
 
 int main(int argc, char* argv[])
 {
 	Analysis A;
 	string s = "";
-	for(int i=0;i<argc;i++)
+	for (int i = 0; i < argc; i++)
 	{
-		int size=strlen(argv[i]);
-		for(int j=0;j<size;j++)s=s+argv[i][j];
-		s=s+" ";
+		char in[100];
+		int size = strlen(argv[i]);
+		for (int j = 0; j < size; j++)s = s + argv[i][j];
+		s = s + " ";
 	}
 	//cout<<s;
 	A.Begin(s);
 	A.Out();
-	
+
 	return 0;
 }
 

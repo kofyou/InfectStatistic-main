@@ -387,13 +387,16 @@ class InfectStatistic {
 			for (int i=0; i<provinceStrings.length; i++) {
 				if (existProvince[i]==1) {
 					bw.write(provinceStrings[i]+" ");
-			        if (!hasType) {
-				    //全部输出
-			            for (int j=0; j<type.length; j++) {
+			        if (!hasType) {  //输出所有的疫情信息
+			            for (int j=0; j<typeStrings.length; j++) {
 			            	bw.write(typeStrings[j]+allStatistic[i][j]+"人 ");
 			            }
-			        } else {
-				    //按传入的Type参数输出相对应类型
+			        } else {  //按传入的Type参数输出相对应类型
+				        for (int k=0; k<type.length; k++) {
+				        	if (type[k]==true) {
+				        		bw.write(typeStrings[k]+allStatistic[i][k]+"人 ");
+				        	}
+				        }
 			        }
 			        bw.write("\n");
 				}
@@ -401,22 +404,27 @@ class InfectStatistic {
 			}
 			
 		} else {
-			for (int i=0; i<provinceStrings.length; i++) {
-				if (!hasType) {
-					//输出相应省份全部类型患者数据
-				} else {
-					//输出相应省份相应类型患者数据
+			for (int i=0; i<province.length; i++) {
+				if (province[i]==true) {
+					bw.write(provinceStrings[i]+" ");
+					if (!hasType) {  //输出相应省份全部类型患者数据
+						for (int j=0; j<typeStrings.length; j++) {
+							bw.write(typeStrings[j]+allStatistic[i][j]+"人 ");
+						}
+					} else {  //输出相应省份相应类型患者数据
+						for (int k=0; k<type.length; k++) {
+							if (type[k]==true) {
+								bw.write(typeStrings[k]+allStatistic[i][k]+"人 ");
+							}
+						}
+					}
+					bw.write("\n");
 				}
-			}
-			
+				
+			}	
 		}
 		bw.write("// 该文档并非真实数据，仅供测试使用");
 		bw.flush();
 		bw.close();
 	}
-	
-
 }
-
-	    
-

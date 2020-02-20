@@ -9,15 +9,15 @@ import static java.util.stream.Collectors.toMap;
 
 class InfectStatistic {
 
-    private CmdArgs cmdArgs;
+    private Cmd cmd;
     private Map<String  , File> LogsMap;
     private Container container;
     private Record nation;
 
 
-    public CmdArgs GetCmdArgs()
+    public Cmd GetCmd()
     {
-        return cmdArgs;
+        return cmd;
     }
 
     public Map<String , File> GetLogsMap()
@@ -96,7 +96,7 @@ class InfectStatistic {
     //构造函数
     public InfectStatistic()
     {
-        cmdArgs = new CmdArgs();
+        cmd = new Cmd();
         nation = new Record();
         nation.SetProvinceName("全国");
         container = new Container();
@@ -203,16 +203,16 @@ class InfectStatistic {
     //输出文件
     public void OutputFile() throws IOException
     {
-        String OutputPath = cmdArgs.GetOutputPath();
+        String OutputPath = cmd.GetOutputPath();
         BufferedWriter bw = null;
         try
         {
             bw = Common.NBWriter(OutputPath);
-            if (!cmdArgs.HasProvince() || cmdArgs.GetProvinces().contains(Lib.National))
+            if (!cmd.HasProvince() || cmd.GetProvinces().contains(Lib.National))
             {
-                nation.OutRecord(bw , cmdArgs.GetTypes());
+                nation.OutRecord(bw , cmd.GetTypes());
             }
-            container.OutContainer(bw , cmdArgs.GetTypes() , cmdArgs.GetProvinces());
+            container.OutContainer(bw , cmd.GetTypes() , cmd.GetProvinces());
             bw.close();
         }catch (IOException e)
         {
@@ -226,13 +226,13 @@ class InfectStatistic {
     public static void main(String[] args) throws ParseException , IOException
     {
         InfectStatistic inf = new InfectStatistic();
-        CmdArgs cmdArgs =  inf.GetCmdArgs();
-        if (!cmdArgs.ManageArgs(args , inf))
+        Cmd cmd =  inf.GetCmd();
+        if (!cmd.ManageArgs(args , inf))
         {
             System.out.println("处理命令行参数失败");
             return;
         }
-        inf.SetLogsMap(Common.GetFiles(cmdArgs.GetLogPath() ,cmdArgs.GetDate() ,
+        inf.SetLogsMap(Common.GetFiles(cmd.GetLogPath() ,cmd.GetDate() ,
                 Lib.LogFileRegex));
         inf.ReadLogFile();
         inf.OutputFile();
@@ -242,35 +242,35 @@ class InfectStatistic {
 class Container
 {
 
-    Map<String , Record> recordMap;
+    Map<String , Record> RecordMap;
     public Container()
     {
-        recordMap = new HashMap<>();
+        RecordMap = new HashMap<>();
     }
 
     public Map<String , Record> GetRecordMap()
     {
-        return recordMap;
+        return RecordMap;
     }
 
     public Record GetRecord(String Province)
     {
-        return recordMap.get(Province);
+        return RecordMap.get(Province);
     }
 
     public void AddRecord(Record record)
     {
-        recordMap.put(record.GetProvinceName() , record);
+        RecordMap.put(record.GetProvinceName() , record);
     }
 
     public boolean CompareTo(Container c)
     {
         Map<String , Record> rdMap = c.GetRecordMap();
-        if (recordMap.size() != rdMap.size())
+        if (RecordMap.size() != rdMap.size())
         {
             return false;
         }
-        for (Map.Entry<String , Record> entry : recordMap.entrySet())
+        for (Map.Entry<String , Record> entry : RecordMap.entrySet())
         {
             Record record1 = entry.getValue();
             Record record2 = c.GetRecord(record1.GetProvinceName());
@@ -285,14 +285,14 @@ class Container
     public void SortByProvince()
     {
         ChinaComparator mapKeyComparator = new ChinaComparator();
-        recordMap = Common.SortMap(recordMap , mapKeyComparator);
+        RecordMap = Common.SortMap(RecordMap , mapKeyComparator);
     }
 
     //将容器内容输入文件
     public void OutContainer(BufferedWriter bw  , Vector<String> types  , Vector<String> Provinces) throws IOException
     {
         SortByProvince();
-        for (Map.Entry<String , Record> entry : recordMap.entrySet())
+        for (Map.Entry<String , Record> entry : RecordMap.entrySet())
         {
             Record record = entry.getValue();
             if (Provinces != null && Provinces.size() > 0)
@@ -478,7 +478,7 @@ class Record
         bw.flush();
     }
     /** show record's message **/
-    public void showRecordMessage()
+    public void ShowRecordMessage()
     {
         String ProvinceRecord = this.GetProvinceName() + " 感染患者"
                 + this.GetIpNum() +"人 "
@@ -499,17 +499,16 @@ class Record
     }
 }
 
-//@SUppressWarnings("ALL")
-class CmdArgs
+class Cmd
 {
     private String LogPath;
     private String OutputPath;
     private String date;
     private Vector<String> types;
     private Vector<String> Provinces;
-    private boolean showArgs;
+    private boolean ShowArgs;
 
-    public CmdArgs()
+    public Cmd()
     {
         this.types = new Vector<String>();
         this.Provinces = new Vector<String>();
@@ -518,7 +517,7 @@ class CmdArgs
         Date now = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         this.date = sdf.format(now);
-        this.showArgs = false;
+        this.ShowArgs = false;
     }
 
     public String GetLogPath()
@@ -611,7 +610,7 @@ class CmdArgs
         }
         if (i >= args.length)
         {
-            showRule();
+            ShowRule();
             return false;
         }
         for (; i < args.length; ++i)
@@ -625,7 +624,7 @@ class CmdArgs
                 }
                 else
                 {
-                    System.out.println("你必须指定日志文件夹的正确全路径");
+                    System.out.println("日志文件的路径有误");
                     return false;
                 }
             }
@@ -676,41 +675,35 @@ class CmdArgs
             }
             else if ("-show".equals(args[i]))
             {
-                this.showArgs = true;
+                this.ShowArgs = true;
             }
             else
             {
-                System.out.println("Unknow args " + args[i]);
+                System.out.println("未知参数"+ args[i]);
             }
         }
         if (this.LogPath == null || this.OutputPath == null)
         {
-            showRule();
+            ShowRule();
             return false;
         }
-        if (this.showArgs)
+        if (this.ShowArgs)
         {
-            showArgs();
+            ShowArgs();
         }
         return true;
     }
 
-    public void showRule()
+    public void ShowRule()
     {
-        System.out.println("command line example : java InfectStatistic list");
-        System.out.println("                    -log (LogPath , Must Specify)");
-        System.out.println("                    -out (OutputPath , Must Specify)");
-        System.out.println("                    -date (yyyy-MM-dd)");
-        System.out.println("                    -type (Ip , Sp , Cure , Dead)");
-        System.out.println("                    -Province (武汉 , 福建 , 北京 , ...)");
-        System.out.println("                    -show (print args)");
+        System.out.println("请输入形如：java InfectStatistic list -log -out -date -type -Province -show");
     }
 
-    public void showArgs()
+    public void ShowArgs()
     {
-        System.out.println("日志目录位置:" + this.GetLogPath());
-        System.out.println("输出文件位置:" + this.GetOutputPath());
-        System.out.println("统计的最新截至日期:" + this.GetDate());
+        System.out.println("日志文件位置:" + this.GetLogPath());
+        System.out.println("文件输出位置:" + this.GetOutputPath());
+        System.out.println("最新的统计截至日期:" + this.GetDate());
         if (this.GetTypes() != null && this.typeNumber() != 0)
         {
             System.out.println("选择统计的人员类型:");
@@ -721,7 +714,7 @@ class CmdArgs
         }
         if (this.GetProvinces() != null && this.ProvinceNumber() != 0)
         {
-            System.out.println("选择统计的省份:");
+            System.out.println("请选择统计的省份:");
             for (String tem : this.GetProvinces())
             {
                 System.out.print(tem + " ");

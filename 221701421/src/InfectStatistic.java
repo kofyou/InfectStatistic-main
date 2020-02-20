@@ -36,6 +36,15 @@ class InfectStatistic {
         if (dateIndex > 0) {//如果有传入-date参数
             dateString = args[dateIndex + 1];
         }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        date = null;
+        if (dateIndex >= 0) {
+            try {
+                date = simpleDateFormat.parse(dateString);
+            } catch (ParseException e) {
+                System.out.println("时间参数非法");
+            }
+        }
 
         int dirIndex = list.indexOf("-log");//日志文件目录
         if (dirIndex < 0) {
@@ -48,15 +57,15 @@ class InfectStatistic {
         int outputIndex = list.indexOf("-out");//输出文件目录
         if (outputIndex < 0) {
             System.out.println("错误：没有传入输出文件路径");
+            System.exit(-1);
         }
         outputPath = args[outputIndex + 1];
 
         int provinceListIndex = list.indexOf("-province");//传入参数中-province的下标索引
         int provinceListLastIndex = findLastIndex(args, provinceListIndex);//查询的最后一个省份的下标索引
         provinceList = new ArrayList<String>();//省份列表
-
         if (provinceListIndex >= 0) {//有传入-province参数
-            for (int i = provinceListIndex; i <= provinceListLastIndex; i++) {
+            for (int i = provinceListIndex + 1; i <= provinceListLastIndex; i++) {
                 provinceList.add(args[i]);
             }
         }
@@ -75,15 +84,6 @@ class InfectStatistic {
             }
         }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        date = null;
-        if (dateIndex >= 0) {
-            try {
-                date = simpleDateFormat.parse(dateString);
-            } catch (ParseException e) {
-                System.out.println("时间参数非法");
-            }
-        }
     }
 
     public void statistic(){
@@ -101,6 +101,26 @@ class InfectStatistic {
             index++;
         }
         return index - 1;
+    }
+
+    public ArrayList<String> getProvinceList() {
+        return provinceList;
+    }
+
+    public HashMap<String, Integer> getTypeMap() {
+        return typeMap;
+    }
+
+    public String getOutputPath() {
+        return outputPath;
+    }
+
+    public File getLogDir() {
+        return logDir;
+    }
+
+    public Date getDate() {
+        return date;
     }
 }
 

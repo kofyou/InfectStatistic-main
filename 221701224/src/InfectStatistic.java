@@ -21,7 +21,7 @@ import java.util.regex.*;
 
 class InfectStatistic {
 	public static String log_route="";//日志文件路径
-	public static String out_route;//输出文件路径
+	public static String out_route="";//输出文件路径
 	public static String log_need;//需要被解析的日志文件路径
 	public static String out_name;//
 	public static String[] log_list;//读取到的日志文件列表,并且按照日期从小到大排序
@@ -165,6 +165,16 @@ public static void judgeCommandLine(String[] str) {
 			}
 			
 		}
+	}
+	if("".equals(log_route))
+	{
+		System.out.println("命令行错误，没有输入-log！");
+		System.exit(0);
+	}
+	if("".equals(out_route))
+	{
+		System.out.println("命令行错误，没有输入-out！");
+		System.exit(0);
 	}
 }
 public static boolean isLegalDate(String str) {

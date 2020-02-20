@@ -135,7 +135,6 @@ class InfectStatistic {
     		MyProvince myProvince = new MyProvince(strProvinceName);
     		provinceMap.put(strProvinceName, myProvince);
     	}
-    	
     }
     
     //处理输入的命令
@@ -212,8 +211,6 @@ class InfectStatistic {
     		System.out.println("日志写入错误！");
     		System.exit(0);
     	}
-    	
-    	
     }
 	
     //读取指定日期以及之前的所有log文件
@@ -266,9 +263,6 @@ class InfectStatistic {
         		System.exit(0);
         	}
         }
-        
-        
-        
     }
     
     //读取单个文件
@@ -295,11 +289,6 @@ class InfectStatistic {
         				int num = getPeopleNum(wordString[3]);
         				provinceMap.get(wordString[0]).spAdd(num);
         			}
-        			/*
-        			System.out.println(provinceMap.get(wordString[0]).provinceName);
-        			System.out.println(provinceMap.get(wordString[0]).ip);
-        			System.out.println(provinceMap.get(wordString[0]).sp);
-        			*/
         		} else if(wordString[2].equals("流入")) {
         			if(wordString[1].equals("感染患者")) {
         				int num = getPeopleNum(wordString[4]);
@@ -323,7 +312,6 @@ class InfectStatistic {
         		}
         	}
         }
-
         bufferedReader.close();
         fileReader.close();
     }
@@ -365,7 +353,6 @@ class InfectStatistic {
     	
     	writer.flush();
     	writer.close();
-    	
     }
     
     //按-type指定的顺序输出curProvince的防疫情况

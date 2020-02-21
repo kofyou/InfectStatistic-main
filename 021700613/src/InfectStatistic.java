@@ -171,9 +171,35 @@ class OrderHandle{
         }
     }   
 }
+/**
+ * 
+ * 命令执行类
+ * 
+ *
+ * @author 021700613
+ * @version 1.0
+ * @since 2020.2.21
+ */
 
 class RunOrder{
-
+    OrderHandle handle;
+    boolean hasDate = false;
+    boolean hasType = false;
+    boolean hasProvince = false;
+    
+    public RunOrder(OrderHandle handle) {
+        if (!handle.dateString.equals("")) {
+            this.hasDate = true;
+        }
+        if (handle.hasType) {
+            this.hasType = true;
+        }
+        if (handle.hasProvince) {
+            this.hasProvince = true;
+        }
+        this.handle = handle;
+    }
+    
 }
 
 class ReadFile{

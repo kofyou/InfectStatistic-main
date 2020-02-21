@@ -38,7 +38,7 @@ class InfectStatistic
     
     public static ArrayList<Province> allProvince = new ArrayList<Province>();  //用于记录省份类的实例对象
     
-    public static Nation nation;  //nation的成员变量记录了全国感染人数，疑似人数，治愈人数和死亡人数
+    public static Nation nation;  //记录了全国感染人数，疑似人数，治愈人数和死亡人数
     
     /*
     * Description:分析命令行穿给主函数的命令
@@ -401,37 +401,15 @@ class InfectStatistic
         		}
         	}
         }
-        //for(String i:list){  
-           // System.out.print(i+"  ");  
-        //}
-
-
-        
-        
-        //System.out.println(collator.getCollationKey(allProvince.get(0).provinceName));
-        
-        /*for(int i = 0;i < length-1;i++){
-            for(int j = 0;j < length-i-1;j++){
-            	CollationKey key1 = collator.getCollationKey(allProvince.get(j).provinceName);
-				CollationKey key2 = collator.getCollationKey(allProvince.get(j + 1).provinceName);
-                if(key1.compareTo(key2) > 0)
-                {
-                    //String nameString = allProvince.get(j).provinceName;
-                    //int ip = allProvince.get(j).ip;
-                    //int sp = allProvince.get(j).sp;
-                    //int cure = allProvince.get(j).cure;
-                    //int dead = allProvince.get(j).dead;
-                    
-                    Province temp = allProvince.get(j);
-                    allProvince.set(j,allProvince.get(j + 1));
-                    allProvince.set(j + 1,temp);
-                }
-            }
-        }*/
     }
 	
 	
-	
+	/*
+	* Description:主函数，主要流程控制
+	* Input:命令行的输入
+	* Return:无
+	* Others:无
+	*/ 
     public static void main(String[] args) throws IOException 
     {
     	analysisOfCommand(args);

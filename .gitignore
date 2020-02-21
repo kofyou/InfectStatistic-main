@@ -9,3 +9,5 @@ out
 gen
 .idea/
 InfectStatistic-example.iml
+#忽略所有class文件
+041701320/*.class

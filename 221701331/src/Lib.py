@@ -1,11 +1,12 @@
 from datetime import date
+import pytest
 
 TYPE_CN_MAP = {'infected': '感染患者', 'suspect': '疑似患者', 'cure': '治愈', 'death': '死亡'}
 
 
 def parse_output_line(province, data):
     """
-    处理输出的一行数据
+    处理输出的一行数据到题目指定格式
     :param province: 省份名称
     :param data: 存储数据的字典，符合Statistic.data的结构
     :return: 数据行

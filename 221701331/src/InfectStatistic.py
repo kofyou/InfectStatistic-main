@@ -78,97 +78,98 @@ def map_info_type(s: str) -> int:
         return 8
 
 
-parser = argparse.ArgumentParser(prog='InfectStatistic', description='show statistic of epidemic data')
-parser.add_argument('option', choices=['list'], type=str, help='only "list" support')
-parser.add_argument('-log', type=str, required=True, help='*directory* that contain logs file')
-parser.add_argument('-out', type=argparse.FileType('w', encoding='utf8'), required=True,
-                    help='*file* path that this script output')
-parser.add_argument('-date', type=str, help='real time data until this param, format YYYY-mm-DD')
-parser.add_argument('-type', type=str, nargs='*', choices=['ip', 'sp', 'cure', 'dead'], help='type(s) to output')
-parser.add_argument('-province', type=str, nargs='*', help='which province(s) to display, input "全国" if needs sum')
-option = parser.parse_args()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(prog='InfectStatistic', description='show statistic of epidemic data')
+    parser.add_argument('option', choices=['list'], type=str, help='only "list" support')
+    parser.add_argument('-log', type=str, required=True, help='*directory* that contain logs file')
+    parser.add_argument('-out', type=argparse.FileType('w', encoding='utf8'), required=True,
+                        help='*file* path that this script output')
+    parser.add_argument('-date', type=str, help='real time data until this param, format YYYY-mm-DD')
+    parser.add_argument('-type', type=str, nargs='*', choices=['ip', 'sp', 'cure', 'dead'], help='type(s) to output')
+    parser.add_argument('-province', type=str, nargs='*', help='which province(s) to display, input "全国" if needs sum')
+    option = parser.parse_args()
 
-# ======= 检查命令行参数 =======
-# check -log
-try:
-    if option.log and len(os.listdir(option.log)) == 0:
-        sys.stderr.write('log directory ({0}) is empty'.format(option.log))
+    # ======= 检查命令行参数 =======
+    # check -log
+    try:
+        if option.log and len(os.listdir(option.log)) == 0:
+            sys.stderr.write('log directory ({0}) is empty'.format(option.log))
+            exit(1)
+    except FileNotFoundError as e:
+        sys.stderr.write('cannot find log directory {0}'.format(option.log))
         exit(1)
-except FileNotFoundError as e:
-    sys.stderr.write('cannot find log directory {0}'.format(option.log))
-    exit(1)
-# check -date
-if option.date and not re.match(r'^\d{4}-\d{2}-\d{2}$', option.date):
-    sys.stderr.write('argument -date is invalid: ' + option.date + '\nformat must be YYYY-mm-DD')
-    exit(1)
-# check -province
-# if option.province and len(set(SORTED_PROVENCE_NAME + ['全国'] - set(option.province)):  # 集合方法求差集
-wrongInputProvinces = [x for x in (option.province or []) if x not in SORTED_PROVENCE_NAME + ['全国']]
-if option.province and len(wrongInputProvinces):
-    sys.stderr.write('province name invalid: {0}'.format(wrongInputProvinces))
-    exit(1)
-# check -type
-if option.type and len(option.type) != len(set(option.type)):
-    sys.stderr.write('type repeat!')
-    exit(1)
+    # check -date
+    if option.date and not re.match(r'^\d{4}-\d{2}-\d{2}$', option.date):
+        sys.stderr.write('argument -date is invalid: ' + option.date + '\nformat must be YYYY-mm-DD')
+        exit(1)
+    # check -province
+    # if option.province and len(set(SORTED_PROVENCE_NAME + ['全国'] - set(option.province)):  # 集合方法求差集
+    wrongInputProvinces = [x for x in (option.province or []) if x not in SORTED_PROVENCE_NAME + ['全国']]
+    if option.province and len(wrongInputProvinces):
+        sys.stderr.write('province name invalid: {0}'.format(wrongInputProvinces))
+        exit(1)
+    # check -type
+    if option.type and len(option.type) != len(set(option.type)):
+        sys.stderr.write('type repeat!')
+        exit(1)
 
-# ======= 日志文件处理 ========
-stat = Statistic()
-filesTuple = os.walk(option.log).__next__()
-basePath = filesTuple[0] + '\\'
-# 扫描目录下的所有文件
-for filename in filesTuple[2]:
-    # 若指定日期，则按参数中止循环，否则处理完所有文件
-    # if option.date and filename.find(option.date) > -1:
-    if option.date and str_to_date(filename[:10]) > str_to_date(option.date):
-        break
-    with open(basePath + filename, encoding='utf8') as fr:
-        # 处理文件的每一行
-        for line in fr:
-            if line[0] == line[1] == '/':
-                continue
-            if line[len(line) - 1] == '\n':
-                line = line[:-1]
-            stat.parse_record_line(line)
-if option.date and str_to_date(filename[:10]) < str_to_date(option.date):
-    sys.stderr.write('warning: 日期超出范围\n')
-stat.data['全国'] = stat.get_total()
+    # ======= 日志文件处理 ========
+    stat = Statistic()
+    filesTuple = os.walk(option.log).__next__()
+    basePath = filesTuple[0] + '\\'
+    # 扫描目录下的所有文件
+    for filename in filesTuple[2]:
+        # 若指定日期，则按参数中止循环，否则处理完所有文件
+        # if option.date and filename.find(option.date) > -1:
+        if option.date and str_to_date(filename[:10]) > str_to_date(option.date):
+            break
+        with open(basePath + filename, encoding='utf8') as fr:
+            # 处理文件的每一行
+            for line in fr:
+                if line[0] == line[1] == '/':
+                    continue
+                if line[len(line) - 1] == '\n':
+                    line = line[:-1]
+                stat.parse_record_line(line)
+    if option.date and str_to_date(filesTuple[2][-1][:10]) < str_to_date(option.date):
+        sys.stderr.write('warning: 日期超出范围\n')
+    stat.data['全国'] = stat.get_total()
 
-# ======== 输出数据处理 ========
-output = ''
-data = {}
-if option.province:
-    for p in option.province:
-        data[p] = stat.data[p] if p in stat.data.keys() else {**EMPTY_DATA}
-else:
-    data = {**stat.data}  # todo:这里应该不是深拷贝
-# sortedProvince = sorted(list(data.keys()), key=lambda x: lazy_pinyin(x[0]))
-# 排除type参数不包含的类型
-if option.type:
-    mapList = []
-    new_data = {}
-    for t in option.type:
-        if t == 'ip':
-            mapList.append('infected')
-        elif t == 'sp':
-            mapList.append('suspect')
-        elif t == 'dead':
-            mapList.append('death')
-        else:
-            mapList.append('cure')
-    for k, province in data.items():
-        new_data[k] = {}
-        for t in mapList:
-            new_data[k][t] = province[t]
-    data = new_data
-# 生成输出文本
-if not option.province or '全国' in option.province:
-    output += parse_output_line('全国', data)
-for province in SORTED_PROVENCE_NAME:
-    output += parse_output_line(province, data)
-output += '// 该文档并非真实数据，仅供测试使用\n' \
-          '// 命令：' + ' '.join(sys.argv) + '\n'
-# 写入out参数指定的文件
-option.out.write(output)
-print(output)
-option.out.close()
+    # ======== 输出数据处理 ========
+    output = ''
+    data = {}
+    if option.province:
+        for p in option.province:
+            data[p] = stat.data[p] if p in stat.data.keys() else {**EMPTY_DATA}
+    else:
+        data = {**stat.data}  # todo:这里应该不是深拷贝
+    # sortedProvince = sorted(list(data.keys()), key=lambda x: lazy_pinyin(x[0]))
+    # 排除type参数不包含的类型
+    if option.type:
+        mapList = []
+        new_data = {}
+        for t in option.type:
+            if t == 'ip':
+                mapList.append('infected')
+            elif t == 'sp':
+                mapList.append('suspect')
+            elif t == 'dead':
+                mapList.append('death')
+            else:
+                mapList.append('cure')
+        for k, prov in data.items():
+            new_data[k] = {}
+            for t in mapList:
+                new_data[k][t] = prov[t]
+        data = new_data
+    # 生成输出文本
+    if not option.province or '全国' in option.province:
+        output += parse_output_line('全国', data)
+    for prov in SORTED_PROVENCE_NAME:
+        output += parse_output_line(prov, data)
+    output += '// 该文档并非真实数据，仅供测试使用\n' \
+              '// 命令：' + ' '.join(sys.argv[1:]) + '\n'
+    # 写入out参数指定的文件
+    option.out.write(output)
+    print(output)
+    option.out.close()

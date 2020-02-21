@@ -1,516 +1,469 @@
-
-
-import java.util.ArrayList;
-import java.util.Arrays;
+//package Yiqing;
+import java.util.List;
 import java.io.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.junit.Test;
-import java.text.Collator;
-import java.util.Locale;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * InfectStatistic
  * TODO
  *
- * @author zdc5511116
+ * @author zdc5511116_221701222
  * @version 1.0
- * @since 2020-02-12
+ * @since 2020.02
  */
-public class InfectStatistic {
-    static ArrayList<Province> provincesList = new ArrayList<Province>();
-    static String[] provincesRefered = {"全国", "安徽", "北京", "重庆", "福建", "甘肃", "广东",
-            "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林", "江苏",
-            "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海", "四川",
-            "天津", "西藏", "新疆", "云南", "浙江"};
-    public static void main(String[] args) throws Exception{
-        Commands cmds = new Commands();
-        if (args[0].equals("list")) {
-            for (int i = 1; i < args.length; i++) {
+class InfectStatistic {
 
-                switch (args[i]) {
-                    case "-log":
-                        cmds.log = args[i+1];
-                        ++i;
-                        break;
-                    case "-out":
-                        cmds.out = args[i+1];
-                        ++i;
-                        break;
-                    case "-date":
-                        cmds.date = args[i+1];
-                        ++i;
-                        break;
-                    case "-type":
-                        for(int j = i + 1; j < args.length; j++) {
-                            if (!args[j].substring(0, 1).equals("-")) {
-                                if(args[j].equals("ip") || args[j].equals("sp") || args[j].equals("cure") || args[j].equals("dead"))
-                                    cmds.type.add(args[j]);
-                                else
-                                    System.out.println(args[j] + " 不在查询范围内，将查询剩余的类型。");
-                                i = j;
+    Order order;
+
+    public static void main(String[] args) {
+        InfectStatistic infectStatistic = new InfectStatistic();
+        try {
+            if(args.length == 0){
+                Lib.help();
+                throw new Lib.Exit("请按照提示输入命令");
+            }
+            infectStatistic.takeOrder(args[0]);
+            infectStatistic.placeOrder(args);
+        }catch (Lib.Exit exit){
+            System.out.println(exit.getMessage());
+        }
+    }
+
+    /**
+     * 判断命令类型并创建实例
+     * @param cmd 传入的命令
+     */
+    public void takeOrder(String cmd) throws Lib.Exit {
+        switch (cmd){
+            case "list":
+                order = new ListOrder();
+                break;
+            default:
+                throw new Lib.Exit("\"" + cmd + "\"无效的命令");
+        }
+    }
+
+    /**
+     * 执行命令
+     * @param args 参数列表
+     */
+    public void placeOrder(String[] args) throws Lib.Exit {
+        order.execute(args);
+    }
+
+}
+
+/**
+ * 命令接口
+ */
+interface Order {
+
+    void execute(String[] args) throws Lib.Exit;
+}
+
+/**
+ * list命令类
+ */
+class ListOrder implements Order {
+
+    /*一些常量*/
+    private final String INFECTION_PATIENT = "感染患者";
+    private final String SUSPECTED_PATIENT = "疑似患者";
+    private final String DIAGNOSE = "确诊感染";
+    private final String CURE = "治愈";
+    private final String DEAD = "死亡";
+    private final String INCREMENT = "新增";
+    private final String EXCLUDE = "排除";
+    private final String INFLOW = "流入";
+
+    /*以下成员变量用于判断是否传入了相应的参数*/
+    private boolean hasLog;
+    private boolean hasOut;
+    private boolean hasDate;
+    private boolean hasType;
+    private boolean hasProvince;
+
+    /*以下成员变量用于保存具体参数的参数值*/
+    private String logParam;
+    private String outParam;
+    private String dateParam;
+    private List<String> typeParams;
+
+    private List<String> provinceParams;
+
+    /*用于保存各省份疫情信息*/
+    private final Map<String, List<Integer>> statistics;
+
+    /*日志目录*/
+    private File logDirectory;
+
+    /*输出哪些类型数据和输出哪些省份*/
+    private Map<String,Integer> outType;
+    private List<String> outProvince;
+
+    /*构造方法*/
+    public ListOrder() {
+        hasLog = false;
+        hasOut = false;
+        hasDate = false;
+        hasType = false;
+        hasProvince = false;
+        typeParams = new ArrayList<>();
+        provinceParams = new ArrayList<>();
+        statistics = new LinkedHashMap<>();
+        outType = new LinkedHashMap<>();   //默认输出全部类型数据
+        outType.put(INFECTION_PATIENT,0);
+        outType.put(SUSPECTED_PATIENT,1);
+        outType.put(CURE,2);
+        outType.put(DEAD,3);
+        outProvince = new ArrayList<>();
+        outProvince.add("全国");
+        Lib.mapInit(statistics);
+    }
+
+    /**
+     *解析参数，保存，设定默认值，并调用相应的方法
+     * @param args 传递给main方法的参数
+     */
+    @Override
+    public void execute(String[] args) throws Lib.Exit {
+        if(args.length == 1){
+            Lib.helpList();    //显示提示信息
+            throw new Lib.Exit("请按照提示输入命令");
+        }
+        /*分离参数*/
+        int i = 1;
+        while (i < args.length) {
+            switch (args[i]) {
+                case "-log":
+                    hasLog = true;
+                    if (++i >= args.length) {  //如果-log后面没有给参数值
+                        throw new Lib.Exit("-log参数缺少参数值");
+                    }
+                    logParam = args[i++];      //-log后面跟着的参数为-log的参数值
+                    break;
+                case "-out":
+                    hasOut = true;
+                    if (++i >= args.length) {  //如果-out后面没有给参数值
+                        throw new Lib.Exit("-out参数缺少参数值");
+                    }
+                    outParam = args[i++];      //-out后面跟着的参数为-out的参数值
+                    break;
+                case "-date":
+                    hasDate = true;
+                    if (++i >= args.length) {  //如果-date后面没有给参数值
+                        throw new Lib.Exit("-date参数缺少参数值");
+                    }
+                    dateParam = args[i++];     //-date后面跟着的参数为-date的参数值
+                    break;
+                case "-type":
+                    hasType = true;
+                    while (++i < args.length && !args[i].equals("-log") && !args[i].equals("-out") && !args[i].equals("-date")
+                            && !args[i].equals("-province")) {   //-type的参数值范围
+                        typeParams.add(args[i]);
+                    }
+                    break;
+                case "-province":
+                    hasProvince = true;
+                    while (++i < args.length && !args[i].equals("-log") && !args[i].equals("-out") && !args[i].equals("-date")
+                            && !args[i].equals("-type")) {       //-province的参数值范围
+                        provinceParams.add(args[i]);
+                    }
+                    break;
+                default:
+                    throw new Lib.Exit("\"" + args[i] + "\"无法解析的参数");
+            }
+        }
+        /*执行相应的方法*/
+        if(!hasLog) {  //log必须有
+            throw new Lib.Exit("缺少-log参数");
+        }
+        if(!hasOut) {  //out必须有
+            throw new Lib.Exit("缺少-out参数");
+        }
+        if(!hasDate) {  //如果没有data参数
+            dateParam=new SimpleDateFormat("yyyy-MM-dd").format(new Date()); //当前日期
+        }
+        doLog(logParam);    //读取日志路径
+        doDate(dateParam);   //读取日志路径下相应日期的日志
+        if(hasType) {
+            doType(typeParams);   //需要输出的信息类型
+        }
+        if(hasProvince) {
+            doProvince(provinceParams);   //需要输出的省份疫情信息
+        }
+        doOut(outParam);  //输出到指定的路径
+    }
+
+    /**
+     *执行-log命令参数 读取log文件夹
+     * @param logPath -log参数后面的log文件路径
+     */
+    private void doLog(String logPath) throws Lib.Exit {
+        logDirectory = new File(logPath);  //读取路径
+        if(!logDirectory.exists()) {
+            throw new Lib.Exit("\"-log\" " + logDirectory + " 无法解析的路径");
+        }
+    }
+
+    /**
+     *执行-out命令参数
+     * @param outPath -out参数后面的输出路径
+     */
+    private void doOut(String outPath) throws Lib.Exit {
+        countNational(); //计算全国数据
+        File outFile = new File(outPath);
+        FileWriter writer = null;    //字符输出流
+        try {
+            writer = new FileWriter(outFile);
+            for(String province : statistics.keySet()) {   //遍历统计数据
+                if(!outProvince.contains(province)) {
+                    continue;
+                }
+                List<Integer> data = statistics.get(province);
+                writer.write(province + "    ");
+                for(String type : outType.keySet()) {
+                    writer.write(type + data.get(outType.get(type)) + "人    ");
+                }
+                writer.write("\n");
+            }
+            writer.write("//该文档并非真实数据，仅供测试使用\n");
+            writer.flush();
+        } catch (Exception e) {
+            throw new Lib.Exit("\"out\" " + e.getMessage());
+        } finally {
+            try {
+                if (writer != null) {
+                    writer.close();   //关闭流
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     *执行-date命令参数 计算当日疫情状况
+     * @param date -date参数后面的具体日期
+     */
+    private void doDate(String date) throws Lib.Exit {
+        List<File> logList = Lib.getLogFiles(logDirectory);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date paramDate;
+        ExecutorService threadPool = Executors.newCachedThreadPool();
+        try {
+            paramDate = dateFormat.parse(date);
+            for (File log : logList) {
+                Date logDate = dateFormat.parse(log.getName().substring(0, log.getName().indexOf('.')));
+                if(logDate.compareTo(paramDate) > 0) {  //判断日志文件的日期是否小于等于给定日期
+                    continue;
+                }
+                threadPool.submit(() -> {
+                    BufferedReader reader = null;
+                    try {
+                        reader = new BufferedReader(new InputStreamReader(new FileInputStream(log), StandardCharsets.UTF_8));
+                        String dataRow;
+                        while ((dataRow = reader.readLine()) != null) {
+                            if (dataRow.startsWith("//")) { //忽略注释行
+                                continue;
                             }
-                            else {
-                                i = j - 1;
-                                break;
+                            String[] data = dataRow.split(" ");  //分割数据行
+                            if (!outProvince.contains(data[0])) {
+                                outProvince.add(data[0]);
+                            }
+                            synchronized (statistics) {   //给数据加上锁
+                                List<Integer> provinceData = statistics.get(data[0]);   //当前行的省份数据
+                                List<Integer> destProvince;   //用于处理流入
+                                switch (data[1]) {
+                                    case INCREMENT:  //处理新增
+                                        if (data[2].equals(INFECTION_PATIENT)) {  //新增感染
+                                            increaseInf(provinceData, Lib.parseData(data[3]));
+                                        } else {                                  //新增疑似
+                                            increaseSus(provinceData, Lib.parseData(data[3]));
+                                        }
+                                        break;
+                                    case EXCLUDE:  //处理排除疑似
+                                        excludeSus(provinceData, Lib.parseData(data[3]));
+                                        break;
+                                    case CURE:  //处理治愈
+                                        cure(provinceData, Lib.parseData(data[2]));
+                                        break;
+                                    case DEAD:  //处理死亡
+                                        dead(provinceData, Lib.parseData(data[2]));
+                                        break;
+                                    case INFECTION_PATIENT:  //处理感染患者流入
+                                        destProvince = statistics.get(data[3]);
+                                        infInflow(provinceData, destProvince, Lib.parseData(data[4]));
+                                        break;
+                                    case SUSPECTED_PATIENT:
+                                        if (data[2].equals(INFLOW)) {   //处理疑似患者流入
+                                            destProvince = statistics.get(data[3]);
+                                            susInflow(provinceData, destProvince, Lib.parseData(data[4]));
+                                        } else if (data[2].equals(DIAGNOSE)) {  //处理确诊
+                                            diagnose(provinceData, Lib.parseData(data[3]));
+                                        }
+                                        break;
+                                }
                             }
                         }
-                        break;
-                    case "-province":
-                        for(int j = i + 1; j < args.length; j++) {
-                            if (!args[j].substring(0, 1).equals("-")) {
-                                if (Arrays.asList(provincesRefered).contains(args[j]))
-                                    cmds.province.add(args[j]);
-                                else
-                                    System.out.println(args[j] + " 不在查询范围内，将查询剩余的省份。");
-                                i = j;
-                            }
-                            else {
-                                i = j - 1;
-                                break;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if(reader != null) {
+                            try {
+                                reader.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
                         }
-                        // System.out.println(cmds.province.size());
+                    }
+                });
+            }
+            threadPool.shutdown();
+            while (!threadPool.isTerminated());   //等待所有线程执行完
+        } catch (Exception e) {
+            throw new Lib.Exit(e.getMessage());
+        }
+    }
+
+    /**
+     *执行-type命令参数
+     * @param types -type命令参数后面的具体参数值数组
+     */
+    private void doType(List<String> types) throws Lib.Exit {
+        Map<String,Integer> newOutType = new LinkedHashMap<>();
+        for (String key : statistics.keySet()) {
+            List<Integer> oldData = statistics.get(key);
+            List<Integer> newData = new ArrayList<>();
+            int index = 0;
+            for(String type : types) {
+                switch (type) {
+                    case "ip":
+                        newData.add(oldData.get(0));
+                        newOutType.put(INFECTION_PATIENT,index++);
+                        break;
+                    case "sp":
+                        newData.add(oldData.get(1));
+                        newOutType.put(SUSPECTED_PATIENT,index++);
+                        break;
+                    case "cure":
+                        newData.add(oldData.get(2));
+                        newOutType.put(CURE,index++);
+                        break;
+                    case "dead":
+                        newData.add(oldData.get(3));
+                        newOutType.put(DEAD,index++);
                         break;
                     default:
-                        System.out.println("\n存在错误的命令行参数！");
-                        System.exit(0);
+                        throw new Lib.Exit("\"-type\" 无法解析的类型 " + type);
                 }
             }
-            if (cmds.log.equals("")) {
-                System.out.println("未指定-log参数！");
-                System.exit(0);
-            }
-            if (cmds.out.equals("")) {
-                System.out.println("未指定-out参数！");
-                System.exit(0);
-            }
+            outType = newOutType;
+            statistics.put(key,newData);
         }
-        else {
-            System.out.println("不存在 " + args[0] + " 指令！");
-            System.exit(0);
-        }
-
-        FileUtil fUtil = new FileUtil();
-        String str;     //存放读取的每一行
-        //FileUtil util = new FileUtil();
-        BufferedReader bReader;
-        String dir = "";
-        if (!cmds.log.equals(""))
-            dir = cmds.log;
-        //bReader = new BufferedReader(new FileReader(cmds.log));
-        //bReader = new BufferedReader(new FileReader("c:\\Users\\13067\\Desktop\\test\\test\\2020-01-22.log.txt"));
-        String[] files = fUtil.readLog(cmds);
-        // for (String string : files) {
-        //     System.out.println(string);
-        // }
-
-        for (String name : files) {
-            //BufferedWriter bWriter = new BufferedWriter(new FileWriter("output.txt"));
-            String path = dir + "\\" + name;
-
-            bReader = new BufferedReader(new FileReader(path));
-            while ((str = bReader.readLine()) != null && !str.contains("//")) {
-
-                String[] splitInfo = str.split(" ");
-                int index;      //存放省列表下标
-                if (provincesList.isEmpty()) {
-                    provincesList.add(new Province("全国"));
-                }
-                if ((index = fUtil.isProvinceExit(splitInfo[0], provincesList)) == -1) {
-                    provincesList.add(new Province(splitInfo[0]));
-                    index = provincesList.size() - 1;
-                }
-                for (int i = 1; i < splitInfo.length; i++) {
-                    if (splitInfo[i].equals("新增")) {
-                        if (splitInfo[i+1].equals("感染患者")) {
-                            fUtil.addNum("infect", splitInfo[i+2], provincesList, index);
-                            break;
-                        }
-                        else if (splitInfo[i+1].equals("疑似患者")) {
-                            fUtil.addNum("suspect", splitInfo[i+2], provincesList, index);
-                            break;
-                        }
-                    }
-                    else if (splitInfo[i].equals("治愈")) {
-                        fUtil.addNum("cure", splitInfo[i+1], provincesList, index);
-                        fUtil.subNum("infect", splitInfo[i+1], provincesList, index);
-                        break;
-                    }
-                    else if (splitInfo[i].equals("死亡")){
-                        fUtil.addNum("dead", splitInfo[i+1], provincesList, index);
-                        fUtil.subNum("infect", splitInfo[i+1], provincesList, index);
-                        break;
-                    }
-                    else if (splitInfo[i].equals("排除")) {
-                        fUtil.subNum("suspect", splitInfo[i+2], provincesList, index);
-                    }
-                    else if (splitInfo[i].equals("确诊感染")){
-                        fUtil.subNum("suspect", splitInfo[i+1], provincesList, index);
-                        fUtil.addNum("infect", splitInfo[i+1], provincesList, index);
-                    }
-                    else if (splitInfo[i].equals("流入")) {
-                        if (splitInfo[i-1].equals("感染患者")) {
-                            fUtil.subNum("infect", splitInfo[i+2], provincesList, index);
-                            if ((index = fUtil.isProvinceExit(splitInfo[i+1], provincesList)) == -1) {
-                                provincesList.add(new Province(splitInfo[i+1]));
-                                index = provincesList.size() - 1;
-                            }
-                            fUtil.addNum("infect", splitInfo[i+2], provincesList, index);
-                        }
-                        else if (splitInfo[i-1].equals("疑似患者")) {
-                            fUtil.subNum("suspect", splitInfo[i+2], provincesList, index);
-                            if ((index = fUtil.isProvinceExit(splitInfo[i+1], provincesList)) == -1) {
-                                provincesList.add(new Province(splitInfo[i+1]));
-                                index = provincesList.size() - 1;
-                            }
-                            fUtil.addNum("suspect", splitInfo[i+2], provincesList, index);
-                        }
-                    }
-                }
-            }
-            bReader.close();
-        }
-        for (String p1 : cmds.province) {
-            boolean flag = false;
-            for (Province p2 : provincesList) {
-                if (p1.equals(p2.getName())) {
-                    flag = true;
-                    break;
-                }
-            }
-            if (!flag) {
-                provincesList.add(new Province(p1));
-            }
-        }
-
-        //int n = provincesList.size();
-        fUtil.outPut(provincesList, cmds);
-        // for (Province p : provincesList) {
-        //     String message = p.toString();
-        //     bWriter.write(message);
-        //     bWriter.newLine();
-        // }
-
-        // bWriter.close();
-
     }
 
     /**
-     * FileUtil
+     *执行-province命令参数
+     * @param provinces -province命令参数后面的具体参数值数组
      */
-    public static class FileUtil {
-
-        public int isProvinceExit(String name, ArrayList<Province> list) {
-            if (list.isEmpty()) {
-                return -1;
-            }
-            else {
-                for (Province province : list) {
-                    if (province.getName().equals(name)) {
-                        return list.indexOf(province);
-                    }
-                }
-            }
-            return -1;
-        }
-
-
-        public void outPut(ArrayList<Province> list,Commands cmds) throws Exception {
-
-            BufferedWriter bWriter = new BufferedWriter(new FileWriter(cmds.out));
-
-            //将"全国"数据复制到national中，从列表中删除并将列表排序后，再插入到列表第一的位置
-            Province national = list.get(0);
-            list.remove(0);
-            list.sort(Province::compareByName);
-            list.add(0, national);
-            //遍历列表 输出
-            for (Province p : list) {
-                String message = p.toString(cmds);
-                if (!message.equals("")) {
-                    bWriter.write(message);
-                    bWriter.newLine();
-                }
-            }
-            bWriter.write("// 该文档并非真实数据，仅供测试使用");
-
-            bWriter.close();
-        }
-
-        //提取字符串中的数字
-        public String saveDigit(String a) {
-            String regEx="[^0-9]";
-            Pattern p = Pattern.compile(regEx);
-            Matcher m = p.matcher(a);
-            return m.replaceAll("");
-        }
-
-        public void addNum(String type, String number, ArrayList<Province> list, int index) {
-            int num = Integer.parseInt(saveDigit(number));
-            if (type.equals("infect")) {
-                list.get(index).addNumInfect(num);
-                list.get(0).addNumInfect(num);
-            }
-            else if (type.equals("suspect")) {
-                list.get(index).addNumSuspect(num);
-                list.get(0).addNumSuspect(num);
-            }
-            else if (type.equals("cure")) {
-                list.get(index).addNumCure(num);
-                list.get(0).addNumCure(num);
-            }
-            else {
-                list.get(index).addNumDead(num);
-                list.get(0).addNumDead(num);
-            }
-        }
-
-        public void subNum(String type, String number, ArrayList<Province> list, int index) {
-            int num = Integer.parseInt(saveDigit(number));
-            if (type.equals("infect")) {
-                list.get(index).subNumInfect(num);
-                list.get(0).subNumInfect(num);
-            }
-            else if (type.equals("suspect")) {
-                list.get(index).subNumSuspect(num);
-                list.get(0).subNumSuspect(num);
-            }
-
-        }
-
-        public String[] readLog(Commands cmds) throws Exception {
-
-            File file = new File(cmds.log);
-            //BufferedReader bReader = new BufferedReader(new FileReader("fileName"))
-            FilenameFilter filter = new FilenameFilter(){
-
-                @Override
-                public boolean accept(File dir, String name) {
-                    File currFile = new File(dir, name);
-
-                    if (currFile.isFile() && name.endsWith(".log.txt")) {
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                }
-            };
-            if (file.exists()) {
-                //ArrayList <String> lists = new ArrayList<>();
-
-                String[] filter_lists = file.list(filter);
-                int index;
-                if (!cmds.date.equals("")) {
-                    if (!Pattern.matches("[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]", cmds.date)) {
-                        System.out.println("日期格式错误！");
-                        System.exit(-1);
-                    }
-                    for (int i = 0; i < filter_lists.length; i++) {
-
-                        if (filter_lists[i].substring(0, 10).equals(cmds.date)) {
-                            index = i;
-                            String[] lists = new String[index + 1];
-                            System.arraycopy(filter_lists, 0, lists, 0, index + 1);
-                            return lists;
-                        }
-                        else if (filter_lists[i].substring(0, 10).compareTo(cmds.date) >= 1) {
-                            index = i;
-                            String[] lists = new String[index];
-                            System.arraycopy(filter_lists, 0, lists, 0, index);
-                            return lists;
-                        }
-                    }
-                    System.out.println("未找到 " + cmds.date + " 的日志文件！");
-                    System.exit(-1);
-                }
-                return filter_lists;
-
-            }
-            else {
-                System.out.println("-log文件路径不存在！");
-                System.exit(0);
-            }
-            return null;
-        }
-
-
+    private void doProvince(List<String> provinces) {
+        outProvince = provinces;
     }
 
     /**
-     * province
+     *新增确诊患者的计算
+     * @param provinceData 当前省份疫情
+     * @param count 新增数量
      */
-    public static class Province {
-
-        private String name;
-        private int num_infect;
-        private int num_cure;
-        private int num_dead;
-        private int num_suspect;
-
-        public Province(String name) {
-            this.name = name;
-            this.num_cure = 0;
-            this.num_dead = 0;
-            this.num_infect = 0;
-            this.num_suspect = 0;
-        }
-        public Province(String name, int num_cure, int num_dead, int num_infect, int num_suspect) {
-            this.name = name;
-            this.num_cure = num_cure;
-            this.num_dead = num_dead;
-            this.num_infect = num_infect;
-            this.num_suspect = num_suspect;
-        }
-
-        public String toString(Commands cmds) {
-            FileUtil fUtil = new FileUtil();
-            String message = "";
-            if (cmds.province.isEmpty()) {
-                message = this.name;
-                if (cmds.type.isEmpty()) {
-                    message += " 感染患者 " + this.num_infect + "人 疑似患者 " + this.num_suspect
-                            + "人 治愈 " + this.num_cure + "人 死亡 " + this.num_dead + "人";
-                }
-                else {
-                    for (String s : cmds.type) {
-                        if (s.equals("ip")) {
-                            message += " 感染患者 " + this.num_infect + "人 ";
-                        }
-                        else if (s.equals("sp")) {
-                            message += " 疑似患者 " + this.num_suspect + "人 ";
-                        }
-                        else if (s.equals("cure")) {
-                            message += " 治愈 " + this.num_cure + "人 ";
-                        }
-                        else {
-                            message += " 死亡 " + this.num_dead + "人 ";
-                        }
-                    }
-                    String a = fUtil.saveDigit(message);
-                    int b = Integer.valueOf(a);
-                    if (b == 0) {
-                        message = "";
-                    }
-                }
-            }
-            else {
-                if (cmds.type.isEmpty()) {
-                    for (String p : cmds.province) {
-                        if (this.name.equals(p)) {
-                            //message = this.name;
-                            message = this.name + " 感染患者 " + this.num_infect + "人 疑似患者 " + this.num_suspect
-                                    + "人 治愈 " + this.num_cure + "人 死亡 " + this.num_dead + "人";
-                            break;
-                        }
-                    }
-                }
-                else {
-                    for (String p : cmds.province) {
-                        if (this.name.equals(p)) {
-                            message = this.name;
-                            for (String s : cmds.type) {
-                                if (s.equals("ip")) {
-                                    message += " 感染患者 " + this.num_infect + "人 ";
-                                }
-                                else if (s.equals("sp")) {
-                                    message += " 疑似患者 " + this.num_suspect + "人 ";
-                                }
-                                else if (s.equals("cure")) {
-                                    message += " 治愈 " + this.num_cure + "人 ";
-                                }
-                                else {
-                                    message += " 死亡 " + this.num_dead + "人 ";
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-            return message;
-        }
-
-        //按拼音排序
-        public int compareByName(Province p) {
-            Collator c = Collator.getInstance(Locale.CHINA);
-            int numForName = c.compare(this.getName(), p.getName());
-            return numForName;
-        }
-
-        public void setName (String name) {
-            this.name = name;
-        }
-        public void addNumInfect (int num) {
-            this.num_infect += num;
-        }
-        public void addNumSuspect (int num) {
-            this.num_suspect += num;
-        }
-        public void addNumCure (int num) {
-            this.num_cure += num;
-        }
-        public void addNumDead (int num) {
-            this.num_dead += num;
-        }
-        public void subNumInfect (int num) {
-            this.num_infect -= num;
-        }
-        public void subNumSuspect (int num) {
-            this.num_suspect -= num;
-        }
-        public void subNumCure (int num) {
-            this.num_cure -= num;
-        }
-        public void subNumDead (int num) {
-            this.num_dead -= num;
-        }
-        public void setNumInfect (int num) {
-            this.num_infect = num;
-        }
-        public void setNumSuspect (int num) {
-            this.num_suspect = num;
-        }
-        public void setNumCure (int num) {
-            this.num_cure = num;
-        }
-        public void setNumDead (int num) {
-            this.num_dead = num;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-        public int getNumInfect() {
-            return this.num_infect;
-        }
-        public int getNumSuspect() {
-            return this.num_suspect;
-        }
-        public int getNumCure() {
-            return this.num_cure;
-        }
-        public int getNumDead() {
-            return this.num_dead;
-        }
-
-
-
-
+    private void increaseInf(List<Integer> provinceData,int count) {
+        provinceData.set(0,provinceData.get(0) + count);
     }
+
     /**
-     * Commands
+     *新增疑似患者的计算
+     * @param provinceData 当前省份疫情
+     * @param count 新增人数
      */
-    public static class Commands {
-
-        String log = "";
-        String out = "";
-        String date = "";
-        ArrayList<String> type = new ArrayList<>();
-        ArrayList<String> province = new ArrayList<>();
-
-
+    private void increaseSus(List<Integer> provinceData,int count) {
+        provinceData.set(1,provinceData.get(1) + count);
     }
 
+    /**
+     *排除疑似患者的计算
+     * @param provinceData 当前省份疫情
+     * @param count 排除人数
+     */
+    private void excludeSus(List<Integer> provinceData,int count) {
+        provinceData.set(1,provinceData.get(1) - count);
+    }
+
+    /**
+     *新增治愈病例的计算
+     * @param provinceData 当前省份疫情
+     * @param count 治愈人数
+     */
+    private void cure(List<Integer> provinceData,int count) {
+        provinceData.set(2,provinceData.get(2) + count);
+        provinceData.set(0,provinceData.get(0) - count);
+    }
+
+    /**
+     *新增死亡病例的计算
+     * @param provinceData 当前省份疫情
+     * @param count 死亡人数
+     */
+    private void dead(List<Integer> provinceData,int count) {
+        provinceData.set(3,provinceData.get(3) + count);
+        provinceData.set(0,provinceData.get(0) - count);
+    }
+
+    /**
+     * 流入感染患者的计算
+     * @param sourceProvince 感染者从那个省（市、自治区）流出
+     * @param destProvince 感染者流入哪个省（市、自治区）
+     * @param count 人数
+     */
+    private void infInflow(List<Integer> sourceProvince,List<Integer> destProvince,int count) {
+        sourceProvince.set(0,sourceProvince.get(0) - count);
+        destProvince.set(0,destProvince.get(0) + count);
+    }
+
+    /**
+     * 流入疑似患者的计算
+     * @param sourceProvince 感染者从那个省（市、自治区）流出
+     * @param destProvince 感染者流入哪个省（市、自治区）
+     * @param count 人数
+     */
+    private void susInflow(List<Integer> sourceProvince,List<Integer> destProvince,int count) {
+        sourceProvince.set(1,sourceProvince.get(1) - count);
+        destProvince.set(1,destProvince.get(1) + count);
+    }
+
+    /**
+     *确诊病例的计算
+     * @param provinceData 当前省份疫情
+     * @param count 确诊人数
+     */
+    private void diagnose(List<Integer> provinceData,int count) {
+        provinceData.set(0,provinceData.get(0) + count);
+        provinceData.set(1,provinceData.get(1) -count);
+    }
+
+    /**
+     * 计算全国数据
+     */
+    private void countNational() {
+        List<Integer> national = statistics.get("全国");
+        for (List<Integer> data : statistics.values()) {
+            for (int i = 0 ; i < national.size() ; i ++){
+                national.set(i,national.get(i) + data.get(i));
+            }
+        }
+    }
 }

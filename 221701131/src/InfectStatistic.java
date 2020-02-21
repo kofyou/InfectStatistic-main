@@ -474,7 +474,7 @@ class DateProcess{
 		//对行的信息进行检查筛选有用信息
 		//1.对关键词的切割
 		String[] list;
-		String splitChar=" ";
+		String splitChar="\\s+";
 		if(line.startsWith("//")) {
 			//如果为仅供参考 则无需进行处理
 			return ;
@@ -560,7 +560,7 @@ class DateProcess{
 		//1.拆分字符串
 		//2.识别语句类型进行统计
 		String[] list;
-		String splitChar=" ";
+		String splitChar="\\s+";
 		if(line.startsWith("//")) {
 			//如果为仅供参考 则无需进行处理
 			return ;

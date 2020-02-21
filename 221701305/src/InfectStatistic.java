@@ -106,22 +106,6 @@ class InfectStatistic {
 
 	
 	
-	//获取省份名称的拼音
-	/*public String getProvinceName(String s) {
-		//按照拼音顺序排好的全国省份（除去香港、澳门和台湾省）
-		String[][] convert = {{"安徽","AnHui"},{"北京","BeiJing"},{"重庆","ChongQing"},{"福建","FuJian"},{"甘肃","GanSu"},
-				{"广东","Guangdong"},{"广西",""},{"贵州","GuiZhou"},{"海南","HaiNan"},{"河北","HeBei"},{"河南","HeNan"},{"黑龙江",
-				"HeiLongJiang"},{"湖北","HuBei"},{"湖南","HuNan"},{"吉林","JiLin"},{"江苏","JiangSu"},{"江西","JiangXi"},{"辽宁","LiaoNing"},
-				{"内蒙古","NeiMengGu"},{"宁夏","NingXia"},{"青海","QingHai"},{"山东","ShanDong"},{"山西","ShanXi"},{"陕西","ShanXi"},
-				{"上海","ShangHai"},{"四川","SiChuang"},{"天津","TianJin"},{"西藏","XiZang"},{"新疆","XinJiang"},{"云南","YunNan"},
-				{"浙江","ZheJiang"}
-		};
-		for(int i=0;i<31;i++) {
-			if(convert[i][0]==s)
-				return convert[i][1];
-		}
-		return "error";
-	}*/
 	
     //处理数据
     public void dealStatistic(String filePath,Hashtable<String,Province> hashtable) throws IOException{
@@ -188,22 +172,18 @@ class InfectStatistic {
             		if(hashtable.containsKey(splitString[3])==false) {//如果province中没有这个省份则新建
             			String proName;
             			if(splitString[1].equals("感染患者")) {
-            				
-                			//proName=getProvinceName(splitString[3]);
                 			//被流入的省份ip直接初始为化流入值
                 			hashtable.put(splitString[3],new Province(splitString[3],getNumber(splitString[4]),"ip"));
                 			//流出ip的省份减
                 			hashtable.get(splitString[0]).deleteNum(getNumber(splitString[4]), "ip");
-                			//System.out.println("*****新建省"+proName);
+                			
                 			
                 		}
             			else if(splitString[1].equals("疑似患者")){
-                    		//proName=getProvinceName(splitString[3]);
                         	//被流入的省份sp直接初始为化流入值
                         	hashtable.put(splitString[3], new Province(splitString[3],getNumber(splitString[4]),"sp"));
                         	//流出sp省份减
                         	hashtable.get(splitString[0]).deleteNum(getNumber(splitString[4]), "sp");
-                        	//System.out.println("*****新建省"+proName);
                         					
                         }
                 	}
@@ -212,13 +192,13 @@ class InfectStatistic {
                 			
                 			hashtable.get(splitString[3]).addNum(getNumber(splitString[4]),"ip");
                				hashtable.get(splitString[0]).deleteNum(getNumber(splitString[4]), "ip");
-               				//System.out.println("******ip"+splitString[0]+hashtable.get(splitString[3]).getIp());
+               				
                			}
                			else {
                				
                				hashtable.get(splitString[3]).addNum(getNumber(splitString[4]),"sp");
                				hashtable.get(splitString[0]).deleteNum(getNumber(splitString[4]), "sp");
-               				//System.out.println("******ip"+splitString[0]+hashtable.get(splitString[3]).getSp());
+               				
                			}
                 			
                		}
@@ -228,12 +208,12 @@ class InfectStatistic {
             	    if(splitString[1].equals("死亡")) {
             		    hashtable.get(splitString[0]).deleteNum(getNumber(splitString[2]),"ip");
             		    hashtable.get(splitString[0]).addNum(getNumber(splitString[2]),"dead");
-            		    //System.out.println("******ip"+splitString[0]+hashtable.get(splitString[0]).getIp());
+            		    
            			}
            			else if(splitString[1].equals("治愈")) {
            				hashtable.get(splitString[0]).deleteNum(getNumber(splitString[2]),"ip");	
            				hashtable.get(splitString[0]).addNum(getNumber(splitString[2]),"cure");
-           				//System.out.println("******ip"+splitString[0]+hashtable.get(splitString[0]).getIp());
+           				
            			}
            	   }
               
@@ -253,8 +233,9 @@ class InfectStatistic {
     //写文件
     public void writeFile(String path,Hashtable<String,Province> proHash,Hashtable<Integer,String> typeHash,String[] province) throws IOException {
     	
-    	String[] sortedPro = {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北","湖南","吉林",
-    			"江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆","云南","浙江"};
+    	String[] sortedPro = {"全国","安徽","北京","重庆","福建","甘肃","广东","广西","贵州","海南","河北","河南","黑龙江","湖北",
+    			"湖南","吉林","江苏","江西","辽宁","内蒙古","宁夏","青海","山东","山西","陕西","上海","四川","天津","西藏","新疆",
+    			"云南","浙江"};
     	
     	String content=null;
 		FileWriter fileWriter;
@@ -271,7 +252,7 @@ class InfectStatistic {
 				for(int i=0;i<32;i++) {
 					if(proHash.containsKey(sortedPro[i])) {			
 						String keys=sortedPro[i];
-						if(typeHash!=null) {
+						if(typeHash!=null) {//指定type
 							content=keys;
 							for(int k=0;k<typeHash.size();k++) {
 					            if(typeHash.containsKey(k)) {
@@ -294,15 +275,17 @@ class InfectStatistic {
 				            }
 							content+="\n";
 						}
-						else
+						else//不指定type
+						{
+							
 							content=proHash.get(keys).getName()+" 感染患者"+proHash.get(keys).getIp()+"人 疑似患者"+proHash.get(keys).getSp()+"人 治愈"+proHash.get(keys).getCure()+"人 死亡"+proHash.get(keys).getDead()+"人 \n";
-						
+						}
 						
 						bw.write(content);
 						
 					}
 				}
-				bw.write("// 该文档并非真实数据，仅供测试使用\n");
+				bw.write("// 该文档并非真实数据，仅供测试使用\n\n");
 				bw.close();
 		    } 
 			catch (IOException e) {
@@ -377,7 +360,7 @@ class InfectStatistic {
 							content=sortedPro[i]+" 感染患者0人 疑似患者0人 治愈0人 死亡0人\n";
 						fileWriter = new FileWriter(file.getAbsoluteFile(),true);
 						bw = new BufferedWriter(fileWriter);
-						content+="// 该文档并非真实数据，仅供测试使用\n";
+						//content+="// 该文档并非真实数据，仅供测试使用\n\n";
 						bw.write(content);	
 						bw.close();
 					}
@@ -392,15 +375,15 @@ class InfectStatistic {
     //统计全国数据
     public void Sum(Hashtable<String,Province> hashtable) {
     	
-    	Province nation = new Province("全国");
-    	Set set = hashtable.keySet();
-        Iterator iterator = set.iterator();
+    	Province nation=new Province("全国");
+    	Set set=hashtable.keySet();
+        Iterator iterator=set.iterator();
         while(iterator.hasNext()) {
-            Object keys = iterator.next();
-            nation.ip += hashtable.get(keys).getIp();
-            nation.sp += hashtable.get(keys).getSp();
-            nation.cure += hashtable.get(keys).getCure();
-            nation.dead += hashtable.get(keys).getDead();
+            Object keys=iterator.next();
+            nation.ip+=hashtable.get(keys).getIp();
+            nation.sp+=hashtable.get(keys).getSp();
+            nation.cure+=hashtable.get(keys).getCure();
+            nation.dead+=hashtable.get(keys).getDead();
         }
     	hashtable.put("全国",nation);
     	
@@ -506,16 +489,18 @@ class InfectStatistic {
         else
         	typeHash=null;
        
-        writeFile("F:/output.txt",proHash,typeHash,province);
+        //处理-out
+        int num=cmdHash.get("-out")+1;
+        writeFile(test[num],proHash,typeHash,province);
     }
     
     public static void main(String[] args) throws IOException {
         
         InfectStatistic in = new InfectStatistic();
         //测试
-        String[] test= {"list","-date","2020-01-27","-log","F:\\InfectStatistic-main\\example\\log\\","-out","D:/output.txt","-type","sp","ip","dead","cure"};
+       // String[] test= {"list","-date","2020-01-22","-log","F:\\InfectStatistic-main\\example\\log\\","-out","F:\\output.txt"};
         Hashtable<String,Province> proHash = new Hashtable<String, Province>();//以省份汉字作为Key 以省类作为value
-        in.dealCmd(test, proHash);
+        in.dealCmd(args, proHash);
   
     }
     

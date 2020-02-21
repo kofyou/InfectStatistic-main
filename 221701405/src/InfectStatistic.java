@@ -47,16 +47,6 @@ class InfectStatistic {
     		province_value = new ArrayList<String>();
     	}
     	
-        
-    	public void test() {
-    		System.out.println("command:" + list );
-			System.out.println("arguments.log:" + log + "," + log_value);	
-			System.out.println("arguments.date:" + date + "," + date_value);	
-			System.out.println("arguments.out:" + out + "," + out_value);
-			System.out.println("arguments.type:" + type + "," + type_value);
-			System.out.println("arguments.province:" + province + "," + province_value);
-    	}
-    	
     	//判断命令是否为list
     	public boolean isList() {
 			return list;
@@ -160,8 +150,7 @@ class InfectStatistic {
 					break;		
 				default:
 					break;
-				}
-				
+				}			
 			}
 			return command;
 		}
@@ -170,10 +159,6 @@ class InfectStatistic {
 		public void commandRun(ArrayList<String> list) throws IOException {
 	 	    Command cmd = new Command();
 			cmd = CommandAnalysis.analysis(list);
-			
-			//测试用
-			cmd.test();
-			
 			FileControl file = new FileControl();
 			if(cmd.log_value.equals("") || cmd.out_value.equals("")) {
      		}else {
@@ -575,28 +560,7 @@ class InfectStatistic {
         for(String i:args) {
         	commandline.add(i);//获取输入的命令
         }
-        
-        /*测试用
-        ArrayList<String> commandline_test = new ArrayList<String>();
-        commandline_test.add("list");
-        commandline_test.add("-log");
-        commandline_test.add("C:\\Users\\RY\\Documents\\GitHub\\InfectStatistic-main\\221701405\\log");
-        commandline_test.add("-out");
-        commandline_test.add("C:\\Users\\RY\\Documents\\GitHub\\InfectStatistic-main\\221701405\\result\\test.txt");
-        commandline_test.add("-type");
-        commandline_test.add("ip");
-        commandline_test.add("sp");
-        commandline_test.add("dead");
-        commandline_test.add("-province");
-        commandline_test.add("全国");
-        commandline_test.add("福建");
-        commandline_test.add("-date");
-        commandline_test.add("2020-01-27"); 
-        */
-        
         CommandAnalysis cmd_analysis=new CommandAnalysis();//实例化命令行解析对象
-        
-        //cmd_analysis.commandRun(commandline_test);
         cmd_analysis.commandRun(commandline);//执行命令    
     }
 }

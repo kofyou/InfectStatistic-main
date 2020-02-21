@@ -13,13 +13,13 @@
 &emsp;&emsp;最近新型冠状病毒疫情严重，全国人民都感到担忧，迫切希望能够及时了解到病毒最新的情况，要求开发一个疫情统计程序。该程序实现读取日志文件并输出要求输出的省份的疑似患者人数,感染患者人数,治愈人数,死亡人数。  
 &emsp;&emsp;同时，希望武汉小朋友早日克服困难，青山一道同风雨，明月何曾是两乡。武汉加油！  
 ### 2. 如何运行
-&emsp;&emsp;下载并用cmd打开(cd)到221701117/src文件下，根据用户的需求输入代码。例如，  
+&emsp;&emsp;下载并用cmd打开(cd)到221701117/src文件下，根据用户的需求输入代码。例如，注意要先编译，并且-log文件目录后面必须有‘\’：  
 ```
 第一步 javac -encoding  UTF-8 InfectStatistic.java  
 
-第二步 java InfectStatistic list -log G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\ -out G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt -date 2020-02-22 -type ip sp dead -province 福建 全国 湖南
+第二步 java InfectStatistic list -log G:\java\eclipse\eclipse-workspace\hw2_2\src\ -out G:\java\eclipse\eclipse-workspace\hw2_2\src\output.txt -date 2020-02-22 -type ip sp dead -province 福建 全国 湖南
 ```
-&emsp;&emsp;将在相应目录下生成output。txt输出结果。
+&emsp;&emsp;将在相应目录下生成output.txt输出结果。
 <div><img width="100%" src="https://images.cnblogs.com/cnblogs_com/yjchen/1645851/o_200218091302%E6%96%87%E4%BB%B6.png"/></div>  
 
 ```
@@ -36,4 +36,4 @@ list命令 支持以下命令行参数：
 * -type 可选择[ip： infection patients 感染患者，sp： suspected patients 疑似患者，cure：治愈 ，dead：死亡患者]，使用缩写选择，如 -type ip 表示只列出感染患者的情况，-type sp cure则会按顺序【sp, cure】列出疑似患者和治愈患者的情况，不指定该项默认会列出所有情况。
 * -province 指定列出的省，如-province 福建，则只列出福建，-province 全国 浙江则只会列出全国、浙江
 
-注：java InfectStatistic表示执行主类InfectStatistic，list为命令，-date代表该命令附带的参数，-date后边跟着具体的参数值，如2020-01-22。-type 的多个参数值会用空格分离，每个命令参数都在上方给出了描述，每个命令都会携带一到多个命令参数
+注：java InfectStatistic表示执行主类InfectStatistic，list为命令，-date代表该命令附带的参数，-date后边跟着具体的参数值，如2020-01-22。-type 的多个参数值会用空格分离，每个命令参数都在上方给出了描述，每个命令都会携带一到多个命令参数。

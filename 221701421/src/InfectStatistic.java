@@ -15,7 +15,7 @@ import java.util.logging.SimpleFormatter;
  * @since xxx
  */
 
-class InfectStatistic {
+class ProcessParameter {
     private ArrayList<String> provinceList;//省份列表
     private HashMap<String, Integer> typeMap;//查询的类别ip、sp、cure、dead
     private String outputPath;//输出的目标文件路径
@@ -23,9 +23,9 @@ class InfectStatistic {
     private Date date = null;//查询截止日期
 
     public static void main(String[] args) {
-        InfectStatistic infectStatistic = new InfectStatistic();
-        infectStatistic.processParameters(args);
-        infectStatistic.statistic();
+        ProcessParameter processParameter = new ProcessParameter();
+        processParameter.processParameters(args);
+        processParameter.statistic();
     }
 
     public void processParameters(String []args){
@@ -43,13 +43,14 @@ class InfectStatistic {
                 date = simpleDateFormat.parse(dateString);
             } catch (ParseException e) {
                 System.out.println("时间参数非法");
+                System.exit(-1);
             }
         }
 
         int dirIndex = list.indexOf("-log");//日志文件目录
         if (dirIndex < 0) {
             System.out.println("错误：没有传入日志文件路径");
-            return;
+            System.exit(-1);
         }
         String dirPath = args[dirIndex + 1];//日志文件夹路径
         logDir = new File(dirPath);//日志文件夹
@@ -87,7 +88,7 @@ class InfectStatistic {
 
     public void statistic(){
         //开始统计
-        InfectStatisticOperator infectStatistic = new InfectStatisticOperator();
+        InfectStatistic infectStatistic = new InfectStatistic();
         infectStatistic.statistic(logDir, date);
         infectStatistic.output(outputPath, provinceList, typeMap);
     }
@@ -124,7 +125,7 @@ class InfectStatistic {
 }
 
 
-class InfectStatisticOperator {
+class InfectStatistic {
     private String []provinceList = {
         "安徽", "北京", "重庆","福建", "甘肃", "广东", "广西", "贵州", "海南", "河北", "河南",
             "黑龙江", "湖北", "湖南", "吉林", "江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海",
@@ -133,7 +134,7 @@ class InfectStatisticOperator {
     private HashMap<String, ProvanceInfo> provinceMap = new HashMap<>();
     private List<String> fileList = new ArrayList<>();
     private int infectTotalNum,suspectedTotalNum,cureTotalNum,diedTotalNum;
-    public InfectStatisticOperator(){
+    public InfectStatistic(){
         for(String p : provinceList){
             provinceMap.put(p, new ProvanceInfo(p));
         }
@@ -168,21 +169,35 @@ class InfectStatisticOperator {
         return diedTotalNum;
     }
 
-    public int statistic(File dir, Date date){//统计
+    public void processLogDir(File dir){//处理log文件夹的日志文件
+        for (File f : dir.listFiles()) {//将目录下所有的文件名加入fileList列表用于排序
+            fileList.add(f.getName().split("\\.")[0]);
+        }
+        Collections.sort(fileList);
+    }
+
+    public int processDate(Date date){//时间处理
         try {
-            BufferedReader reader = null;
-            String line;
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            for (File f : dir.listFiles()) {//将目录下所有的文件名加入fileList列表用于排序
-                fileList.add(f.getName().split("\\.")[0]);
-            }
-            Collections.sort(fileList);
             String lastDateString = fileList.get(fileList.size() - 1);//最大日期
             Date lastDate = simpleDateFormat.parse(lastDateString);
             if (date != null && date.compareTo(lastDate) > 0) {
                 System.out.println("抱歉，日期超出范围");
                 return -1;
             }
+        }catch (Exception e){
+            return -1;
+        }
+        return 0;
+    }
+
+    public int statistic(File dir, Date date){//统计
+        try {
+            BufferedReader reader = null;
+            String line;
+            processLogDir(dir);
+            processDate(date);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             for (String fileDateString : fileList) {
                 File file = new File(dir.getPath() + "/" + fileDateString + ".log.txt");
                 Date fileDate = simpleDateFormat.parse(fileDateString);//日志日期

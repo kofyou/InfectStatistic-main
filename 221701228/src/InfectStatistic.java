@@ -613,6 +613,10 @@ public class InfectStatistic
 				getParameters(args[i]);
 			}
 		}
+		else 
+		{
+			return ;
+		}
 		if(!Arrays.asList(args).contains("-log")||!Arrays.asList(args).contains("-out"))
 		{
 			System.out.print("缺少参数-log或-out");

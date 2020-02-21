@@ -83,7 +83,9 @@ class InfectStatistic {
 		if (df!=0) {
 			if (date.format(formatter).compareTo(strdate)<0)
 			{
-				System.out.println("日期超出范围");
+				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outpath),"UTF-8"));
+				bw.write("日期超出范围");
+				bw.close();
 				System.exit(0);
 			}
 			logprocess.LogProcess(logpath,strdate);					//日期处理
@@ -170,8 +172,9 @@ class InfectStatistic {
 					bw.write("\n");
 				}
 			}
+	        bw.write("\\\\ 该文档并非真实数据，仅供测试使用");
 	        bw.close();
-    	}
+		}
 	}
     public void LogContentHandle(String lineText) {
     	String match1="(\\S+) 新增 感染患者 (\\d+)人";		//匹配<省> 新增 感染患者 n人
@@ -183,30 +186,28 @@ class InfectStatistic {
     	String match7="(\\S+) 疑似患者 确诊感染 (\\d+)人";	//匹配<省> 疑似患者 确诊感染 n人
     	String match8="(\\S+) 排除 疑似患者 (\\d+)人";		//匹配<省> 排除 疑似患者 n人
     	
-    	boolean isMatch1,isMatch2,isMatch3,isMatch4,isMatch5,isMatch6,isMatch7,isMatch8;
-    	
-    	if (isMatch1=Pattern.matches(match1,lineText)) {
+    	if (Pattern.matches(match1,lineText)) {
     		AddIllness(lineText);
     	}
-    	if (isMatch2=Pattern.matches(match2,lineText)) {
+    	if (Pattern.matches(match2,lineText)) {
     		AddDoubtfulIllness(lineText);
     	}
-    	if (isMatch3=Pattern.matches(match3,lineText)) {
+    	if (Pattern.matches(match3,lineText)) {
     		ChangeIllness(lineText);
     	}
-    	if (isMatch4=Pattern.matches(match4,lineText)) {
+    	if (Pattern.matches(match4,lineText)) {
     		ChangeDoubtfulIllness(lineText);
     	}
-    	if (isMatch5=Pattern.matches(match5,lineText)) {
+    	if (Pattern.matches(match5,lineText)) {
     		DeadIllness(lineText);
     	}
-    	if (isMatch6=Pattern.matches(match6,lineText)) {
+    	if (Pattern.matches(match6,lineText)) {
     		SecureIllness(lineText);
     	}
-    	if (isMatch7=Pattern.matches(match7,lineText)) {
+    	if (Pattern.matches(match7,lineText)) {
     		DiagnoseDoutbfulIllness(lineText);
     	}
-    	if (isMatch8=Pattern.matches(match8,lineText)) {
+    	if (Pattern.matches(match8,lineText)) {
     		RemoveDoutbfulIllness(lineText);
     	}
     }   

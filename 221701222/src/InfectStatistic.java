@@ -81,7 +81,7 @@ class ListOrder implements Order {
     private final String EXCLUDE = "排除";
     private final String INFLOW = "流入";
 
-    /*以下成员变量用于判断是否传入了相应的参数*/
+    /*以下成员变量用于判断是否传入了相应参数*/
     private boolean hasLog;
     private boolean hasOut;
     private boolean hasDate;

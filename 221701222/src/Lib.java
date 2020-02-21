@@ -7,11 +7,11 @@ import java.util.Map;
 
 /**
  * InfectStatistic
- * TODO
- *程序执行过程中需要的一些静态方法
+ * 
+ *程序静态方法
  *
  * @zdc5511116_221701222
- * @version 0.7
+ * @version 1.0
  * @since 2020.02
  */
 public class Lib {
@@ -87,18 +87,7 @@ public class Lib {
         System.out.println("（给定输出省份数据---可选参数 省份可多选 使用简称 如 福建省 输入 福建）");
     }
 
-    /**
-     * 解析日志文档里的数据，比如“10人”解析成整型数字”10“
-     * @param dataNumber 需要解析的数据
-     * @return 解析结果
-     */
-    public static int parseData(String dataNumber) throws Exit {
-        try{
-            return Integer.parseInt(dataNumber.substring(0,dataNumber.length() - 1));
-        }catch (Exception e){
-            throw new Lib.Exit(e.getMessage());
-        }
-    }
+    
 
     /**
      * 从日志文件路径中提取日志文件
@@ -116,6 +105,18 @@ public class Lib {
         return fileList;
     }
 
+     /**
+     * 解析日志文档里的数据，比如“10人”解析成整型数字”10“
+     * @param dataNumber 需要解析的数据
+     * @return 解析结果
+     */
+    public static int parseData(String dataNumber) throws Exit {
+        try{
+            return Integer.parseInt(dataNumber.substring(0,dataNumber.length() - 1));
+        }catch (Exception e){
+            throw new Lib.Exit(e.getMessage());
+        }
+    }
     public static class Exit extends Exception{
 
         public Exit(){

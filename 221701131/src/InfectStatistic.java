@@ -23,17 +23,21 @@ public class InfectStatistic {
 		} catch (MissingCommandException e) {
 			// TODO Auto-generated catch block
 			e.showMessage();
+			return;
 		} catch (ParameterExpection e1) {
 			// TODO: handle exception
 			e1.showMessage();
+			return;
 		} catch(DateFormatException e2) {
 			// TODO: handle exception
 			e2.showMessage();
+			return;
 		}
 		
 		Reader r=new Reader(parOpt.log,parOpt.date);
 		DateProcess dp=new DateProcess(r.getArrayListOfFiles(),
 		parOpt.province,parOpt.out,parOpt.type);
+		return;
 	}
 
 }

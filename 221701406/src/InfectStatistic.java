@@ -128,13 +128,13 @@ class InfectStatistic {
 			System.out.println("-log,-out选项必须存在，请重新输入命令！");
 			System.exit(0);
 		}
-		
-		
+			
 		//test
 		/*System.out.println(date+"\n"+logPath+"\n"+resultPath);
 		for (int k=0; k<type.length; k++) {
 			System.out.println(type[k]);
 		}
+		System.out.println("\n");
 		for (int j=0; j<province.length; j++) {
 			System.out.println(province[j]);
 		}*/
@@ -215,8 +215,9 @@ class InfectStatistic {
         		 readFile(logPath+allFile[j].getName());
         	 }
          }
+         
          //test
-        /* for (int i=0; i<32; i++) {
+         /*for (int i=0; i<PROVINCE_NUM; i++) {
  			for (int j=0; j<4; j++) {
  				System.out.print(allStatistic[i][j]);
  			}	

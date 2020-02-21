@@ -150,7 +150,6 @@ class ProvinceList {
         return new Province("");
     }
 }
-
 // 状态类
 
 class TypeList {
@@ -199,7 +198,6 @@ class Work {
         PL = new ProvinceList(null);
         FileList = new File(list.Log).list();
     }
-
     // 将string转化为date
     public Date strTodate(String str) {
         Date date;
@@ -274,7 +272,6 @@ class Work {
                 String tempStr;
                 while ((tempStr = reader.readLine()) != null) {
                     tempStr.trim();
-
                     if (tempStr.charAt(0) != '/') {
                         String[] lineList = tempStr.split(" ");
                         Deal(lineList);
@@ -305,7 +302,6 @@ class Work {
                 // 省死亡数+ 感染者数-
                 Add(lineList[0], "dead", FindNumber(lineList[2]));
                 Add(lineList[0], "ip", -1 * FindNumber(lineList[2]));
-
             } else if (lineList[1].equals("治愈")) {
                 // 治愈数+ 感染数-
                 Add(lineList[0], "cure", FindNumber(lineList[2]));
@@ -414,5 +410,4 @@ class Work {
             e.printStackTrace();
         }
     }
-
 }

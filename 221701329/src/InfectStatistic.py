@@ -15,6 +15,7 @@ import sys
 import os.path
 from pathlib import Path
 from sys import argv
+import pytest
 
 
 class CmdCenter:

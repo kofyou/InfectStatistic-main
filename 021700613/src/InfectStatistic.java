@@ -463,5 +463,29 @@ class WriteFile{
         bufferedWriter.close();
         outStream.close();
     }
+    /*
+     * 来向文件写信息
+     */
+    public void writeAll(String keyString, BufferedWriter bufferedWriter, PeopleNum PeopleNum) {
+        try {
+            bufferedWriter.write(keyString);
+            if(PeopleNum.infectedNum > 0) {
+                bufferedWriter.write(" 感染患者" + PeopleNum.infectedNum + "人");
+            }
+            if(PeopleNum.potentialNum > 0) {
+                bufferedWriter.write(" 疑似患者" + PeopleNum.potentialNum + "人");
+            }
+            if(PeopleNum.curedNum > 0) {
+                bufferedWriter.write(" 治愈" + PeopleNum.curedNum + "人");
+            }
+            if(PeopleNum.deadNum > 0) {
+                bufferedWriter.write(" 死亡" + PeopleNum.deadNum + "人");
+            }
+            bufferedWriter.write("\n");  
+        } catch (IOException e) {
+            e.printStackTrace();
+        }            
+          
+    }
 
 }

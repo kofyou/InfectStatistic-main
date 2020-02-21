@@ -49,6 +49,18 @@ string UTF8ToGB(const char* str)
 	return result;
 }
 
+//输出注释行
+void output_zhu_shi(fstream& output_file,int argc, char* argv[])
+{
+	int i;
+	output_file << "// 该文档并非真实数据，仅供测试使用" << "\n";   //输出文件尾数据
+	output_file << "// 命令：";
+	for (i = 2; i < argc; i++)
+	{
+		output_file << argv[i] << " ";
+	}
+}
+
 //往map中插入一个省份pair
 void insert_province(string province_name)
 {
@@ -326,7 +338,7 @@ vector<int> get_path_name_date(string file_path)
 }
 
 //根据-date参数选出应该处理的文件
-void pick_log_file(vector<string> file_list)
+void pick_log_file(vector<string> file_list, int argc, char* argv[])
 {
 	int i;
 	bool process_sign = false;   //用于处理没有设置date参数的情况
@@ -348,6 +360,7 @@ void pick_log_file(vector<string> file_list)
 	if (i == 0)
 	{
 		fstream output_file(m_single["-out"], fstream::out);
+		output_zhu_shi(output_file, argc, argv);
 		exit(0);
 	}
 }
@@ -451,12 +464,7 @@ void output_fei_yan_log(int argc,char* argv[])
 		}
 		output_file << "\n";
 	}
-	output_file << "// 该文档并非真实数据，仅供测试使用" << "\n";   //输出文件尾数据
-	output_file << "// 命令：";
-	for (i = 2; i < argc; i++)
-	{
-		output_file << argv[i] << " ";
-	}
+	output_zhu_shi(output_file, argc, argv);
 }
 
 int main(int argc, char* argv[])
@@ -464,11 +472,10 @@ int main(int argc, char* argv[])
 	initialize_type();
 	process_cmd(argc, argv);
 	int i;
-	cout << argc;
 	vector<string> file_list;
 	insert_province("全国");
 	getFiles(m_single["-log"], file_list);
-	pick_log_file(file_list);
+	pick_log_file(file_list,argc,argv);
 	output_fei_yan_log(argc,argv);
 	return 0;
 }

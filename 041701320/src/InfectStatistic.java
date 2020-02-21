@@ -22,7 +22,7 @@ class InfectStatistic{
 	Date dt = new Date(System.currentTimeMillis());
     String strDateFormat = "yyyy-MM-dd";
     SimpleDateFormat sdf = new SimpleDateFormat(strDateFormat);
-    String date=sdf.format(dt);
+    String date = sdf.format(dt);
 	
 	public String[] province = {
 			"全国", "安徽", "澳门" ,"北京", "重庆", "福建","甘肃","广东", "广西",
@@ -32,19 +32,19 @@ class InfectStatistic{
 	/*二维数组
 	 * 一维表示省份
 	 * 二维分别表示{是否需要列出,ip,sp,cure,dead}*/
-	public int[][] situation=new int[35][5];
+	public int[][] situation = new int[35][5];
 	
 	//类型输出顺序，默认ip,sp,cure,dead
-	public int type_order[]= {1,2,3,4};
-	public String[] type= {"感染患者", "疑似患者", "治愈", "死亡"};
+	public int type_order[] = {1,2,3,4};
+	public String[] type = {"感染患者", "疑似患者", "治愈", "死亡"};
 
 	//处理文件
 	class ProcessFile{
 		
 		//读取日志
 		public void readLog() {
-			File file=new File(path_in);
-			File[] listFiles=file.listFiles();
+			File file = new File(path_in);
+			File[] listFiles = file.listFiles();
 			String path;
 			
 			int i=0;
@@ -52,7 +52,7 @@ class InfectStatistic{
 				path=listFiles[i].getName();
 				if(path.compareTo(date)<=0) {
 					try {
-						BufferedReader b=new BufferedReader(new InputStreamReader(
+						BufferedReader b = new BufferedReader(new InputStreamReader(
 								new FileInputStream(new File(path_in+path)), "UTF-8"));
 						String line;
 						while((line=b.readLine())!=null) {
@@ -106,7 +106,7 @@ class InfectStatistic{
 	    		if(str[0].equals(province[i])) { 
 	    			situation[0][1] += n;
 	    			situation[i][1] += n; 
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0] = 1;
 	    			break;
 	    		}
@@ -122,7 +122,7 @@ class InfectStatistic{
 	    		if(str[0].equals(province[i])) { 
 	    			situation[0][2] += n;
 	    			situation[i][2] += n; 
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0] = 1;
 	    			break;
 	    		}
@@ -140,7 +140,7 @@ class InfectStatistic{
 	    			situation[0][1] -= n;
 	    			situation[i][3] += n;
 	    			situation[i][1] -= n;
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0] = 1;
 	    			break;
 	    		}
@@ -156,7 +156,7 @@ class InfectStatistic{
 	    			situation[0][1] -= n;
 	    			situation[i][4] += n;
 	    			situation[i][1] -= n;
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0] = 1;
 	    			break;
 	    		}
@@ -169,12 +169,12 @@ class InfectStatistic{
 	    	for(i = 1; i < province.length; i++) {
 	    		if(str[0].equals(province[i])) {
 	    			situation[i][1] -= n;
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0]=1;
 	    		}
 	    		if(str[3].equals(province[i])) {
 	    			situation[i][1] += n;
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0]=1;
 	    		}
 	    	}		
@@ -186,12 +186,12 @@ class InfectStatistic{
 	    	for(i = 1; i < province.length; i++) {
 	    		if(str[0].equals(province[i])) {
 	    			situation[i][2] -= n;
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0]=1;
 	    		}
 	    		if(str[3].equals(province[i])) {
 	    			situation[i][2] += n;
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0]=1;
 	    		}
 	    	}			
@@ -206,7 +206,7 @@ class InfectStatistic{
 	    			situation[0][1] += n; 
 	    			situation[i][2] -= n; 
 	    			situation[i][1] += n; 
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0]=1;
 	    			break;
 	    		}
@@ -220,7 +220,7 @@ class InfectStatistic{
 	    		if(str[0].equals(province[i])) { 
 	    			situation[0][2] -= n; 	    			
 	    			situation[i][2] -= n; 
-	    			if(situation[0][0]==-1)
+	    			if(situation[0][0] == -1)
 	    				situation[i][0]=1;
 	    			break;
 	    		}
@@ -233,12 +233,12 @@ class InfectStatistic{
 				
 				FileWriter fw=null;
 				fw=new FileWriter(path_out);
-				if(situation[0][0]==-1)
-					situation[0][0]=1;
+				if(situation[0][0] ==-1)
+					situation[0][0] = 1;
 				int i=0;
 				while(i<35) {
 					
-					if(situation[i][0]==1) {
+					if(situation[i][0] == 1) {
 						
 						//System.out.println("a");
 						
@@ -266,9 +266,7 @@ class InfectStatistic{
 			}
 		}
 		
-	}	
-	
-	 
+	}			 
 	
 	
 	//处理命令行
@@ -295,18 +293,18 @@ class InfectStatistic{
 			for(i = 1;i<args.length;i++){
 				//读取-log
 				if(args[i].equals("-log")){
-					path_in=args[++i];
+					path_in = args[++i];
 					
 				} 
 				//读取-out
 				else if(args[i].equals("-out")){ 
-					path_out=args[++i];
+					path_out = args[++i];
 					
 				} 
 				//读取-date
 				else if(args[i].equals("-date")){
-					i=getDate(++i);
-					if(i==-1) {
+					i = getDate(++i);
+					if(i == -1) {
 						System.out.println("日期超出范围!");
 						return false;
 					}
@@ -314,12 +312,12 @@ class InfectStatistic{
 				} 
 				//设置-type输出顺序
 				else if(args[i].equals("-type")){ 
-					i=setType(++i); 
+					i = setType(++i); 
 					
 				} 
 				//读取-province
 				else if(args[i].equals("-province")){ 
-					i=getProvince(++i);
+					i = getProvince(++i);
 	
 				}
 			}
@@ -364,7 +362,7 @@ class InfectStatistic{
 			int k;
 			int flag=i;
 			for(k=0;k<4;k++)
-				type_order[k]=0;
+				type_order[k] = 0;
 			k=1;
 			while(i<args.length) {
 				if(args[i].equals("ip")) {
@@ -390,7 +388,7 @@ class InfectStatistic{
 				else
 					break;
 			}				
-			if(flag==i) {
+			if(flag == i) {
 				type_order[0] = 1;
 				type_order[1] = 2;
 				type_order[2] = 3;
@@ -408,35 +406,33 @@ class InfectStatistic{
 				//System.out.println("province arg");
 				for(j=0;j<35;j++) {
 					if(args[i].equals(province[j])) {
-						situation[j][0]=1;
+						situation[j][0] = 1;
 						i++;
 						break;
 					}
 				}
-				if(j==35)
+				if(j == 35)
 					break;
 				
 			}
-			if(flag==i) {
+			if(flag == i) {
 				//System.out.println("flag==i");
-				situation[0][0]=-1;
+				situation[0][0] = -1;
 				
 			}
 			return --i;
 		}
 		
-	}
-	
-	
+	}		
 	
 
     public static void main(String[] args) {
-    	InfectStatistic infectStatistic=new InfectStatistic();
-    	InfectStatistic.ProcessCmd pCmd=infectStatistic.new ProcessCmd(args);
-    	boolean x=pCmd.ProcessPara();
-    	if(x!=true)
+    	InfectStatistic infectStatistic = new InfectStatistic();
+    	InfectStatistic.ProcessCmd pCmd = infectStatistic.new ProcessCmd(args);
+    	boolean x = pCmd.ProcessPara();
+    	if(x != true)
     		return;
-    	InfectStatistic.ProcessFile pFile=infectStatistic.new ProcessFile();
+    	InfectStatistic.ProcessFile pFile = infectStatistic.new ProcessFile();
     	pFile.readLog();
     	pFile.writeLog();
     }	

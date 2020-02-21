@@ -199,7 +199,20 @@ class RunOrder{
         }
         this.handle = handle;
     }
-    
+    public void Run() {
+        InfectedMap map = new InfectedMap();
+        ReadFile reader = new ReadFile();
+        WriteFile writer = new WriteFile();
+        
+        try {
+            reader.handleFile(handle.inPath, map, hasDate, handle.dateString);
+            map.sortByProvince();
+            writer.writeFile(handle.outPath, map, hasType, handle.typeList, hasProvince, handle.provinceList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 
 class ReadFile{

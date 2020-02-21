@@ -7,12 +7,9 @@ import java.util.*;
 /**
  * Lib
  * TODO
- * Lib
- * Common
- * @author 岳逾先
- * @version 1.1.1
+ * @author Kvc
  * @since 1.8
- */
+**/
 public class Lib {
     public static String LogFileRegex = "2020-[0-1][0-9]-[0-3][0-9].log.txt";
     public static String Ip = "感染患者";
@@ -30,16 +27,14 @@ public class Lib {
             "上海","四川","天津","西藏","新疆","云南","浙江"};
 }
 
-class Common {
-
-    /** new BufferReader br **/
+class Common
+{
     public static BufferedReader NewBufferReader(String path) throws FileNotFoundException
     {
         FileReader fr = new FileReader(path);
         BufferedReader br = new BufferedReader(fr);
         return br;
     }
-    /** new BufferWriter bw **/
     public static BufferedWriter NBWriter(String path) throws IOException
     {
         File file = new File(path);

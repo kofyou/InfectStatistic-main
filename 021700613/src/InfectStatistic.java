@@ -214,9 +214,65 @@ class RunOrder{
     }
 
 }
+/**
+ * 
+ * 文件读取类
+ * 
+ *
+ * @author 021700613
+ * @version 1.0
+ * @since 2020.2.22
+ */
 
 class ReadFile{
+    /*
+     * 对传入log文件夹目录下的所有文件进行处理
+     */
+    public void handleFile(String dirPath, InfectedMap map, boolean hasDate, String dateString) throws IOException{
+        //获取文件目录
+        File dirFile = new File(dirPath);
+        //获取目录下所有*.log.txt文件
+        File[] logFiles = dirFile.listFiles();
+        //存放所有的文件名
+        List<String> filesName = new ArrayList<String>();
+        List<File> filesList = Arrays.asList(logFiles);
 
+        //对filesList根据文件名按照时间进行排序
+        //覆写compare方法
+        Collections.sort(filesList, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        for (int i = 0; i < filesList.size() ;i++) {
+                filesName.add(filesList.get(i).toString());
+            }
+        String inPath = "";
+        //改成绝对路径
+        String absolutePath = "";
+        if (hasDate) {
+            absolutePath = dirPath + dateString + ".log.txt";
+
+        }
+        String lastFile = filesName.get(filesName.size() - 1);
+        int len = lastFile.length();
+        String lastDateString = lastFile.substring(len - 18, len -8 );
+        if (lastDateString.compareTo(dateString) < 0) {
+            System.out.println("！错误：输入date参数比最新log文件更新！");
+        }
+        for (int i = 0; i<filesName.size(); i++) {
+            inPath = filesName.get(i);
+            //若命令中有 -date参数
+            if(hasDate) {
+                if (inPath.compareTo(absolutePath) > 0) {
+                    break;
+                }
+            }
+            inputFile(inPath, map);
+        }
+    }
+ 
 }
 
 class InfoHandle{

@@ -38,7 +38,9 @@ import java.text.SimpleDateFormat;
 
 class InfectStatistic {
     public static void main(String[] args) {
-        System.out.println("helloworld");
+        OrderHandle odHandle = new OrderHandle(args);
+        RunOrder runOd = new RunOrder(odHandle);
+        RunOrder.Run();
     }
 }
 /**

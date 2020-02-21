@@ -107,12 +107,11 @@ class InfectStatistic {
     public boolean ManageLine(String line)
     {
         String[] data = line.split(" ");
-        String beginStr = data[0].substring(0 ,2);
-        if (beginStr.equals(Lib.Skip))
+        String First = data[0].substring(0 , 2);
+        if (First.equals(Lib.Skip))
         {
             return false;
         }
-        // Get Province record
         Record record = container.GetRecord(data[0]);
         if (record == null)
         {
@@ -120,10 +119,8 @@ class InfectStatistic {
             record.SetProvinceName(data[0]);
             container.AddRecord(record);
         }
-        //获取数量
         int num = Common.ParserStringToInt(data[data.length - 1]);
         int[] dataLength = {3 , 4 , 5};
-        // 处理数据
         if (data.length == dataLength[0])
         {
             if (data[1].equals(Lib.Dead))

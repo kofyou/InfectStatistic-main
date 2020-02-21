@@ -207,19 +207,24 @@ class ParameterOption{
 							  province[0]=1;
 						}//if-end
 					  else {
-							for(i++;i<myArgs.length;i++) {
-								
-								for(int j=0;j<lib.provinces.length;j++) {
-									if(myArgs[i].equals(lib.provinces[j])) {
-										province[j]=1;
-									}//if-end
-								}//for-end	
-								if(myArgs[i].startsWith("-")) {
-									flag2=true;
-									break;
+						for(i++;i<myArgs.length;i++) {
+							boolean flagP=false;
+							for(int j=0;j<lib.provinces.length;j++) {
+								if(myArgs[i].equals(lib.provinces[j])) {
+									province[j]=1;
+									flagP=true;
 								}//if-end
-								
 							}//for-end
+							
+							if(myArgs[i].startsWith("-")) {
+								flag2=true;
+								break;
+							}//if-end
+							if(flagP==false) {
+								System.out.println("省份错误/省份不带省名如福建省应为福建");
+								throw new ParameterExpection();
+							}
+						}//for-end
 							if(flag2==true){
 								  i--;
 								  continue;

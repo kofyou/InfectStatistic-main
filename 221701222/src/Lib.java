@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class Lib {
     /**
-     * 初始化统计数据
+     * 初始化统计的数据
      * @param statistics 统计数据
      */
     public static void mapInit(Map<String, List<Integer>> statistics){

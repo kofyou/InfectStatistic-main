@@ -292,9 +292,89 @@ class ReadFile{
     }
  
 }
+/**
+ * 
+ * 处理文件信息
+ * 
+ *
+ * @author 021700613
+ * @version 1.0
+ * @since 2020.2.22
+ */
 
 class InfoHandle{
-
+    public void parseInfo(String line, InfectedMap infectedMap){
+        //将传入的信息按空格进行切割
+        String cutString = " ";
+        String[] newLine = line.split(cutString);
+        
+        //获取人数信息
+        int len = newLine.length;
+        String regEx="[^0-9]";  
+        Pattern p = Pattern.compile(regEx);  
+        Matcher m = p.matcher(newLine[len-1]); 
+        String numString= m.replaceAll("").trim();
+        int num = Integer.valueOf(numString);
+        
+        //查找infectedMap中是否含有该地区
+        boolean existed = infectedMap.map.containsKey(newLine[0]);
+        
+        //若无该地区，则先创建
+        if (!existed){
+            PeopleNum thisArea = new PeopleNum();
+            infectedMap.map.put(newLine[0], thisArea);
+        }
+        
+        PeopleNum countryTmp = infectedMap.map.get("全国");
+        PeopleNum provinceTmp = infectedMap.map.get(newLine[0]); 
+       
+        //用正则表达式进行处理
+        if (line.matches("(.*)新增 感染患者(.*)")){
+            countryTmp.infectedNum += num;
+            provinceTmp.infectedNum += num;           
+        }else if (line.matches("(.*)新增 疑似患者(.*)")){
+            countryTmp.potentialNum += num;
+            provinceTmp.potentialNum += num;
+        }else if (line.matches("(.*)死亡(.*)")){
+            countryTmp.deadNum += num;
+            provinceTmp.deadNum += num;
+            countryTmp.infectedNum -= num;
+            provinceTmp.infectedNum -= num;
+        }else if (line.matches("(.*)治愈(.*)")){
+            countryTmp.curedNum += num;
+            provinceTmp.curedNum += num;
+            countryTmp.infectedNum -= num;
+            provinceTmp.infectedNum -= num;
+        }else if (line.matches("(.*)疑似患者 确诊感染(.*)")){
+            countryTmp.infectedNum += num;
+            provinceTmp.infectedNum += num;
+            countryTmp.potentialNum -= num;
+            provinceTmp.potentialNum -= num;
+        }else if (line.matches("(.*)排除 疑似患者(.*)")){
+            countryTmp.potentialNum -= num;
+            provinceTmp.potentialNum -= num;
+        }else if (line.matches("(.*)流入(.*)")){
+            boolean existed2 = infectedMap.map.containsKey(newLine[3]);
+            if(!existed2){
+                PeopleNum thisArea = new PeopleNum();
+                infectedMap.map.put(newLine[3], thisArea);
+            }
+            PeopleNum province2Tmp = infectedMap.map.get(newLine[3]); 
+            if (line.matches("(.*)疑似患者 流入(.*)")){
+                provinceTmp.potentialNum -= num;
+                province2Tmp.potentialNum += num;
+            }else if (line.matches("(.*)感染患者 流入(.*)")) {
+                provinceTmp.infectedNum -= num;
+                province2Tmp.infectedNum += num;
+            }
+            infectedMap.map.replace(newLine[3], province2Tmp);
+        }
+        
+        infectedMap.map.replace(newLine[0], countryTmp);
+        infectedMap.map.replace(newLine[0], provinceTmp);
+    }
+    
+  
 }
 
 class WriteFile{

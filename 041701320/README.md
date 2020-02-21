@@ -14,9 +14,9 @@
 
 ## 2.如何运行  
 
- 1. 命令行（win+r cmd）cd到项目src下
- 2. 输入命令：javac Infectstatistic.java
- 3. 输入命令：java Infectstatistic list （+各个参数）
+ 1. 命令行（win+r cmd）cd到项目src下  
+ 2. 输入命令：javac Infectstatistic.java  
+ 3. 输入命令：java Infectstatistic list （+各个参数）  
 
 ## 3.功能简介
 

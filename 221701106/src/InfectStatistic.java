@@ -3,9 +3,12 @@
  * InfectStatistic
  * TODO
  *
- * @author xxx
- * @version xxx
- * @since xxx
+ * @author 刘星雨
+ * @version 1.0
+ * @since 2020-02-14
+ */
+/**
+ * Copyright @ 221701106_刘星雨
  */
 import java.io.*;
 import java.lang.String;
@@ -88,6 +91,7 @@ class InfectStatistic {
     }
 	public class OutProcess {
 		public void OutProcess(String logpath,String outpath,String[] typestr,int df,int tf,int pf) throws IOException {	//输出到指定文件中
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outpath),"UTF-8"));
 			if (tf==0) {														//未指定输出类型即按顺序输出
 				for (int i=0;i<4;i++) {
 					type[i]=i+1;
@@ -101,65 +105,66 @@ class InfectStatistic {
 			for (int i=0;i<32;i++) {
 				int ftype=0;
 				if (provinceflag[((i+31)%32)]==1&&tf==0) {
-					System.out.println(province[(i+31)%32]+" 感染患者"+illnessarray[(i+31)%32]+"人 "+"疑似患者"+
+					bw.write(province[(i+31)%32]+" 感染患者"+illnessarray[(i+31)%32]+"人 "+"疑似患者"+
 						doubtfulillnessarray[(i+31)%32]+"人 "+"治愈"+secureillnessarray[(i+31)%32]+"人 "+"死亡"+
-						deadillnessarray[(i+31)%32]+"人");
+						deadillnessarray[(i+31)%32]+"人"+"\n");
 				}
 				if (provinceflag[(i+31)%32]==1&&tf==1) {
-					System.out.print(province[(i+31)%32]+" ");
+					bw.write(province[(i+31)%32]+" ");
 					for (int k=0;k<4;k++) {
 					for (int j=0;j<4;j++) {
 						if (type[j]==1&&ftype==0) {
 							ftype++;
 							if (j==0)
-								System.out.print("感染患者"+illnessarray[(i+31)%32]+"人 ");
+								bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
 							if (j==1)
-								System.out.print("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+								bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
 							if (j==2)
-								System.out.print("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+								bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
 							if (j==3)
-								System.out.print("死亡"+deadillnessarray[(i+31)%32]+"人 ");
+								bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
 						}
 						if (type[j]==2&&ftype==1) {
 							ftype++;
 							if (j==0)
-								System.out.print("感染患者"+illnessarray[(i+31)%32]+"人 ");
+								bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
 							if (j==1)
-								System.out.print("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+								bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
 							if (j==2)
-								System.out.print("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+								bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
 							if (j==3)
-								System.out.print("死亡"+deadillnessarray[(i+31)%32]+"人 ");
+								bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
 						}
 						if (type[j]==3&&ftype==2) {
 							ftype++;
 							if (j==0)
-								System.out.print("感染患者"+illnessarray[(i+31)%32]+"人 ");
+								bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
 							if (j==1)
-								System.out.print("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+								bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
 							if (j==2)
-								System.out.print("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+								bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
 							if (j==3)
-								System.out.print("死亡"+deadillnessarray[(i+31)%32]+"人 ");
+								bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
 						}
 						if (type[j]==4&&ftype==3) {
 							ftype++;
 							if (j==0)
-								System.out.print("感染患者"+illnessarray[(i+31)%32]+"人 ");
+								bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
 							if (j==1)
-								System.out.print("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+								bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
 							if (j==2)
-								System.out.print("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+								bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
 							if (j==3)
-								System.out.print("死亡"+deadillnessarray[(i+31)%32]+"人 ");
+								bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
 						}
 					}
 					}
-					System.out.print("\n");
+					bw.write("\n");
 				}
 			}
 //    		FileWriter fw=new FileWriter(outpath);
 //    		fw.write(outputarray);									//将最终字符串数组输出到指定文件中
+	        bw.close();
     	}
 	}
     public void LogContentHandle(String lineText) {

@@ -1,4 +1,4 @@
-
+package com.xzy;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,6 +8,11 @@ import static java.lang.System.exit;
 
 public class InfectStatistic {
 	public static void main(String[] args) throws ParseException, IOException {
+        /*String[] test1= {
+                "list",
+                "-log", "D:/log/",
+                "-out", "D:/aaa.txt",
+        };*/
         Map<String, ArrayList<String>> map=get_params(args);
         String front_path=map.get("-log").get(0);
         ArrayList<String> filenames=get_input_data(map);//获得所有需要统计的数据的文件名称
@@ -280,15 +285,21 @@ public class InfectStatistic {
         SimpleDateFormat sqf=new SimpleDateFormat("yyyy-MM-dd");
         Date point_date; //point_date为目标日期，需统计该日期前的数据
         Date max_date=get_max_date(files_name); //获取文件夹中文件的最大日期，该功能封装在get_max_date中
-        if(map.get("-date").get(0)!=null){
-            if(max_date.getTime()>=(sqf.parse(map.get("-date").get(0))).getTime())//比较参数中日期与文件夹中的最大日期
-            point_date=sqf.parse(map.get("-date").get(0));
-            else
+        if(map.get("-date")!=null){
+            if(map.get("-date").get(0)!=null){
+                if(max_date.getTime()>=(sqf.parse(map.get("-date").get(0))).getTime())//比较参数中日期与文件夹中的最大日期
+                    point_date=sqf.parse(map.get("-date").get(0));
+                else
+                    point_date=max_date;
+            }
+            else{
                 point_date=max_date;
+            }
         }
         else{
             point_date=max_date;
         }
+
         ArrayList<String> filenames=get_file_need(point_date,files_name);//获得所有需要统计的日期文件名
         return filenames;
     }

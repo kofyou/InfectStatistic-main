@@ -287,7 +287,7 @@ public:
 					outfile << it->province;
 					printf(" 感染患者 %d人 疑似患者%d人 治愈%d人 死亡%d人\n", it->sure_count, it->doubt_count,
 						it->cure_count, it->dead_count);
-					outfile << " 确诊患者" << it->sure_count << "人" << " 疑似患者" << it->doubt_count << "人" << " 治愈" << it->cure_count << "人" << " 死亡" << it->dead_count << "人" << endl;
+					outfile << " 感染患者" << it->sure_count << "人" << " 疑似患者" << it->doubt_count << "人" << " 治愈" << it->cure_count << "人" << " 死亡" << it->dead_count << "人" << endl;
 
 				}
 				else {
@@ -305,7 +305,7 @@ public:
 							outfile << " 疑似患者" << it->doubt_count << "人";
 							break;
 						case increase_sure:
-							printf(" 确诊患者%d人", it->sure_count);
+							printf(" 感染患者%d人", it->sure_count);
 							outfile << " 确诊患者" << it->sure_count << "人";
 							break;
 						case cure:
@@ -320,6 +320,7 @@ public:
 				}
 			}
 		}
+		outfile << "// 该文档并非真实数据，仅供测试使用" << endl;
 	}
 
 	///根据传入的字符串 读取信息 并将其添加到映射表

@@ -329,7 +329,7 @@ class Reader{
 			//最新一天
 			for(int i=0;i<fileLists.length;i++) {
 				if(fileLists[i].contains(".log")) {
-					files.add(fileLists[i]);
+					files.add(filePath.concat(fileLists[i]));
 				}
 			}
 		}

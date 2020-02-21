@@ -272,6 +272,24 @@ class ReadFile{
             inputFile(inPath, map);
         }
     }
+    /*
+     * 解析每个*.log.txt文件的内容
+     */
+    public void inputFile(String inPath, InfectedMap map) throws IOException {
+        InputStream inStream = new FileInputStream(inPath);
+        String line; 
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
+        line = reader.readLine(); 
+        Infohandle infohandle = new Infohandle();
+        while (line != null) { 
+            if (!line.matches("//(.*)") && !line.equals("")) {
+                infohandle.parseInfo(line, map);
+            }     
+            line = reader.readLine(); 
+        }
+        reader.close();
+        inStream.close();
+    }
  
 }
 

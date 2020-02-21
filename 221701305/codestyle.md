@@ -1,7 +1,7 @@
-##代码风格
+# 代码风格
 
-参考老师给的《码出高效_阿里巴巴Java开发手册》
-开发手册链接：https://github.com/chjw8016/alibaba-java-style-guide
++ 参考老师给的《码出高效_阿里巴巴Java开发手册》
++ 开发手册链接：https://github.com/chjw8016/alibaba-java-style-guide
 
 # 1、缩进
 + 缩进1个Tab键，为4个空格
@@ -35,7 +35,7 @@ class InfectStatistic
 ```
 public int getIp() 
 {
-	return ip;
+    return ip;
 }
 ```
 
@@ -52,27 +52,27 @@ MAX_STOCK_COUNT
 + 举例如下
 ```
 class Province{
-		String name=null;//省份名称(拼音）
-	    int ip=0;//感染患者
-	    int sp=0;//疑似患者
-	    int cure=0;//治愈
-	    int dead=0;//死亡
+    String name=null;//省份名称(拼音）
+    int ip=0;//感染患者
+    int sp=0;//疑似患者
+    int cure=0;//治愈
+    int dead=0;//死亡
 	    
-	    public Province(String name) {
-	    	this.name=name;
-	    	this.ip=0;
-	    	this.sp=0;
-	    	this.cure=0;
-	    	this.dead=0;
-	    }
+    public Province(String name) {
+	this.name=name;
+    	this.ip=0;
+	this.sp=0;
+    	this.cure=0;
+	this.dead=0;
+    }
+    
+    public int getIp() {
+    	return ip;
+    }
 	    
-	    public int getIp() {
-	    	return ip;
-	    }
-	    
-	    public int getSp() {
-	    	return sp;
-	    }
+    public int getSp() {
+    	return sp;
+    }
 }
 ```
 
@@ -85,10 +85,10 @@ class Province{
 //统计全国数据
 public void Sum(Hashtable<String,Province> hashtable) {
     Province nation = new Province("全国");
-	Set set = hashtable.keySet();
-	Iterator iterator = set.iterator();
+    Set set = hashtable.keySet();
+    Iterator iterator = set.iterator();
 	
-	//遍历哈希表
+    //遍历哈希表
     while(iterator.hasNext()) {
         Object keys = iterator.next();
         nation.ip += hashtable.get(keys).getIp();

@@ -43,13 +43,13 @@ class CmdCenter:
             if argvs[i] == "-date":
                 CmdCenter.Date = argvs[i+1]
             if argvs[i] == "-type":
-                for k in range(i+1,len(argvs-1)):
+                for k in range(i+1,len(argvs)):
                     if argvs[k][0] == '-':
                         break
                     else:
                         CmdCenter.Types.append(argvs[k])
             if argvs[i] == "-province":
-                for k in range(i+1,len(argvs-1)):
+                for k in range(i+1,len(argvs)):
                     if argvs[k][0] == '-':
                         break
                     else:
@@ -74,12 +74,18 @@ class DataCenter:
 
     def DealAllData(self):
         allFile = os.listdir(self.__private_path)
+        checkFlag = False
         for nowFile in allFile:
             nowDateStr = nowFile[:-8]
             nowDate = str2date(nowDateStr)
             diffDate = self.__private_date - nowDate
-            if diffDate.total_seconds()>0:
+            if diffDate.total_seconds() >= 0:
+                checkFlag = True
                 self.DealFileData(nowFile)
+        if not checkFlag:
+            print("无满足输入时间要求的日志文件")
+            return False
+        return True
 
     # 用于处理一天的数据
     def DealFileData(self, fileName):
@@ -142,10 +148,10 @@ class DataCenter:
             types.append("cure")
             types.append("dead")
         if "全国" in provinces:
-            output += self.CountryInfo()
+            output += self.CountryInfo(types)
         if len(provinces) == 0:
             provinces = self.__private_allData.keys()
-            output += self.CountryInfo()
+            output += self.CountryInfo(types)
         for province in provinces:
             if province in self.__private_allData:
                 output += province + " "
@@ -175,7 +181,7 @@ class DataCenter:
         output += "// 该文档并非真实数据，仅供测试使用"
         return output
 
-    def CountryInfo(self):
+    def CountryInfo(self,types):
         output = ""
         ip = 0
         sp = 0
@@ -187,10 +193,14 @@ class DataCenter:
             cure += self.__private_allData[province].__dict__['CureCount']
             dead += self.__private_allData[province].__dict__['DieCount']
         output += "全国 "
-        output += "感染患者{0}人".format(str(ip))
-        output += "疑似患者{0}人".format(str(sp))
-        output += "治愈{0}人".format(str(cure))
-        output += "死亡{0}人".format(str(dead))
+        if "ip" in types :
+            output += "感染患者{0}人 ".format(str(ip))
+        if "sp" in types :
+            output += "疑似患者{0}人 ".format(str(sp))
+        if "cure" in types :
+            output += "治愈{0}人 ".format(str(cure))
+        if "dead" in types :
+            output += "死亡{0}人 ".format(str(dead))
         output += "\n"
         return output
 
@@ -240,10 +250,12 @@ couldRun = CmdCenter.DealCmd(cmdCenter, argv)
 # print(CmdCenter.LogPath)
 if couldRun:
     dataCenter = DataCenter(CmdCenter.Date, CmdCenter.LogPath, CmdCenter.OutPath)
-    DataCenter.DealAllData(dataCenter)
-    resultStr = DataCenter.OutputStatistic(dataCenter, CmdCenter.Types, CmdCenter.Provinces)
-    f = open(CmdCenter.OutPath, 'w')
-    f.write(resultStr)
-    print("成功")
+    if not DataCenter.DealAllData(dataCenter):
+        print("失败")
+    else :
+        resultStr = DataCenter.OutputStatistic(dataCenter, CmdCenter.Types, CmdCenter.Provinces)
+        f = open(CmdCenter.OutPath, 'w')
+        f.write(resultStr)
+        print("成功")
 else:
     print("输入格式错误")

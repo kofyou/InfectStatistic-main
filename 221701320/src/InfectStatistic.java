@@ -11,11 +11,11 @@ import java.util.Arrays;
  * @since xxx
  */
 class InfectStatistic {
-	public static String[] province= {"北京","天津","上海","重庆","河北","山西","辽宁",
-						"吉林","黑龙江","江苏","浙江","安徽","福建","江西",
-						"山东","河南","湖北","湖南","广东","海南","四川",
-						"贵州","云南","陕西","甘肃","青海","台湾","内蒙古",
-						"广西","西藏","宁夏","新疆","香港","澳门"};
+	public static String[] province= {"安徽","北京","重庆","福建","甘肃","广东","广西",
+						"贵州","海南","河北","河南","黑龙江","湖北","湖南",
+						"吉林","江苏","江西","辽宁","内蒙古","宁夏","青海",
+						"山东","山西","陕西","上海","四川","天津","西藏",
+						"新疆","云南","浙江"};
 	
 	public static int[] ip= {0,0,0,0,0,0,0,
 			   0,0,0,0,0,0,0,
@@ -76,7 +76,7 @@ class InfectStatistic {
 	public static void readfile2(String str) {
 		String[] a=str.split(" ");
 		int m=0;
-		for(int i=0;i<34;i++) {
+		for(int i=0;i<31;i++) {
 			if(province[i].equals(a[0])) {
 				m=i;break;
 			}
@@ -106,7 +106,7 @@ class InfectStatistic {
 		if(a.length==5) {
 			int n=0;
 			if(a[1].equals("感染患者")) {
-				for(int i=0;i<34;i++) {
+				for(int i=0;i<31;i++) {
 					if(province[i].equals(a[3])) {
 						n=i;break;
 					}
@@ -121,7 +121,7 @@ class InfectStatistic {
 				}
 			}
 			if(a[1].equals("疑似患者")) {
-				for(int i=0;i<34;i++) {
+				for(int i=0;i<31;i++) {
 					if(province[i].equals(a[3])) {
 						n=i;break;
 					}
@@ -199,7 +199,7 @@ class InfectStatistic {
 							judgeprovince++;
 							quanguo=1;
 						}
-					for(int t=0;t<34;t++) {
+					for(int t=0;t<31;t++) {
 						if(args[j].equals(province[t])) {
 							judgeprovince++;
 							pro[t]=1;
@@ -274,7 +274,7 @@ class InfectStatistic {
     			string+="\n";
     			out.write(string);
 	        }
-        	for(int i=0;i<34;i++) {
+        	for(int i=0;i<31;i++) {
     			if(pro[i]==1) {
     				string=(province[i]+" ");
     				if(grhz==1) {

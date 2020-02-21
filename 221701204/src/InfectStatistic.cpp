@@ -1,4 +1,4 @@
-﻿/*********************************
+/*********************************
 FileName:InfectStatistic.cpp
 Author:林羽希
 Function:疫情状况统计
@@ -199,15 +199,8 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
 				string in;
 				while (getline(fin, in))
 				{
-					char In[200];
-					for (int i = 0; i < in.size(); i++)In[i] = in[i];
-					In[in.size()] = '\0';
-					char* p;
-					p = U2G(In);
-					string tmp;
-					for (int i = 0; p[i] != '\0'; i++)tmp = tmp + p[i];
-					if (tmp[0] == '/' && tmp[1] == '/')continue;
-					LineDetail(tmp);
+					if (in[0] == '/' && in[1] == '/')continue;
+					LineDetail(in);
 				}
 				if (returnflag == 1)return;
 			}

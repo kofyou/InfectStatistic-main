@@ -39,7 +39,6 @@ class InfectStatistic {
 
     /**
      * 使用命令行参数初始化InfectStatistic类（在这一步中获取各个参数）
-     *
      * @param args 从命令行获得的分割好的字符串数组
      */
     InfectStatistic(String[] args) {
@@ -163,7 +162,8 @@ class InfectStatistic {
                         writer.write(provinceName + " " + provinceInfo.toString(outputTypes) + '\n');
                     }
                 }
-            } else {
+            }
+            else {
                 if (provinces.contains("全国")) {
                     writer.write("全国 " + countryTotalInfo.toString(outputTypes) + '\n');
                     provinces.remove("全国");
@@ -195,20 +195,13 @@ class InfectStatistic {
                 }
             }
 
+            writer.write("// 该文档并非真实数据，仅供测试使用");
+
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-//    @Override
-//    public String toString() {
-//        return "InfectStatistic{" +
-//                "inputPath='" + inputPath + '\'' +
-//                ", outputPath='" + outputPath + '\'' +
-//                ", date='" + date + '\'' +
-//                ", types=" + types +
-//                ", provinces=" + provinces +
-//                '}';
-//    }
+
 }

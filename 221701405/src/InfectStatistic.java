@@ -100,12 +100,11 @@ class InfectStatistic {
 		
 		//命令行解析函数
 		public static Command analysis(List<String> list) {
-			Command command = new Command();//实例化一个command对象
+			Command command = new Command();
 			
 			//进行命令行解析
 			for(int i = 0;i < list.size();i++) {
-				String temp = list.get(i);
-				//获取command
+				String temp = list.get(i);//获取command
 				switch(temp) {
 				case "list":
 					command.list = true;//命令行包含list命令

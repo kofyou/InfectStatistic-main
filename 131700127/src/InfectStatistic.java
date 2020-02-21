@@ -17,22 +17,29 @@ import java.text.SimpleDateFormat;
 
 
 public class InfectStatistic {
-	public String[] args;		//保存命令
 	public String logPath;		//保存日志路径
 	public String outPath;		//保存输出路径
+	public String dateStr;
+	
 	boolean typeIsExist;
 	boolean provinceIsExist;
+	
 	public List<String> types = new ArrayList<String>();
 	public List<String> provinces = new ArrayList<String>();
+	
+	public String[] args;		//保存命令
+	public String[] typeStr = {"ip","sp","crue","dead"};            //保存类型
 	public String[] provinceStr = {"全国", "安徽", "澳门" ,"北京", "重庆", "福建","甘肃",
 			"广东", "广西", "贵州", "海南", "河北", "河南", "黑龙江", "湖北", "湖南", "吉林",
 			"江苏", "江西", "辽宁", "内蒙古", "宁夏", "青海", "山东", "山西", "陕西", "上海",
 			"四川", "台湾", "天津", "西藏", "香港", "新疆", "云南", "浙江"};	//保存省份
+	
 	public LinkedHashMap<String,Integer> ip = new LinkedHashMap<String,Integer>();	//保存各省的感染患者人数
 	public LinkedHashMap<String,Integer> sp = new LinkedHashMap<String,Integer>(); 	//保存各省的疑似患者人数
 	public LinkedHashMap<String,Integer> cure = new LinkedHashMap<String,Integer>();	//保存各省的治愈人数
 	public LinkedHashMap<String,Integer> dead = new LinkedHashMap<String,Integer>();	//保存各省的死亡人数
-    public String addIp = "\\s*\\S+ 新增 感染患者 \\d+人\\s*";
+    
+	public String addIp = "\\s*\\S+ 新增 感染患者 \\d+人\\s*";
     public String addSp = "\\s*\\S+ 新增 疑似患者 \\d+人\\s*";
     public String inflowIp = "\\s*\\S+ 感染患者 流入 \\S+ \\d+人\\s*";
     public String inflowSp = "\\s*\\S+ 疑似患者 流入 \\S+ \\d+人\\s*";
@@ -40,7 +47,8 @@ public class InfectStatistic {
     public String addCure = "\\s*\\S+ 治愈 \\d+人\\s*";
     public String spToIp = "\\s*\\S+ 疑似患者 确诊感染 \\d+人\\s*";
     public String reduceSp = "\\s*\\S+ 排除 疑似患者 \\d+人\\s*";
-	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");	//设定日期格式
+	
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");	//设定日期格式
 	Date d = new Date(System.currentTimeMillis());
 	public String date = dateFormat.format(d);
 	
@@ -58,6 +66,10 @@ public class InfectStatistic {
 	public boolean inspectParameter(String [] argsStr) {
 		int j;
 		args = argsStr;
+		if(args.length == 0) {
+			System.out.print("No parameters entered.");
+			return false;
+		}
 		if(!argsStr[0].equals("list")) {
 			System.out.println("Command line format error.");
 			return false;
@@ -81,13 +93,13 @@ public class InfectStatistic {
 						return false;
 					}
 					else{
-						date = args[j] + ".log.txt";
+						dateStr = args[j];
 						break;
 					}
 				case "-out":
 					j = inspectOutPath(++j);
 					if(j == -1) {
-						System.out.println("Command line format error.('-out'parameter)");
+						System.out.println("Command line format error.('-outputFile'parameter)");
 						return false;
 					}
 					else{
@@ -132,9 +144,8 @@ public class InfectStatistic {
 				return j;
 			else
 				return -1;
-		
-		
 	}
+	
 	//检验输出路径
 	public int inspectOutPath(int j) {
 		if (j != args.length && args[j].matches("^[A-z]:\\\\(\\S+)+(\\.txt)$"))
@@ -146,7 +157,7 @@ public class InfectStatistic {
 	public int inspectDate(int j) {
 		if(j < args.length) {
 			if(isValidDate(args[j])) {
-				if(date.compareTo(args[j]) >= 0)
+				if(date.compareTo(args[j]) >= 0) 
 					return j;
 				else 
 					return -1;
@@ -162,36 +173,14 @@ public class InfectStatistic {
 	public int inspectType(int j) {
 		typeIsExist = true;
 		if(j < args.length) {
-			int n = j,h = 0;
-			if(j < args.length) {
-				while(j < args.length) {
-					switch(args[j]){
-						case "ip":
-							types.add(args[j]);
-							j++;
-							break;
-						case "sp":
-							types.add(args[j]);
-							j++;
-							break;
-						case "cure":
-							types.add(args[j]);
-							j++;
-							break;
-						case "dead":
-							types.add(args[j]);
-							j++;
-							break;
-						default:
-							h = 1;
-							break;
-					}
-					if(h == 1) 
-						break;
+			for(int k = 0; k < typeStr.length && j<args.length; k++) {
+				if(args[j].equals(typeStr[k])) { 
+					types.add(args[j]); 
+					j++;
 				}
+				else 
+					break;
 			}
-			if(n == j)
-				return -1;
 		}
 		return (j - 1);
 	}
@@ -199,7 +188,6 @@ public class InfectStatistic {
 	//检验省份
 	public int inspectProvince(int j) {
 		int k, n = j;
-		
 		if(j < args.length){
 			while(j<args.length) {
 				for(k = 0; k < provinceStr.length; k++) {
@@ -252,20 +240,19 @@ public class InfectStatistic {
 		int l = logFiles.length;
 		List<String> legalFiles = new ArrayList<String>();
 		for(int i = 0;i < l;i++) {
+			String  fileDate = logFiles[i].substring(0, 10);
 			String suffix = logFiles[i].substring(logFiles[i].lastIndexOf(".") + 1);
-			if(suffix.matches("txt"))
+			if(suffix.matches("txt") && dateStr.compareTo(fileDate) >=0)
 				legalFiles.add(logFiles[i]);
 		}
 		l = legalFiles.size();
 		if(l == 0)
 			throw new IllegalException("Error, no legal log file exists in the log directory");
-
 		logFiles = new String[l];
 		legalFiles.toArray(logFiles);
 		Arrays.sort(logFiles);
 		for(int i = 0;i < l;i++) {
-			System.out.println(logFiles[i]);
-		execFile(logPath + "/" + logFiles[i]);
+			execFile(logPath + "/" + logFiles[i]);
 		}
 		int ipSum = 0;
 		int spSum = 0;
@@ -296,18 +283,21 @@ public class InfectStatistic {
 	                    else
 	                        list.add(provinceStr[i]);
 	                }
-	                out(writer, list);
-	            } else {
-	                out(writer, provinces);
+	                outputFile(writer, list);
 	            }
-	        } else {
+	            else {
+	                outputFile(writer, provinces);
+	            }
+	        }
+	      else {
 	            if (provinceIsExist) {
 	                for (String province : provinces) {
 	                    writer.write(province + " 感染患者" + ip.get(province) + "人 疑似患者" + sp.get(province) + "人 治愈"
 	                            + cure.get(province) + "人 死亡" + dead.get(province) + "人\n");
 	                }
 
-	            } else {
+	            } 
+	            else {
 	                Integer[] ipProvincesAmount = new Integer[ip.size()];
 	                ip.values().toArray(ipProvincesAmount);
 	                Integer[] spProvincesAmount = new Integer[sp.size()];
@@ -334,7 +324,7 @@ public class InfectStatistic {
 	}
 	
 	//输出函数
-	private void out(BufferedWriter writer, List<String> provinces) throws Exception {
+	private void outputFile(BufferedWriter writer, List<String> provinces) throws Exception {
         for (String province : provinces) {
             writer.write(province);
             int size = types.size();
@@ -381,8 +371,6 @@ public class InfectStatistic {
         }
     }
 
-
-	
 	//处理日志文件
 	public void execFile(String path) throws Exception{
 		FileInputStream fs = new FileInputStream(new File(path));
@@ -481,10 +469,6 @@ public class InfectStatistic {
 	//主函数
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		if(args.length == 0) {
-			System.out.print("No parameters entered.");
-			return;
-		}
 		InfectStatistic s = new InfectStatistic();
 		if(s.inspectParameter(args)) {
 			try {

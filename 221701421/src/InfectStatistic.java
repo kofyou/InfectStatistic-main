@@ -22,11 +22,6 @@ class ProcessParameter {
     private File logDir;//日志文件夹
     private Date date = null;//查询截止日期
 
-    public static void main(String[] args) {
-        ProcessParameter processParameter = new ProcessParameter();
-        processParameter.processParameters(args);
-        processParameter.statistic();
-    }
 
     public void processParameters(String []args){
         List list = Arrays.asList(args);
@@ -134,6 +129,14 @@ class InfectStatistic {
     private HashMap<String, ProvanceInfo> provinceMap = new HashMap<>();
     private List<String> fileList = new ArrayList<>();
     private int infectTotalNum,suspectedTotalNum,cureTotalNum,diedTotalNum;
+
+
+    public static void main(String[] args) {
+        ProcessParameter processParameter = new ProcessParameter();
+        processParameter.processParameters(args);
+        processParameter.statistic();
+    }
+
     public InfectStatistic(){
         for(String p : provinceList){
             provinceMap.put(p, new ProvanceInfo(p));

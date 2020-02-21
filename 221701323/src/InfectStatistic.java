@@ -12,8 +12,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.text.SimpleDateFormat;
-
 /**
  * InfectStatistic
  *
@@ -23,8 +21,16 @@ import java.text.SimpleDateFormat;
  */
 
 public class InfectStatistic {
+    static Work work;
+    static List list;
+
     public static void main(String[] args) {
-        // String str="list -log C:\Users\dell\Desktop\InfectStatistic-main\221701323\log -out C:\Users\dell\Desktop\InfectStatistic-main\221701323\result\ListOut.txt -province 全国 福建 湖北 -type sp ip dead cure";
+        init(args);
+        work.dealData();
+        work.Show();
+    }
+
+    public static void init(String[] args) {
         String[] strs = args;
         String log = null;
         String out = null;
@@ -82,10 +88,8 @@ public class InfectStatistic {
             } else
                 continue;
         }
-        List list = new List(log, out, date, provinces, types);
-        Work work = new Work(list);
-        work.dealData();
-        work.Show();
+        list = new List(log, out, date, provinces, types);
+        work = new Work(list);
     }
 }
 
@@ -138,18 +142,6 @@ class ProvinceList {
         }
     }
 
-    public void printout() {
-        for (Province p : List) {
-            if (p.ip != 0 || p.sp != 0 || p.cure != 0 || p.dead != 0) {
-                System.out.println("城市：" + p.ProvinceName);
-                System.out.println("ip=" + p.ip);
-                System.out.println("sp=" + p.sp);
-                System.out.println("cure=" + p.cure);
-                System.out.println("dead=" + p.dead);
-            }
-        }
-    }
-
     public Province Select(String name) {
         for (Province p : List) {
             if (p.ProvinceName.equals(name))
@@ -177,12 +169,6 @@ class TypeList {
             Types = Types2;
         }
     }
-
-    public void printout() {
-        for (Entry<String, String> entry : Types.entrySet()) {
-            System.out.println(entry.getKey() + "=" + entry.getValue());
-        }
-    }
 }
 // list类存储命令
 
@@ -200,15 +186,6 @@ class List {
         Provinces = new ProvinceList(provinces);
         Types = new TypeList(types);
     }
-
-    public void printList() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        // String dateString = formatter.format(currentTime);
-        // DateFormat d1 =java.text.DateFormat.getDateInstance();
-        System.out.println("log=" + Log + "\nOut=" + Out + "\nDate=" + formatter.format(DateNow) + "\n");
-        Provinces.printout();
-        Types.printout();
-    }
 }
 
 // 日志处理类
@@ -221,13 +198,6 @@ class Work {
         list = lis;
         PL = new ProvinceList(null);
         FileList = new File(list.Log).list();
-    }
-
-    public void printout() {
-        for (String name : FileList) {
-            System.out.println("文件名：" + name);
-        }
-        // PL.printout();
     }
 
     // 将string转化为date
@@ -258,25 +228,33 @@ class Work {
     }
 
     // 日志名和日期比较
-    public boolean Compare(String str) {
-        if (strTodate(str).compareTo(list.DateNow) < 0 || list.DateNow.toString().equals(strTodate(str).toString()))
-            return true;
+    public int Compare(String str) {
+        if (strTodate(str).compareTo(list.DateNow) < 0)
+            return 1;
+        else if (list.DateNow.toString().equals(strTodate(str).toString()))
+            return 0;
         else
-            return false;
+            return -1;
 
     }
 
     // 处理日志列表，选取符合Date的日志文件
 
     public void Select() {
+        FileSort();
+        if (Compare(FileList[FileList.length - 1]) == 1) {
+            System.err.println("日期不存在！");
+            System.exit(0);
+        }
         int i = 0;
         for (String str : FileList) {
-            if (Compare(str)) i++;
+            if (Compare(str) >= 0)
+                i++;
         }
         String[] newlist = new String[i];
         int n = 0;
         for (int j = 0; j < FileList.length; j++) {
-            if (Compare(FileList[j])) {
+            if (Compare(FileList[j]) >= 0) {
                 newlist[n++] = FileList[j];
             }
         }
@@ -285,8 +263,8 @@ class Work {
 
     // 根据日志列表读取文件，遍历文件每一行进行数据处理
     public void dealData() {
-        this.Select();
-        this.FileSort();
+        Select();
+        FileSort();
         for (String str : FileList) {
             String fileName = list.Log + "\\" + str;
             File file = new File(fileName);
@@ -408,8 +386,6 @@ class Work {
             }
 
         }
-        // String[] li=list.Out.split("//");
-        // String OutName=li[li.length-1];
         File file = new File(list.Out);
         if (file.exists()) {
             System.out.println("文件已经存在了");

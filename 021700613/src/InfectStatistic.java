@@ -376,7 +376,39 @@ class InfoHandle{
     
   
 }
+/**
+ * 
+ * 文件输出的工具类
+ * 
+ *
+ * @author 021700613
+ * @version 1.0
+ * @since 2020.2.22
+ */
 
 class WriteFile{
+    public void writeFile(String outPath, InfectedMap map,
+                boolean hasType, List<String> typeList, boolean hasProvince ,
+                List<String> provinceList) throws IOException {    
+        OutputStream outStream = new FileOutputStream(outPath);
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outStream));
+        
+        if (hasProvince && !hasType) {
+            String provinceName = "";
+            for (int i = 0; i < provinceList.size(); i++) {
+                provinceName = provinceList.get(i);
+                if (map.map.get(provinceName) != null) {
+                    PeopleNum province = map.map.get(provinceName);
+                    writeAll(provinceName, bufferedWriter, province);
+                }else {
+                    bufferedWriter.write(provinceName);
+                    bufferedWriter.write(" 暂无信息：感染患者0人");
+                    bufferedWriter.write(" 疑似0人");
+                    bufferedWriter.write(" 治愈0人");
+                    bufferedWriter.write(" 死亡0人\n");
+                }
+            }
+           
+        }
 
 }

@@ -1,3 +1,4 @@
+package infect;
 /**
  * 
  * @author wzzzq
@@ -99,7 +100,7 @@ public class InfectStatistic {
 				case "-out":
 					j = inspectOutPath(++j);
 					if(j == -1) {
-						System.out.println("Command line format error.('-outputFile'parameter)");
+						System.out.println("Command line format error.('-out'parameter)");
 						return false;
 					}
 					else{
@@ -182,7 +183,7 @@ public class InfectStatistic {
 					break;
 			}
 		}
-		return (j - 1);
+		return (j + 1);
 	}
 	
 	//ºÏ—È °∑›
@@ -242,6 +243,7 @@ public class InfectStatistic {
 		for(int i = 0;i < l;i++) {
 			String  fileDate = logFiles[i].substring(0, 10);
 			String suffix = logFiles[i].substring(logFiles[i].lastIndexOf(".") + 1);
+			if(dateStr == null) dateStr = date;
 			if(suffix.matches("txt") && dateStr.compareTo(fileDate) >=0)
 				legalFiles.add(logFiles[i]);
 		}

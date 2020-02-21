@@ -6,174 +6,243 @@
  * @version 1
  * @since 1
 """
-import Lib.py
+from datetime import datetime, date
+from datetime import timedelta
+import re
+import threading
+import os
+import sys
 import os.path
 from pathlib import Path
 from sys import argv
 
-cmdCenter = CmdCenter.__init__()
-couldRun = cmdCenter.DealCmd(argv)
-if couldRun:
-    dataCenter = DataCenter.__init__(cmdCenter.Date, cmdCenter.LogPath, cmdCenter.OutPath)
-    dataCenter.DealAllData()
-    resultStr = OutputStatistic()
-else:
-    print("输入格式错误")
-
 
 class CmdCenter:
-    LogPath
-    OutPath
-    Date
-    Types
-    Provinces
+    LogPath = ""
+    OutPath = ""
+    Date = ""
+    Types = []
+    Provinces = []
 
     def __init__(self):
         pass
 
-    def DealCmd(self, argv):
-        if len(argv) < 6:
-            return false
-        if argv[1] != "list":
-            return false
+    def DealCmd(self, argvs):
+        if len(argvs) < 6:
+            return False
+        if argvs[1] != "list":
+            return False
         checkCount = 0
-        for i in len(argv-1):
-            if argv[i] == "-log":
+        for i in range(2, len(argvs)-1):
+            if argvs[i] == "-log":
                 checkCount += 1
-                OutPath = argv[i+1]
-            if argv[i] == "-out":
+                CmdCenter.LogPath = argvs[i+1]
+            if argvs[i] == "-out":
                 checkCount += 1
-                OutPath = argv[i + 1]
-            if argv[i] == "-date":
-                Date = argv[i+1]
-            if argv[i] == "-type":
-                for k in range(i+1,len(argv-1)):
-                    if argv[k][0] == '-':
+                CmdCenter.OutPath = argvs[i + 1]
+            if argvs[i] == "-date":
+                CmdCenter.Date = argvs[i+1]
+            if argvs[i] == "-type":
+                for k in range(i+1,len(argvs-1)):
+                    if argvs[k][0] == '-':
                         break
                     else:
-                        Types.append(argv[k])
-            if argv[i] == "-province":
-                for k in range(i+1,len(argv-1)):
-                    if argv[k][0] == '-':
+                        CmdCenter.Types.append(argvs[k])
+            if argvs[i] == "-province":
+                for k in range(i+1,len(argvs-1)):
+                    if argvs[k][0] == '-':
                         break
                     else:
-                        Provinces.append(argv[k])
+                        CmdCenter.Provinces.append(argvs[k])
         if checkCount < 2:
-            return false
+            return False
+        else:
+            return True
 
 
 class DataCenter:
+    __private_outPath=""
+    __private_path=""
+    __private_date=""
+    __private_allData={}
+
     def __init__(self, dateTime, logPath, outPath):
-        self.__private_date = datetime.datetime.strptime(dateTime, '%Y-%m-%d').date()
-        self.__private_date -= 1
+        self.__private_date = datetime.date(datetime.strptime(dateTime, '%Y-%m-%d'))
+        # self.__private_date = self.__private_date + date.timedelta(days=-1).strftime("%Y-%m-%d").date()
         self.__private_path = logPath
         self.__private_outPath = outPath
-        self.__private_allData.setdefault("1", 1)
-        self.__private_allData.clear()
-        pass
-    __private_outPath
-    __private_path
-    __private_date
-    __private_allData
 
     def DealAllData(self):
-        fileName = self.__private_date.strftime("%Y%m%d") + ".log.txt"
-        allFile = os.listdir(path)
-        fileCount = len(allFile)
+        allFile = os.listdir(self.__private_path)
         for nowFile in allFile:
             nowDateStr = nowFile[:-8]
             nowDate = str2date(nowDateStr)
             diffDate = self.__private_date - nowDate
-            if diffDate>0:
+            if diffDate.total_seconds()>0:
                 self.DealFileData(nowFile)
-            pass
-        pass
 
     # 用于处理一天的数据
     def DealFileData(self, fileName):
         filePath = self.__private_path + "/" + fileName
         obj = open(filePath, mode='r')
-        fileContent = getFileContent(filep)
+        fileContent = getFileContent(filePath)
         allStr = fileContent.split('\n')
         for str in allStr:
             self.DealOneLineData(str)
         obj.close()
         pass
 
-    def DealOneLineData(self,str):
-        if isIgnoreLine(str):
+    def DealOneLineData(self, lineContent):
+        if isIgnoreLine(lineContent):
             return
-        words = str.split(" ")
-        if len(words) >4:
+        words = lineContent.split(" ")
+        if len(words) > 4:
             province_1 = words[0]
-            if not self.__private_allData.hasKey(province_1):
+            if province_1 not in self.__private_allData:
                 obj = ProvinceData()
                 self.__private_allData.setdefault(province_1, obj)
             province_2 = words[3]
-            if not self.__private_allData.hasKey(province_2):
+            if province_2 not in self.__private_allData:
                 obj = ProvinceData()
-                self.__private_allData.setdefault(province_2,obj)
-            count = words[len(words) - 1]
+                self.__private_allData.setdefault(province_2, obj)
+            count = int(content2Eng(words[len(words) - 1]))
             if words[1] == "感染患者":
-                self.private_allData[province_1].InfectionCount -= count
-                self.private_allData[province_2].InfectionCount += count
+                self.__private_allData[province_1].__dict__['InfectionCount'] -= count
+                self.__private_allData[province_2].__dict__['InfectionCount'] += count
             if words[2] == "疑似患者":
-                self.private_allData[province_1].UncertainCount -= count
-                self.private_allData[province_2].UncertainCount += count
+                self.__private_allData[province_1].__dict__['UncertainCount'] -= count
+                self.__private_allData[province_2].__dict__['UncertainCount'] += count
         else:
             province_1 = words[0]
-            if not self.__private_allData.hasKey(province_1):
+            if province_1 not in self.__private_allData:
                 obj = ProvinceData()
                 self.__private_allData.setdefault(province_1, obj)
-            count = words[len(words) - 1]
+            count = int(content2Eng(words[len(words) - 1]))
             if words[1] == "死亡":
-                self.private_allData[province_1].DieCount += count
+                self.__private_allData[province_1].__dict__['DieCount'] += count
             if words[1] == "治愈":
-                self.private_allData[province_1].CureCount += count
-                self.private_allData[province_1].InfectionCount -= count
+                self.__private_allData[province_1].__dict__['CureCount'] += count
+                self.__private_allData[province_1].__dict__['InfectionCount'] -= count
             if words[1] == "新增":
                 if words[2] == "感染患者":
-                    self.private_allData[province_1].InfectionCount += count
+                    self.__private_allData[province_1].__dict__['InfectionCount'] += count
                 if words[2] == "疑似患者":
-                    self.private_allData[province_1].UncertainCount += count
+                    self.__private_allData[province_1].__dict__['UncertainCount'] += count
             if words[1] == "疑似患者":
-                self.private_allData[province_1].UncertainCount -= count
-                self.private_allData[province_1].InfectionCount += count
+                self.__private_allData[province_1].__dict__['UncertainCount'] -= count
+                self.__private_allData[province_1].__dict__['InfectionCount'] += count
             if words[1] == "排除":
-                self.private_allData[province_1].UncertainCount -= count
+                self.__private_allData[province_1].UncertainCount -= count
 
-    def OutputStatistic(self):
-        pass
+    def OutputStatistic(self, types, provinces):
+        output = ""
+        if len(types) == 0:
+            types.append("ip")
+            types.append("sp")
+            types.append("cure")
+            types.append("dead")
+        if "全国" in provinces:
+            output += self.CountryInfo()
+        if len(provinces) == 0:
+            provinces = self.__private_allData.keys()
+            output += self.CountryInfo()
+        for province in provinces:
+            if province in self.__private_allData:
+                output += province + " "
+                for nowType in types:
+                    # 感染
+                    if nowType == "ip":
+                        output += "感染患者"
+                        output += str(self.__private_allData[province].__dict__['InfectionCount'])
+                        output += "人"
+                    # 疑似
+                    if nowType == "sp":
+                        output += "疑似患者"
+                        output += str(self.__private_allData[province].__dict__['UncertainCount'])
+                        output += "人"
+                    # 治愈
+                    if nowType == "cure":
+                        output += "治愈"
+                        output += str(self.__private_allData[province].__dict__['CureCount'])
+                        output += "人"
+                    # 死亡
+                    if nowType == "dead":
+                        output += "死亡"
+                        output += str(self.__private_allData[province].__dict__['DieCount'])
+                        output += "人"
+                    output += " "
+                output += "\n"
+        output += "// 该文档并非真实数据，仅供测试使用"
+        return output
 
-
-# 枚举类，用来表明数据类型
-class InfluenceType:
-    def __init__(self):
-        pass
-
-    # 感染、疑似、治愈、死亡
-    Infection = 0
-    Uncertain = 1
-    Cure = 2
-    Die = 3
+    def CountryInfo(self):
+        output = ""
+        ip = 0
+        sp = 0
+        cure = 0
+        dead = 0
+        for province in self.__private_allData.keys():
+            ip += self.__private_allData[province].__dict__['InfectionCount']
+            sp += self.__private_allData[province].__dict__['UncertainCount']
+            cure += self.__private_allData[province].__dict__['CureCount']
+            dead += self.__private_allData[province].__dict__['DieCount']
+        output += "全国 "
+        output += "感染患者{0}人".format(str(ip))
+        output += "疑似患者{0}人".format(str(sp))
+        output += "治愈{0}人".format(str(cure))
+        output += "死亡{0}人".format(str(dead))
+        output += "\n"
+        return output
 
 
 # 用于存储各个省份的数据
 class ProvinceData:
     def __init__(self):
+        self.InfectionCount = 0
+        self.UncertainCount = 0
+        self.CureCount = 0
+        self.DieCount = 0
         pass
-
-    InfectionCount = 0
-    UncertainCount = 0
-    CureCount = 0
-    DieCount = 0
 
 
 # 文件操作-判断一行字符串是否被忽略
 def isIgnoreLine(str):
-    if str.Count <=2:
-        return true
+    if len(str) <= 2:
+        return True
     else:
-        if str[0] == '/' and str[1]=='/':
-            return true
-    return false
+        if str[0] == '/' and str[1] == '/':
+            return True
+    return False
+
+
+# 时间与str互转
+def str2date(current_str, date_format="%Y-%m-%d"):
+    current_str.replace(" ", "")
+    current_date = datetime.strptime(current_str, date_format).date()
+    return current_date
+
+
+# 文件操作-获取文件全部内容
+def getFileContent(path):
+    with open(path, 'r', encoding='utf-8') as file_object:
+        contends = file_object.read()
+    return contends
+
+
+def content2Eng(file):
+    pattern = re.compile(r'[\u4e00-\u9fa5]')
+    english = re.sub(pattern, '', file)
+    return english
+
+
+cmdCenter = CmdCenter()
+couldRun = CmdCenter.DealCmd(cmdCenter, argv)
+# print(CmdCenter.LogPath)
+if couldRun:
+    dataCenter = DataCenter(CmdCenter.Date, CmdCenter.LogPath, CmdCenter.OutPath)
+    DataCenter.DealAllData(dataCenter)
+    resultStr = DataCenter.OutputStatistic(dataCenter, CmdCenter.Types, CmdCenter.Provinces)
+    f = open(CmdCenter.OutPath, 'w')
+    f.write(resultStr)
+else:
+    print("输入格式错误")

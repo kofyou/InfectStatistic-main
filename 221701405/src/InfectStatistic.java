@@ -47,6 +47,16 @@ class InfectStatistic {
     		province_value = new ArrayList<String>();
     	}
     	
+        
+    	public void test() {
+    		System.out.println("command:" + list );
+			System.out.println("arguments.log:" + log + "," + log_value);	
+			System.out.println("arguments.date:" + date + "," + date_value);	
+			System.out.println("arguments.out:" + out + "," + out_value);
+			System.out.println("arguments.type:" + type + "," + type_value);
+			System.out.println("arguments.province:" + province + "," + province_value);
+    	}
+    	
     	//判断命令是否为list
     	public boolean isList() {
 			return list;
@@ -93,14 +103,13 @@ class InfectStatistic {
 	    public void setProvinceValue(ArrayList<String> argument) {
 	    	this.province_value = argument;
 	    }
-	    
 	}
 			
 	//命令行解析类
 	static class CommandAnalysis{
 		
-		//解析命令行
-		static public Command analysis(List<String> list) {
+		//命令行解析函数
+		public static Command analysis(List<String> list) {
 			Command command = new Command();//实例化一个command对象
 			
 			//进行命令行解析
@@ -161,6 +170,9 @@ class InfectStatistic {
 		public void commandRun(ArrayList<String> list) throws IOException {
 	 	    Command cmd = new Command();
 			cmd = CommandAnalysis.analysis(list);
+			
+			//测试用
+			cmd.test();
 			
 			FileControl file = new FileControl();
 			if(cmd.log_value.equals("") || cmd.out_value.equals("")) {

@@ -366,9 +366,8 @@ class InfectStatistic{
 				type_order[1] = 2;
 				type_order[2] = 3;
 				type_order[3] = 4;
-				return i--;
 			}
-			return i;
+			return --i;
 		}
 		
 		public int getProvince(int i){
@@ -388,9 +387,9 @@ class InfectStatistic{
 			if(flag==i) {
 				//System.out.println("flag==i");
 				situation[0][0]=-1;
-				return i--;
+				
 			}
-			return i;
+			return --i;
 		}
 		
 	}

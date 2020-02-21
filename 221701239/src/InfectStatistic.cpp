@@ -346,7 +346,10 @@ void pick_log_file(vector<string> file_list)
 			break;
 	}
 	if (i == 0)
+	{
+		fstream output_file(m_single["-out"], fstream::out);
 		exit(0);
+	}
 }
 
 //该函数实现了将path路径文件夹下的所有文件读取到files里面
@@ -462,17 +465,10 @@ int main(int argc, char* argv[])
 	process_cmd(argc, argv);
 	int i;
 	cout << argc;
-	for (i = 0; i < argc; i++)
-	{
-		cout << argv[i] << "\n";      //命令行测试
-	}
 	vector<string> file_list;
 	insert_province("全国");
 	getFiles(m_single["-log"], file_list);
 	pick_log_file(file_list);
-	for (i = 0; i < file_list.size(); i++)
-	{
-		//cout << file_list[i] << "\n" ;
-	}
 	output_fei_yan_log(argc,argv);
+	return 0;
 }

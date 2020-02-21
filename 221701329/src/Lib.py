@@ -13,7 +13,7 @@ import sys
 
 
 # 单例基类
-class Singleton(object):
+class Singleton:
     def __init__(self):
         pass
 

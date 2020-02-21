@@ -11,35 +11,10 @@ import os.path
 from pathlib import Path
 from sys import argv
 
-couldRun = false
-if len(argv) >=6:
-    couldRun = true
-if argv[1] == "list":
-    couldRun = true
-else:
-    couldRun = false
-checkCount=0
+cmdCenter = CmdCenter.__init__()
+couldRun = cmdCenter.DealCmd(argv)
 if couldRun:
-    for i in len(argv-1):
-        if argv[i] == "-log":
-        if argv[i] == "-out":
-        if argv[i] == "-date":
-        if argv[i] == "-type":
-        if argv[i] == "-province":
-
-    file = Path(argv[4])
-    file = file[:-1]
-    couldRun = false
-    if file.is_dir():
-        if file.exists():
-            couldRun = true
-
-    couldRun = false
-    if dicFile.is_dir():
-        if dicFile.exists():
-            couldRun = true
-if couldRun:
-    dataCenter = DataCenter.__init__(argv[2],argv[4],argv[6])
+    dataCenter = DataCenter.__init__(cmdCenter.Date, cmdCenter.LogPath, cmdCenter.OutPath)
     dataCenter.DealAllData()
     resultStr = OutputStatistic()
 else:
@@ -47,16 +22,44 @@ else:
 
 
 class CmdCenter:
-    LogPath=""
-    OutPath=""
-    Date=""
-    Type=""
-    Province=""
+    LogPath
+    OutPath
+    Date
+    Types
+    Provinces
+
     def __init__(self):
         pass
-    def DealCmd(self,argv):
 
-
+    def DealCmd(self, argv):
+        if len(argv) < 6:
+            return false
+        if argv[1] != "list":
+            return false
+        checkCount = 0
+        for i in len(argv-1):
+            if argv[i] == "-log":
+                checkCount += 1
+                OutPath = argv[i+1]
+            if argv[i] == "-out":
+                checkCount += 1
+                OutPath = argv[i + 1]
+            if argv[i] == "-date":
+                Date = argv[i+1]
+            if argv[i] == "-type":
+                for k in range(i+1,len(argv-1)):
+                    if argv[k][0] == '-':
+                        break
+                    else:
+                        Types.append(argv[k])
+            if argv[i] == "-province":
+                for k in range(i+1,len(argv-1)):
+                    if argv[k][0] == '-':
+                        break
+                    else:
+                        Provinces.append(argv[k])
+        if checkCount < 2:
+            return false
 
 
 class DataCenter:
@@ -142,6 +145,7 @@ class DataCenter:
     def OutputStatistic(self):
         pass
 
+
 # 枚举类，用来表明数据类型
 class InfluenceType:
     def __init__(self):
@@ -164,6 +168,7 @@ class ProvinceData:
     CureCount = 0
     DieCount = 0
 
+
 # 文件操作-判断一行字符串是否被忽略
 def isIgnoreLine(str):
     if str.Count <=2:
@@ -172,21 +177,3 @@ def isIgnoreLine(str):
         if str[0] == '/' and str[1]=='/':
             return true
     return false
-
-verbDic_Level1 = { "排除":2, "死亡":3, "治愈":4}
-verbDic_Level2 = {"新增":1, "流入":2, "排除":3}
-def isVerbWithLevel(str):
-    if str in verbDic_Level1.keys():
-        return 1
-    if str in verbDic_Level2.keys():
-        return 2
-    pass
-
-def isProvince(str):
-    pass
-
-def isPeopleType(str):
-    pass
-
-def isNum(str):
-    pass

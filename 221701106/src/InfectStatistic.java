@@ -35,16 +35,19 @@ class InfectStatistic {
     	String argstring[]=args;
 		int df=0,tf=0,pf=0;						//-date,-type,-province标志
 		String[] typestr={"感染患者","疑似患者","治愈","死亡"};
+		
 		InfectStatistic useInfectStatistic=new InfectStatistic();
 		OutProcess outprocess = useInfectStatistic.new OutProcess();
 		LogProcess logprocess =useInfectStatistic.new LogProcess();
 		TypeHandle typehandle = useInfectStatistic.new TypeHandle();
 		ProvinceHandle provincehandle = useInfectStatistic.new ProvinceHandle();
+		
 		String logpath=null;				//日志文件路径
 		String outpath=null;				//输入文件路径
 		String strdate=null;
 		int ilog=0,idate=0,itype=0,iprovince=0;
 		int di=0,ti=0,pi=0;
+		
 		for (int i=0;i<args.length;i++) {		//循环读取命令行参数
 			if (args[i].equals("-log")&&ilog!=1) {
 				ilog=1;
@@ -70,8 +73,10 @@ class InfectStatistic {
 				pi=i;
 			}
 		}
+		
 		LocalDate date = LocalDate.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		
 		if (df==0) {								//未指定日期即用当然日期进行处理
 			logprocess.LogProcess(logpath,date.format(formatter));
 		}
@@ -87,11 +92,13 @@ class InfectStatistic {
 		typehandle.TypeHandle(argstring,ti);			//处理-type参数
 		if (pf!=0)
 		provincehandle.ProvinceHandle(argstring,pi);			//处理-type参数
+		
 		outprocess.OutProcess(logpath,outpath,typestr,df,tf,pf);			//对-out参数进行处理
     }
 	public class OutProcess {
 		public void OutProcess(String logpath,String outpath,String[] typestr,int df,int tf,int pf) throws IOException {	//输出到指定文件中
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outpath),"UTF-8"));
+			
 			if (tf==0) {														//未指定输出类型即按顺序输出
 				for (int i=0;i<4;i++) {
 					type[i]=i+1;
@@ -102,6 +109,7 @@ class InfectStatistic {
 					provinceflag[i]=1;
 				}
 			}
+			
 			for (int i=0;i<32;i++) {
 				int ftype=0;
 				if (provinceflag[((i+31)%32)]==1&&tf==0) {
@@ -112,58 +120,56 @@ class InfectStatistic {
 				if (provinceflag[(i+31)%32]==1&&tf==1) {
 					bw.write(province[(i+31)%32]+" ");
 					for (int k=0;k<4;k++) {
-					for (int j=0;j<4;j++) {
-						if (type[j]==1&&ftype==0) {
-							ftype++;
-							if (j==0)
-								bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
-							if (j==1)
-								bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
-							if (j==2)
-								bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
-							if (j==3)
-								bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
+						for (int j=0;j<4;j++) {
+							if (type[j]==1&&ftype==0) {
+								ftype++;
+								if (j==0)
+									bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
+								if (j==1)
+									bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+								if (j==2)
+									bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+								if (j==3)
+									bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
+							}
+							if (type[j]==2&&ftype==1) {
+								ftype++;
+								if (j==0)
+									bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
+								if (j==1)
+									bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+								if (j==2)
+									bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+								if (j==3)
+									bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
+							}
+							if (type[j]==3&&ftype==2) {
+								ftype++;
+								if (j==0)
+									bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
+								if (j==1)
+									bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+								if (j==2)
+									bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+								if (j==3)
+									bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
+							}
+							if (type[j]==4&&ftype==3) {
+								ftype++;
+								if (j==0)
+									bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
+								if (j==1)
+									bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
+								if (j==2)
+									bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
+								if (j==3)
+									bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
+							}
 						}
-						if (type[j]==2&&ftype==1) {
-							ftype++;
-							if (j==0)
-								bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
-							if (j==1)
-								bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
-							if (j==2)
-								bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
-							if (j==3)
-								bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
-						}
-						if (type[j]==3&&ftype==2) {
-							ftype++;
-							if (j==0)
-								bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
-							if (j==1)
-								bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
-							if (j==2)
-								bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
-							if (j==3)
-								bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
-						}
-						if (type[j]==4&&ftype==3) {
-							ftype++;
-							if (j==0)
-								bw.write("感染患者"+illnessarray[(i+31)%32]+"人 ");
-							if (j==1)
-								bw.write("疑似患者"+doubtfulillnessarray[(i+31)%32]+"人 ");
-							if (j==2)
-								bw.write("治愈"+secureillnessarray[(i+31)%32]+"人 ");
-							if (j==3)
-								bw.write("死亡"+deadillnessarray[(i+31)%32]+"人 ");
-						}
-					}
 					}
 					bw.write("\n");
 				}
 			}
-//    		FileWriter fw=new FileWriter(outpath);
-//    		fw.write(outputarray);									//将最终字符串数组输出到指定文件中
 	        bw.close();
     	}
 	}
@@ -176,7 +182,9 @@ class InfectStatistic {
     	String match6="(\\S+) 治愈 (\\d+)人";				//匹配<省> 治愈 n人
     	String match7="(\\S+) 疑似患者 确诊感染 (\\d+)人";	//匹配<省> 疑似患者 确诊感染 n人
     	String match8="(\\S+) 排除 疑似患者 (\\d+)人";			//匹配<省> 排除 疑似患者 n人
+    	
     	boolean isMatch1,isMatch2,isMatch3,isMatch4,isMatch5,isMatch6,isMatch7,isMatch8;
+    	
     	if (isMatch1=Pattern.matches(match1,lineText)) {
     		AddIllness(lineText);
     	}
@@ -228,6 +236,7 @@ class InfectStatistic {
     public void AddIllness(String lineText) {					//<省> 新增 感染患者 n人
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[3].replace("人",""));	//将n人从字符串类型转化为int类型
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[0].equals(province[i])) {			//匹配省份
     			illnessarray[i]+=n;								//该省感染患者人数增加n
@@ -239,6 +248,7 @@ class InfectStatistic {
     public void AddDoubtfulIllness(String lineText) {			//<省> 新增 疑似患者 n人
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[3].replace("人",""));	//将n人从字符串类型转化为int类型
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[0].equals(province[i])) {			//匹配省份
     			doubtfulillnessarray[i]+=n;						//该省疑似患者人数增加n
@@ -250,12 +260,14 @@ class InfectStatistic {
     public void ChangeIllness(String lineText) {				//<省1> 感染患者 流入 <省2> n人
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[4].replace("人",""));	//将n人从字符串类型转化为int类型
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[0].equals(province[i])) {			//匹配流出感染患者省份
     			illnessarray[i]-=n;								//流出患者省感染患者人数减少n
     			break;
     		}
     	}
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[3].equals(province[i])) {			//匹配流入感染患者省份
     			illnessarray[i]+=n;								//流入患者省感染患者人数增加n
@@ -266,12 +278,14 @@ class InfectStatistic {
     public void ChangeDoubtfulIllness(String lineText) {		//<省1> 疑似患者 流入 <省2> n人
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[4].replace("人",""));	//将n人从字符串类型转化为int类型
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[0].equals(province[i])) {			//匹配流出疑似患者省份
     			doubtfulillnessarray[i]-=n;						//流出患者省疑似患者人数减少n
     			break;
     		}
     	}
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[3].equals(province[i])) {			//匹配流入疑似患者省份
     			doubtfulillnessarray[i]+=n;						//流入患者省疑似患者人数增加n
@@ -282,6 +296,7 @@ class InfectStatistic {
     public void DeadIllness(String lineText) {					//<省> 死亡 n人
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[2].replace("人",""));	//将n人从字符串类型转化为int类型
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[0].equals(province[i])) {			//匹配死亡患者省份
     			deadillnessarray[i]+=n;							//该省死亡人数增加n
@@ -295,6 +310,7 @@ class InfectStatistic {
     public void SecureIllness(String lineText) {				//<省> 治愈 n人
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[2].replace("人",""));	//将n人从字符串类型转化为int类型
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[0].equals(province[i])) {			//匹配治愈患者省份
     			secureillnessarray[i]+=n;						//该省治愈人数增加n
@@ -308,6 +324,7 @@ class InfectStatistic {
     public void DiagnoseDoutbfulIllness(String lineText) {		//<省> 疑似患者 确诊感染 n人
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[3].replace("人",""));	//将n人从字符串类型转化为int类型
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[0].equals(province[i])) {			//匹配疑似患者确诊省份
     			doubtfulillnessarray[i]-=n;						//该省的疑似患者减少n
@@ -321,6 +338,7 @@ class InfectStatistic {
     public void RemoveDoutbfulIllness(String lineText) {		//<省> 排除 疑似患者 n人
     	String[] cutlineText=lineText.split(" ");
     	int n=Integer.valueOf(cutlineText[3].replace("人",""));	//将n人从字符串类型转化为int类型
+    	
     	for (int i=0;i<province.length;i++) {
     		if (cutlineText[0].equals(province[i])) {			//匹配排除疑似患者省份
     			doubtfulillnessarray[i]-=n;						//该省的疑似患者减少n
@@ -332,6 +350,7 @@ class InfectStatistic {
     public class TypeHandle {
     	public void TypeHandle(String[] args,int i) {
     		int j;
+    		
     		for (j=0;j<4;j++) {
     			type[j]=0;		//-type参数将所有输出优先级置0
     		}

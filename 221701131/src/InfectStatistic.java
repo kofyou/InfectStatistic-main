@@ -184,12 +184,6 @@ class ParameterOption{
 									}//if-end
 								}//for-end
 								if(!flagLoop) {
-									if(i==myArgs.length) {
-										System.out.print("i++引发的错误");
-									}
-									System.out.printf("%d %d\n",i,myArgs.length);
-									System.out.printf("%s %s\n",myArgs[i],"line");
-									System.out.print("flagLoop!"+myArgs[i]+"XX");
 									throw new ParameterExpection();
 								}
 								

@@ -25,6 +25,7 @@ public class InfectStatistic
 	public static String [] provinceList = new String[]{"","","","","","","","","","","","","",""
 			,"","","","","","","","","","","","","","","","","","","","",""};
 	public static String [] typeList = new String[]{"","","",""};
+	public static String dateString = "";
 	public static Date inputDate = new Date();
 	public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 	public static String initMaxDateString = "1900-01-01";
@@ -153,6 +154,7 @@ public class InfectStatistic
 			{
 				try 
 				{
+					dateString = s;
 					inputDate = format.parse(s);
 				} 
 				catch (ParseException e) 
@@ -164,8 +166,8 @@ public class InfectStatistic
 		}
 	}
 	
-	//判断输入的日期是否超出范围
-	public static boolean checkDate(String path, Date date)
+	//获取最大日期
+	public static Date getMaxDate(String path)
 	{
 		String [] list = new File(path).list();
 		int compareTo = 0;
@@ -196,6 +198,13 @@ public class InfectStatistic
 				e.printStackTrace();
 			}
 		}
+		return maxDate;
+	}
+	
+	//判断输入的日期是否超出范围
+	public static boolean checkDate(String path, Date date)
+	{
+		Date maxDate = getMaxDate(path);
 		if(maxDate.compareTo(date)<0)
 		{
 			return false;
@@ -615,12 +624,25 @@ public class InfectStatistic
 		}
 		else 
 		{
+			System.out.print("不存在该命令！");
 			return ;
 		}
 		if(!Arrays.asList(args).contains("-log")||!Arrays.asList(args).contains("-out"))
 		{
 			System.out.print("缺少参数-log或-out");
 			return ;
+		}
+		if(dateString.equals(""))
+		{
+			try 
+			{
+				inputDate = format.parse(format.format(getMaxDate(inputPath)));
+			} 
+			catch (ParseException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		if(!checkDate(inputPath,inputDate))
 		{

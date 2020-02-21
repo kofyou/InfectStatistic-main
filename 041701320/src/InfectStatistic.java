@@ -243,14 +243,15 @@ class InfectStatistic{
 						//System.out.println("a");
 						
 						fw.write(province[i]+" ");
-						for(int j=0,k=1;j<type_order.length;j++) {
-							if(type_order[j]==k) {
-								String string=type[j]+situation[i][j+1]+"人"+" ";
-								fw.write(string);
-								k++;
-								//System.out.println(string);
+						for(int k=1;k<5;k++)
+							for(int j=0;j<4;j++) {
+								if(type_order[j]==k) {
+									String string=type[j]+situation[i][j+1]+"人"+" ";
+									fw.write(string);
+									break;
+									//System.out.println(string);
+								}
 							}
-						}
 						fw.write("\n");	
 					}
 					
@@ -304,7 +305,11 @@ class InfectStatistic{
 				} 
 				//读取-date
 				else if(args[i].equals("-date")){
-					date=args[++i]+".log.txt";
+					i=getDate(++i);
+					if(i==-1) {
+						System.out.println("日期超出范围!");
+						return false;
+					}
 	
 				} 
 				//设置-type输出顺序
@@ -327,9 +332,33 @@ class InfectStatistic{
 //		public void getPathOut(int i){
 //			
 //		}
-//		public void getDate(int i){
-//			
-//		}
+		public int  getDate(int i){
+			if(isValid(args[i])) { 
+				if(date.compareTo(args[i]) >= 0) //判断是否超过当前日期
+					date = args[i] + ".log.txt";
+				else
+					return -1;
+			}
+			else 
+				return -1;
+			return i;			
+		}
+		public boolean isValid(String s) {
+	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	        try {
+	            sdf.setLenient(false);
+	            sdf.parse(s);
+	            String[] a = s.split("-");
+	            for (String x : a) {
+	                boolean is_num = x.matches("[0-9]+");
+	                if (!is_num)
+	                    return false;
+	            }
+	        } catch (Exception e) {
+	            return false;
+	        }
+	        return true;
+	    }
 		
 		public int setType(int i){
 			int k;
@@ -372,17 +401,21 @@ class InfectStatistic{
 		
 		public int getProvince(int i){
 			int flag=i;
+			int j;
 			for(int t=0;t<35;t++)
 				situation[t][0]=0;
 			while(i<args.length) {
 				//System.out.println("province arg");
-				for(int j=0;j<35;j++) {
+				for(j=0;j<35;j++) {
 					if(args[i].equals(province[j])) {
 						situation[j][0]=1;
 						i++;
 						break;
 					}
 				}
+				if(j==35)
+					break;
+				
 			}
 			if(flag==i) {
 				//System.out.println("flag==i");
@@ -401,6 +434,8 @@ class InfectStatistic{
     	InfectStatistic infectStatistic=new InfectStatistic();
     	InfectStatistic.ProcessCmd pCmd=infectStatistic.new ProcessCmd(args);
     	boolean x=pCmd.ProcessPara();
+    	if(x!=true)
+    		return;
     	InfectStatistic.ProcessFile pFile=infectStatistic.new ProcessFile();
     	pFile.readLog();
     	pFile.writeLog();

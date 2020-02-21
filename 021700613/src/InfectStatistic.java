@@ -409,6 +409,59 @@ class WriteFile{
                 }
             }
            
+        }else if (!hasProvince && hasType) {
+            for (HashMap.Entry<String, PeopleNum> entry : map.map.entrySet()) {
+                String keyString = entry.getKey();
+                bufferedWriter.write(keyString);
+                if(typeList.contains("ip")) {
+                    bufferedWriter.write(" 感染患者" + map.map.get(keyString).infectedNum + "人");
+                }
+                if(typeList.contains("sp")) {
+                    bufferedWriter.write(" 疑似患者" + map.map.get(keyString).potentialNum + "人");
+                }
+                if(typeList.contains("cure")) {
+                    bufferedWriter.write(" 治愈" + map.map.get(keyString).curedNum + "人");
+                }
+                if(typeList.contains("dead")) {
+                    bufferedWriter.write(" 死亡" + map.map.get(keyString).deadNum + "人");
+                }
+                bufferedWriter.write("\n");  
+               }
+        }else if (hasProvince && hasType) {
+            String provinceName = "";
+            for (int i = 0; i < provinceList.size(); i++) {
+                provinceName = provinceList.get(i);
+                if (map.map.get(provinceName) != null) {
+                    PeopleNum province = map.map.get(provinceName);
+                    String keyString = provinceName;
+                    bufferedWriter.write(keyString);
+                    if(typeList.contains("ip")) {
+                        bufferedWriter.write(" 感染患者" + province.infectedNum + "人");
+                    }
+                    if(typeList.contains("sp")) {
+                        bufferedWriter.write(" 疑似患者" + province.potentialNum + "人");
+                    }
+                    if(typeList.contains("cure")) {
+                        bufferedWriter.write(" 治愈" + province.curedNum + "人");
+                    }
+                    if(typeList.contains("dead")) {
+                        bufferedWriter.write(" 死亡" + province.deadNum + "人");
+                    }
+                    bufferedWriter.write("\n");  
+                }else {
+                    System.out.println(provinceName + "暂无疫情信息");
+                }
+            }
+        }else {
+            for (HashMap.Entry<String, PeopleNum> entry : map.map.entrySet()) {
+                String keyString = entry.getKey();
+                writeAll(keyString, bufferedWriter, map.map.get(keyString));
+               }
         }
+        
+        bufferedWriter.write("//该数据并非真实数据，仅供测试程序使用\n"); 
+        bufferedWriter.close();
+        outStream.close();
+    }
 
 }

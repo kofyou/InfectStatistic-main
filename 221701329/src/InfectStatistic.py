@@ -244,5 +244,6 @@ if couldRun:
     resultStr = DataCenter.OutputStatistic(dataCenter, CmdCenter.Types, CmdCenter.Provinces)
     f = open(CmdCenter.OutPath, 'w')
     f.write(resultStr)
+    print("成功")
 else:
     print("输入格式错误")

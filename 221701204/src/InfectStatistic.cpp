@@ -20,6 +20,7 @@ class Analysis
 {
 public:
 	char outpath[1005];
+	int datef = 0;
 	string province[40];
 	map<string, int>mi;
 	map<string, int>mi1;
@@ -189,7 +190,6 @@ void Analysis::FindAllFile(const char* path, const char* format, const char* dat
 				}
 				if (returnflag == 1)return;
 				if (flg == 1 && size != 0)returnflag = 1;
-				freopen(outpath, "w", stdout);
 				char nowpath[200];
 				strcpy(nowpath, newpaths);
 				strcat(nowpath, "\\");
@@ -326,7 +326,7 @@ string Analysis::Begin(string com)
 {
 	Init();
 	char inpath[1005], date[105];
-
+	date[0] = '\0';
 	int cc = 0;
 	int size = com.size();
 	for (int i = 0; i < size; i++)
@@ -407,6 +407,7 @@ string Analysis::Begin(string com)
 		else i--;
 	}
 	CheckAgain();
+	freopen(outpath, "w", stdout);
 	FindAllFile(inpath, ".log.txt", date);
 	return Check(cc, date);
 
@@ -423,6 +424,7 @@ int main(int argc, char* argv[])
 		for (int j = 0; j < size; j++)s = s + argv[i][j];
 		s = s + " ";
 	}
+
 	//cout<<s;
 	A.Begin(s);
 	A.Out();

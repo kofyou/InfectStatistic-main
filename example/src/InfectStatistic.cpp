@@ -195,13 +195,29 @@ public:
         ///读取省份参数
         parameters = attributeParameters("-province", strings);
         BaseData::provinces = parameters;
+        if(!validProvince()) {
+        	cout << "省份参数有误" << endl;
+        	return false;
+		}
 
         ///读取日期参数
         parameters = attributeParameters("-date", strings);
-        setFilesWillBeRead(parameters[0]);
+        if(parameters.size() == 0) {
+        	getAllFiles("D:\\log", BaseData::files);
+		} else {
+			if(!validDate(parameters[0])) {
+				cout << "日期不合法" << endl;
+				return false;
+			}
+			setFilesWillBeRead(parameters[0]);
+		}
         
         ///读取类型参数
         parameters = attributeParameters("-type", strings);
+        if(!validType(parameters)) {
+        	cout << "指定类型参数有误";
+        	return false;
+		}
         BaseData::types = transferStringToAction(parameters);
 
         ///全部合法 成功返回
@@ -216,7 +232,7 @@ public:
         
         for(int i = 0 ; i < BaseData::files.size() ; i++) {
         	input_stream.open(BaseData::files[i]);
-
+		
        	 	while(getline(input_stream, data)) {
             	if (data.find("//") != -1) break;
             	getInfoFromString(data);
@@ -421,10 +437,10 @@ private:
     	
         vector<Action> res;
         for(int i = 0 ; i < strings.size() ; i++) {
-            if (strings[i].find("ip") != -1) res.push_back(increase_sure);
-            else if (strings[i].find("sp") != -1) res.push_back(increase_doubt);
-            else if (strings[i].find("cure") != -1) res.push_back(cure);
-            else if (strings[i].find("dead") != -1) res.push_back(dead);
+            if (strings[i] == "ip" || strings[i] == "infection patients") res.push_back(increase_sure);
+            else if (strings[i] == "sp" || strings[i] == "suspected patients") res.push_back(increase_doubt);
+            else if (strings[i] == "cure") res.push_back(cure);
+            else if (strings[i] == "dead") res.push_back(dead);
         }
 
         return res;
@@ -467,6 +483,7 @@ private:
 		BaseData::files = new_files; 
 	}
 	
+	///设置需要读取的文件 
 	static bool isFileShow(string date, int year, int month, int day) {
 		string year_string, month_string, day_string;
 		int file_year, file_month, file_day;
@@ -501,6 +518,7 @@ private:
 	
 	///输出全国数据 
 	static void outputCountryData() {
+		
 		
 		///计算全国数据
 		int sure_count = 0;
@@ -557,6 +575,69 @@ private:
 	
 	outfile.close();
 }
+
+	///验证省份是否合法
+	static bool validProvince() {
+		bool flag = false;
+		
+		for(int i = 0 ; i < BaseData::provinces.size() ; i++) {
+			for(int j = 0 ; j < BaseData::meta_data.size() ; j++) {
+				if(BaseData::meta_data[j].province == BaseData::provinces[i]) {
+					flag = true;
+					break;
+				}
+			}
+			
+			if(!flag) return false; 
+			flag = false;
+		}
+		
+		return true;
+	} 
+	
+	///验证日期是否合法
+	static bool validDate(const string date) {
+		int year, month, day;
+		
+		string year_string, month_string, day_string;
+		year_string = date.substr(1, 4);
+		month_string = date.substr(6, 2);
+		day_string = date.substr(9, 2);
+		
+		year = stoi(year_string);
+		month = stoi(month_string);
+		day = stoi(day_string);
+ 
+ 		if(month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) {
+        	if(day > 0 && day <= 31) return true;
+        	else return false;
+    	}else if(month == 2) {
+        	if((year % 4 == 0 && year % 100 != 0) || year % 400 == 0 && year % 100 == 0) {
+        		if(day == 29) return true;
+        		else return false;
+			} else {
+				if(day == 28) return true;
+				else return false;
+			}
+        }else {
+        	if(day > 0 && day < 31) return true;
+        	else return false;
+    	}
+    	
+    	return false;
+	}
+	
+	///验证类型是否合法
+	static bool validType(vector<string> types) {
+		for(int i = 0 ; i < types.size() ; i++) {
+			
+			///找不到任何关键字 
+			if(types[i] != "suspected patients" && types[i] != "sp" && types[i] != "dead" && types[i] != "cure" &&
+			   types[i] != "ip" && types[i] != "infection patients") return false;
+		}
+		
+		return true;
+	}
 };
 
 
@@ -565,7 +646,12 @@ class Application {
 public:
     static void run(int argc, char* argv[]) {
 
-        if(!Tool::getParameters(argc, argv)) return;
+        if(!Tool::getParameters(argc, argv)) {
+        	
+        	cout << "参数不合法！" << endl; 
+        	
+			return;
+		}
 
         BaseData::init();
 

@@ -6,5 +6,5 @@
  * @version xxx
  * @since xxx
  */
-public class Lib {
+class Lib {
 }

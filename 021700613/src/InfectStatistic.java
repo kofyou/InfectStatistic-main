@@ -17,6 +17,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.*;
+import java.awt.RenderingHints.Key;
+import java.awt.print.Printable;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 class InfectStatistic {
     public static void main(String[] args) {
@@ -89,9 +107,69 @@ class InfectedMap{
         }
     }
 }
+/**
+ * 
+ * 命令行输入命令分析
+ * 
+ *
+ * @author 021700613
+ * @version 1.0
+ * @since 2020.2.21
+ */
 
 class OrderHandle{
-
+    //存放-log
+    public String inPath = "";
+    //存放-out
+    public String outPath = "";
+    //存放-date
+    public String dateString = "";
+    //存放-type
+    public boolean hasType = false;
+    public List<String> typeList = new ArrayList<String>();
+    //存放-province
+    public boolean hasProvince = false;
+    public List<String> provinceList = new ArrayList<String>();
+    
+    public OrderHandle(String[] args) {
+        for (int i = 1; i < args.length; i++){
+            if ( args[i].equals("-log")) {
+                i++;
+                this.inPath = args[i];
+            }else if (args[i].equals("-out")){
+                i++;
+                this.outPath = args[i];
+            }else if (args[i].equals("-date")){
+                i++;
+                this.dateString = args[i];
+            } else if (args[i].equals("-type")){
+                i++;
+                this.hasType = true;
+                int index = i;
+                for (int j = 0; j < args.length - index ; j++) {
+                    this.typeList.add(args[i]);
+                    if (args[i].equals("-province")) {
+                        i --;
+                        break;
+                    }
+                    i++;
+                }
+                
+                if (typeList.size() == 4) {
+                    hasType = false;
+                }
+            } else if (args[i].equals("-province")){
+                //若含有province参数，则要对其后参数进行记录
+                this.hasProvince = true;
+                i++;
+                int index = i;
+                for (int j = 0; j < args.length - index; j++) {
+                    this.provinceList.add(args[i]);
+                    i++;
+                }
+            }                 
+        }
+    }   
 }
 
 class RunOrder{

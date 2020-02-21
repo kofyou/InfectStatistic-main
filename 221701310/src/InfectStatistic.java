@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
  * @since 2020-02-20
  */
 
-
 class InfectStatistic {
 	
 	class MyProvince {
@@ -229,7 +228,6 @@ class InfectStatistic {
             	
             	//若未指明日期，无需判断，读取所有logs
             	if (date.equals("")) {
-            		System.out.println("here!");
             		isDateAllowed = true;
             		files.add(tempList[i].toString());
 				} else {//若指明日期，需要判断日期是否合理，选择不晚于该日期的logs
@@ -441,5 +439,10 @@ class InfectStatistic {
     	InfectStatistic infectStatistic = new InfectStatistic();
     	infectStatistic.init();
     	infectStatistic.processCmd(args);
+    	/*
+		for(String str:args ) {
+			System.out.println(str);
+		}
+		*/
     }
 }

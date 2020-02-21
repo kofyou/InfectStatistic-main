@@ -31,9 +31,9 @@ class InfectStatistic {
 	public int[] type={1,2,3,4};					//用于判断-type类型的输出顺序
 	public int[] provinceflag=new int[32];			//用于存放输出省份的标准
     public static void main(String args[]) throws IOException {
-    	//String args[]= {"list","-log","D:\\game\\221701106\\example\\log","-out","D:\\output.txt","-date","2020-01-25"};
-    	String argstring[]=args;
-		int df=0,tf=0,pf=0;						//-date,-type,-province标志
+    	//String[] args= {"list","-log","D:\\game\\221701106\\example\\log","-out","D:\\output.txt","-date","2020-01-25"};
+    	String[] argstring=args;
+		int df=0,tf=0,pf=0;							//-date,-type,-province标志
 		String[] typestr={"感染患者","疑似患者","治愈","死亡"};
 		
 		InfectStatistic useInfectStatistic=new InfectStatistic();
@@ -56,7 +56,7 @@ class InfectStatistic {
 			if (args[i].equals("-out")) {	
 				outpath=args[i+1];				//-out参数的下一个参数即为输出文件路径名
 			}
-			if (args[i].equals("-date")) {	//保证-date参数是第二个处理的
+			if (args[i].equals("-date")) {		//保证-date参数是第二个处理的
 				idate=1;
 				di=1;
 				df=1;
@@ -86,25 +86,25 @@ class InfectStatistic {
 				System.out.println("日期超出范围");
 				System.exit(0);
 			}
-			logprocess.LogProcess(logpath,strdate);	//日期处理
+			logprocess.LogProcess(logpath,strdate);					//日期处理
 		}
 		if (tf!=0)
-		typehandle.TypeHandle(argstring,ti);			//处理-type参数
+		typehandle.TypeHandle(argstring,ti);						//处理-type参数
 		if (pf!=0)
-		provincehandle.ProvinceHandle(argstring,pi);			//处理-type参数
+		provincehandle.ProvinceHandle(argstring,pi);				//处理-type参数
 		
-		outprocess.OutProcess(logpath,outpath,typestr,df,tf,pf);			//对-out参数进行处理
+		outprocess.OutProcess(logpath,outpath,typestr,df,tf,pf);	//对-out参数进行处理
     }
 	public class OutProcess {
 		public void OutProcess(String logpath,String outpath,String[] typestr,int df,int tf,int pf) throws IOException {	//输出到指定文件中
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outpath),"UTF-8"));
 			
-			if (tf==0) {														//未指定输出类型即按顺序输出
+			if (tf==0) {						//未指定输出类型即按顺序输出
 				for (int i=0;i<4;i++) {
 					type[i]=i+1;
 				}
 			}
-			if (pf==0) {														//未指定省份则输出全国和所有省份
+			if (pf==0) {						//未指定省份则输出全国和所有省份
 				for (int i=0;i<32;i++) {
 					provinceflag[i]=1;
 				}
@@ -181,7 +181,7 @@ class InfectStatistic {
     	String match5="(\\S+) 死亡 (\\d+)人";				//匹配<省> 死亡 n人
     	String match6="(\\S+) 治愈 (\\d+)人";				//匹配<省> 治愈 n人
     	String match7="(\\S+) 疑似患者 确诊感染 (\\d+)人";	//匹配<省> 疑似患者 确诊感染 n人
-    	String match8="(\\S+) 排除 疑似患者 (\\d+)人";			//匹配<省> 排除 疑似患者 n人
+    	String match8="(\\S+) 排除 疑似患者 (\\d+)人";		//匹配<省> 排除 疑似患者 n人
     	
     	boolean isMatch1,isMatch2,isMatch3,isMatch4,isMatch5,isMatch6,isMatch7,isMatch8;
     	
@@ -213,17 +213,17 @@ class InfectStatistic {
     public class LogProcess {
     	public void LogProcess(String logpath,String concretedate) throws IOException {
     		File logfilepath=new File(logpath);
-    		File list[]=logfilepath.listFiles();					//获取日志文件列表
+    		File[] list=logfilepath.listFiles();					//获取日志文件列表
     		for (int i=0;i<list.length;i++) {						//循环获得日志文件夹中的每一个日志文件
     			String logsname=list[i].getName();					//获得日志文件名
-    			String cutlineText[]=logsname.split("\\.");			//按"."分割
+    			String[] cutlineText=logsname.split("\\.");			//按"."分割
     			if (!(cutlineText[0].compareTo(concretedate)>0)) {		//如果在指定的日期内则处理该文本的信息
     				File logfile=new File(list[i].getAbsolutePath());
 					BufferedReader buff = new BufferedReader(new InputStreamReader(new FileInputStream(logfile),"UTF-8"));
 					String lineText=null;
 					while ((lineText=buff.readLine())!=null) {	//按行读取文本内容
 						if(!lineText.startsWith("//")) {		//行开头是"//"则不读取
-							LogContentHandle(GetLineText(lineText));					//返回单行文本
+							LogContentHandle(GetLineText(lineText));	//返回单行文本
 						}
 					}
 				}
@@ -356,19 +356,19 @@ class InfectStatistic {
     		}
     		j=1;
     		for(;i<args.length;i++) {
-    			if (args[i].equals("ip")) {								//只输出感染患者
+    			if (args[i].equals("ip")) {				//只输出感染患者
     				type[0]=j;
     				j++;
     			}
-    			if (args[i].equals("sp")) {								//只输出疑似患者
+    			if (args[i].equals("sp")) {				//只输出疑似患者
     				type[1]=j;
     				j++;
     			}
-    			if (args[i].equals("cure")) {							//只输出治愈患者
+    			if (args[i].equals("cure")) {			//只输出治愈患者
     				type[2]=j;
     				j++;
     			}
-    			if (args[i].equals("dead")) {							//只输出治愈患者
+    			if (args[i].equals("dead")) {			//只输出治愈患者
     				type[3]=j;
     				j++;
     			}
@@ -379,7 +379,7 @@ class InfectStatistic {
     	public void ProvinceHandle(String[] args,int i) {
     		for(;i<args.length;i++) {
     			for (int j=0;j<province.length;j++) {
-    					if (args[i].equals(province[j])) {			//参数中的省份如果匹配的话，讲省份的标志置为1
+    					if (args[i].equals(province[j])) {		//参数中的省份如果匹配的话，讲省份的标志置为1
     						provinceflag[j]=1;			
     				}
     			}

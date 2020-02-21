@@ -15,8 +15,6 @@ import datetime
 
 import sys
 
-import time
-
 
 def sort_by_pinyin(province):
     #  用于按拼音排序各省
@@ -31,7 +29,7 @@ def sort_by_pinyin(province):
         '宁夏': 21, '青海': 22, '山东': 23,
         '山西': 24, '陕西': 25, '上海': 26,
         '四川': 27, '台湾': 28, '天津': 29,
-        '香港': 30, '西藏': 31, '新疆': 32,
+        '西藏': 30, '香港': 31, '新疆': 32,
         '云南': 33, '浙江': 34
     }
     
@@ -53,11 +51,11 @@ def check_command(args):
     if '-log' in args and '-out' in args:
         cl = CommandHandler(args)
         cl.paras()
-        fi = DataHandler(cl.input_path, cl.output_path, cl.input_date)
+        fi = DataHandler(cl.input_path, cl.output_path, cl.input_date, cl.type_list, cl.province_list)
         fi.read_file()
-        fi.write_file(cl.type_list, cl.province_list)
 
     return '运行成功'
+
 
 class DataHandler:
     #  从日志读取数据，处理后输出到目标文件
@@ -65,10 +63,12 @@ class DataHandler:
     data_dict = {}
     #  用于存放数据的嵌套字典，字典的键为省份名，值为记录各类型对应人数的字典，其键为类型，其值为对应的人数
     
-    def __init__(self, input_path, output_path, file_date):
+    def __init__(self, input_path, output_path, file_date, type_list, province_list):
         
         self.input_path = input_path
         self.output_path = output_path
+        self.type_list = type_list
+        self.province_list = province_list
         if len(file_date) == 0:
             self.file_date = '1970-01-01'
             #  将input_date设为不可能大于任何日志日期的日期，这样若没有日期输入，则日期会在DataHandler类的read_file函数中被设为日志最新的一天
@@ -149,46 +149,48 @@ class DataHandler:
                             content = line.split()
                             self.file_data(content)
                     f.close()
+
+        self.write_file()
     
-    def write_file(self, type_list=[], province_list=[]):
+    def write_file(self):
         #  输出到文件
         
         f = open(self.output_path, 'w+', encoding='utf-8')
         
         return_str = ''
         
-        if len(type_list) == 0:
-            type_list = ['感染患者', '疑似患者', '治愈', '死亡']
+        if len(self.type_list) == 0:
+            self.type_list = ['感染患者', '疑似患者', '治愈', '死亡']
         
-        for i in range(len(type_list)):
-            if type_list[i] == 'ip':
-                type_list[i] = '感染患者'
-            elif type_list[i] == 'sp':
-                type_list[i] = '疑似患者'
-            elif type_list[i] == 'cure':
-                type_list[i] = '治愈'
-            elif type_list[i] == 'dead':
-                type_list[i] = '死亡'
+        for i in range(len(self.type_list)):
+            if self.type_list[i] == 'ip':
+                self.type_list[i] = '感染患者'
+            elif self.type_list[i] == 'sp':
+                self.type_list[i] = '疑似患者'
+            elif self.type_list[i] == 'cure':
+                self.type_list[i] = '治愈'
+            elif self.type_list[i] == 'dead':
+                self.type_list[i] = '死亡'
         
-        if len(province_list) == 0:
+        if len(self.province_list) == 0:
             for i in range(35):
                 for m in self.data_dict:
                     if sort_by_pinyin(m) == i:
                         output_str = str(m)
-                        for n in type_list:
+                        for n in self.type_list:
                             output_str = output_str + ' ' + n + str(self.data_dict[m][n]) + '人'
                         output_str += '\n'
                         return_str += output_str
                         f.writelines(output_str)
         else:
-            for province in province_list:
+            for province in self.province_list:
                 if province not in self.data_dict:
                     self.dict_add_items(province)
             for i in range(35):
                 for m in self.data_dict:
-                    if sort_by_pinyin(m) == i and m in province_list:
+                    if sort_by_pinyin(m) == i and m in self.province_list:
                         output_str = str(m)
-                        for n in type_list:
+                        for n in self.type_list:
                             output_str = output_str + ' ' + n + str(self.data_dict[m][n]) + '人'
                         output_str += '\n'
                         return_str += output_str
@@ -234,22 +236,23 @@ class CommandHandler:
         index = 0
         
         for arg in self.args:
-            if arg == '-log':
-                self.input_path = self.args[index + 1]
-            if arg == '-out':
-                self.output_path = self.args[index + 1]
-            if arg == '-date':
-                self.input_date = self.args[index + 1]
-            if arg == '-type':
-                self.set_type_list(index)
-            if arg == '-province':
-                self.set_province_list(index)
+            if index + 1 < len(self.args) and self.args[index + 1][0] != '-':
+                if arg == '-log':
+                    self.input_path = self.args[index + 1]
+                if arg == '-out':
+                    self.output_path = self.args[index + 1]
+                if arg == '-date':
+                    self.input_date = self.args[index + 1]
+                if arg == '-type':
+                    self.set_type_list(index)
+                if arg == '-province':
+                    self.set_province_list(index)
             index += 1
                 
     def set_type_list(self, index):
         
         for i in range(index + 1, len(self.args)):
-            if self.args[i][0] != '-':
+            if self.args[i][0] != '-' and i < len(self.args):
                 if self.args[i] not in ['ip', 'sp', 'cure', 'dead']:
                     print('错误：输入的类型不存在!')
                     return '错误：输入的类型不存在!'
@@ -261,7 +264,7 @@ class CommandHandler:
     def set_province_list(self, index):
         
         for i in range(index + 1, len(self.args)):
-            if self.args[i][0] != '-':
+            if self.args[i][0] != '-' and i < len(self.args):
                 try:
                     sort_by_pinyin(self.args[i])
                 except KeyError as identifier:

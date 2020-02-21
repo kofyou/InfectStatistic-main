@@ -15,3 +15,4 @@ result/
 .vs/
 test*
 __pycache__
+.project

@@ -212,42 +212,6 @@ class ListOrder implements Order {
     }
 
     /**
-     *执行-out命令参数
-     * @param outPath -out参数后面的输出路径
-     */
-    private void doOut(String outPath) throws Lib.Exit {
-        countNational(); //计算全国数据
-        File outFile = new File(outPath);
-        FileWriter writer = null;    //字符输出流
-        try {
-            writer = new FileWriter(outFile);
-            for(String province : statistics.keySet()) {   //遍历统计数据
-                if(!outProvince.contains(province)) {
-                    continue;
-                }
-                List<Integer> data = statistics.get(province);
-                writer.write(province + "    ");
-                for(String type : outType.keySet()) {
-                    writer.write(type + data.get(outType.get(type)) + "人    ");
-                }
-                writer.write("\n");
-            }
-            writer.write("//该文档并非真实数据，仅供测试使用\n");
-            writer.flush();
-        } catch (Exception e) {
-            throw new Lib.Exit("\"out\" " + e.getMessage());
-        } finally {
-            try {
-                if (writer != null) {
-                    writer.close();   //关闭流
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
      *执行-date命令参数 计算当日疫情状况
      * @param date -date参数后面的具体日期
      */
@@ -330,6 +294,43 @@ class ListOrder implements Order {
             throw new Lib.Exit(e.getMessage());
         }
     }
+    /**
+     *执行-out命令参数
+     * @param outPath -out参数后面的输出路径
+     */
+    private void doOut(String outPath) throws Lib.Exit {
+        countNational(); //计算全国数据
+        File outFile = new File(outPath);
+        FileWriter writer = null;    //字符输出流
+        try {
+            writer = new FileWriter(outFile);
+            for(String province : statistics.keySet()) {   //遍历统计数据
+                if(!outProvince.contains(province)) {
+                    continue;
+                }
+                List<Integer> data = statistics.get(province);
+                writer.write(province + "    ");
+                for(String type : outType.keySet()) {
+                    writer.write(type + data.get(outType.get(type)) + "人    ");
+                }
+                writer.write("\n");
+            }
+            writer.write("//该文档并非真实数据，仅供测试使用\n");
+            writer.flush();
+        } catch (Exception e) {
+            throw new Lib.Exit("\"out\" " + e.getMessage());
+        } finally {
+            try {
+                if (writer != null) {
+                    writer.close();   //关闭流
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+ 
 
     /**
      *执行-type命令参数

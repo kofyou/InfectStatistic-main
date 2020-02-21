@@ -15,7 +15,9 @@
 ### 2. 如何运行
 &emsp;&emsp;下载并用cmd打开(cd)到221701117/src文件下，根据用户的需求输入代码。例如，  
 ```
-java InfectStatistic list -log G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\ -out G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt -date 2020-02-22 -type ip sp dead -province 福建 全国 湖南
+第一步 javac -encoding  UTF-8 InfectStatistic.java  
+
+第二步 java InfectStatistic list -log G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\ -out G:\\java\\eclipse\\eclipse-workspace\\hw2_2\\src\\output.txt -date 2020-02-22 -type ip sp dead -province 福建 全国 湖南
 ```
 &emsp;&emsp;将在相应目录下生成output。txt输出结果。
 <div><img width="100%" src="https://images.cnblogs.com/cnblogs_com/yjchen/1645851/o_200218091302%E6%96%87%E4%BB%B6.png"/></div>  

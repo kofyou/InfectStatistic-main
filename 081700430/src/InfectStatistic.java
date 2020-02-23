@@ -29,7 +29,6 @@ class InfectStatistic {
     private String[] provinces = new String[]{"全国", "安徽", "北京" ,"重庆" ,"福建" ,"甘肃" ,"广东" ,"广西" ,"贵州" ,"海南" ,
                  "河北" ,"河南" ,"黑龙江" ,"湖北" ,"湖南" ,"吉林" ,"江苏" ,"江西" ,"辽宁" ,"内蒙古" ,"宁夏" ,"青海" ,
                  "山东" ,"山西" ,"陕西" ,"上海" ,"四川" ,"天津" ,"西藏" ,"新疆" ,"云南" ,"浙江"};
-    private int solutions;                                                               //0: 无指定；1：指定省份；2：指定类型；3：都指定
 
     private void init(String[] args) {
         if (args.length > 0 && args[0].equals("list")) {
@@ -88,7 +87,6 @@ class InfectStatistic {
                         break;
                 }
             }
-
             for (String str : provinces) {
                 status.put(str, new int[]{0, 0, 0, 0});
             }
@@ -99,11 +97,6 @@ class InfectStatistic {
     }
 
     private void dealLogs() {
-       /* int k = 0;
-        while (province[k] != null) {
-            System.out.println(province[k++]);
-        } */
-     //   System.out.println(log + " " + out);/* dbg:调试查看读取文件是否正确 */
         if (log == null) {
             System.out.println("请输入正确的日志地址！");
             System.exit(-1);
@@ -115,12 +108,10 @@ class InfectStatistic {
             for (File aFile : files) {
                 String[] splitName = aFile.getName().split("\\.");
                 if (aFile.isFile() && splitName.length > 2 && splitName[1].equals("log")) {
-                    //System.out.println(aFile.getName() + " " + splitName[0] + " " +splitName[1]+" "+splitName[2]);/* dbg:调试查看读取文件是否正确 */
                     if (date != null) {
                         try {
                             Date fileDate = sdf.parse(splitName[0]);
                             if (fileDate.before(date) || fileDate.equals(date)) {
-                            //    System.out.println(aFile.getName() + " " + splitName[0] + " " +splitName[1]+" "+splitName[2]);
                                 caculateLogs(aFile);
                             }
                         }
@@ -128,7 +119,6 @@ class InfectStatistic {
                         }
                     }
                     else {
-                        //System.out.println(aFile.getName() + " " + splitName[0] + " " +splitName[1]+" "+splitName[2]);
                         caculateLogs(aFile);
                     }
                 }
@@ -142,18 +132,12 @@ class InfectStatistic {
 
     private void caculateLogs(File file) {
         try {
-            //System.out.println("a1:");  //xx:test
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String dataLine;
             while ((dataLine = br.readLine()) != null) {
-                //System.out.println("a2:");  //xx:test
                 String[] words = dataLine.split("\\s+");
-                //System.out.println("test words:"+words[0]);  //xx:test
                 if (status.containsKey(words[0])) {
                     int[] tempStatus = status.get(words[0]);
-                    //System.out.println(words[0]+":" + tempStatus[ip] + " "+tempStatus[sp]+" "+
-                    //        tempStatus[cure]+" "+tempStatus[dead]);  //xx:test
-                   // System.out.println("test words:"+words[0]+" "+words[1]+" "+words[2]);
                     if (words.length == 3) {
                         int num = Integer.parseInt(words[2].substring(0, words[2].indexOf("人")));
                         if (words[1].equals("死亡") && num > 0) {
@@ -170,11 +154,6 @@ class InfectStatistic {
                             internal[cure] += num;
                             status.put(words[0], tempStatus);
                         }
-                        //System.out.println("num:"+num);
-                        //System.out.println(words[0]+":" + tempStatus[ip] + " "+tempStatus[sp]+" "+
-                          //      tempStatus[cure]+" "+tempStatus[dead]);  //xx:test
-                       // System.out.println("test num:"+num+" inter: " + internal[ip] + " "+internal[sp]+" "+
-                        //        internal[cure]+" "+internal[dead]);  //xx:test
                     }
                     else if (words.length == 4) {
                         int num = Integer.parseInt(words[3].substring(0, words[3].indexOf("人")));
@@ -202,11 +181,6 @@ class InfectStatistic {
                             internal[sp] -= num;
                             status.put(words[0],tempStatus);
                         }
-                        //System.out.println("num:"+num);
-                      //  System.out.println(words[0]+":" + tempStatus[ip] + " "+tempStatus[sp]+" "+
-                        //        tempStatus[cure]+" "+tempStatus[dead]);  //xx:test
-                       // System.out.println("test num:"+num+" inter: " + internal[ip] + " "+internal[sp]+" "+
-                        //        internal[cure]+" "+internal[dead]);  //xx:test
                     }
                     else if (words.length == 5) {
                         int num = Integer.parseInt(words[4].substring(0, words[4].indexOf("人")));
@@ -224,12 +198,6 @@ class InfectStatistic {
                             tempStatus2[sp] += num;
                             status.put(words[3],tempStatus2);
                         }
-                       // System.out.println("num:"+num);
-                       // System.out.println(words[0]+":" + tempStatus[ip] + " "+tempStatus[sp]+" "+
-                         //       tempStatus[cure]+" "+tempStatus[dead]);  //xx:test
-
-                       // System.out.println("test num:"+num+" inter: " + internal[ip] + " "+internal[sp]+" "+
-                        //        internal[cure]+" "+internal[dead]);  //xx:test
                     }
                 }
             }
@@ -255,7 +223,6 @@ class InfectStatistic {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
             String dataLine;
             if (province == null && type == null) {
-               // System.out.println("arrive solition0");
                 for (String provin : provinces) {
                     int[] tempStatus = status.get(provin);
                     dataLine = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", provin,
@@ -265,10 +232,8 @@ class InfectStatistic {
                 bw.close();
             }
             else if (province != null && type == null) {
-                //System.out.println("arrive solition1");
                 int i = 0;
                 while (province[i] != null) {
-                 //   System.out.println("test p:"+province[i]); //xxx
                     if (status.containsKey(province[i])) {
                         int[] tempStatus = status.get(province[i]);
                         dataLine = String.format("%s 感染患者%d人 疑似患者%d人 治愈%d人 死亡%d人\n", province[i],
@@ -277,7 +242,6 @@ class InfectStatistic {
                     }
                     i++;
                 }
-               // System.out.println("test arrive here?"); //xxx
                 bw.close();
             }
             else if (province == null) {
@@ -287,7 +251,6 @@ class InfectStatistic {
                         needTypes++;
                     }
                 }
-               // System.out.println("arrive solition2");
                 for (String provin : provinces) {
                     int[] tempStatus = status.get(provin);
                     String[] intToSring = new String[]{"感染患者" + tempStatus[ip] + "人", "疑似患者" + tempStatus[sp]
@@ -309,7 +272,6 @@ class InfectStatistic {
                     else {
                         dataLine = "";
                     }
-                   // System.out.println(dataLine);
                     bw.write(dataLine);
                 }
                 bw.close();
@@ -321,10 +283,8 @@ class InfectStatistic {
                         needTypes++;
                     }
                 }
-               // System.out.println("arrive solition3");
                 int i = 0;
                 while (province[i] != null) {
-                    //System.out.println("test p:"+province[i]); //xxx
                     if (status.containsKey(province[i])) {
                         int[] tempStatus = status.get(province[i]);
                         String[] intToSring = new String[]{"感染患者" + tempStatus[ip] + "人", "疑似患者" + tempStatus[sp]
@@ -349,7 +309,6 @@ class InfectStatistic {
                         bw.write(dataLine);
                     }
                     i++;
-                   // System.out.println("test data:"+dataLine); //xxx
                 }
                 bw.close();
             }
@@ -366,5 +325,4 @@ class InfectStatistic {
         infect.dealLogs();
         infect.outFile();
     }
-
 }

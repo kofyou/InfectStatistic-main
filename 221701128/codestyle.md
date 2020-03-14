@@ -1,5 +1,7 @@
 ## 代码风格
 
+本规范来自于阿里JAVA开发手册，![阿里JAVA开发手册](https://github.com/chjw8016/alibaba-java-style-guide)
+
 1.缩进：一个Tab(四个空格)
 
 2.变量命名：变量开头只能用英文小写，遵照驼峰命名法命名

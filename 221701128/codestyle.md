@@ -1,6 +1,6 @@
 ## 代码风格
 
-本规范来自于阿里JAVA开发手册，![阿里JAVA开发手册](https://github.com/chjw8016/alibaba-java-style-guide)
+本规范来自于阿里JAVA开发手册，[阿里JAVA开发手册](https://github.com/chjw8016/alibaba-java-style-guide)
 
 1.缩进：一个Tab(四个空格)
 

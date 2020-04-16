@@ -1,0 +1,322 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * InfectStatistic
+ * TODO
+ *
+ * @author wys
+ * @version v 1.0.0
+ * @since 2020.2.11
+ */
+public class InfectStatistic {
+
+    public static void main(String[] args) throws IOException {
+        //调用方法，解析出各个参数
+        Map<String,Object> argsMap = Lib.getArgsMap(args);
+        //如果返回的是null，说明参数有误，直接return
+        if(argsMap == null) {
+            return;
+        }
+        String log = argsMap.get("log").toString();
+        String out = argsMap.get("out").toString();
+        String date = argsMap.get("date").toString();
+        List<String> type = (List<String>)argsMap.get("type");
+        List<String> province = (List<String>)argsMap.get("province");
+
+        //1.根据log获取到最新的文件日期
+        File fileDir = new File(log);
+        if(!fileDir.isDirectory()) {
+            System.out.println("log参数错误，未能获取到文件夹");
+            return;
+        } else {
+            //获取到文件夹中的所有文件
+            File[] files = fileDir.listFiles();
+            if(files.length<1) {
+                System.out.println("文件夹下没有任何文件");
+                return;
+            }
+
+            //获取到文件夹中最大日期的文件名称。
+            String maxDate = "";
+            maxDate = getMaxDate(files);
+
+            //如果date没有输入的话，默认成最新的日期
+            if(date == "") {
+                date = maxDate;
+            }
+
+            //用date跟maxDate比较，看date参数是否正确
+            if((date.compareTo(maxDate)>0)) {
+                System.out.println("date参数有问题，不能大于文件的最大时间");
+                return;
+            }
+
+            //定义最后返回时候的变量
+            Map<String,Map<String,Integer>> provinceMap = new HashMap<String, Map<String,Integer>>();
+            Map<String,Integer> typeMap = new LinkedHashMap<String,Integer>();
+
+            //totalMap一直是全国的数据，便于下面随时操作。
+            Map<String,Integer> totalMap = new LinkedHashMap<String,Integer>();
+            totalMap.put(Lib.ipstr, 0);
+            totalMap.put(Lib.spstr, 0);
+            totalMap.put(Lib.curestr, 0);
+            totalMap.put(Lib.deadstr,0);
+            //provinceMap.put("全国", totalMap);
+
+            //根据date和log循环所有文文件，读入统计各个信息。然后计算全国信息
+            for(int i=0; i<files.length; i++) {
+                String fileName = files[i].getName();
+                if(fileName.contains(".log.txt")) {
+                    String fileNameDate = fileName.substring(0,fileName.indexOf(".log.txt"));
+
+                    //遍历所有的
+                    if(date.compareTo(fileNameDate)>=0) {
+                        InputStreamReader isr = new InputStreamReader(new FileInputStream(files[i]), "UTF-8");
+                        BufferedReader br = new BufferedReader(isr);
+                        String line = null;
+                        while ((line = br.readLine()) != null) {
+                            //每一行根据空格分割成数组,然后逐个判断计算
+                            String[] arr = line.split("\\s{1,}");
+                            //经过查看，每一行切割以后，长度最小是3  最大 为5,
+                            //经过长度判断，去除掉部分有问题的数据
+                            if(arr.length>2 && arr.length<6) {
+                                //当第一组字符属于城市的一部分的时候，继续执行下面的部分
+                                if(Lib.citiesList.contains(arr[0])) {
+                                    if(provinceMap.containsKey(arr[0])) {
+                                        typeMap = provinceMap.get(arr[0]);
+                                    } else {
+                                        typeMap = new LinkedHashMap<String,Integer>();
+                                        typeMap.put(Lib.ipstr, 0);
+                                        typeMap.put(Lib.spstr, 0);
+                                        typeMap.put(Lib.curestr, 0);
+                                        typeMap.put(Lib.deadstr,0);
+                                        provinceMap.put(arr[0], typeMap);
+                                    }
+
+                                    if(arr.length==3) {
+                                        //此时状况为死亡，治愈两种情况，都是在对应的数上做加法；同时，感染患者减去这些；
+                                        String tempNumStr = arr[2].substring(0,arr[2].length()-1);
+                                        int tempNum = Integer.parseInt(tempNumStr);
+                                        typeMap.put(arr[1], typeMap.get(arr[1])+tempNum);
+                                        typeMap.put(Lib.ipstr, typeMap.get(Lib.ipstr)-tempNum);
+                                        //计算上全国的数据
+                                        totalMap.put(arr[1], totalMap.get(arr[1])+tempNum);
+                                        totalMap.put(Lib.ipstr, totalMap.get(Lib.ipstr)-tempNum);
+                                    } else if(arr.length==4) {
+                                        if(arr[1].equals("新增")) {
+                                            //新增，无论是感染新增，还是疑似新增，都是在原基础上做加法,同样的全国的变化也是如此
+                                            String tempNumStr = arr[3].substring(0,arr[3].length()-1);
+                                            int tempNum = Integer.parseInt(tempNumStr);
+                                            typeMap.put(arr[2], typeMap.get(arr[2])+tempNum);
+
+                                            //计算上全国的数据
+                                            totalMap.put(arr[2], totalMap.get(arr[2])+tempNum);
+
+
+                                        } else {
+                                            if(arr[1].equals("疑似患者")) {
+                                                if(arr[2].equals("确诊感染")) {
+                                                    //在此情况下，疑似患者数量减少n ， 确诊患者数量增加 n,同样的全国的变化也是如此
+                                                    //n 为此条数据最后的那个数字
+                                                    String tempNumStr = arr[3].substring(0,arr[3].length()-1);
+                                                    int tempNum = Integer.parseInt(tempNumStr);
+                                                    typeMap.put(arr[1], typeMap.get(arr[1])-tempNum);
+                                                    typeMap.put(Lib.ipstr, typeMap.get(Lib.ipstr)+tempNum);
+                                                    totalMap.put(arr[1], totalMap.get(arr[1])-tempNum);
+                                                    totalMap.put(Lib.ipstr, totalMap.get(Lib.ipstr)+tempNum);
+                                                }
+                                            } else if(arr[1].equals("排除")) {
+                                                //此种情况下，该省排除相应人数，全国也排除相应人数
+                                                String tempNumStr = arr[3].substring(0,arr[3].length()-1);
+                                                int tempNum = Integer.parseInt(tempNumStr);
+                                                typeMap.put(arr[2], typeMap.get(arr[2])-tempNum);
+                                                totalMap.put(arr[2], totalMap.get(arr[2])-tempNum);
+                                            }
+                                        }
+                                    } else if(arr.length==5) {
+                                        //此种情况就是给省1减去对应的人给省二加上对应的人,对于全国来说没有变化
+                                        //（1）对省一的操作
+                                        String tempNumStr = arr[4].substring(0,arr[4].length()-1);
+                                        int tempNum = Integer.parseInt(tempNumStr);
+                                        typeMap.put(arr[1], typeMap.get(arr[1])-tempNum);
+                                        String city2 = arr[3];
+                                        if(provinceMap.containsKey(city2)) {
+                                            typeMap = provinceMap.get(city2);
+                                        } else {
+                                            typeMap = new LinkedHashMap<String,Integer>();
+                                            typeMap.put(Lib.ipstr, 0);
+                                            typeMap.put(Lib.spstr, 0);
+                                            typeMap.put(Lib.curestr, 0);
+                                            typeMap.put(Lib.deadstr,0);
+                                            provinceMap.put(city2, typeMap);
+                                        }
+                                        //（2）对省二的操作
+                                        typeMap.put(arr[1], typeMap.get(arr[1])+tempNum);
+                                    }
+                                }
+                            }
+                        }
+                        //到这里一个文件处理完毕
+                    }
+                }
+            }
+            //到这里文件夹处理完毕
+
+            //下面的工作：处理文件输出
+            //写入out对应的文件中,先判断前面的文件夹是不是存在，不存在就创建
+            String dir = out.substring(0,out.lastIndexOf("/"));
+            File f = new File(dir);
+            if(!f.exists() || !f.isDirectory()) {
+                f.mkdirs();
+            }
+
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(out)), "UTF-8"));
+
+            //遍历provinceMap,按照特定的顺序排序
+            List<String> keys = new ArrayList<String>();
+            keys.addAll(provinceMap.keySet());
+            keys = Lib.sortByAlphabet(keys);
+
+            //判断type
+            if(type.size()>0 && province.size()<1) {
+                //只有type
+                StringBuffer sbf = new StringBuffer();
+                for(int i=0; i<type.size(); i++) {
+                    sbf.append(Lib.getNamebyType(type.get(i)) + totalMap.get(Lib.getNamebyType(type.get(i)))+"人  ");
+                }
+                bw.write("全国  " + sbf.toString());
+                //先输出全国的
+
+                //换行
+                bw.newLine();
+
+                //根据排好续的keys依次输出到txt中
+                for(int i=0; i<keys.size(); i++) {
+                    Map<String,Integer> tempMap = provinceMap.get(keys.get(i));
+                    StringBuffer sbf2 = new StringBuffer();
+                    for(int j=0; j<type.size(); j++) {
+                        sbf2.append(Lib.getNamebyType(type.get(j))+tempMap.get(Lib.getNamebyType(type.get(j)))+"人  ");
+                    }
+                    bw.write(keys.get(i)+"  "+sbf2.toString());
+                    bw.newLine();
+                }
+                bw.write("// 该文档并非真实数据，仅供测试使用");
+                bw.close();
+            } else if(type.size()>0 && province.size()>0) {
+                //既有type，也有province  //先输出全国的
+                if(province.contains("全国")) {
+                    StringBuffer sbf = new StringBuffer();
+                    for(int i=0; i<type.size(); i++) {
+                        sbf.append(Lib.getNamebyType(type.get(i))+totalMap.get(Lib.getNamebyType(type.get(i)))+"人  ");
+                    }
+                    bw.write("全国  "+sbf.toString());
+                    bw.newLine();
+                }
+
+                //全国输入进去以后，再看还有没有没输入的
+                province = Lib.sortByAlphabet(province);
+                for(String str: province) {
+                    if(str.equals("全国")) {
+                        continue;
+                    }
+                    Map<String,Integer> tempMap = provinceMap.get(str);
+                    StringBuffer sbf2 = new StringBuffer();
+                    for(int j=0; j<type.size(); j++) {
+                        sbf2.append(Lib.getNamebyType(type.get(j))+(tempMap==null?
+                                0:tempMap.get(Lib.getNamebyType(type.get(j))))+"人  ");
+                    }
+                    bw.write(str+"  "+sbf2.toString());
+                    bw.newLine();
+
+                }
+                bw.write("// 该文档并非真实数据，仅供测试使用");
+                bw.close();
+                //不指定type，则列出所有情况
+            } else if(type.size()<1 && province.size()>0) {
+                if(province.contains("全国")) {
+                    bw.write("全国  "+Lib.ipstr +totalMap.get(Lib.ipstr)+"人  "+Lib.spstr +totalMap.get(Lib.spstr)+"人  "
+                            +Lib.curestr +totalMap.get(Lib.curestr)+"人  "+Lib.deadstr +totalMap.get(Lib.deadstr)+"人");
+                    bw.newLine();
+                } else {
+                    province = Lib.sortByAlphabet(province);
+                    for(String str:province){
+                        int str1Num = 0;
+                        int str2Num = 0;
+                        int str3Num = 0;
+                        int str4Num = 0;
+                        if(provinceMap.containsKey(str)) {
+                            Map<String,Integer> tempMap = provinceMap.get(str);
+                            str1Num = tempMap.get(Lib.ipstr);
+                            str2Num = tempMap.get(Lib.spstr);
+                            str3Num = tempMap.get(Lib.curestr);
+                            str4Num = tempMap.get(Lib.deadstr);
+                        }
+                        bw.write( str+"  "+Lib.ipstr +str1Num+"人  "+Lib.spstr +str2Num+"人  "+Lib.curestr +str3Num+"人  "+Lib.deadstr +str4Num+"人");
+                        bw.newLine();
+                    }
+                }
+                bw.write("// 该文档并非真实数据，仅供测试使用");
+                bw.close();
+            } else {
+                //既没有type也没有province
+                //先输出全国的
+                bw.write("全国  "+Lib.ipstr +totalMap.get(Lib.ipstr)+"人  "+Lib.spstr +totalMap.get(Lib.spstr)+"人  "
+                        +Lib.curestr +totalMap.get(Lib.curestr)+"人  "+Lib.deadstr +totalMap.get(Lib.deadstr)+"人");
+                bw.newLine();
+
+                //根据排好续的keys依次输出到txt中
+                for(int i=0; i<keys.size(); i++) {
+                    Map<String,Integer> tempMap = provinceMap.get(keys.get(i));
+                    bw.write( keys.get(i)+"  "+Lib.ipstr +tempMap.get(Lib.ipstr)+"人  "+Lib.spstr +tempMap.get(Lib.spstr)
+                            +"人  "+Lib.curestr +tempMap.get(Lib.curestr)+"人  "+Lib.deadstr +tempMap.get(Lib.deadstr)+"人");
+                    bw.newLine();
+                }
+                bw.write("// 该文档并非真实数据，仅供测试使用");
+                bw.close();
+            }
+        }
+
+    }
+    /**
+     *获取到文件夹中最大日期的文件名称
+     * @param -log 参数下的目录文件
+     * @return 文件最大日期
+     */
+    public static String getMaxDate(File[] files) {
+        String maxDate = "";
+        String tempDate = "";
+        for(int i=0; i<files.length; i++) {
+            String fileName = files[i].getName();
+            if(fileName.contains(".log.txt")) {
+                String fileNameDate = fileName.substring(0, fileName.indexOf(".log.txt"));
+                if(i == 1) {
+                    maxDate = fileNameDate;
+                    tempDate = fileNameDate;
+                } else {
+                    tempDate = fileNameDate;
+                    //两个日期格式的文件能直接这样比较大小
+                    if(tempDate.compareTo(maxDate)>0) {
+                        maxDate = tempDate;
+                    }
+                }
+            }
+        }
+        return maxDate;
+    }
+}
+

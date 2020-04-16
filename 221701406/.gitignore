@@ -1,0 +1,8 @@
+/bin/
+/.setting/
+/log/
+/result/
+*.classpath
+*.project
+/src/InfectStatistic.class
+/src/InfectStatisticTest.java

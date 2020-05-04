@@ -2,8 +2,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.Test;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -129,7 +127,7 @@ class CmdArgs {
  *作为之后拓展此系统的命令接口
  */
 interface Command{
-	void execute(Map<String,List<String>> map,String[] args);
+	void execute(Map<String,List<String>> map);
 }
 
 /**
@@ -138,7 +136,6 @@ interface Command{
  */
 class ListCommand implements Command{
 	private ListKey listKey;
-	private String[] args;
 	private List<int[]> result = new LinkedList<int[]>();
 	private List<String> logLine = new LinkedList<String>();
 	
@@ -149,8 +146,7 @@ class ListCommand implements Command{
      * @param map
      */
 	@Override
-	public void execute(Map<String, List<String>> map,String[] args) {
-		this.args = args;
+	public void execute(Map<String, List<String>> map) {
 		System.out.println("---现在开始执行list命令");
 		String proString = null;
 		List<String> typeString = new LinkedList<String>();
@@ -160,20 +156,12 @@ class ListCommand implements Command{
 				case DATE:
 					dateKey(map);
 					result = DataManager.solveData(logLine);
-					DataManager.mergeData(result);
-					System.out.println("简化后结果集为：");
-					Iterator<int[]> it = result.iterator();
-			    	while(it.hasNext()) {
-			    		int[] t = it.next();
-			    		System.out.println(t[1]+Constant.SPACE + t[2] + Constant.SPACE 
-			    				+ t[3] + Constant.SPACE + t[4]);
-			    		}
 					break;
 				case LOG:
 					logKey(map);
 					break;
 				case OUT:
-					outKey(map,proString,typeString,args);
+					outKey(map,proString,typeString);
 					break;
 				case TYPE:
 					typeString = typeKey(map);
@@ -194,7 +182,17 @@ class ListCommand implements Command{
 	private String provinceKey(Map<String, List<String>> map) {
 		List<String> provinceList = map.get(Constant.PROVINCE);
 		if(provinceList == null || provinceList.get(0) == Constant.DEFAULT) {
-			System.out.println("---未指定provinc参数，默认输出全部省份");
+			System.out.println("---未指定province参数，默认输出全部省份");
+
+			DataManager.mergeData(result);
+			System.out.println("简化后结果集为：");
+			Iterator<int[]> it = result.iterator();
+	    	while(it.hasNext()) {
+	    		int[] t = it.next();
+	    		System.out.println(t[1]+Constant.SPACE + t[2] + Constant.SPACE 
+	    				+ t[3] + Constant.SPACE + t[4]);
+	    		}
+	    	
 			String proIndex = new String(Constant.SPACE);
 			for(int i = 0; i < ProvinceValue.values().length; i++) {
 				proIndex += ProvinceValue.valueOf(i).getText();
@@ -202,6 +200,15 @@ class ListCommand implements Command{
 			}
 			return proIndex;
 		}
+		System.out.println("---已指定province参数，不需要简化结果集");
+		System.out.println("结果集为：");
+		Iterator<int[]> it = result.iterator();
+    	while(it.hasNext()) {
+    		int[] t = it.next();
+    		System.out.println(t[1]+Constant.SPACE + t[2] + Constant.SPACE 
+    				+ t[3] + Constant.SPACE + t[4]);
+    		}
+    	
 		System.out.println("分析-provinc参数");
 		String proIndex = new String(Constant.SPACE);
 		for(int i = 0; i < provinceList.size(); i++) {
@@ -243,8 +250,8 @@ class ListCommand implements Command{
      * @param provinceString
      * @exception NoOutException
      */
-	private void outKey(Map<String, List<String>> map
-			,String proString,List<String> typeString,String[] args) {
+	private void outKey(Map<String, List<String>> map,String proString,
+			List<String> typeString) {
 		System.out.println("分析-out参数");
 		List<String> outList = map.get(Constant.OUT);
 		try {
@@ -291,13 +298,10 @@ class ListCommand implements Command{
 	    					break;
 	    				}
 	    			}
+		    		bw.write("\n");
 	    		}
 	    	}
-			bw.write("\n// 该文档并非真实数据，仅供测试使用\r\n" + 
-					"// 命令：");
-			for(int i = 0;i < args.length;i++) {
-				bw.write(args[i] + " ");
-			}
+			bw.write("// 该文档并非真实数据，仅供测试使用");
 	        bw.flush(); // 把缓存区内容压入文件
 	        bw.close();
 	        System.out.println("输出完成！");

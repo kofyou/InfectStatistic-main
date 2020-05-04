@@ -15,11 +15,12 @@ import java.util.Map;
 class InfectStatistic {
     public static void main(String[] args) {
 //    	String[] test = {"list","-date"
-//    			,"2020-01-22"
-//    			,"-log","C:/Users/jhuy/Documents/GitHub/InfectStatistic-main/221701325/log",
-//    			"-province","福建","新疆","全国",
-//    			"-type","ip","sp",
-//    			"-out","C:/Users/jhuy/Documents/GitHub/InfectStatistic-main/221701325/out.txt"};
+//    			,"2020-01-23"
+//    			,"-log","D:/GitHub/InfectStatistic-main/221701325/log",
+//    			"-province","福建","新疆","全国","湖北",
+//    			"-type","cure","ip","sp",
+//    			"-out","D:/GitHub/InfectStatistic-main/221701325/out.txt"};
+//    	CmdArgs cmdArgs = new CmdArgs(test);
     	CmdArgs cmdArgs = new CmdArgs(args);
     	Map<String,List<String>> map = new HashMap<String,List<String>>();
     	
@@ -30,7 +31,7 @@ class InfectStatistic {
     	ListCommand listCommand = new ListCommand();//目前默认只有list命令
     	cmdArgs.setCommand(listCommand);
     	cmdArgs.fillMap(map);
-    	cmdArgs.command.execute(map,args);
+    	cmdArgs.command.execute(map);
     }
     
 }
